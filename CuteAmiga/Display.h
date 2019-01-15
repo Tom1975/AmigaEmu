@@ -1,0 +1,50 @@
+#pragma once
+
+#include <qwidget.h>
+#include <qevent.h>
+#include "Monitor.h"
+
+namespace Ui {
+class Display;
+}
+
+class Display : public QWidget, public DisplayFrame
+{
+   Q_OBJECT
+
+public:
+   Display(QWidget* parent, const QPoint& position, const QSize& size, unsigned int frame_time = 0);
+   Display(QWidget* parent);
+    ~Display();
+
+    virtual unsigned int * GetFrameBuffer(unsigned int line);
+    virtual  void VSync();
+
+    virtual void AFrameIsReady();
+    void Init();
+
+    // Display
+    //virtual QPaintEngine* paintEngine() const;
+    virtual void resizeEvent(QResizeEvent* event);
+    //virtual void paintEvent(QPaintEvent*);
+
+    // Keyboard
+    virtual void keyPressEvent(QKeyEvent * event_keyboard);
+    void keyReleaseEvent(QKeyEvent *event_keyboard);
+
+    // Drag'n'drop
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
+
+public slots:
+    void paintEvent(QPaintEvent*);
+    void ForceRefresh();
+
+signals:
+   void Update();
+   
+
+private:
+   QPixmap pixmap_;
+   QImage image_;
+};
