@@ -1,18 +1,38 @@
 #include "Bus.h"
 #include <cstdio>
+#include <cstring>
 
 #define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
 #define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
 
-Bus::Bus()
+Bus::Bus(): tick_count_(0), 
+            current_operation_(NONE),
+            tick_to_access_(0), 
+            operation_complete_(false), 
+            agnus_bus_required_(false), 
+            operation_memory(this, ram_), 
+            pending_(nullptr),
+            wait_dma_to_complete_(false),
+            odd_counter_(0), 
+            address_(0),
+            agnus_(nullptr),
+            denise_(nullptr),
+            copper_(nullptr),
+            bitplanes_(nullptr)
 {
    Reset();
-   memory_overlay_ = true;   
+   memory_overlay_ = true;
+   
 }
 
 Bus::~Bus()
 {
+}
 
+void Bus::SetBusActive(unsigned char active)
+{
+   uds_ = (active & 0x2) ? ACTIVE : INACTIVE;
+   lds_ = (active & 0x1) ? ACTIVE : INACTIVE;
 }
 
 void Bus::Reset()
@@ -29,121 +49,473 @@ void Bus::Reset()
    br_ = INACTIVE;
    bg_ = INACTIVE;
    bgack_ = INACTIVE;
-
 }
 
-
-void Bus::SetFC(int)
+unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   
-}
-
-void Bus::SetRW(InOutSignal signal)
-{
-   rw_ = signal;
-   // Agnus, Gary, 2x8520
-   // Someone should be awakened ?
-   // todo
-}
-
-void Bus::MemoryOverlay(bool ram)
-{
-   memory_overlay_ = ram;
-}
-
-void Bus::SetAS(InOutSignal as)
-{
-   as_ = as;
-
-   // todo :check various peripherals, FAST Ram, and check again ROM acces...
-
-   // Set data on the bus (if from memory)
-   void* real_address;
-   if ( address_ > 0xF80000
-      || (memory_overlay_ && address_ < 0x80000))
+   address_ = address;
+   operation_complete_ = false;
+   current_operation_ = WRITE;
+   data_ = data;
+   // There should be no current read here.
+   if ((address_ & 0xE3F000) == 0xC3F000
+      || (address_ < 0x200000))
    {
-      real_address = &rom_[address_ & 0x3FFFF];
+      // IO registers , Chip RAM
+      agnus_bus_required_ = true;
+      wait_dma_to_complete_ = true;
+
+      if ((address_ & 0xE3F000) == 0xC3F000)
+      {
+         unsigned short* addr = (unsigned short*)(&register_trace_[address_ & 0x1FF]);
+         *addr = data_;
+      }
+   }
+
+   // If address is meant to be read through AGNUS, add it to the DMA pending
+   // Otherwise, prepare a read to be done
+   tick_to_access_ = 4;
+   tick_to_access_--;
+
+   return 0;
+}
+
+bool Bus::WriteFinished()
+{
+   return operation_complete_;
+}
+
+unsigned int Bus::Read(unsigned int address)
+{
+   address_ = address;
+   operation_complete_ = false;
+   current_operation_ = READ;
+
+   // There should be no current read here.
+   if ( (address_ & 0xE3F000) == 0xC3F000
+      || (address_ < 0x200000))
+   {
+      // IO registers , Chip RAM
+      agnus_bus_required_ = true;
+      wait_dma_to_complete_ = true;         
+   }
+
+   // If address is meant to be read through AGNUS, add it to the DMA pending
+   // Otherwise, prepare a read to be done
+   
+   tick_to_access_ = 4;
+   tick_to_access_--;
+
+   return 0;
+}
+
+bool Bus::ReadFinished(unsigned short& data)
+{
+   if (operation_complete_)
+   {
+      data = data_;
+   }
+   return operation_complete_;
+}
+
+
+void Bus::Tick()
+{
+   if (current_operation_ == NONE || wait_dma_to_complete_ || operation_complete_)
+   {
+      return;
+   }
+   // Is there a read ?
+   if (tick_to_access_ == 0)
+   {
+      // READ or WRITE ?
+      operation_complete_ = true;
+      
+      if (current_operation_ == READ)
+      {         
+         // Set data on the bus (if from memory)
+         unsigned char* real_address = 0;
+         if (address_ > 0xF80000
+            || (memory_overlay_ && address_ < 0x80000))
+         {
+            real_address = &rom_[address_ & 0x3FFFF];
+         }
+         else if (address_ < 0x200000)
+         {
+            // FAST ram
+         }
+         else if (address_ < 0xA00000)
+         {
+            // FAST ram - TODO
+            real_address = &ram_[address_ & 0x7FFFF];
+         }
+         else
+         {
+            if ((address_ & 0xFFF000) == 0xBFE000)
+            {
+               data_ = cia_a_->In((address_ >> 8) & 0xF);
+               operation_complete_ = true;
+               return;
+            }
+            // CIA-B
+            // todo : exact address selection
+            // 101x xxxx xx10 RRRR xxxx xxx1
+            if ((address_ & 0xFFF000) == 0xBFD000)
+            {
+               data_ = cia_b_->In((address_ >> 8) & 0xF);
+               operation_complete_ = true;
+               return;
+            }
+            else
+            {
+               // ?? todo ??
+               int dbg = 1;
+               data_ = 0;
+               operation_complete_ = true;
+               return;
+            }
+         }
+         // ROM or fast ram : 
+         data_ = 0;
+         if (uds_ == ACTIVE)
+            data_ = real_address[0];
+         if (lds_ == ACTIVE)
+         {
+            data_ <<= 8;
+            data_ |= real_address[+1];
+         }
+         operation_complete_ = true;
+      }
+      else
+      {
+         if (address_ < 0x200000)
+         {
+            // FAST ram
+         }
+         else
+         {
+            // Set correct address / data
+            if (lds_ && !uds_)
+            {
+               address_ += 1;
+            }
+            else if (!lds_ && uds_)
+            {
+               // convert
+               data_ >>= 8;
+
+            }
+            // CIA-A
+            // todo : exact address selection
+            // 101x xxxx xx01 RRRR xxxx xxx0
+            if ((address_ & 0xFFF000) == 0xBFE000)
+            {
+               cia_a_->Out((address_ >> 8) & 0xF, data_);
+               memory_overlay_ = (cia_a_->GetPA() & 0x1);
+               // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high
+               operation_complete_ = true;
+            }
+            // CIA-B
+            // todo : exact address selection
+            // 101x xxxx xx10 RRRR xxxx xxx1
+            if ((address_ & 0xFFF000) == 0xBFD000)
+            {
+               cia_b_->Out((address_ >> 8) & 0xF, data_);
+               // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high
+               operation_complete_ = true;
+            }
+         }
+      }
+   }
+   tick_to_access_--;
+}
+
+void Bus::ResetDmaCount()
+{
+   tick_count_ = 0;
+}
+
+void Bus::TickDMA()
+{
+   // Finish pending operation
+   if (pending_ != nullptr && pending_->operation_complete_ == false)
+   {
+      pending_->DoDma();
+      if (wait_dma_to_complete_)
+      {
+         wait_dma_to_complete_ = false;
+         operation_complete_ = true;
+         data_ = pending_->GetData();
+      }
+      
+   }
+
+   // Is it an odd or even tick ?
+   bool dma_used = false;
+   if (tick_count_ & 1)
+   {
+      // Check first DMA bitplane
+      unsigned int first_dma_bitplane = agnus_->ddfstrt_&0xFF;
+      // odd : 
+      switch (odd_counter_++)
+      {
+      case 0:
+      case 1:
+      case 2:
+      case 3:// Memory Refresh
+         break;
+      // Disk DMA
+      case 4:
+      case 5:
+      // Audio DMA
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+      // Sprite DMA
+      case 10:
+      case 11:
+         break;
+      case 12:
+      case 13:
+      case 14:
+      case 15:
+      case 16:
+      case 17:
+      case 18:
+      case 19:
+      case 20:
+      case 21:
+      case 22:
+      default:
+      // Bitplanes (1, 2, 3, 4 for low res, 1, 2 for high res)
+         break;
+      }
+      
+
+   }
+   if (dma_used == false)
+   {
+      // EVEN (or value not used) : Only Copper, Blitter and 68000 (and Bitplanes eventually) are available on this 
+      // Bitplane read can begin here
+      if (!bitplanes_->DmaTick(tick_count_))
+      // Copper
+      if ( !copper_->DmaTick())
+      // Blitter
+      // 68000 
+      if (agnus_bus_required_)
+      {
+         
+         operation_memory.address_ = address_;
+         operation_memory.data_ = data_;
+         operation_memory.current_operation_ = current_operation_;
+         operation_memory.lds_ = lds_;
+         operation_memory.uds_ = uds_;
+         operation_memory.operation_complete_ = false;
+         pending_ = &operation_memory;
+         agnus_bus_required_ = false;
+      }
+      // End of line ? 
+      // refresh odd_counter_
+      if (agnus_->horizontal_counter_ == 0)
+      {
+         odd_counter_ = 0;
+      }
+   }
+   tick_count_++;
+}
+
+// Read or write ?
+void Bus::DmaOperationMemory::DoDma ()
+{
+   if (current_operation_ == READ)
+   {
+      // IO
+      if ((address_ & 0xE3F000) == 0xC3F000)
+      {
+         switch (address_ & 0x1FF)
+         {
+         case 0x004:    // VPOS
+            data_ = agnus_->GetVpos();
+            break;
+         case 0x006:    // VHPOS
+            data_ = agnus_->GetVhpos();
+            break;
+         case 0x01C:    // INTENAR
+            data_ = paula_->GetIntEna();
+            break;
+         default:
+         {
+            int dbg = 1;
+            break;
+         }
+         }
+      }
+      else
+      {
+         // Set data on the bus (if from memory)
+         unsigned char* real_address = 0;
+         // Chip ram
+         if (address_ < 0x200000)
+         {
+            real_address = &ram_[address_ & 0x7FFFF];
+         }
+
+         data_ = 0;
+         if (uds_ == ACTIVE)
+            data_ = real_address[0];
+         if (lds_ == ACTIVE)
+         {
+            data_ <<= 8;
+            data_ |= real_address[+1];
+         }
+
+      }
    }
    else
    {
-      // Chip ram
-      if ((address_ & 0xE00000) != 0)
-         real_address = &ram_[address_ & 0x7FFFF];
-      else if (address_ < 0xA00000)
-         // FAST ram - TODO
-         real_address = &ram_[address_ & 0x7FFFF];
-         
-   }
+      if (address_ < 0x200000
+         || (address_ & 0xF00000) == 0xF00000) // CHECK THIS !
+      {
+         // Chip ram
+         // Whole word ?
+         if (uds_ == ACTIVE)
+            ram_[address_ & 0x7FFFF] = data_ >> 8;
+         if (lds_ == ACTIVE)
+            ram_[(address_ + 1) & 0x7FFFF] = data_ & 0xFF;
+         // Other wise : Write wanted byte
+      }
+      else
+      {
+         // Set correct address / data
+         if (lds_ && !uds_)
+         {
+            address_ += 1;
+         }
+         else if (!lds_ && uds_)
+         {
+            // convert
+            data_ >>= 8;
 
-   const unsigned short value = static_cast<unsigned int*>(real_address)[0];
-   data_ = SWAP_UINT16(value);
-   // set DTACK
-   dtack_ = Bus::ACTIVE;
+         }
+         // Custom chips
+         if ((address_ & 0xE3F000) == 0xC3F000)
+         {
+            bus_->SetRGA(address_ & 0x1FE, data_);
+         }
+      }
+   }
    
+   operation_complete_ = true;
 }
 
-void Bus::SetData(unsigned short data) 
+void Bus::SetRGA(unsigned short addr, unsigned short data)
 {
-   data_ = data; 
-
-   // CIA-A
-   // todo : exact address selection
-   // 101x xxxx xx01 RRRR xxxx xxx0
-   if ((address_ & 0xFFF000) == 0xBFE000)
+   switch (addr)
    {
-      cia_a_->Out((address_ >> 8) & 0xF, data);
-      memory_overlay_ = (cia_a_->GetPA() & 0x1);
-      // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high
-      dtack_ = ACTIVE;
-
-   }
-   // CIA-B
-   // todo : exact address selection
-   // 101x xxxx xx10 RRRR xxxx xxx1
-   if ((address_ & 0xFFF000) == 0xBFD000)
-   {
-      cia_b_->Out((address_ >> 8) & 0xF, data);
-      // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high
-      dtack_ = ACTIVE;
-   }
-
-   // Custom chips
-   if ((address_ & 0xFFF000) == 0xDFF000)
-   {
-      switch (address_ & 0x1FF)
-      {
-
-
-
-      case 0x8E :    // DIWSTRT
-         agnus_->diwstrt_ = data;
+      case 0x24:  // DSKLEN
+         paula_->SetDskLen(data_);
          break;
-      case 0x90:    // DIWSTOP
-         agnus_->diwstop_ = data;
-      break;
-
-
-      case 0x96:  // DMACON
-         dma_control_->Dmacon(data);
+      case 0x2E: // COPCON
+         agnus_->GetCopper()->SetCopCon(data_);
+         break;
+      case 0x32:  // SERPER
+         paula_->SetSerPer(data_);
+         break;
+      case 0x80:  // 1rst address COPPER (bit 16-18)
+         agnus_->GetCopper()->Set1rstHighAddress(data_);
+         break;
+      case 0x82:  // 1rst address COPPER (bit 1-15)
+         agnus_->GetCopper()->Set1rstLowAddress(data_);
+         break;
+      case 0x84:  // 2nd address COPPER (bit 16-18)
+         agnus_->GetCopper()->Set2ndHighAddress(data_);
+         break;
+      case 0x86:  // 2nd address COPPER (bit 1-15)
+         agnus_->GetCopper()->Set2ndLowAddress(data_);
+         break;
+      case 0x88:
+         agnus_->GetCopper()->SetJmp1(data_);
+         break;
+      case 0x8A:
+         agnus_->GetCopper()->SetJmp2(data_);
+         break;
+      case 0x8C:
+         agnus_->GetCopper()->SetCopIns(data_);
+         break;
+      case 0x8E: // DIWSTRT
+         agnus_->diwstrt_ = data_;
+         break;
+      case 0x90: // DIWSTOP
+         agnus_->diwstop_ = data_;
+         break;
+      case 0x92: // DDFSTRT
+         agnus_->ddfstrt_ = data_;
+         break;
+      case 0x94: // DDFSTOP
+         agnus_->ddfstop_ = data_;
          break;
 
 
-      case 0x9A:  // INTENA
-         paula_->SetIntEna(data);
+      case 0x96: // DMACON
+         dma_control_->Dmacon(data_);
          break;
-      case 0x9C:  // INTREQ
-         paula_->SetIntReq(data);
+
+
+      case 0x9A: // INTENA
+         paula_->SetIntEna(data_);
+         break;
+      case 0x9C: // INTREQ
+         paula_->SetIntReq(data_);
+         break;
+
+      case 0xE0:
+      case 0xE2:
+      case 0xE4:
+      case 0xE6:
+      case 0xE8:
+      case 0xEA:
+      case 0xEC:
+      case 0xEE:
+      case 0xF0:
+      case 0xF2:
+      case 0xF4:
+      case 0xF6:
+         if ((address_ & 0x2))
+         {
+            // low short
+            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] &= ~0xFFFF;
+            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] |= data_;
+         }
+         else
+         {
+            // high short
+            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] &= ~0xFFFF0000;
+            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] |= (data_ << 16);
+         }
+
          break;
 
       case 0x100: // BPLCON0
-         bitplanes_->SetCon0(data);
+         bitplanes_->SetCon0(data_);
          break;
       case 0x102: // BPLCON1
-         bitplanes_->SetCon1(data);
+         bitplanes_->SetCon1(data_);
          break;
       case 0x104: // BPLCON2
-         bitplanes_->SetCon2(data);
+         bitplanes_->SetCon2(data_);
          break;
+
+      case 0x110: //BPL1DAT
+      case 0x112: //BPL2DAT
+      case 0x114: //BPL3DAT
+      case 0x116: //BPL4DAT
+      case 0x118: //BPL5DAT
+      case 0x11A: //BPL6DAT
+         denise_->SetData(((address_ & 0x1FF) - 0x110) >> 1, data_);
+         // todo
+         break;
+
       case 0x180: // Color registers
       case 0x182:
       case 0x184:
@@ -176,12 +548,33 @@ void Bus::SetData(unsigned short data)
       case 0x1BA:
       case 0x1BC:
       case 0x1BE:
-         bitplanes_->SetColor((address_ & 0x1FF) - 0x180, data);
+         denise_->SetColor((address_ & 0x1FF) - 0x180, data_);
          break;
 
-
+      default:
+      {
+         //UNDEF
+         int test = 1;
+         break;
       }
    }
+}
+
+void Bus::SetFC(int)
+{
+}
+
+void Bus::SetRW(InOutSignal signal)
+{
+   rw_ = signal;
+   // Agnus, Gary, 2x8520
+   // Someone should be awakened ?
+   // todo
+}
+
+void Bus::MemoryOverlay(bool ram)
+{
+   memory_overlay_ = ram;
 }
 
 unsigned char Bus::Read8(unsigned int address)
@@ -201,7 +594,6 @@ unsigned char Bus::Read8(unsigned int address)
       else if (address < 0xA00000)
          // FAST ram - TODO
          real_address = &ram_[address & 0x7FFFF];
-
    }
    return real_address[0];
 }
@@ -223,7 +615,6 @@ unsigned short Bus::Read16(unsigned int address)
       else if (address < 0xA00000)
          // FAST ram - TODO
          real_address = &ram_[address & 0x7FFFF];
-
    }
    const unsigned short value = static_cast<unsigned short*>(real_address)[0];
    return SWAP_UINT16(value);
@@ -246,7 +637,6 @@ unsigned int Bus::Read32(unsigned int address)
       else if (address < 0xA00000)
          // FAST ram - TODO
          real_address = &ram_[address & 0x7FFFF];
-
    }
    const unsigned int value = static_cast<unsigned int*>(real_address)[0];
    return SWAP_UINT32(value);

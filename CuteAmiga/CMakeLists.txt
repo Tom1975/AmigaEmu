@@ -23,10 +23,10 @@ file( GLOB HEADERS
 	"*.h"
 )
 
-
 set ( UIS
  mainwindow.ui
  debugDialog.ui
+ MemoryDialog.ui
 )
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Sources )

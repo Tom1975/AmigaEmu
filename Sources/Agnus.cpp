@@ -1,7 +1,7 @@
 #include "Agnus.h"
+#include "Motherboard.h"
 
-
-Agnus::Agnus()
+Agnus::Agnus() : lof_(0)
 {
    Reset();
 }
@@ -16,6 +16,8 @@ void Agnus::Reset()
    horizontal_counter_ = 0;
    line_counter_ = 0;
    hsync_ = vsync_ = vblank_ = 0;
+   lof_ = 0;
+   ddfstrt_ = ddfstop_ = 0;
 }
 
 void Agnus::Tick(bool up)
@@ -47,6 +49,9 @@ void Agnus::TickCCK(bool up)
       {
          // Start of VSync
          vsync_ = true;
+         motherboard_->VSync();
+
+         // Also, throw an interrupt
       }
       else if (line_counter_ == 5 && horizontal_counter_ == 18)
       {
@@ -57,6 +62,7 @@ void Agnus::TickCCK(bool up)
       {
          // Start of Hsync
          hsync_ = true;
+         motherboard_->HSync();
       }
       else if (horizontal_counter_ == 35)
       {
@@ -66,6 +72,9 @@ void Agnus::TickCCK(bool up)
       // End of line (227 * 3.546.. = 64us)
       else if (horizontal_counter_ == 227)
       {
+         // Reset DMA counter
+         motherboard_->GetBus()->ResetDmaCount();
+
          horizontal_counter_ = 0;
          line_counter_++;
 
@@ -85,8 +94,14 @@ void Agnus::TickCCK(bool up)
          if (line_counter_ == 312)
          {
             line_counter_ = 0;
+            motherboard_->ResetHCounter();
          }
-         
       }
    }
+}
+
+bool Agnus::WithinWindow()
+{
+   return ((line_counter_ > diwstrt_ >> 8) && line_counter_  < (diwstop_ >> 8)
+      && horizontal_counter_ > ddfstrt_ * 2 && horizontal_counter_ < ddfstop_ * 2);
 }

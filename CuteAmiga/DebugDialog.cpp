@@ -14,7 +14,7 @@ DebugDialog::DebugDialog(QWidget *parent) :
 
    ui->registers_list_->clear();
    ui->registers_list_->setColumnCount(2);
-   ui->registers_list_->setRowCount(18);
+   ui->registers_list_->setRowCount(20);
 
    QTableWidgetItem  * item = new QTableWidgetItem("pc");
    ui->registers_list_->setItem(0, 0, item);
@@ -36,9 +36,14 @@ DebugDialog::DebugDialog(QWidget *parent) :
    ui->registers_list_->setItem(13, 0, new QTableWidgetItem("A4"));
    ui->registers_list_->setItem(14, 0, new QTableWidgetItem("A5"));
    ui->registers_list_->setItem(15, 0, new QTableWidgetItem("A6"));
-   ui->registers_list_->setItem(16, 0, new QTableWidgetItem("SP"));
+   ui->registers_list_->setItem(16, 0, new QTableWidgetItem("A7"));
 
-   for (int i = 0; i < 18; i++)
+   ui->registers_list_->setItem(17, 0, new QTableWidgetItem("SSP"));
+   ui->registers_list_->setItem(18, 0, new QTableWidgetItem("USP"));
+
+   ui->registers_list_->setItem(19, 0, new QTableWidgetItem("SR"));
+
+   for (int i = 0; i < 20; i++)
    {
       ui->registers_list_->setItem(i, 1, new QTableWidgetItem("--"));
    }
@@ -141,6 +146,13 @@ void DebugDialog::UpdateDebug()
       ui->registers_list_->item(1+i, 1)->setText(str);
    }
 
+   str = QString("%1").arg(m68k->GetDataSsp(), 6, 16);
+   ui->registers_list_->item(17, 1)->setText(str);
+   str = QString("%1").arg(m68k->GetDataUsp(), 6, 16);
+   ui->registers_list_->item(18, 1)->setText(str);
+   str = QString("%1").arg(m68k->GetDataSr(), 6, 16);
+   ui->registers_list_->item(19, 1)->setText(str);
+
    // Disassemble the next lines
    unsigned int offset, offset_old;
    offset = offset_old = emu_handler_->GetMotherboard()->GetCpu()->GetPc() - 4; // -2 because of prefetch
@@ -149,15 +161,18 @@ void DebugDialog::UpdateDebug()
    char addr[16];
    for (int i = 0; i < 32; i++)
    {
-      sprintf(addr, "%8.8X : ", offset);
+#define ASM_SIZE 26
+#define ADD_SIZE 10
+
+      sprintf(addr, "%8.8X: ", offset);
       offset = disassembler_.Disassemble(emu_handler_->GetMotherboard(), offset, str_asm);
       str_asm = addr + str_asm;
-      int size_tab = 32 - str_asm.size();
+      int size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
       if (size_tab > 0)
       {
          str_asm.append(size_tab, ' ' );
       }
-      for (int i = offset_old; i < offset; i++)
+      for (unsigned int i = offset_old; i < offset; i++)
       {
          char b[4];
          sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(i));

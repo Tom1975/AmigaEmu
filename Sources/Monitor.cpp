@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#define NBPIXELADDED 16
+#define NBPIXELADDED 4
 
 // PAL line number
 #define RESY 312
@@ -68,13 +68,13 @@ void Monitor::Tick( )
    ///////////////////////////////////
    // Display : Colors
    // HBLANK or VBLANK : No display
-   if (x_ < 1024 - 16)
+   if (x_ < 1024 - NBPIXELADDED)
    {
       if (*hsync_ || *vsync_)
       {
          ///////////////////////////////////
          // Display color : Black (sync on)
-         memset(curent_framebuffer_line_, 0, 16 * sizeof(unsigned int));
+         memset(curent_framebuffer_line_, 0, NBPIXELADDED * sizeof(unsigned int));
 
       }
       else
@@ -88,14 +88,15 @@ void Monitor::Tick( )
    ///////////////////////////////////
    // Display : Monitor Part
    x_ += NBPIXELADDED;
+   hsync_count_ += NBPIXELADDED;
 
-   if (*hsync_)
+   if (*hsync_ == false)
    {
       if (hsync_found_)
       {
          if (horizontal_synchronisation_ >= 48)
          {
-            if (hsync_total_ > 896 && hsync_total_ < 1024)
+            if (hsync_total_ > 800 && hsync_total_ < 1024)
             {
                // Total length computation
                if (x_total_ != hsync_total_)
@@ -188,7 +189,7 @@ void Monitor::Tick( )
 
          if (hsync_total_ < 0)
          {
-            hsync_total_ += hsync_total_ + (line_sync_);
+            hsync_total_ += (line_sync_);
          }
 
          hsync_count_ = 0;

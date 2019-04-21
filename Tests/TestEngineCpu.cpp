@@ -40,7 +40,7 @@ unsigned int TestEngineCpu::RunOpcode(unsigned char* buffer_to_run, unsigned int
 unsigned int TestEngineCpu::RunMoreOpcode(unsigned int tick)
 {
    unsigned int count = 0;
-   for (unsigned int i = 0; i < (tick + 1); i++)
+   for (unsigned int i = 0; i < (tick ); i++)
    {
       do
       {

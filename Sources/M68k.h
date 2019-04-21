@@ -2,6 +2,8 @@
 
 #include "Bus.h"
 #include "AddressingModeFactory.h"
+#include "RegisterList.h"
+#include "AMPc.h"
 
 class M68k
 {
@@ -16,6 +18,11 @@ public :
    void Reset();
    void Tick();
 
+   void Int(unsigned char level) 
+   {
+      int_ = level;
+   };   // 1-7
+
    // Debug : Access / Modify
    unsigned long GetPc() { return pc_; };
    void SetPc(unsigned long pc) { pc_ = pc; };
@@ -29,6 +36,14 @@ public :
    void GetIR(unsigned short& irc, unsigned short& ird, unsigned short & ir) {
       irc = irc_; ird = ird_; ir = ir_;
    };
+   unsigned int GetDataUsp() { return usp_; }
+   void SetDataUsp(unsigned int value) { usp_ = value; }
+   unsigned int GetDataSsp() { return ssp_; }
+   void SetDataSsp(unsigned int value) { ssp_ = value; }
+
+   unsigned short GetDataSr() { return sr_; }
+   void SetDataSr(unsigned short value) { sr_ = value; }
+
 
    AddressingMode * GetOpcodeSource() {
       return source_alu_;
@@ -38,10 +53,10 @@ public :
    }
 
    bool IsNewOpcode() {
-      return new_opcode_;
+      return new_opcode_ == 2;
    }
    void NewOpcodeStopped() {
-      new_opcode_ = false;;
+      new_opcode_ = 1;
    }
 
 
@@ -55,9 +70,12 @@ protected:
    unsigned int   pc_;        // Programm Counter
 
    unsigned short sr_;        // Status Register (supervisor) and Condition Code Register
+   unsigned short sr_trapped_;// Copy of SR for exception 
+
 
    // Supervisor Programmer's model
-   unsigned int   ssp_;       //Supervision stack pointer
+   unsigned int   usp_;       // User's stack pointer
+   unsigned int   ssp_;       // Supervision stack pointer
 
    // Internal registers
    unsigned short   irc_;     // Prefetch queue
@@ -66,6 +84,8 @@ protected:
 
    // Generic bus
    Bus*           bus_;       // Bus connection
+
+   unsigned char     int_;    // interruption level
 
    //////////////////////////////////////////////////
    // Internal functions
@@ -76,11 +96,18 @@ protected:
       STATE_EXECUTE,
       STATE_WRITE,
    } current_phase_;
+   
+   enum
+   {
+      BYTE,
+      WORD,
+      LONG
+   } operand_size_;
 
    unsigned int current_state_;
    unsigned short current_data_;
 
-   bool new_opcode_;
+   unsigned int new_opcode_;
    bool irc_ready_;
    bool write_end_;
 
@@ -110,6 +137,7 @@ protected:
    BusOperation next_bus_operation_;
    unsigned int next_address_;
    unsigned short next_data_;
+   unsigned int next_size_;
 
    /////////////////////////
    // Generic evaluations
@@ -118,20 +146,28 @@ protected:
    /////////////////////////
    // CPU commands
    unsigned int CpuFetch();
+   unsigned int OperandFetch();
+   unsigned int FetchFunction();
    unsigned int CpuFetchInit();
    unsigned int SourceFetch();
    unsigned int SourceRead();
    unsigned int DestinationFetch();
    unsigned int DestinationRead();
+   unsigned int OperandFinished();
    unsigned int ReadMemorySource();
    unsigned int FetchSource();
+   unsigned int ReadSource();
+   unsigned int ReadDestination();
    unsigned int FetchDestination();
+   unsigned int InitWait() { time_counter_ = 0; return true; }
    unsigned int Wait4Ticks(){ return  (++time_counter_ == 8); }
    unsigned int Wait2Ticks() { return  (++time_counter_ == 4); }
    unsigned int DecodeDestination();
    unsigned int WaitForDestination();
    unsigned int WriteSourceToDestination();
+   unsigned int WriteSourceToDestinationSimple();
    unsigned int WaitForWriteSourceToDestination();
+   unsigned int WaitForWriteSourceToDestinationSimple();
 
    /////////////////////////
    // Bus commands
@@ -148,7 +184,6 @@ protected:
    bool bus_granted_;
 
    // Inner helper attributes
-
    enum
    {
       F_C = 0x1,
@@ -158,12 +193,6 @@ protected:
       F_X = 0x10
    };
 
-   enum
-   {
-      BYTE,
-      WORD,
-      LONG
-   } operand_size_;
 
    typedef enum
    {
@@ -185,7 +214,7 @@ protected:
       COND_LESS_EQUAL
    }Condition;
    Condition conditon_;
-   char displacement_;
+   short displacement_;
    bool condition_true_;
 
    ////////////////////////////////////////////////
@@ -194,6 +223,9 @@ protected:
    AddressingModeFactory destination_factory_;
    AddressingMode *source_alu_;
    AddressingMode *destination_alu_;
+   AMPc pc_alu_;
+
+   RegisterList register_list_;
 
    // Decode destination An, data, etc.
    unsigned char an_;
@@ -202,52 +234,229 @@ protected:
    unsigned char size_;
 
    unsigned short data_w_;
-
-   unsigned int fetched_values;
+   unsigned int data_l_;
 
    // Opcode execution state :
    
    // Opcode time counter
    unsigned int time_counter_;
 
+   // Movem register's mask
+   unsigned short mask_;
+
+   // Exception 
+   unsigned int vector_;
+
+   unsigned int TRAP(unsigned int vector);
+   unsigned int INT();
 
    /////////////////////////
    // Decoding
    unsigned int Nothing();
-   unsigned int DecodeLea();
-   unsigned int DecodeMove();
-   unsigned int DecodeSubq();
+   unsigned int DecodeAdd();
+   unsigned int DecodeAddA();
+   unsigned int DecodeAddq();
+   unsigned int DecodeAndToSr();
+   unsigned int DecodeAndiToCcr();
+   unsigned int DecodeAsd2();
    unsigned int DecodeBcc();
+   unsigned int DecodeBclr();
+   unsigned int DecodeBsr();
+   unsigned int DecodeBtst();
+   unsigned int DecodeClr();
    unsigned int DecodeCmpAL();
-   unsigned int DecodeCmpIW();
+   unsigned int DecodeCmpD();
+   unsigned int DecodeCmpI();
+   unsigned int DecodeCmpm();
+   unsigned int DecodeDBcc();
+   unsigned int DecodeDivu();
+   unsigned int DecodeEoriToCcr();
+   unsigned int DecodeEoriSr();
+   unsigned int DecodeExg();
+   unsigned int DecodeExt();
    unsigned int DecodeJmp();
+   unsigned int DecodeLea();
+   unsigned int DecodeLink();
+   unsigned int DecodeLink2();
+   unsigned int DecodeLsd();
+   unsigned int DecodeLsd2();
+   unsigned int DecodeMove();
+   unsigned int DecodeMoveFromSr();
+   unsigned int DecodeMoveToSr();
+   unsigned int DecodeMovem();
+   unsigned int DecodeMovembis();
+   unsigned int OpcodeMovemWrite();
+   unsigned int DecodeMovem2();
+   unsigned int DecodeMoveq();
+   unsigned int DecodeMulu();
+   unsigned int DecodeNot();
+   unsigned int DecodeNotSupported();
+   unsigned int DecodeOr();
+   unsigned int DecodeOriSr();
+   unsigned int DecodeOriToCcr();
+   unsigned int DecodePea();
+   unsigned int DecodeRte();
+   unsigned int DecodeRts();
+   unsigned int DecodeScc();
+   unsigned int DecodeStop();
+   unsigned int DecodeSub();
+   unsigned int DecodeSubA();
+   unsigned int DecodeSubI();
+   unsigned int DecodeSubq();
+   unsigned int DecodeSubX();
+   unsigned int DecodeSwap();
+   unsigned int DecodeTst();
+   unsigned int DecodeUnlk();
+
+   unsigned int NotImplemented();
 
    /////////////////////////
    // Opcodes
    const char* GetName(unsigned int* data);
 
    unsigned int NotSupported();
-   unsigned int OpcodeNop();
-   unsigned int OpcodeLea();
-   unsigned int OpcodeMove();
-   unsigned int OpcodeSubq();
+   unsigned int NotSupported2();
+   unsigned int NotSupported3();
+   unsigned int NotSupported4();
+   unsigned int OpcodeAdd();
+   unsigned int OpcodeAnd();
    unsigned int OpcodeBcc();
+   unsigned int OpcodeBchg();
+   unsigned int OpcodeBclr();
+   unsigned int OpcodeBclr2();
+   unsigned int OpcodeBset();
+   unsigned int OpcodeBset2();
+   unsigned int OpcodeBsr();
+   unsigned int OpcodeBtst();
+   unsigned int OpcodeClr();
    unsigned int OpcodeCmpAL();
-   unsigned int OpcodeCmpIW();
+   unsigned int OpcodeCmpD();
+   unsigned int OpcodeCmpI();
+   unsigned int OpcodeCmpm();
+   unsigned int OpcodeDBcc(); 
+   unsigned int OpcodeDivs();
+   unsigned int OpcodeDivu();
+   unsigned int OpcodeEor();
    unsigned int OpcodeJmp();
+   unsigned int OpcodeJsr();
+   unsigned int OpcodeJsr2();
+   unsigned int OpcodeLea();
+   unsigned int OpcodeLink();
+   unsigned int OpcodeLsd();
+   unsigned int OpcodeMove();
+   unsigned int OpcodeMoveFromSr();
+   unsigned int OpcodeMoveToSr();
+   unsigned int OpcodeMovem();
+   unsigned int OpcodeMovem2();
+   unsigned int OpcodeMoveUsp();
+   unsigned int SimpleFetch();
+   unsigned int OpcodeMulu();
+   unsigned int OpcodeMuls();
+   unsigned int OpcodeNeg();
+   unsigned int OpcodeNot();
+   unsigned int OpcodeNop();
+   unsigned int OpcodeOr();
+   unsigned int OpcodePea();
+   unsigned int OpcodeRte();
+   unsigned int OpcodeRte2();
+   unsigned int OpcodeRts();
+   unsigned int OpcodeStop();
+   unsigned int OpcodeStop2();
+   unsigned int OpcodeSub();
+   unsigned int OpcodeSubq();
+   unsigned int OpcodeTst();
+   unsigned int OpcodeUnlk();
 
    /////////////////////////
    // Working list for opcode
    
    static Func ResetList_[];
-   static Func Lea_[];
-   static Func Move_[];
-   static Func Subq_L_Dn_An_[];
+
+   static Func Abcd_[];
+   static Func Add_[];
+   static Func AddA_[];
+   static Func AddI_[];
+   static Func Addq_[];
+   static Func AddX_[];
+   static Func And_[];
+   static Func Andi_[];
+   static Func AndiToCcr_[];
+   static Func AndToSr_[];
+   static Func Asd_[];
+   static Func Asd2_[];
    static Func Bcc_[];
-   static Func Default_[];
+   static Func Bchg_[];
+   static Func Bchg_dn_[];
+   static Func Bclr_[];
+   static Func Bset_[];
+   static Func Bsr_[];
+   static Func Btst_[];
+   static Func Btst_dn_[];
+   static Func Chk_[];
+   static Func Clr_[];
    static Func CmpA_L_[];
-   static Func CmpI_W_[];
+   static Func CmpD_[];
+   static Func CmpI_[];
+   static Func Cmpm_[];
+   static Func DBcc_[];
+   static Func Divs_[];
+   static Func Divu_[];
+   static Func Eor_[];
+   static Func Eori_[];
+   static Func EoriToCcr_[];
+   static Func EoriSr_[];
+   static Func Exg_[];
+   static Func Ext_[];
+   static Func IllegalInstruction_[];
    static Func Jmp_[];
+   static Func Jsr_[];
+   static Func Lea_[];
+   static Func Link_[];
+   static Func Lsd_[];
+   static Func Lsd2_[];
+   static Func Move_[];
+   static Func MoveFromSr_[];
+   static Func MoveToCcr_[];
+   static Func MoveToSr_[];
+   static Func Movem_[];
+   static Func Movep_[];
+   static Func Moveq_[];
+   static Func MoveUsp_[];
+   static Func Mulu_[];
+   static Func Muls_[];
+   static Func Nbcd_[];
+   static Func Neg_[];
+   static Func Negx_[];
+   static Func Nop_[];
+   static Func Not_[];
+   static Func Or_[];
+   static Func Ori_[];
+   static Func OriSr_[];
+   static Func OriToCcr_[];
+   static Func Pea_[];
+   static Func Reset_[];
+   static Func Rod_[];
+   static Func Rod2_[];
+   static Func Roxd_[];
+   static Func Roxd2_[];
+   static Func RteOpcode_[];
+   static Func Rtr_[];
+   static Func RtsOpcode_[];
+   static Func Sbcd_[];
+   static Func Scc_[];
+   static Func Stop_[];
+   static Func Sub_[];
+   static Func SubA_ [];
+   static Func SubI_[];
+   static Func Subq_[];
+   static Func Subq_L_Dn_An_[];
+   static Func SubX_[];
+   static Func Swap_[];
+   static Func Tas_[];
+   static Func Trap_[];
+   static Func Trapv_[];
+   static Func Tst_[];
+   static Func Unlk_[];
 
    Func* working_array_[0x10000];
    Func* current_working_list_;

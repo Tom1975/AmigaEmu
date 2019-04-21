@@ -25,11 +25,25 @@ public:
    void StrHor();
 
    void TickCDAC(bool up);
+   void SetBplDat(unsigned int bitplane_number, unsigned short data);
 
    // Get RGB each tick
    void GetRGB(unsigned int * display);
+   void SetData(unsigned int bitplane_number, unsigned short data);
+   void SetColor(unsigned int colornumber, unsigned short data);
+
+
+
+   unsigned short bplxdat_[6];   // 6 Bitplanes registers
+   int nb_bitplanes_;
+
+   void DisplayWord();
+   void DisplayWordBkg();
 
 protected:
+   
+   unsigned short color_[32];
+   unsigned int display_[16];
    Bitplanes * bitplanes_;
    int hpos_counter_;
 

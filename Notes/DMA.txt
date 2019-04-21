@@ -1,0 +1,60 @@
+DMA ACCESS
+----------
+
+AGNUs contains the DMA controller.
+It features 25 channels.
+
+
+http://www.markwrobel.dk/post/amiga-machine-code-letter4-dma-revisited/
+
+
+Cycles pairs, cycles impairs
+
+Cycles impairs
+
+Comme on peut le voir sur le schéma précédent, le circuit graphique principal Agnus tourne à 3,579545 MHz (NTSC) ou 3,546895 MHz (PAL) soit deux fois moins vite que le processeur 68000, 
+mais un "Move" du processeur demande quatre cycles alors que les circuits spécialisés accèdent par DMA à chaque cycle du bus.
+Autant que possible, on va donc laisser au processeur les cycles pairs et utiliser les cycles impairs, ce qui revient à encastrer les accès sans léser personne. Un cycle dure 280 ns, 
+une ligne du raster (1/50 Hz)/312 lignes soit 63,5 s, il faut donc répartir environ 225 cycles à chaque ligne vidéo. Voir ce chronogramme :
+
+circuiterie graphique
+
+On utilise un canal DMA par bitplane, et on lit donc 16 bits à chaque accès. On trouve alors que l'on ne peut gérer que 4 bitplanes en basse résolution et 2 en haute résolution (225/2*16/640) 
+si l'on se contente des cycles impairs, et qu'il faut investir des cycles pairs si l'on veut plus. Dans ce cas, on pénalise les accès du processeur à la mémoire Chip, 
+alors que jusqu'à maintenant l'activité des circuits spécialisés, lui, était invisible.
+
+On voit bien que l'on travaille aux limites de l'électronique. Pour aller plus loin (plus haute résolution, mode 12 voire 24 bits "vrais") il faudrait modifier
+les circuits pour les faire travailler plus vite, sur plus de bits.
+
+D'autre part, le matériel de l'Amiga (en l'occurrence Denise) gère directement les sprites, petits objets qui sont incrustés sur l'image 
+(le pointeur de la souris en est un). Il y en a huit, définis en 4 couleurs dont une transparente (on fait correspondre des registres couleur à chaque sprite),
+La largeur est de 16 pixels et la hauteur quelconque (on peut grouper les sprites par paires de façon à disposer de 16 couleurs).
+
+En début de chaque ligne, il faut donc a priori faire 8x2 accès (sur les cycles impairs) pour décrire la ligne courante de chaque sprite, la position en "x" 
+étant fournie par les DMA sprites lors de la ligne précédant l'objet, celui-ci finissant par un double zéro. Le système d'exploitation gère un nombre supérieur
+de Virtual Sprites (VSprites) mais il ne pourra y en avoir plus de 8 à un moment donné sur une ligne. D'autre part, le matériel sait gérer des priorités (profondeurs) 
+ainsi que les collisions entre sprites ou avec certaines couleurs de l'image de fond.
+
+Ceci est utilisé par le système d'exploitation pour implémenter les "Graphics ELements" (GEL, dont les Virtual Sprites font partie). Il gère également la vitesse et l'accélération.
+
+En cas "d'overscan", le DMA bitplane peut venir empiéter sur les sprites qui disparaîtront alors, à l'éxeption du premier (le pointeur de la souris) qui est toujours présent.
+
+Pour compléter la synchronisation des cycles impairs, rigides, citons 4 accès pour le rafraîchissement de la mémoire Chip, 2 pour les disquettes et 4 pour 
+chacune des voies sonores. Les échantillons étant pris sur 8 bits, on a donc 2 échantillons par piste à chaque ligne vidéo, ce qui donne une fréquence 
+d'échantillonnage de 31,5 kHz, soit une fréquence audio maximale de 15,7 kHz.
+
+Les cycles pairs
+
+Les cycles pairs sont moins stricts et disponibles pour le processeur, mais servent aussi au Blitter et au Copper (et aux bitplanes qui ne tenaient pas autrement).
+
+On a fait allusion au Blitter plus loin dans cet article, qui utilisant quatre canaux DMA (trois sources et une cible) assure largement plus que
+les opérations de bit blit élémentaires (l'action à effectuer est décrite par une somme de minterms et permet donc toutes sortes de mixages et de masquages). 
+Il va sans dire que l'interface graphique Intuition l'utilise largement pour l'affichage des polices, des fenêtres, des menus, etc.
+
+NB : un minterm exprime le ET logique de deux variables ou de leur négation. Toute fonction binaire peut se décomposer en somme de minterms.
+
+Le système d'exploitation gère également des Blitter OBjects, objets graphiques trop importants pour passer en sprites et qui sont pris en charge par le Blitter,
+ce qui assure des animations en temps réels d'objets importants. Comme ce sont aussi des GEL, le système peut prendre en charge vitesse, accélération et collisions.
+
+Le Blitter peut éventuellement concéder un cycle tous les trois cycles au processeur en cas de besoin, mais le Copper a priorité absolue (ce qui a peu de gravité 
+dans la mesure où il est en attente la plupart du temps).

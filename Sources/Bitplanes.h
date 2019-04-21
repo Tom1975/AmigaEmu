@@ -1,36 +1,48 @@
 #pragma once
+#include "DMAControl.h"
+
+class Motherboard;
 
 class Bitplanes
 {
 public:
+   friend class Motherboard;
+
    Bitplanes();
    virtual ~Bitplanes();
 
+   void Init(Motherboard* motherboard)
+   {
+      motherboard_ = motherboard;
+   }
+
    void Reset();
    void Tick();
+   bool DmaTick(unsigned int dmatick);
+   void NewLine();
+
+   void SetDmaCon(DMAControl* dmacon);
 
    void SetCon0(unsigned short data);
    void SetCon1(unsigned short data);
    void SetCon2(unsigned short data);
 
-   void SetColor(unsigned int colornumber, unsigned short data);
+   
+   unsigned short bplcon0_;
+   unsigned short bplcon1_;
+   unsigned short bplcon2_;
 
-   void DisplayWord(unsigned int* buffer);
-   void DisplayWordBkg(unsigned int* buffer);
+   
+   unsigned int bplxpt_[6];
+
    
 
 protected:
    ////////////////////////////////
    // 
-   unsigned short bplcon0_;
-   unsigned short bplcon1_;
-   unsigned short bplcon2_;
-
-   unsigned short color_[32];
-
-   unsigned short bplxdat_[6];   // 6 Bitplanes registers
+   Motherboard* motherboard_;
 
    // Usefull precomputed datas
    int nb_bitplanes_;
-
+   DMAControl* dmacon_;
 };

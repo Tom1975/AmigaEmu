@@ -9,6 +9,13 @@
 #include "Denise.h"
 #include "Agnus.h"
 
+class HardwareIO
+{
+public:
+   
+   virtual unsigned char GetJoystick(unsigned int port_number) = 0;
+};
+
 class Motherboard
 {
 public :
@@ -16,10 +23,20 @@ public :
    virtual ~Motherboard();
 
    // Init and settings
-   bool Init(DisplayFrame* frame);
+   bool Init(DisplayFrame* frame, HardwareIO* hardware);
 
    // Access 
    M68k* GetCpu() { return &m68k_; }
+   Bus* GetBus() { return &bus_; }
+   Agnus* GetAgnus() { return &agnus_; }
+   Denise* GetDenise() { return &denise_; }
+
+   // Lines implementations
+   void VSync();
+   void HSync();
+   void ResetHCounter();
+
+   unsigned char GetCiaPort(CIA8520* cia, bool a);
 
    // Bus implémentation
    unsigned int Read32(unsigned int address) { return bus_.Read32(address); };
@@ -52,6 +69,7 @@ protected:
    // Devices
    M68k m68k_;
 
+   unsigned char count_E_;
    CIA8520 cia_a_;
    CIA8520 cia_b_;
 
@@ -63,5 +81,5 @@ protected:
    Bitplanes bitplanes_;
 
    Monitor monitor_;
-
+   HardwareIO* hardware_;
 };

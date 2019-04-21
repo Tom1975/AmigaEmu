@@ -32,6 +32,14 @@ void Paula::Reset()
 {
 }
 
+
+////////////////////////////////
+// Disk
+void Paula::SetDskLen(unsigned short dsklen)
+{
+   dsklen_ = dsklen;
+}
+
 ////////////////////////////////
 // Interruptions
 void Paula::SetIntReq(unsigned short intreq)
@@ -48,10 +56,27 @@ void Paula::SetIntEna(unsigned short intena)
 {
    //
    if (intena & 0x8000)
-      int_ena_ |= (intena & 0x1FFF);
+      int_ena_ |= (intena & 0x7FFF);
    else
-      int_ena_ &= ((~intena) & 0x1FFF);
+      int_ena_ &= ((~intena) & 0x7FFF);
 
+   CheckInt();
+}
+
+unsigned short Paula::GetIntEna()
+{
+   //
+   return int_ena_;
+}
+
+void Paula::SetSerPer(unsigned int serper)
+{
+   serper_ = serper;
+}
+
+void Paula::Int(unsigned short interrupt)
+{
+   int_req_ |= interrupt;
    CheckInt();
 }
 

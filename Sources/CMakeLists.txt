@@ -9,7 +9,15 @@ file( GLOB HEADERS
 	"*.h"
 )
 
-add_library(AmigaCore ${SRCS} ${HEADERS})
+set(EXTRA
+   TODO.txt
+   "../Notes/Cia 8520.txt"
+	"../Notes/DMA.txt"
+   )
+
+source_group("Docs" FILES ${EXTRA} )
+
+add_library(AmigaCore ${SRCS} ${HEADERS} ${EXTRA})
 
 set(CompilerFlags
         CMAKE_CXX_FLAGS
@@ -20,3 +28,4 @@ set(CompilerFlags
         CMAKE_C_FLAGS_DEBUG
         CMAKE_C_FLAGS_RELEASE
         )
+

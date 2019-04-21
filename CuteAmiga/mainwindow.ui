@@ -42,6 +42,7 @@
      <string>Debug</string>
     </property>
     <addaction name="actionCPU"/>
+    <addaction name="actionMemory"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -117,6 +118,11 @@
   <action name="actionSet_Kickstart">
    <property name="text">
     <string>Set Kickstart</string>
+   </property>
+  </action>
+  <action name="actionMemory">
+   <property name="text">
+    <string>Memory window</string>
    </property>
   </action>
  </widget>

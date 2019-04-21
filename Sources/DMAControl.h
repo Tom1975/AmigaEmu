@@ -11,8 +11,8 @@ public:
 
    void Dmacon(unsigned short data);
    
-protected:
    // Inner values
    unsigned short dmacon_;
+
    
 };

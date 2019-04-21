@@ -7,6 +7,7 @@
 
 #include "Motherboard.h"
 #include "Breakpoint.h"
+#include "HardwareInterface.h"
 
 class IUpdate
 {
@@ -82,5 +83,6 @@ protected:
    // Inner attributes
    Motherboard  * motherboard_;
    DisplayFrame* frame_;
+   HardwareInterface hardware_io_;
 
 };

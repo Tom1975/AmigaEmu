@@ -21,7 +21,7 @@ void AmigaEmulation::Start()
 {
    current_function_ = &AmigaEmulation::RunStep;
 
-   if (motherboard_->Init(frame_))
+   if (motherboard_->Init(frame_, &hardware_io_))
    {
       // Create thread with emulation handling
       emulation_thread_ = std::thread(Begin, this);

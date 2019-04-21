@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QLabel.h>
 #include "DebugDialog.h"
+#include "MemoryDialog.h"
 #include "AmigaEmulation.h"
 
 namespace Ui {
@@ -20,6 +21,7 @@ public:
     virtual void closeEvent(QCloseEvent *event);
     void InitEmulation();
     void Break();
+    void Memory();
     void SaveConfig();
     void LoadConfig();
 
@@ -35,6 +37,7 @@ private:
     AmigaEmulation* emu_handler_;;
 
     DebugDialog debug_;
+    MemoryDialog memory_;
 
     // Ressources
     QPixmap* led_on_;

@@ -1,34 +1,120 @@
 #include "AMAddress.h"
+#include "AMAbsolute.h"
 
 ///////////////////////////////////////////////////////////////
 // Addressing mode : Register
-AMAddress::AMAddress(unsigned int* registers, unsigned int * pc) : registers_(registers), pc_(pc)
+AMAddress::AMAddress(unsigned int* registers, unsigned int * pc, unsigned int* usp, unsigned int* ssp, unsigned short* sr) : 
+   registers_(registers), pc_(pc), size_to_read_(0), usp_(usp), ssp_(ssp), sr_(sr)
 {
 }
 
 // 
-void AMAddress::Init(unsigned int reg_number, unsigned int size, IncrementType increment)
+void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment)
 {
    register_number_ = reg_number;
-   size_ = size;
    increment_ = increment;
+   size_read_ = 0;
+   result_ = 0;
+   size_ = size;
+
+   operand_size_ = size;
+   switch (operand_size_)
+   {
+   case Byte: size_to_read_ = 1; written_input_ = 1; break;
+   case Word: size_to_read_ = 1; written_input_ = 1; break;
+   case Long: size_to_read_ = 2; written_input_ = 2; break;
+   }
+
+   if (register_number_ < 7)
+   {
+      current_register_ = &registers_[register_number_];
+   }
+   else
+   {
+      if (*sr_ & 0x2000)
+      {
+         current_register_ = ssp_;
+      }
+      else
+      {
+         current_register_ = usp_;
+      }
+   }
+   
+   if (increment_ == DECREMENT_PRE)
+   {
+      switch (operand_size_)
+      {
+      case Byte: *current_register_ -= 1; break;
+      case Word: *current_register_ -= 2; break;
+      case Long: *current_register_ -= 4; break;
+      }
+   }
+
+   address_to_write_ = *current_register_;
+   address_to_read_ = *current_register_;
+}
+
+
+void AMAddress::Complete()
+{
+   if ( increment_ == INCREMENT_POST)
+   {
+      switch (operand_size_)
+      {
+      case Byte: *current_register_ += 1; break;
+      case Word: *current_register_ += 2; break;
+      case Long: *current_register_ += 4; break;
+      }
+      address_to_write_ = *current_register_;
+   }
+}
+
+void AMAddress::Increment()
+{
+   // Reinit the size read
+   size_read_ = 0;
+   if (increment_ == INCREMENT_POST)
+   {
+      *current_register_ += (sizeof(unsigned short))*size_to_read_;
+   }
+   address_to_write_ += (sizeof(unsigned short))*size_to_read_;
+   address_to_read_ += (sizeof(unsigned short))*size_to_read_;
+}
+
+void AMAddress::Decrement()
+{
+   // Reinit the size read
+   size_read_ = 0;
+   //*current_register_ -= (sizeof(unsigned short))*size_to_read_;
+   if (increment_ == DECREMENT_PRE)
+   {
+      *current_register_ -= (sizeof(unsigned short))*size_to_read_;
+   }
+   address_to_write_ -= (sizeof(unsigned short))*size_to_read_;
+   address_to_read_ -= (sizeof(unsigned short))*size_to_read_;
 }
 
 //////////////////
 // Get value
 unsigned char AMAddress::GetU8()
 {
-   return (unsigned char)registers_[register_number_] & 0xFF;
+   return (unsigned char)result_ & 0xFF;
 }
 
 unsigned short AMAddress::GetU16()
 {
-   return (unsigned short)registers_[register_number_] & 0xFF;
+   return (unsigned short)result_ & 0xFFFF;
 }
 
 unsigned int AMAddress::GetU32()
 {
-   return registers_[register_number_];
+   return result_; // registers_[register_number_];
+}
+
+unsigned int AMAddress::GetEffectiveAddress()
+{
+   return *current_register_;
 }
 
 //////////////////
@@ -41,80 +127,126 @@ bool AMAddress::FetchComplete()
 bool AMAddress::ReadComplete(unsigned int& address_to_read)
 {
    // Need to read !
-   return size_read_ == size_;
+   address_to_read = address_to_read_ + size_read_ * (sizeof (unsigned short));
+   return size_read_ == size_to_read_;
 }
+
+
 void AMAddress::AddWord(unsigned short value)
 {
-   // NO USE !
-   if (size_read_++ < size_)
+   
+   if (size_read_++ < size_to_read_)
    {
-      result_ <<= 16;
-      result_ |= value;
+      if (operand_size_==Byte)
+         result_ |= value & 0xFF;
+      else
+      {
+         result_ <<= 16;
+         result_ |= value;
+      }
+
    }
 }
 //////////////////
 // Write 
 bool AMAddress::WriteInput(AddressingMode* source)
 {
-   switch (size_)
+   switch (operand_size_)
    {
-   case 0: // Byte
-      // todo
+   case Byte:
+      written_input_ = 1;
+      input_ = source->GetU8();
       break;
-   case 1: // Word
-      // todo
+   case Word:
+      written_input_ = 1;
+      input_ = source->GetU16();
       break;
-   case 2: // long
-      // todo
+   case 2:
+      written_input_ = 2;
+      input_ = source->GetU32();
       break;
    }
-   return false;
+   address_to_write_ = *current_register_;
+
+   return true;
 }
+
+
 
 bool AMAddress::WriteComplete()
 {
-   // todo
-   return true;
+   return written_input_ == 0;
 }
 unsigned short AMAddress::WriteNextWord(unsigned int& address_to_write)
 {
-   // todo
-   return 0;
+   address_to_write = address_to_write_;
+   written_input_--;
+   address_to_write_ += 2;
+
+   return input_ >> (written_input_ * 16);
 }
 
 //////////////////
 // Do somme math !
+void AMAddress::Add(AddressingMode* source, unsigned short& sr)
+{
+   switch (source->GetSize())
+   {
+   case Byte:
+      written_input_ = 1;
+      result_ += source->GetU8();
+      break;
+   case Word:
+      written_input_ = 1;
+      result_ += source->GetU16();
+      break;
+   case 2:
+      written_input_ = 2;
+      result_ += source->GetU32();
+      break;
+   }
+   input_ = result_;
+   address_to_write_ = *current_register_;
+}
+
+void AMAddress::Sub(AddressingMode* source, unsigned short& sr)
+{
+   // todo
+   //input_ = this->GetU32() + source->GetU32();
+}
+
+void AMAddress::Not(unsigned short& sr)
+{
+   // todo
+   //input_ = ~(this->GetU32());
+   //ComputeFlagsNul(sr, input_, size_);
+}
+
+void AMAddress::Or(AddressingMode* source, unsigned short& sr)
+{
+   switch (size_)
+   {
+   case Byte:
+      input_ = source->GetU8() | (result_ & 0xFF);
+      break;
+   case Word:
+      input_ = source->GetU16() | (result_ & 0xFFFF);
+      break;
+   case Long:
+      input_ = source->GetU32() | (result_ );
+      break;
+   }
+}
+
 void AMAddress::Subq(unsigned char data, unsigned char size, unsigned short& sr)
 {
    unsigned int new_value;
    unsigned int old_value;
 
-   old_value = registers_[register_number_];
-   registers_[register_number_] -= data;
-   new_value = registers_[register_number_];
+   old_value = *current_register_;
+   *current_register_ -= data;
+   new_value = *current_register_;
 
    ComputeFlags(sr, old_value, new_value, data);
-}
-
-void AMAddress::CmpL(unsigned int data, unsigned short& sr)
-{
-   unsigned int new_value;
-   unsigned int old_value;
-   old_value = registers_[register_number_];
-   new_value = registers_[register_number_] - data;
-
-   unsigned char flag = sr & 0xFC;
-   // update flags
-   bool v = (!old_value&data & !new_value) | (old_value & !data&new_value);
-   if (v) flag |= 0x2;
-
-   bool c = (old_value&data & new_value) | (!old_value & data&new_value);
-   if (c) flag |= 0x1;
-
-   if (new_value == 0) flag |= 0x4;
-
-   if ((new_value >> ((size_ == 1) ? 15 : 31)) & 0x1) flag |= 0x8;  // Neg
-   // no overflow or carry ?
-   sr = flag;
 }
 

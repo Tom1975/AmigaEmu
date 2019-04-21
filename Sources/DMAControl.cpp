@@ -12,6 +12,7 @@ DMAControl::~DMAControl()
 
 void DMAControl::Reset()
 {
+   dmacon_ = 0;
 }
 
 void DMAControl::Dmacon(unsigned short data)

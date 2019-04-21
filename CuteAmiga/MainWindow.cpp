@@ -7,6 +7,7 @@
 MainWindow::MainWindow(QWidget *parent) :
    QMainWindow(parent),
    debug_(this),
+   memory_(this),
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
@@ -16,11 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
    // Menu connection
    connect(ui->actionReset, &QAction::triggered, emu_handler_, &AmigaEmulation::Reset);
    connect(ui->actionCPU, &QAction::triggered, this, &MainWindow::Break);
+   connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::Memory);
    connect(ui->display_, SIGNAL(Update()),
       this, SLOT(Update()), Qt::QueuedConnection);
 
    // Create debug window
    debug_.SetEmulator(emu_handler_);
+   memory_.SetEmulator(emu_handler_);
 
    led_on_ = new QPixmap(":/Images/led_on.png");
    led_off_ = new QPixmap(":/Images/led_off.png");
@@ -67,7 +70,7 @@ void MainWindow::SaveConfig()
    unsigned int nb_bp = pb_handler->GetBreakpointNumber();
    
    unsigned int nb_breapkoints_saved = 0;
-   for (int i = 0; i < nb_bp; i++)
+   for (unsigned int i = 0; i < nb_bp; i++)
    {
       IBreakpointItem* bp = pb_handler->GetBreakpoint(i);
       const char* str_def = bp->GetString();
@@ -108,12 +111,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
    SaveConfig();
 }
 
-
 void MainWindow::Break()
 {
    emu_handler_->Break();
    debug_.Update();
-   debug_.show(); 
+   debug_.show();
+   memory_.Update();
+}
+
+void MainWindow::Memory()
+{
+   memory_.Update();
+   memory_.show();
 }
 
 /////////////////////////////////////////////////////////////////////////////
