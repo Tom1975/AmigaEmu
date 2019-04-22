@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <queue>
+#include <functional>
 #include "QObject.h"
 
 

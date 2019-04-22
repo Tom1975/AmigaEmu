@@ -4,6 +4,7 @@
 class Motherboard;
 
 #include <vector>
+#include <string>
 
 class IBreakpoint
 {
