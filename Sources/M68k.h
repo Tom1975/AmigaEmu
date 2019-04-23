@@ -18,6 +18,7 @@ public :
    void Reset();
    void Tick();
 
+   unsigned char* GetIntPin() { return &int_; }
    void Int(unsigned char level) 
    {
       int_ = level;

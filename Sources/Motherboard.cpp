@@ -11,6 +11,7 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this)
    bus_.SetDMAControl(&dma_control_);
    bus_.SetCustomChips(&agnus_, &denise_, &paula_, &bitplanes_);
    bitplanes_.Init(this);
+   paula_.SetIntPin(m68k_.GetIntPin());
    agnus_.Init(this);
    denise_.Init(&bitplanes_, &agnus_.diwstrt_, &agnus_.diwstop_);
 

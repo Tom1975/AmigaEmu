@@ -146,7 +146,7 @@ void M68k::Tick()
             int dbg = 1;
          }
          // Check for interrupt ?
-         if (int_  > 0 && int_ >= ((sr_ >> 8)&0x7) ) // todo : Test int against current priority of the cpu
+         if (int_  > 0 && int_ > ((sr_ >> 8)&0x7) ) // todo : Test int against current priority of the cpu
          {
             // do it
             // Act like a trap, and set current priority to int priority 
@@ -2812,7 +2812,17 @@ unsigned int M68k::OpcodeBtst()
 {
    // Do it and adjust the flags
    //destination_alu_->Btst(data_, sr_);
-   if (destination_alu_->GetU8() & (1 << (data_ & 7)))
+   bool result = false;
+
+   if (destination_alu_->IsDataRegister())
+   {
+      result = (destination_alu_->GetU32() & (1 << (data_ & 0x1F)));
+   }
+   else
+   {
+      result = (destination_alu_->GetU8() & (1 << (data_ & 7)));
+   }
+   if (result)
    {
       sr_ = sr_ & ~F_Z;
    }
@@ -3043,6 +3053,10 @@ unsigned int M68k::INT()
    sr_trapped_ = sr_;
 
    sr_ |= 0x2000; // Set S
+
+   sr_ |= (int_ << 8);
+   
+
    sr_ &= 0x3FFF; // Remove T
 
    pc_ -= 4; // Current pc is written

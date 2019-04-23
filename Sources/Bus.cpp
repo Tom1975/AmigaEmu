@@ -344,6 +344,9 @@ void Bus::DmaOperationMemory::DoDma ()
          case 0x01C:    // INTENAR
             data_ = paula_->GetIntEna();
             break;
+         case 0x01E:    // INTREQR
+            data_ = paula_->GetIntReqR();
+            break;
          default:
          {
             int dbg = 1;
