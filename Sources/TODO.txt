@@ -6,8 +6,8 @@
 -----------
 EXECUTE OK : 
 ------------
-FC0F54
-FC0AFE : 
+Interrupt handler (vertical blanking) : FC12FC
+=> FC6CDC  (a comprendre)
 
 -----------
 TODO : 
