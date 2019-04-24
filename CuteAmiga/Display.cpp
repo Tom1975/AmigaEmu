@@ -44,14 +44,14 @@ Display::~Display()
 
 void Display::Init()
 {
-   for (int i = 0; i < 1024; i++)
+   /*for (int i = 0; i < 1024; i++)
    {
       unsigned int * buffer = (unsigned int*)image_.scanLine(i);
       for (int j = 0; j < 1024; j++)
       {
          buffer[j] = (rand()<<15) + rand();
       }
-   }
+   }*/
       
    
 
