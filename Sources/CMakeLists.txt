@@ -9,10 +9,12 @@ file( GLOB HEADERS
 	"*.h"
 )
 
+
 set(EXTRA
    TODO.txt
    "../Notes/Cia 8520.txt"
 	"../Notes/DMA.txt"
+   "../Notes/Kickstart 1.2.asm"
    )
 
 source_group("Docs" FILES ${EXTRA} )

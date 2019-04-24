@@ -53,7 +53,8 @@ public:
    void SetDMAControl (DMAControl* dma_control)
    {
       dma_control_ = dma_control;
-      if(copper_!= nullptr)copper_->SetDmaCon(dma_control_);
+      if (copper_!= nullptr)copper_->SetDmaCon(dma_control_);
+      if (blitter_ != nullptr)blitter_->SetDmaCon(dma_control_);
       if (bitplanes_ != nullptr)bitplanes_->SetDmaCon(dma_control_);
       
       operation_memory.SetDMAControl(dma_control);
@@ -68,6 +69,9 @@ public:
       bitplanes_->SetDmaCon(dma_control_);
       copper_ = agnus_->GetCopper();
       copper_->SetDmaCon(dma_control_);
+      blitter_= agnus_->GetBlitter();
+      blitter_->SetDmaCon(dma_control_);
+
       operation_memory.InitCustomChips(paula_, agnus_, bitplanes_);
    }
 
@@ -211,6 +215,7 @@ protected:
    CIA8520* cia_b_;
 
    Copper* copper_;
+   Blitter* blitter_;
 
    DMAControl* dma_control_;
    Paula* paula_;

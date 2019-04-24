@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Copper.h"
+#include "Blitter.h"
 
 class Agnus
 {
@@ -43,6 +44,7 @@ public:
    };
 
    Copper* GetCopper() { return &copper_; }
+   Blitter* GetBlitter() { return &blitter_; }
 
    bool WithinWindow();
 
@@ -50,6 +52,7 @@ protected:
 
    Motherboard* motherboard_;
    Copper copper_;
+   Blitter blitter_;
 
    ////////////////////////////////
    // Various registers

@@ -216,7 +216,7 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
 
 void CIA8520::HandleControlRegister(unsigned int timer)
 {
-   unsigned char *ctrl = timer == 0 ? &cra_ : &crb_;
+   unsigned char *ctrl = (timer == 0) ? &cra_ : &crb_;
    
    if (*ctrl & LOAD)
    {

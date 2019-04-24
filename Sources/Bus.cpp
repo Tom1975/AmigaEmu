@@ -302,6 +302,7 @@ void Bus::TickDMA()
       // Copper
       if ( !copper_->DmaTick())
       // Blitter
+      if (!blitter_->DmaTick())
       // 68000 
       if (agnus_bus_required_)
       {
@@ -425,6 +426,48 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x32:  // SERPER
          paula_->SetSerPer(data_);
          break;
+
+      case 0x48:  // BLTCPTH
+         blitter_->SetBltPt(0x22, data_);
+         break;
+      case 0x4A:  // BLTCPTL
+         blitter_->SetBltPt(0x2, data_);
+         break;
+      case 0x4C:  // BLTBPTH
+         blitter_->SetBltPt(0x21, data_);
+         break;
+      case 0x4E:  // BLTBPTL
+         blitter_->SetBltPt(0x1, data_);
+         break;
+      case 0x50:  // BLTAPTH
+         blitter_->SetBltPt(0x20, data_);
+         break;
+      case 0x52:  // BLTAPTL
+         blitter_->SetBltPt(0, data_);
+         break;
+      case 0x54:  // BLTDPTH
+         blitter_->SetBltPt(0x23, data_);
+         break;
+      case 0x56:  // BLTDPTL
+         blitter_->SetBltPt(3, data_);
+         break;
+      case 0x58:  // BLTSIZE
+         blitter_->SetBltSize(data_);
+         break;
+      case 0x60:  //BLTCMOD
+         blitter_->SetBltMod(2, data_);
+         break;
+      case 0x62:  //BLTBMOD
+         blitter_->SetBltMod(1, data_);
+         break;
+      case 0x64:  //BLTAMOD
+         blitter_->SetBltMod(0, data_);
+         break;
+
+      case 0x68:  //BLTDMOD
+         blitter_->SetBltMod(3, data_);
+         break;
+
       case 0x80:  // 1rst address COPPER (bit 16-18)
          agnus_->GetCopper()->Set1rstHighAddress(data_);
          break;
