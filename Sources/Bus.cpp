@@ -18,7 +18,8 @@ Bus::Bus(): tick_count_(0),
             agnus_(nullptr),
             denise_(nullptr),
             copper_(nullptr),
-            bitplanes_(nullptr)
+            bitplanes_(nullptr),
+            blitter_(nullptr)
 {
    Reset();
    memory_overlay_ = true;
@@ -425,6 +426,13 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          break;
       case 0x32:  // SERPER
          paula_->SetSerPer(data_);
+         break;
+
+      case 0x40:  // BLTCON0
+         blitter_->SetBltCon0(data_);
+         break;
+      case 0x42:  // BLTCON1
+         blitter_->SetBltCon1(data_);
          break;
 
       case 0x48:  // BLTCPTH

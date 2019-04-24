@@ -1,7 +1,7 @@
 #include "Blitter.h"
 #include "Motherboard.h"
 
-Blitter::Blitter() : started_(false)
+Blitter::Blitter() 
 {
    
 }
@@ -17,9 +17,13 @@ Blitter::~Blitter()
 bool Blitter::DmaTick()
 {
    if ((dmacon_->dmacon_ & 0x240) == 0x240 
-      && started_)
+      && dmacon_->dmacon_)
    {
 
+      // Either feed the in pipeline (if not full) or write destination (if in is full and destination can be written)
+
+      
+      
    }
    else
    {
@@ -40,7 +44,8 @@ void Blitter::SetBltSize(unsigned short data)
    window_height_ = data >> 6;
    window_width_ = data & 0x3F;
    // Blitter automaticaly starts
-   started_ = true;
+   
+   dmacon_->dmacon_ |= 0x4000; // busy
 }
 
 void Blitter::SetBltPt(unsigned char zone, unsigned short data)
