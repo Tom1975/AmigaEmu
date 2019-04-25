@@ -30,6 +30,7 @@ public :
    Bus* GetBus() { return &bus_; }
    Agnus* GetAgnus() { return &agnus_; }
    Denise* GetDenise() { return &denise_; }
+   Paula* GetPaula() { return &paula_; }
 
    // Lines implementations
    void VSync();

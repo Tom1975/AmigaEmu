@@ -37,6 +37,17 @@ protected:
    Motherboard* motherboard_;
    DMAControl * dmacon_;
 
+   ////////////////////////////////////////////
+   // Blitter engine
+   unsigned short pipeline_[3];
+   unsigned short pipeline_counter_;
+   unsigned char channel_read_;
+
+   unsigned short output_;
+   bool output_ready_;
+
+   ////////////////////////////////////////////
+   // Blitter Registers
    // DMA blitter registers
    unsigned short blt_d_dat_;
    unsigned short blt_c_dat_;

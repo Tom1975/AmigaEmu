@@ -151,6 +151,7 @@ void M68k::Tick()
             // do it
             // Act like a trap, and set current priority to int priority 
             INT();
+            int_ = 0;
          }
          else
          {

@@ -16,6 +16,7 @@ public:
    {
       motherboard_ = motherboard;
       copper_.Init(motherboard_);
+      blitter_.Init(motherboard_);
       
    }
    ////////////////////////////////
