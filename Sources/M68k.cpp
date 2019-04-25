@@ -1783,11 +1783,13 @@ unsigned int M68k::OpcodeStop()
 unsigned int M68k::OpcodeStop2()
 {
    // Interrupt occurs ?
+   if (int_ > 0 && int_ > ((sr_ >> 8) & 0x7)) // todo : Test int against current priority of the cpu
+   {
+      Fetch();
+      current_function_ = &M68k::CpuFetchInit;
+   }
    return false;
 
-   Fetch();
-   current_function_ = &M68k::CpuFetchInit;
-   return false;
 }
 
 unsigned int M68k::DecodeSub()
