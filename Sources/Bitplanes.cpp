@@ -127,6 +127,7 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
       {
          // No display : Bakground
          motherboard_->GetDenise()->DisplayWordBkg();
+         return false;
       }
 
       // If last bitplane, prepare data for denise
