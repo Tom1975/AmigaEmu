@@ -18,7 +18,7 @@
 #define  SP       0x5
 #define  FLAG     0x10
 
-CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard)
+CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0)
 {
 
    Reset();
@@ -44,11 +44,10 @@ void CIA8520::Tod()
    event_++;
    if (event_ == alarm_)
    {
-      // Int ? 
+      icr_ |= ALARM;
       if (icr_mask_ & ALARM)
       {
-         // Int
-         // todo
+         motherboard_->GetPaula()->Int(8);
       }
    }
 }
@@ -64,14 +63,19 @@ void CIA8520::Tick()
       }
       if (timer_a_ == 0xFFFF)
       {
-         // Int ?
+         if (icr_mask_ & TA)
+         {
+            motherboard_->GetPaula()->Int(8);
+         }
          if ((crb_ & 0x40) == 0x40)
          {
             timer_b_--;
             if (timer_b_ == 0xFFFF)
             {
-               // Int ?
-
+               if (icr_mask_ & TB)
+               {
+                  motherboard_->GetPaula()->Int(8);
+               }
             }
          }
 
@@ -86,8 +90,10 @@ void CIA8520::Tick()
       }
       if (timer_b_ == 0xFFFF)
       {
-         // Int ?
-
+         if (icr_mask_ & TB)
+         {
+            motherboard_->GetPaula()->Int(8);
+         }
       }
    }
 }
