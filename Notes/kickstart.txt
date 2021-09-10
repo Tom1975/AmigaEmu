@@ -1,0 +1,3 @@
+FCAC92 => recuperation d'une allocation.
+
+Ensuite, coperlist/blitter...
