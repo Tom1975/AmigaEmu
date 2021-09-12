@@ -18,7 +18,7 @@
 #define  SP       0x5
 #define  FLAG     0x10
 
-CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0)
+CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false)
 {
 
    Reset();
@@ -41,13 +41,16 @@ void CIA8520::Reset()
 
 void CIA8520::Tod()
 {
-   event_++;
-   if (event_ == alarm_)
+   if (tod_counter_on_)
    {
-      icr_ |= ALARM;
-      if (icr_mask_ & ALARM)
+      event_++;
+      if (event_ == alarm_)
       {
-         motherboard_->GetPaula()->Int(8);
+         icr_ |= ALARM;
+         if (icr_mask_ & ALARM)
+         {
+            motherboard_->GetPaula()->Int(8);
+         }
       }
    }
 }
@@ -119,11 +122,12 @@ unsigned char CIA8520::In(unsigned char addr)
    case 7:
       return (timer_b_ >>8) & 0xFF;
    case 8:
-      return event_ & 0xFF;
+      return latched_alarm_ & 0xFF;
    case 9:
-      return (event_ >>8) & 0xFF;
+      return (latched_alarm_ >>8) & 0xFF;
    case 10:
-      return (event_ >>16) & 0xFF;
+      latched_alarm_ = event_;
+      return (latched_alarm_ >>16) & 0xFF;
 
    case 0xD:
    {
@@ -193,14 +197,17 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
    case 8:
       alarm_ &= ~0xFF;
       alarm_ |= data;
+      tod_counter_on_ = true;
       break;
    case 9:
       alarm_ &= ~0xFF00;
       alarm_ |= (data << 8);
+      tod_counter_on_ = false;
       break;
    case 0xA:
       alarm_ &= ~0xFF0000;
       alarm_ |= (data << 16);
+      tod_counter_on_ = false;
       break;
    case 0xC:
       sdr_ = data;

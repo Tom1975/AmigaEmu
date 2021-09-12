@@ -27,12 +27,22 @@ public:
    void SetCon1(unsigned short data);
    void SetCon2(unsigned short data);
 
-   
+   void SetMod1(unsigned short data)
+   {
+      bpl1mod_ = data;
+   }
+   void SetMod2(unsigned short data)
+   {
+      bpl2mod_ = data;
+   }
+
    unsigned short bplcon0_;
    unsigned short bplcon1_;
    unsigned short bplcon2_;
 
-   
+   unsigned short bpl1mod_;
+   unsigned short bpl2mod_;
+
    unsigned int bplxpt_[6];
 
    

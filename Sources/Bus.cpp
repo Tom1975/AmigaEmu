@@ -559,6 +559,12 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x104: // BPLCON2
          bitplanes_->SetCon2(data_);
          break;
+      case 0x108: // BPL1MOD
+         bitplanes_->SetMod1(data_);
+         break;
+      case 0x10A: // BPL2MOD
+         bitplanes_->SetMod2(data_);
+         break;
 
       case 0x110: //BPL1DAT
       case 0x112: //BPL2DAT
@@ -569,7 +575,57 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          denise_->SetData(((address_ & 0x1FF) - 0x110) >> 1, data_);
          // todo
          break;
+      case 0x120: // Sprites
+      case 0x122: // Sprites
+      case 0x124: // Sprites
+      case 0x126: // Sprites
+      case 0x128: // Sprites
+      case 0x12A: // Sprites
+      case 0x12C: // Sprites
+      case 0x12E: // Sprites
+      case 0x130: // Sprites
+      case 0x132: // Sprites
+      case 0x134: // Sprites
+      case 0x136: // Sprites
+      case 0x138: // Sprites
+      case 0x13A: // Sprites
+      case 0x13C: // Sprites
+      case 0x13E: // Sprites
 
+      case 0x140: // Sprites
+      case 0x142: // Sprites
+      case 0x144: // Sprites
+      case 0x146: // Sprites
+      case 0x148: // Sprites
+      case 0x14A: // Sprites
+      case 0x14C: // Sprites
+      case 0x14E: // Sprites
+      case 0x150: // Sprites
+      case 0x152: // Sprites
+      case 0x154: // Sprites
+      case 0x156: // Sprites
+      case 0x158: // Sprites
+      case 0x15A: // Sprites
+      case 0x15C: // Sprites
+      case 0x15E: // Sprites
+      case 0x160: // Sprites
+      case 0x162: // Sprites
+      case 0x164: // Sprites
+      case 0x166: // Sprites
+      case 0x168: // Sprites
+      case 0x16A: // Sprites
+      case 0x16C: // Sprites
+      case 0x16E: // Sprites
+      case 0x170: // Sprites
+      case 0x172: // Sprites
+      case 0x174: // Sprites
+      case 0x176: // Sprites
+      case 0x178: // Sprites
+      case 0x17A: // Sprites
+      case 0x17C: // Sprites
+      case 0x17E: // Sprites
+         // todo
+         break;
       case 0x180: // Color registers
       case 0x182:
       case 0x184:
