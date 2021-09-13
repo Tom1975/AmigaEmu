@@ -32,6 +32,7 @@ public:
    // Access
    Motherboard* GetMotherboard() { return motherboard_; }
    M68k* GetCpu() {return motherboard_->GetCpu(); }
+   Copper* GetCopper() { return motherboard_->GetAgnus()->GetCopper(); }
 
    // Main functions
    void Reset();

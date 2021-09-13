@@ -43,6 +43,7 @@
     </property>
     <addaction name="actionCPU"/>
     <addaction name="actionMemory"/>
+    <addaction name="actionCopper"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -123,6 +124,11 @@
   <action name="actionMemory">
    <property name="text">
     <string>Memory window</string>
+   </property>
+  </action>
+  <action name="actionCopper">
+   <property name="text">
+    <string>Copper windows</string>
    </property>
   </action>
  </widget>

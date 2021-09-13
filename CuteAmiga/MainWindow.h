@@ -4,6 +4,7 @@
 #include <QLabel.h>
 #include "DebugDialog.h"
 #include "MemoryDialog.h"
+#include "CopperDialog.h"
 #include "AmigaEmulation.h"
 
 namespace Ui {
@@ -22,6 +23,7 @@ public:
     void InitEmulation();
     void Break();
     void Memory();
+    void Copper();
     void SaveConfig();
     void LoadConfig();
 
@@ -38,6 +40,7 @@ private:
 
     DebugDialog debug_;
     MemoryDialog memory_;
+    CopperDialog copper_;
 
     // Ressources
     QPixmap* led_on_;

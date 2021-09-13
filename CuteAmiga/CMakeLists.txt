@@ -27,6 +27,7 @@ set ( UIS
  mainwindow.ui
  debugDialog.ui
  MemoryDialog.ui
+ CopperDialog.ui
 )
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Sources )

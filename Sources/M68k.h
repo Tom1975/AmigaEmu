@@ -84,7 +84,7 @@ protected:
    unsigned short   ir_;      // Instruction currently being decoded
 
    // Generic bus
-   Bus*           bus_;       // Bus connection
+   Bus*              bus_;       // Bus connection
 
    unsigned char     int_;    // interruption level
 

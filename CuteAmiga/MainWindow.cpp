@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
    QMainWindow(parent),
    debug_(this),
    memory_(this),
+   copper_(this),
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
@@ -18,12 +19,15 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(ui->actionReset, &QAction::triggered, emu_handler_, &AmigaEmulation::Reset);
    connect(ui->actionCPU, &QAction::triggered, this, &MainWindow::Break);
    connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::Memory);
+   connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
+   
    connect(ui->display_, SIGNAL(Update()),
       this, SLOT(Update()), Qt::QueuedConnection);
 
    // Create debug window
    debug_.SetEmulator(emu_handler_);
    memory_.SetEmulator(emu_handler_);
+   copper_.SetEmulator(emu_handler_);
 
    led_on_ = new QPixmap(":/Images/led_on.png");
    led_off_ = new QPixmap(":/Images/led_off.png");
@@ -46,8 +50,7 @@ MainWindow::~MainWindow()
 /////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::InitEmulation()
-{
-   // Load configuration
+{   // Load configuration
    LoadConfig();
 
    // Link various windows to emulator parts
@@ -117,6 +120,13 @@ void MainWindow::Break()
    debug_.Update();
    debug_.show();
    memory_.Update();
+   copper_.Update();
+}
+
+void MainWindow::Copper ()
+{
+   copper_.Update();
+   copper_.show();
 }
 
 void MainWindow::Memory()

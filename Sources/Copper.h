@@ -7,6 +7,14 @@ public:
    friend class Motherboard;
    friend class Bus;
 
+   enum CopperState
+   {
+      NONE,
+      FETCH,
+      WAIT
+
+   };
+
    Copper();
    virtual ~Copper();
 
@@ -38,17 +46,38 @@ public:
 
    void SetCopIns(unsigned short data);
 
+   // Debug : Access / modify
+   CopperState GetState() { return current_state_; }
+   unsigned int GetCounter() { return counter_; }
+
+   unsigned short GetCon() { return con_; };
+   unsigned int GetAddress1() { return address_1_; }
+   unsigned int GetAddress2() { return address_2_; }
+
+   unsigned short GetJmp1() { return jmp1_; }
+   unsigned short GetJmp2() { return jmp2_; }
+
+   unsigned short GetInstruction() { return instruction_; }
+
+   unsigned short GetInstruction_1() { return instr_1; }
+   unsigned short GetInstruction_2() { return instr_2; }
+
+   // Move
+   unsigned int GetDestinationAddress() { return destination_address_; }
+   unsigned short GetRAMData() { return ram_data_; }
+
+   // Wait & skip
+   unsigned short GetVP() { return vp_; }
+   unsigned short GetHP() { return hp_; }
+   unsigned short GetVE() { return ve_; }
+   unsigned short GetHE() { return he_; }
+   unsigned char GetBFD() { return bfd_; }
+
 protected:
    void DmaDecode();
    bool Compare();
 
-   enum 
-   {
-      NONE,
-      FETCH,
-      WAIT
-
-   }current_state_;
+   CopperState current_state_;
 
    Motherboard* motherboard_;
 
