@@ -140,13 +140,17 @@ QString CopperDialog::Decode(unsigned short instr1, unsigned short instr2)
       else
       {
          // Wait
-         str += " WAIT ";
+         str += " WAIT (";
       }
+      //str += QString("#%1").arg((instr1 >> 1) & 0xFF, 2, 16, QLatin1Char('0')).toUpper();
+
    }
    else
    {
       // Move
       str += " MOVE ";
+      str += QString("#%1").arg(instr2, 0, 16).toUpper();
+      str += QString(", $%1").arg((instr1) & 0x1FF, 3, 16, QLatin1Char('0')).toUpper();
 
    }
    return str;
