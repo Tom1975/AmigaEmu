@@ -38,8 +38,10 @@ protected:
    unsigned short timer_b_latch_;
 
    // event .
+   bool tod_counter_on_;
    unsigned int event_;
    unsigned int alarm_;
+   unsigned int latched_alarm_;
 
    unsigned char sdr_;
    // Interruption
