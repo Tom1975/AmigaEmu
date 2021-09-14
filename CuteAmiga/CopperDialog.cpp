@@ -104,24 +104,36 @@ void CopperDialog::UpdateDebug()
    // Decode copperlist 2
    ui->copperlist_2->clear();
 
-   unsigned int counter_1 = copper->GetAddress1();
-   unsigned int counter_2 = copper->GetAddress2();
-
-   for (int i = 0; i < 32; i++)
+   unsigned int counter = copper->GetAddress1();
+   bool copperlist_end = false;
+   unsigned int count = 250;
+   while (!copperlist_end && count > 0)
    {
-      unsigned short instr1 = emu_handler_->GetMotherboard()->Read16(counter_1);
-      counter_1 += 2;
-      unsigned short instr2 = emu_handler_->GetMotherboard()->Read16(counter_1);
-      counter_1 += 2;
+      count--;
+      unsigned short instr1 = emu_handler_->GetMotherboard()->Read16(counter);
+      counter += 2;
+      unsigned short instr2 = emu_handler_->GetMotherboard()->Read16(counter);
+      counter += 2;
 
       ui->copperlist_1->addItem(Decode(instr1, instr2));
+      if (instr1 == 0xFFFF && instr2 == 0xFFFE)
+         copperlist_end = true;
+   }
+   count = 250;
+   counter = copper->GetAddress2();
+   copperlist_end = false;
+   while (!copperlist_end && count > 0)
+   {
+      count--;
+      unsigned short instr1 = emu_handler_->GetMotherboard()->Read16(counter);
+      counter += 2;
+      unsigned short instr2 = emu_handler_->GetMotherboard()->Read16(counter);
+      counter += 2;
 
-      instr1 = emu_handler_->GetMotherboard()->Read16(counter_2);
-      counter_2 += 2;
-      instr2 = emu_handler_->GetMotherboard()->Read16(counter_2);
-      counter_2 += 2;
+      ui->copperlist_2->addItem(Decode(instr1, instr2)); 
 
-      ui->copperlist_2->addItem(Decode(instr1, instr2 ));
+      if (instr1 == 0xFFFF && instr2 == 0xFFFE)
+         copperlist_end = true;
    }
 }
 
@@ -142,7 +154,14 @@ QString CopperDialog::Decode(unsigned short instr1, unsigned short instr2)
          // Wait
          str += " WAIT (";
       }
-      //str += QString("#%1").arg((instr1 >> 1) & 0xFF, 2, 16, QLatin1Char('0')).toUpper();
+      // Skip if
+      unsigned short vp = instr1 >> 8;
+      unsigned short ve = (instr2 >> 8) & 0x7F;
+      unsigned short hp = (instr1 & 0xFE) << 2;
+      unsigned short he = (instr2 & 0xFE) << 2;
+      unsigned short bfd = instr2 >> 15;
+
+      str += QString("x:%1(%2); y:%3(%4)").arg(vp, 2, 16, QLatin1Char('0')).arg(ve, 2, 16, QLatin1Char('0')).arg(hp, 2, 16, QLatin1Char('0')).arg(he, 2, 16, QLatin1Char('0')).toUpper();
 
    }
    else
