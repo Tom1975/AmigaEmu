@@ -1,10 +1,17 @@
 FCAC92 => recuperation d'une allocation.
 
 
-FC6D06 => Interrupt handler qui shunte la copperlist 2 ... ? normal ???
+(FC6D06 => Interrupt handler qui shunte la copperlist 2 ... ? normal ???
 Stack : FC07F4  bsr.s     FC0828            Reserved vector #14.
-
+semble ok)
 
 FCAE68 => ??
 
 Ensuite, coperlist/blitter...
+
+**********************
+Attention ! passage dans Alert( alertNum, parameters )
+FC30EC
+Appelé depuis FC3028
+Appelé depuis FE932C 15000002 Timer Device Bad supply
+(0002 - Power supply: no 50/60 Hz ticks)
