@@ -12,6 +12,8 @@ Ensuite, coperlist/blitter...
 **********************
 Attention ! passage dans Alert( alertNum, parameters )
 FC30EC
-Appelé depuis FC3028
+Appelé depuis FC3028 
 Appelé depuis FE932C 15000002 Timer Device Bad supply
-(0002 - Power supply: no 50/60 Hz ticks)
+(0002 - Power supply: no 50/60 Hz ticks)=> OK
+Causé par le CIA qui latchait incorrectement l'event sur MSB plutopt que LSB...
+***********************

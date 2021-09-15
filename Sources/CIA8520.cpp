@@ -122,11 +122,11 @@ unsigned char CIA8520::In(unsigned char addr)
    case 7:
       return (timer_b_ >>8) & 0xFF;
    case 8:
+      latched_alarm_ = event_;
       return latched_alarm_ & 0xFF;
    case 9:
       return (latched_alarm_ >>8) & 0xFF;
    case 10:
-      latched_alarm_ = event_;
       return (latched_alarm_ >>16) & 0xFF;
 
    case 0xD:
