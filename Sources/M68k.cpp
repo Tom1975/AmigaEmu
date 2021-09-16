@@ -59,6 +59,7 @@ M68k::Func M68k::OriToCcr_[] = { &M68k::DecodeOriToCcr, &M68k::OperandFetch, &M6
 M68k::Func M68k::Pea_[] = { &M68k::DecodePea, &M68k::DestinationFetch, &M68k::OpcodePea, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Lsd_[] = { &M68k::DecodeLsd, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeLsd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Lsd2_[] = { &M68k::DecodeLsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Reset_[] = { &M68k::DecodeReset, &M68k::WaitTick<124>, &M68k::OpcodeReset, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RteOpcode_[] = { &M68k::DecodeRte, &M68k::SourceRead, &M68k::OpcodeRte, &M68k::SourceRead, &M68k::OpcodeRte2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RtsOpcode_[] = { &M68k::DecodeRts, &M68k::SourceRead, &M68k::OpcodeRts, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -85,7 +86,6 @@ M68k::Func M68k::Negx_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Trap_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Reset_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nop_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Trapv_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
@@ -1478,6 +1478,30 @@ unsigned int M68k::OpcodePea()
          return false;
       }
    }
+   return true;
+}
+
+unsigned int M68k::DecodeReset()
+{
+   // if not superviseur, 
+   if (sr_ & 0x2000)
+   {
+      // Set Reset output
+      // Wait for 124 state (512 for 68020+)
+      time_counter_ = 0;
+      return true;
+
+   }
+   else
+   {
+      return TRAP(8);
+   }
+}
+
+unsigned int M68k::OpcodeReset()
+{
+   // Clear the reset pin
+   // Next instruction
    return true;
 }
 

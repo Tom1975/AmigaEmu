@@ -70,6 +70,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFB80, 0x4880, &Disassembler68k::MovemOpcode);
    AddCommand(0xFFB8, 0x4880, &Disassembler68k::ExtOpcode);
    AddCommand(0xFFFF, 0x027C, &Disassembler68k::AndToSrOpcode);
+   AddCommand(0xFFFF, 0x4E70, &Disassembler68k::ResetOpcode);
    AddCommand(0xFFFF, 0x4E72, &Disassembler68k::StopOpcode);
    AddCommand(0xFFFF, 0x4E73, &Disassembler68k::RteOpcode);
    AddCommand(0xFFFF, 0x4E75, &Disassembler68k::RtsOpcode);
@@ -743,6 +744,14 @@ unsigned int Disassembler68k::JsrOpcode(Motherboard* motherboard, unsigned short
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
    str_asm += str_opcode;
 
+   return pc;
+}
+
+unsigned int Disassembler68k::ResetOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   unsigned int size = (opcode >> 6) & 0x3;
+   str_asm = "reset";
    return pc;
 }
 

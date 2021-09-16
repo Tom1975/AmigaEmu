@@ -163,6 +163,7 @@ protected:
    unsigned int InitWait() { time_counter_ = 0; return true; }
    unsigned int Wait4Ticks(){ return  (++time_counter_ == 8); }
    unsigned int Wait2Ticks() { return  (++time_counter_ == 4); }
+   template<unsigned int tick> unsigned int WaitTick (){ return  (++time_counter_ == tick*2); }
    unsigned int DecodeDestination();
    unsigned int WaitForDestination();
    unsigned int WriteSourceToDestination();
@@ -296,6 +297,7 @@ protected:
    unsigned int DecodeOriSr();
    unsigned int DecodeOriToCcr();
    unsigned int DecodePea();
+   unsigned int DecodeReset();
    unsigned int DecodeRte();
    unsigned int DecodeRts();
    unsigned int DecodeScc();
@@ -358,6 +360,7 @@ protected:
    unsigned int OpcodeNop();
    unsigned int OpcodeOr();
    unsigned int OpcodePea();
+   unsigned int OpcodeReset();
    unsigned int OpcodeRte();
    unsigned int OpcodeRte2();
    unsigned int OpcodeRts();

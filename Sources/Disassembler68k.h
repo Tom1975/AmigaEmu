@@ -77,6 +77,7 @@ protected:
    unsigned int OriToCcrOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int OrOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int PeaOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
+   unsigned int ResetOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int RodOpcode2(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int RoxdOpcode2(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int RteOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
