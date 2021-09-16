@@ -59,7 +59,7 @@ M68k::Func M68k::OriToCcr_[] = { &M68k::DecodeOriToCcr, &M68k::OperandFetch, &M6
 M68k::Func M68k::Pea_[] = { &M68k::DecodePea, &M68k::DestinationFetch, &M68k::OpcodePea, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Lsd_[] = { &M68k::DecodeLsd, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeLsd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Lsd2_[] = { &M68k::DecodeLsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Reset_[] = { &M68k::DecodeReset, &M68k::WaitTick<124>, &M68k::OpcodeReset, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Reset_[] = { &M68k::DecodeReset, &M68k::WaitTick<124>, &M68k::OpcodeReset, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::RteOpcode_[] = { &M68k::DecodeRte, &M68k::SourceRead, &M68k::OpcodeRte, &M68k::SourceRead, &M68k::OpcodeRte2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RtsOpcode_[] = { &M68k::DecodeRts, &M68k::SourceRead, &M68k::OpcodeRts, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -1487,6 +1487,7 @@ unsigned int M68k::DecodeReset()
    if (sr_ & 0x2000)
    {
       // Set Reset output
+      bus_->SetRST(Bus::ACTIVE);
       // Wait for 124 state (512 for 68020+)
       time_counter_ = 0;
       return true;
@@ -1501,7 +1502,9 @@ unsigned int M68k::DecodeReset()
 unsigned int M68k::OpcodeReset()
 {
    // Clear the reset pin
+   bus_->SetRST(Bus::INACTIVE);
    // Next instruction
+   Fetch();
    return true;
 }
 

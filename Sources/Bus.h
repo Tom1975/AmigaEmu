@@ -81,6 +81,8 @@ public:
    void SetRW(InOutSignal);
    InOutSignal GetRW() { return rw_; }
 
+   void SetRST(InOutSignal rst);
+   InOutSignal GetRST() { return rst_; }
 
    void SetBR(InOutSignal br) { br_ = br; }
    InOutSignal GetBR() { return br_; }
@@ -201,6 +203,8 @@ protected:
 
    InOutSignal    uds_;
    InOutSignal    lds_;
+
+   InOutSignal    rst_;
 
 
    // ROM

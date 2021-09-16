@@ -36,6 +36,17 @@ void Bus::SetBusActive(unsigned char active)
    lds_ = (active & 0x1) ? ACTIVE : INACTIVE;
 }
 
+void Bus::SetRST(InOutSignal rst) 
+{
+   rst_ = rst; 
+   memory_overlay_ = true;
+   cia_a_->Reset();
+   cia_b_->Reset();
+   paula_->Reset();
+   agnus_->Reset();
+
+}
+
 void Bus::Reset()
 {
    // OVL is high, then read from CIA-1.
@@ -93,8 +104,9 @@ unsigned int Bus::Read(unsigned int address)
    current_operation_ = READ;
 
    // There should be no current read here.
+   // TODO CHECK : memory access should be checked here (or anywhere else)
    if ( (address_ & 0xE3F000) == 0xC3F000
-      || (address_ < 0x200000))
+      || ((address_ < 0x200000) && !memory_overlay_) )
    {
       // IO registers , Chip RAM
       agnus_bus_required_ = true;
