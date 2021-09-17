@@ -106,15 +106,26 @@ void DebugDialog::DasmShowContextMenu(const QPoint &pos)
    // Create menu and insert some actions
    QMenu myMenu;
    myMenu.addAction("Insert breakpoint", this, SLOT(AddBreakpoint()));
-   myMenu.addAction("Erase", this, SLOT(eraseItem()));
+   myMenu.addAction("Erase", this, SLOT(RemoveBreakpoint()));
 
    // Show context menu at handling position
    myMenu.exec(globalPos);
 }
 
+void DebugDialog::RemoveBreakpoint()
+{
+   QList<QListWidgetItem *> list_of_items = ui->listWidget->selectedItems();
+   // todo : handle multiple selection
+   emu_handler_->RemoveBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt());
+   UpdateDebug();
+}
+
+
 void DebugDialog::AddBreakpoint()
 {
-   emu_handler_->AddBreakpoint(0);
+   QList<QListWidgetItem *> list_of_items = ui->listWidget->selectedItems();
+   // todo : handle multiple selection
+   emu_handler_->AddBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt());
    UpdateDebug();
 }
 
@@ -123,6 +134,22 @@ void DebugDialog::on_add_bp_clicked()
    QString text = ui->textEdit->toPlainText();
    BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
    pb_handler->CreateBreakpoint(text.toUtf8().constData());
+   UpdateDebug();
+}
+
+void DebugDialog::on_remove_bp_clicked()
+{
+   QList<QListWidgetItem *> list_of_items = ui->list_breakpoints->selectedItems();
+   BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+   // todo : handle multiple selection
+   emu_handler_->RemoveBreakpoint(pb_handler->GetBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt()));
+   UpdateDebug();
+}
+
+void DebugDialog::on_clear_bp_clicked()
+{
+   BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+   pb_handler->Clear();
    UpdateDebug();
 }
 
@@ -165,6 +192,9 @@ void DebugDialog::UpdateDebug()
 #define ADD_SIZE 10
 
       sprintf(addr, "%8.8X: ", offset);
+      QListWidgetItem* item = new QListWidgetItem;
+      item->setData(Qt::UserRole, offset);
+
       offset = disassembler_.Disassemble(emu_handler_->GetMotherboard(), offset, str_asm);
       str_asm = addr + str_asm;
       int size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
@@ -178,8 +208,10 @@ void DebugDialog::UpdateDebug()
          sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(i));
          str_asm += b;
       }
+      item->setText(str_asm.c_str());
+      ui->listWidget->addItem(item);
+
       //
-      ui->listWidget->addItem(str_asm.c_str());
       offset_old = offset;
    }
 

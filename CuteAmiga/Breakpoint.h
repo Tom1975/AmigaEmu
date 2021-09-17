@@ -16,7 +16,7 @@ class IBreakpointItem
 {
 public :
    virtual bool Break () = 0;
-   virtual bool IsThereBreakOnAdress (unsigned short addr) { return false;}
+   virtual bool IsThereBreakOnAdress (unsigned int addr) { return false;}
    virtual const char* GetLabel() { return "default_breakpoint"; }
    virtual const char* GetString() { return nullptr; }
 };
@@ -87,6 +87,7 @@ public:
    IBreakpointItem* CreateBreakpoint(const char* breakpoint_string);
    void RemoveBreakpoint(IBreakpointItem* breakpoint);
    virtual void ToggleBreakpoint(unsigned short addr);
+   void Clear();
 
    // Handling / consulting
    virtual int GetBreakpointNumber() { return breakpoint_number_; };
@@ -103,7 +104,7 @@ protected:
    Motherboard* motherboard_;
 
    IBreakpointItem** breakpoint_list_;
-   int breakpoint_number_;
-   int breakpoint_list_size_;
+   unsigned int breakpoint_number_;
+   unsigned int breakpoint_list_size_;
 };
 

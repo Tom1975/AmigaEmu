@@ -25,7 +25,7 @@ file( GLOB HEADERS
 
 set ( UIS
  mainwindow.ui
- debugDialog.ui
+ DebugDialog.ui
  MemoryDialog.ui
  CopperDialog.ui
 )

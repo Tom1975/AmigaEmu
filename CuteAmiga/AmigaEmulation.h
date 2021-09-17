@@ -45,6 +45,8 @@ public:
       return &breakpoint_handler_;   
    }
    void AddBreakpoint(unsigned int new_bp);
+   void RemoveBreakpoint(IBreakpointItem*  bp_to_remove);
+   void RemoveBreakpoint(unsigned int bp_to_remove);
 
    // static function
    static void Begin(void* param);

@@ -179,3 +179,21 @@ void AmigaEmulation::AddBreakpoint(unsigned int new_bp)
    // check existense 
    breakpoint_handler_.AddBreakpoint(new BreakPC(motherboard_, new_bp));
 }
+
+void AmigaEmulation::RemoveBreakpoint(IBreakpointItem* bp_to_remove)
+{
+   breakpoint_handler_.RemoveBreakpoint(bp_to_remove);
+}
+
+void AmigaEmulation::RemoveBreakpoint(unsigned int bp_to_remove)
+{
+   for (int i = 0; i < breakpoint_handler_.GetBreakpointNumber(); i++)
+   {
+      IBreakpointItem* bp = breakpoint_handler_.GetBreakpoint(i);
+      if (bp->IsThereBreakOnAdress(bp_to_remove))
+      {
+         breakpoint_handler_.RemoveBreakpoint(bp);
+         return;
+      }
+   }
+}

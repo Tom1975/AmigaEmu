@@ -150,6 +150,32 @@
     <string>Add</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="remove_bp">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>410</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="clear_bp">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>410</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Clear all</string>
+   </property>
+  </widget>
   <action name="actionTest">
    <property name="text">
     <string>Test</string>
