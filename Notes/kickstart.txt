@@ -17,3 +17,7 @@ Appelé depuis FE932C 15000002 Timer Device Bad supply
 (0002 - Power supply: no 50/60 Hz ticks)=> OK
 Causé par le CIA qui latchait incorrectement l'event sur MSB plutopt que LSB...
 ***********************
+
+Guru meditation, pas de cause connue atm...
+La stack du guru = 
+	Wait / WaitIO / FE6C68 / ... /FE0000 / FC0680(FindNalme dans OpenDevice)
