@@ -134,7 +134,9 @@ void M68k::Tick()
    if (new_opcode_ == 0)
       BusManagement();
    else
+   {
       new_opcode_ = 0;
+   }
    
    while ((new_opcode_==0) && ((this->*current_function_)()))
    {
@@ -156,6 +158,12 @@ void M68k::Tick()
          else
          {
             // Fetch next opcode
+            // save last opcodes
+            static unsigned int last_opcodes[256];
+            static unsigned char op_index = 0;
+            last_opcodes[(op_index++) & 0xFF] = pc_-4;
+
+
             current_working_list_ = M68k::working_array_[ird_];
             current_function_ = *current_working_list_;
             index_list_ = 0;
@@ -1791,7 +1799,8 @@ unsigned int M68k::DecodeStop()
    // if not superviseur, 
    if (sr_ & 0x2000)
    {
-      source_alu_ = source_factory_.InitAlu(2, 7, 1); // sr
+      //source_alu_ = source_factory_.InitAlu(2, 7, 1); // sr
+      source_alu_ = source_factory_.InitAlu(7, 4, 1); // sr
       return true;
    }
    else
