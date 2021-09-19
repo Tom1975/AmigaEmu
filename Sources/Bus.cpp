@@ -433,11 +433,19 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x24:  // DSKLEN
          paula_->SetDskLen(data_);
          break;
+
+      case 0x2A:  // VPOSW
+         agnus_->SetVpos(data_);
+         break;
       case 0x2E: // COPCON
          agnus_->GetCopper()->SetCopCon(data_);
          break;
       case 0x32:  // SERPER
          paula_->SetSerPer(data_);
+         break;
+
+      case 0x34:  // POTGOT
+         // todo
          break;
 
       case 0x40:  // BLTCON0
@@ -535,6 +543,40 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          paula_->SetIntReq(data_);
          break;
 
+      case 0x9E:  // ADKCON
+         // todo
+         break;
+
+      case 0xA0:  // AUD0LCH
+      case 0xA2:  // AUD0LCL
+      case 0xA4:  // AUD0LEN
+      case 0xA6:  // AUD0PER
+      case 0xA8:  // AUD0VOL
+      case 0xAA:  // AUD0DAT
+
+      case 0xB0:  // AUD1LCH
+      case 0xB2:  // AUD1LCL
+      case 0xB4:  // AUD1LEN
+      case 0xB6:  // AUD1PER
+      case 0xB8:  // AUD1VOL
+      case 0xBA:  // AUD1DAT
+
+      case 0xC0:  // AUD2LCH
+      case 0xC2:  // AUD2LCL
+      case 0xC4:  // AUD2LEN
+      case 0xC6:  // AUD2PER
+      case 0xC8:  // AUD2VOL
+      case 0xCA:  // AUD2DAT
+
+      case 0xD0:  // AUD3LCH
+      case 0xD2:  // AUD3LCL
+      case 0xD4:  // AUD3LEN
+      case 0xD6:  // AUD3PER
+      case 0xD8:  // AUD3VOL
+      case 0xDA:  // AUD3DAT
+         break;
+
+      // Bitplanes
       case 0xE0:
       case 0xE2:
       case 0xE4:

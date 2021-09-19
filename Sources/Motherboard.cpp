@@ -107,6 +107,7 @@ unsigned char Motherboard::GetCiaPort(CIA8520* cia, bool a)
             | (hardware_->GetJoystick(0) << 6)
             // todo : add disk status here
             | (cia_a_.GetPA() & 0x3)
+            // | 0x20 -> READY bit !!!
             );
       }
       else

@@ -44,6 +44,16 @@ public:
       return ((line_counter_ >> 8) & 0x1) | ((lof_&0x1)<<15);
    };
 
+   void SetVHpos(unsigned short data) {
+      horizontal_counter_ = (data&0xFF) << 1;
+      line_counter_ = data >> 8;
+   }
+   void SetVpos(unsigned short data) {
+      lof_ = data >> 15;
+      line_counter_ = ((data & 0x1) << 8);
+   }
+
+
    Copper* GetCopper() { return &copper_; }
    Blitter* GetBlitter() { return &blitter_; }
 

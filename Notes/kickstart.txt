@@ -23,3 +23,7 @@ La stack du guru =
 	Wait / WaitIO / FE6C68 / ... /FE0000 / FC0680(FindNalme dans OpenDevice)
 	==> stop qui repop sur interrupt causée par le blitter (FC6CDC)	
 	=> Bricolage a FC6D04
+	
+********************
+Detection du lecteur de disquette 
+FC490A => voir MTR/READY etc
