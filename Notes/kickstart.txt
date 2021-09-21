@@ -28,3 +28,5 @@ La stack du guru =
 Detection du lecteur de disquette 
 FC490A => voir MTR/READY etc
 Sauvegarde de l'id du drive dans (A3)
+004940: btst #5, BFE001           			Lecture bit READY
+NE LIT PAS l'adresse BFE001... !

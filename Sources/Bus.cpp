@@ -221,8 +221,8 @@ void Bus::Tick()
             // CIA-A
             // todo : exact address selection
             // 101x xxxx xx01 RRRR xxxx xxx0
-            if ((address_ & 0xE03001) == 0xA01000)
-            //if ((address_ & 0xFFF000) == 0xBFE000)
+            //if ((address_ & 0xE03001) == 0xA01000)
+            if ((address_ & 0xFFF000) == 0xBFE000)
             {
                cia_a_->Out((address_ >> 8) & 0xF, data_);
                memory_overlay_ = (cia_a_->GetPA() & 0x1);
@@ -232,8 +232,8 @@ void Bus::Tick()
             // CIA-B
             // todo : exact address selection
             // 101x xxxx xx10 RRRR xxxx xxx1
-            //if ((address_ & 0xFFF000) == 0xBFD000)
-            if ((address_ & 0xE03001) == 0xA02000)
+            if ((address_ & 0xFFF000) == 0xBFD000)
+            //if ((address_ & 0xE03001) == 0xA02000)
             {
                cia_b_->Out((address_ >> 8) & 0xF, data_);
                // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high

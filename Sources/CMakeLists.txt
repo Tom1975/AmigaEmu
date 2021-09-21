@@ -9,7 +9,6 @@ file( GLOB HEADERS
 	"*.h"
 )
 
-
 set(EXTRA
    TODO.txt
    "../Notes/Cia 8520.txt"

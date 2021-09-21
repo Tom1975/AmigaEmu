@@ -99,6 +99,11 @@ bool DiskDrive::GetDKRD()
 bool DiskDrive::GetRDY()
 {
    //todo
+   if (!mtr_)
+   {
+      bool value = (identification_ & (1<< 31-identification_index_) == 0);
+      identification_index_++;
+   }
    return false;
 
 }
