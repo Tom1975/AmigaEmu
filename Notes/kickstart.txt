@@ -27,3 +27,4 @@ La stack du guru =
 ********************
 Detection du lecteur de disquette 
 FC490A => voir MTR/READY etc
+Sauvegarde de l'id du drive dans (A3)

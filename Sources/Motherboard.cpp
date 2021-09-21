@@ -107,7 +107,10 @@ unsigned char Motherboard::GetCiaPort(CIA8520* cia, bool a)
             | (hardware_->GetJoystick(0) << 6)
             // todo : add disk status here
             | (cia_a_.GetPA() & 0x3)
-            // | 0x20 -> READY bit !!!
+            | (drive_.GetCHNG() ? 0 : 0x04)
+            | (drive_.GetWPROT() ? 0 : 0x08)
+            | (drive_.GetTRK0() ? 0 : 0x10)
+            | (drive_.GetRDY () ? 0 : 0x20)
             );
       }
       else
@@ -130,6 +133,40 @@ unsigned char Motherboard::GetCiaPort(CIA8520* cia, bool a)
       }
    }
    return 0;
+}
+
+void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data)
+{
+   if (cia == &cia_a_)
+   {
+      // CIA A
+      if (a)
+      {
+         // PRA
+      }
+      else
+      {
+         // PRB
+      }
+   }
+   else
+   {
+      // CIA B
+      if (a)
+      {
+         // PRA
+      }
+      else
+      {
+         // PRB
+         drive_.SetMTRON((data & 0x80) == 0x00);
+         drive_.SetSEL1((data & 0x10) == 0x10);
+         drive_.SetSEL0((data & 0x08) == 0x08);
+         drive_.SetSIDE((data & 0x04) == 0x00);
+         drive_.SetDIR((data & 0x02) == 0x02);
+         drive_.SetSTEP((data & 0x01) == 0x00);
+      }
+   }
 }
 
 // Macro for knowing what to do every kind of clock tick.

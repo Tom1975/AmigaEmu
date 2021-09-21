@@ -8,6 +8,7 @@
 #include "Monitor.h"
 #include "Denise.h"
 #include "Agnus.h"
+#include "DiskDrive.h"
 
 class HardwareIO
 {
@@ -31,6 +32,7 @@ public :
    Agnus* GetAgnus() { return &agnus_; }
    Denise* GetDenise() { return &denise_; }
    Paula* GetPaula() { return &paula_; }
+   DiskDrive* GetdiskDrive() { return &drive_; }
 
    // Lines implementations
    void VSync();
@@ -38,6 +40,7 @@ public :
    void ResetHCounter();
 
    unsigned char GetCiaPort(CIA8520* cia, bool a);
+   void WriteCiaPort (CIA8520* cia, bool a, unsigned char data);
 
    // Bus implémentation
    unsigned int Read32(unsigned int address) { return bus_.Read32(address); };
@@ -73,6 +76,8 @@ protected:
    unsigned char count_E_;
    CIA8520 cia_a_;
    CIA8520 cia_b_;
+
+   DiskDrive drive_;
 
    DMAControl dma_control_;
 

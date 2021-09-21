@@ -156,9 +156,11 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
    case 0:
       // 
       pra_ = data & ddra_ ;
+      motherboard_->WriteCiaPort(this, true, pra_);
       break;
    case 1:
       prb_ = data & ddrb_;
+      motherboard_->WriteCiaPort(this, false, prb_);
       break;
    case 2:
       ddra_ = data;
