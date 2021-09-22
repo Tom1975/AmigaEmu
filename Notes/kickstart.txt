@@ -3,7 +3,9 @@
 Erreur sur les affichages : 
 Addresses de bitplanes incorrectes () et incrément sans limite = error !
 DMACON fixé vers ici FCAF18
-
+Copper list 2 fixée ici :FC6D00
+Plus particulierement sur l'uinterrupt handler
+FC6CDC
 
 **************************
 *** HISTORIQUE 
