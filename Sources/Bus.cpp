@@ -433,17 +433,17 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
    switch (addr)
    {
       case 0x24:  // DSKLEN
-         paula_->SetDskLen(data_);
+         paula_->SetDskLen(data);
          break;
 
       case 0x2A:  // VPOSW
-         agnus_->SetVpos(data_);
+         agnus_->SetVpos(data);
          break;
       case 0x2E: // COPCON
          agnus_->GetCopper()->SetCopCon(data_);
          break;
       case 0x32:  // SERPER
-         paula_->SetSerPer(data_);
+         paula_->SetSerPer(data);
          break;
 
       case 0x34:  // POTGOT
@@ -451,98 +451,98 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          break;
 
       case 0x40:  // BLTCON0
-         blitter_->SetBltCon0(data_);
+         blitter_->SetBltCon0(data);
          break;
       case 0x42:  // BLTCON1
-         blitter_->SetBltCon1(data_);
+         blitter_->SetBltCon1(data);
          break;
 
       case 0x48:  // BLTCPTH
-         blitter_->SetBltPt(0x22, data_);
+         blitter_->SetBltPt(0x22, data);
          break;
       case 0x4A:  // BLTCPTL
-         blitter_->SetBltPt(0x2, data_);
+         blitter_->SetBltPt(0x2, data);
          break;
       case 0x4C:  // BLTBPTH
-         blitter_->SetBltPt(0x21, data_);
+         blitter_->SetBltPt(0x21, data);
          break;
       case 0x4E:  // BLTBPTL
-         blitter_->SetBltPt(0x1, data_);
+         blitter_->SetBltPt(0x1, data);
          break;
       case 0x50:  // BLTAPTH
-         blitter_->SetBltPt(0x20, data_);
+         blitter_->SetBltPt(0x20, data);
          break;
       case 0x52:  // BLTAPTL
-         blitter_->SetBltPt(0, data_);
+         blitter_->SetBltPt(0, data);
          break;
       case 0x54:  // BLTDPTH
-         blitter_->SetBltPt(0x23, data_);
+         blitter_->SetBltPt(0x23, data);
          break;
       case 0x56:  // BLTDPTL
-         blitter_->SetBltPt(3, data_);
+         blitter_->SetBltPt(3, data);
          break;
       case 0x58:  // BLTSIZE
-         blitter_->SetBltSize(data_);
+         blitter_->SetBltSize(data);
          break;
       case 0x60:  //BLTCMOD
-         blitter_->SetBltMod(2, data_);
+         blitter_->SetBltMod(2, data);
          break;
       case 0x62:  //BLTBMOD
-         blitter_->SetBltMod(1, data_);
+         blitter_->SetBltMod(1, data);
          break;
       case 0x64:  //BLTAMOD
-         blitter_->SetBltMod(0, data_);
+         blitter_->SetBltMod(0, data);
          break;
 
       case 0x68:  //BLTDMOD
-         blitter_->SetBltMod(3, data_);
+         blitter_->SetBltMod(3, data);
          break;
 
       case 0x80:  // 1rst address COPPER (bit 16-18)
-         agnus_->GetCopper()->Set1rstHighAddress(data_);
+         agnus_->GetCopper()->Set1rstHighAddress(data);
          break;
       case 0x82:  // 1rst address COPPER (bit 1-15)
-         agnus_->GetCopper()->Set1rstLowAddress(data_);
+         agnus_->GetCopper()->Set1rstLowAddress(data);
          break;
       case 0x84:  // 2nd address COPPER (bit 16-18)
-         agnus_->GetCopper()->Set2ndHighAddress(data_);
+         agnus_->GetCopper()->Set2ndHighAddress(data);
          break;
       case 0x86:  // 2nd address COPPER (bit 1-15)
-         agnus_->GetCopper()->Set2ndLowAddress(data_);
+         agnus_->GetCopper()->Set2ndLowAddress(data);
          break;
       case 0x88:
-         agnus_->GetCopper()->SetJmp1(data_);
+         agnus_->GetCopper()->SetJmp1(data);
          break;
       case 0x8A:
-         agnus_->GetCopper()->SetJmp2(data_);
+         agnus_->GetCopper()->SetJmp2(data);
          break;
       case 0x8C:
-         agnus_->GetCopper()->SetCopIns(data_);
+         agnus_->GetCopper()->SetCopIns(data);
          break;
       case 0x8E: // DIWSTRT
-         agnus_->diwstrt_ = data_;
+         agnus_->diwstrt_ = data;
          break;
       case 0x90: // DIWSTOP
-         agnus_->diwstop_ = data_;
+         agnus_->diwstop_ = data;
          break;
       case 0x92: // DDFSTRT
-         agnus_->ddfstrt_ = data_;
+         agnus_->ddfstrt_ = data;
          break;
       case 0x94: // DDFSTOP
-         agnus_->ddfstop_ = data_;
+         agnus_->ddfstop_ = data;
          break;
 
 
       case 0x96: // DMACON
-         dma_control_->Dmacon(data_);
+         dma_control_->Dmacon(data);
          break;
 
 
       case 0x9A: // INTENA
-         paula_->SetIntEna(data_);
+         paula_->SetIntEna(data);
          break;
       case 0x9C: // INTREQ
-         paula_->SetIntReq(data_);
+         paula_->SetIntReq(data);
          break;
 
       case 0x9E:  // ADKCON
@@ -591,35 +591,35 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0xF2:
       case 0xF4:
       case 0xF6:
-         if ((address_ & 0x2))
+         if ((addr & 0x2))
          {
             // low short
-            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] &= ~0xFFFF;
-            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] |= data_;
+            bitplanes_->bplxpt_[((addr & 0x1FF) - 0xE0) / 4] &= ~0xFFFF;
+            bitplanes_->bplxpt_[((addr & 0x1FF) - 0xE0) / 4] |= (data & 0xFFFE);
          }
          else
          {
             // high short
-            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] &= ~0xFFFF0000;
-            bitplanes_->bplxpt_[((address_ & 0x1FF) - 0xE0) / 4] |= (data_ << 16);
+            bitplanes_->bplxpt_[((addr & 0x1FF) - 0xE0) / 4] &= ~0xFFFF0000;
+            bitplanes_->bplxpt_[((addr & 0x1FF) - 0xE0) / 4] |= ((data &7)<< 16);
          }
 
          break;
 
       case 0x100: // BPLCON0
-         bitplanes_->SetCon0(data_);
+         bitplanes_->SetCon0(data);
          break;
       case 0x102: // BPLCON1
-         bitplanes_->SetCon1(data_);
+         bitplanes_->SetCon1(data);
          break;
       case 0x104: // BPLCON2
-         bitplanes_->SetCon2(data_);
+         bitplanes_->SetCon2(data);
          break;
       case 0x108: // BPL1MOD
-         bitplanes_->SetMod1(data_);
+         bitplanes_->SetMod1(data);
          break;
       case 0x10A: // BPL2MOD
-         bitplanes_->SetMod2(data_);
+         bitplanes_->SetMod2(data);
          break;
 
       case 0x110: //BPL1DAT
@@ -628,7 +628,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x116: //BPL4DAT
       case 0x118: //BPL5DAT
       case 0x11A: //BPL6DAT
-         denise_->SetData(((address_ & 0x1FF) - 0x110) >> 1, data_);
+         denise_->SetData(((addr & 0x1FF) - 0x110) >> 1, data);
          // todo
          break;
       case 0x120: // Sprites
@@ -714,7 +714,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x1BA:
       case 0x1BC:
       case 0x1BE:
-         denise_->SetColor((address_ & 0x1FF) - 0x180, data_);
+         denise_->SetColor((addr & 0x1FF) - 0x180, data);
          break;
 
       default:
