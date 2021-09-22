@@ -71,7 +71,14 @@ bool AMAbsolute::FetchComplete()
 bool AMAbsolute::ReadComplete(unsigned int& address_to_read)
 {
    address_to_read = address_to_read_ + size_read_ * (sizeof(unsigned short));
-   return size_read_ == size_;
+   if (size_ == Byte)
+   {
+      return size_read_ > size_;
+   }
+   else
+   {
+      return size_read_ == size_;
+   }
 }
 void AMAbsolute::AddWord(unsigned short value)
 {
@@ -82,11 +89,18 @@ void AMAbsolute::AddWord(unsigned short value)
       address_to_read_ |= value;
 
    }
-   else 
-   if (size_read_++ < size_)
+   else
    {
-      result_ <<= 16;
-      result_ |= value;
+      if (size_ == Byte)
+      {
+         result_ |= value & 0xFF;
+         size_read_++;
+      }
+      else if (size_read_++ < size_)
+      {
+         result_ <<= 16;
+         result_ |= value;
+      }
    }
 }
 //////////////////
