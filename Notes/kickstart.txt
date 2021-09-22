@@ -1,3 +1,13 @@
+
+*********************
+Erreur sur les affichages : 
+Addresses de bitplanes incorrectes () et incrément sans limite = error !
+DMACON fixé vers ici FCAF18
+
+
+**************************
+*** HISTORIQUE 
+**************************
 FCAC92 => recuperation d'une allocation.
 
 
@@ -16,6 +26,7 @@ Appelé depuis FC3028
 Appelé depuis FE932C 15000002 Timer Device Bad supply
 (0002 - Power supply: no 50/60 Hz ticks)=> OK
 Causé par le CIA qui latchait incorrectement l'event sur MSB plutopt que LSB...
+===> OK !
 ***********************
 
 Guru meditation, pas de cause connue atm...
@@ -23,6 +34,7 @@ La stack du guru =
 	Wait / WaitIO / FE6C68 / ... /FE0000 / FC0680(FindNalme dans OpenDevice)
 	==> stop qui repop sur interrupt causée par le blitter (FC6CDC)	
 	=> Bricolage a FC6D04
+===> OK !
 	
 ********************
 Detection du lecteur de disquette 
