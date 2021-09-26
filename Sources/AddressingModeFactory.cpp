@@ -22,6 +22,8 @@ AddressingMode* AddressingModeFactory::InitAlu(unsigned char m, unsigned char xn
    case 0:am_size = AddressingMode::Size::Byte; break;
    case 1:am_size = AddressingMode::Size::Word; break;
    case 2:am_size = AddressingMode::Size::Long; break;
+   default:
+      am_size = AddressingMode::Size::Long; break;
    }
    switch (m)
    {

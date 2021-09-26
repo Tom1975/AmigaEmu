@@ -40,7 +40,7 @@ public :
    void ResetHCounter();
 
    unsigned char GetCiaPort(CIA8520* cia, bool a);
-   void WriteCiaPort (CIA8520* cia, bool a, unsigned char data);
+   void WriteCiaPort (CIA8520* cia, bool a, unsigned char data, unsigned char mask);
 
    // Bus implémentation
    unsigned int Read32(unsigned int address) { return bus_.Read32(address); };

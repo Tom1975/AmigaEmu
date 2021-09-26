@@ -1,4 +1,12 @@
 
+Reprise a zero : 
+=> 0xFC0B28 (InitResident)
+=> Pb Console.device: (FE510E)
+- RT_INIT : FE6B88 qui appelle Makelibrary
+Le MakeLibrary ne sort jamais (relative vector FC1508)
+Dans le Makelib = 
+ok jusque FE6BA2
+
 *********************
 Erreur sur les affichages : 
 Addresses de bitplanes incorrectes () et incrément sans limite = error !

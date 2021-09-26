@@ -18,7 +18,7 @@
 #define  SP       0x5
 #define  FLAG     0x10
 
-CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false)
+CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF)
 {
 
    Reset();
@@ -156,11 +156,11 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
    case 0:
       // 
       pra_ = data & ddra_ ;
-      motherboard_->WriteCiaPort(this, true, pra_);
+      motherboard_->WriteCiaPort(this, true, pra_, ddra_);
       break;
    case 1:
       prb_ = data & ddrb_;
-      motherboard_->WriteCiaPort(this, false, prb_);
+      motherboard_->WriteCiaPort(this, false, prb_, ddrb_);
       break;
    case 2:
       ddra_ = data;

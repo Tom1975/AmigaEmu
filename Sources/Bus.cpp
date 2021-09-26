@@ -396,6 +396,10 @@ void Bus::DmaOperationMemory::DoDma ()
       if (address_ < 0x200000
          || (address_ & 0xF00000) == 0xF00000) // CHECK THIS !
       {
+         if (address_ == 0x2398)
+         {
+            int dbg = 1;
+         }
          // Chip ram
          // Whole word ?
          if (uds_ == ACTIVE)

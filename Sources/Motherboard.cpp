@@ -135,7 +135,7 @@ unsigned char Motherboard::GetCiaPort(CIA8520* cia, bool a)
    return 0;
 }
 
-void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data)
+void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data, unsigned char mask)
 {
    if (cia == &cia_a_)
    {
@@ -159,12 +159,18 @@ void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data)
       else
       {
          // PRB
-         drive_.SetMTRON((data & 0x80) == 0x00);
-         drive_.SetSEL1((data & 0x10) == 0x10);
-         drive_.SetSEL0((data & 0x08) == 0x08);
-         drive_.SetSIDE((data & 0x04) == 0x00);
-         drive_.SetDIR((data & 0x02) == 0x02);
-         drive_.SetSTEP((data & 0x01) == 0x00);
+         if (mask&0x80)
+            drive_.SetMTRON((data & 0x80) == 0x10);
+         if (mask & 0x10)
+            drive_.SetSEL1((data & 0x10) == 0x00);
+         if (mask & 0x08)
+            drive_.SetSEL0((data & 0x08) == 0x00);
+         if (mask & 0x04)
+            drive_.SetSIDE((data & 0x04) == 0x00);
+         if (mask & 0x02)
+            drive_.SetDIR((data & 0x02) == 0x00);
+         if (mask & 0x01)
+            drive_.SetSTEP((data & 0x01) == 0x00);
       }
    }
 }

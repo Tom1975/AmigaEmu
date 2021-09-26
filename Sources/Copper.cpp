@@ -32,7 +32,7 @@ bool Copper::DmaTick()
 {
    if ((dmacon_->dmacon_ & 0x280) == 0x280)
    {
-      // todo : remove ! 
+      // todo : remove when understanding fully what's going on !
       if (counter_ == 0xFFFFFFFF)
          VerticalRetraceBegin();
 
@@ -108,7 +108,7 @@ void Copper::DmaDecode()
          }
          else
          {
-
+            current_state_ = NONE;
          }
       }
    }
