@@ -6,7 +6,42 @@ Reprise a zero :
 Le MakeLibrary ne sort jamais (relative vector FC1508)
 Dans le Makelib = 
 ok jusque FE6BA2
+Command 9 pour DoIO , vers input.device
+FE6C64: jsr ($FE38,A6)            ; DoIO  => Pas de retour....
 
+input.device : Voir l'init... FE5F8E
+
+*********************
+;struct Node {
+;    struct  Node *ln_Succ;	/* Pointer to next (successor) */
+;    struct  Node *ln_Pred;	/* Pointer to previous (predecessor) */
+;    UBYTE   ln_Type;
+;    BYTE    ln_Pri;		/* Priority, for sorting */
+;    char    *ln_Name;		/* ID string, null terminated */
+;};
+;struct MsgPort {
+;    struct  Node mp_Node;
+;    UBYTE   mp_Flags;
+;    UBYTE   mp_SigBit;		/* signal bit number	*/
+;    void   *mp_SigTask;		/* object to be signalled */
+;    struct  List mp_MsgList;	/* message linked list	*/
+;};
+;
+;struct Message {
+;    struct  Node mn_Node;
+;    struct  MsgPort *mn_ReplyPort;  /* message reply port */
+;    UWORD   mn_Length;		    /* total message length, in bytes */
+;				    /* (include the size of the Message */
+;				    /* structure in the length) */
+;};
+;;struct IORequest {
+;    struct  Message io_Message; (size = 14 + 4 + 2) = 20
+;    struct  Device  *io_Device;     /* device node pointer  */ 4 
+;    struct  Unit    *io_Unit;	    /* unit (driver private)*/ 4 
+;    UWORD   io_Command;	    /* device command */ 2 
+;    UBYTE   io_Flags; 1 
+;    BYTE    io_Error;		    /* error or warning num */ 1 
+;};28 bytes ( $1C)
 *********************
 Erreur sur les affichages : 
 Addresses de bitplanes incorrectes () et incrément sans limite = error !
