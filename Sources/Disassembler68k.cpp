@@ -34,6 +34,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF1C0, 0x0180, &Disassembler68k::BclrOpcode_);
    AddCommand(0xF0C0, 0x00C0, &Disassembler68k::BsetOpcode_);
    AddCommand(0xFFC0, 0x0800, &Disassembler68k::BtstOpcode_);
+   AddCommand(0xF1C0, 0x0100, &Disassembler68k::BtstDnOpcode_);
    AddCommand(0xFFC0, 0x0840, &Disassembler68k::BchgOpcode_);
    AddCommand(0xF100, 0x5100, &Disassembler68k::SubQOpcode_);// .L=>Ad, Dn   
    AddCommand(0xF000, 0x9000, &Disassembler68k::SubOpcode_);
@@ -996,6 +997,20 @@ unsigned int Disassembler68k::BtstOpcode_(Motherboard* motherboard, unsigned sho
    pc += 2;
 
    sstream << "btst #" << std::hex << std::uppercase << bitnumber;
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   sstream << ", " << str_opcode;
+   str_asm = sstream.str();
+
+   return pc;
+}
+
+unsigned int Disassembler68k::BtstDnOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+   std::string str_opcode;
+   unsigned short data_register_numer = (opcode>>9)&0x7;
+
+   sstream << "btst D" << std::hex << std::uppercase << data_register_numer;
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
    sstream << ", " << str_opcode;
    str_asm = sstream.str();

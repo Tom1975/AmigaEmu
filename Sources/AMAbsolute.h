@@ -40,4 +40,5 @@ protected:
    unsigned int result_;
    unsigned int size_read_;
    unsigned int address_to_read_;
+   unsigned int size_to_read_;
 };

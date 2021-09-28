@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////
 // Addressing mode : Register
 AMAddressIndex::AMAddressIndex(unsigned int* address_registers, unsigned int* data_registers, unsigned int * pc, unsigned int* usp, unsigned int* ssp, unsigned short* sr) :
-   address_registers_(address_registers), data_registers_(data_registers), pc_(pc), usp_(usp), ssp_(ssp), sr_(sr)
+   address_registers_(address_registers), data_registers_(data_registers), pc_(pc), usp_(usp), ssp_(ssp), sr_(sr), size_to_read_(0)
 {
 }
 
@@ -14,9 +14,9 @@ void AMAddressIndex::Init(unsigned int reg_number, unsigned int size)
    size_ = size;
    switch (size)
    {
-   case 0: operand_size_ = Byte; written_input_ = 1; break;
-   case 1: operand_size_ = Word; written_input_ = 1; break;
-   case 2: operand_size_ = Long; written_input_ = 2; break;
+   case 0: size_to_read_ = 1; operand_size_ = Byte; written_input_ = 1; break;
+   case 1: size_to_read_ = 1; operand_size_ = Word; written_input_ = 1; break;
+   case 2: size_to_read_ = 2; operand_size_ = Long; written_input_ = 2; break;
    }
    fetch_read_ = 1;
    size_read_ = 0;
@@ -86,8 +86,9 @@ bool AMAddressIndex::ReadComplete(unsigned int& address_to_read)
 {
    // Need to read !
    address_to_read = address_to_read_ + size_read_ * (sizeof(unsigned short));
-   return size_read_ == size_;
+   return size_read_ == size_to_read_;
 }
+
 void AMAddressIndex::AddWord(unsigned short value)
 {
 
@@ -112,7 +113,7 @@ void AMAddressIndex::AddWord(unsigned short value)
       address_to_read_ = ((register_number_ == -1) ? (*pc_ - 2) : *current_register_) + index + index_register * scale;
       fetch_read_ = 0;
    }
-   else if (size_read_++ < size_)
+   else if (size_read_++ < size_to_read_)
    {
       result_ <<= 16;
       result_ |= value;

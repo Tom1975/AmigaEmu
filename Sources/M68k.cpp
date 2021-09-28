@@ -22,6 +22,7 @@ M68k::Func M68k::Bclr_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::Destinat
 M68k::Func M68k::Bset_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBset, &M68k::CpuFetch, &M68k::OpcodeBset2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bsr_[] = { &M68k::DecodeBsr, &M68k::OpcodeBsr, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Btst_[] = { &M68k::DecodeBtst, &M68k::OperandFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBtst, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Btst_dn_[] = { &M68k::DecodeBtst_D, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBtst_D, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Clr_[] = { &M68k::DecodeClr, &M68k::DestinationFetch/*, &M68k::DestinationRead*/, &M68k::OpcodeClr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::CmpA_L_[] = { &M68k::DecodeCmpAL, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeCmpAL, &M68k::CpuFetch, &M68k::Wait2Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Cmpm_[] = { &M68k::DecodeCmpm, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeCmpm, &M68k::CpuFetch, &M68k::Wait2Ticks, &M68k::OperandFinished, nullptr };
@@ -78,7 +79,7 @@ M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::Opcode
 M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::NotSupported, &M68k::NotSupported2, &M68k::NotSupported3, &M68k::SourceRead, &M68k::NotSupported4, &M68k::CpuFetch, nullptr, };
 
 // TO IMPLEMENT & DISASSEMBLE
-M68k::Func M68k::Btst_dn_[] = { &M68k::NotImplemented, nullptr };
+//M68k::Func M68k::Btst_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::MoveToCcr_[] = { &M68k::NotImplemented, nullptr };
@@ -2835,6 +2836,47 @@ unsigned int M68k::OpcodeBset2()
    }
 }
 
+unsigned int M68k::DecodeBtst_D()
+{
+   // Decode , M, Xn
+   // decode size
+   size_ = (ird_ >> 6) & 0x3;
+
+   source_alu_ = source_factory_.InitAlu(0, (ird_>>9)&0x7, 2);
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+   time_counter_ = 0;
+   Fetch();
+   return true;
+}
+
+unsigned int M68k::OpcodeBtst_D()
+{
+   // Do it and adjust the flags
+   //destination_alu_->Btst(data_, sr_);
+   bool result = false;
+
+   if (destination_alu_->IsDataRegister())
+   {
+      result = (destination_alu_->GetU32() & (1 << (source_alu_ ->GetU8()& 0x1F)));
+   }
+   else
+   {
+      result = (destination_alu_->GetU8() & (1 << (source_alu_->GetU8() & 7)));
+   }
+   if (result)
+   {
+      sr_ = sr_ & ~F_Z;
+   }
+   else
+   {
+      sr_ |= F_Z;
+   }
+
+   // Fetch x1
+   Fetch();
+   return true;
+}
+
 unsigned int M68k::DecodeBtst()
 {
    // Decode , M, Xn
@@ -2931,14 +2973,32 @@ unsigned int M68k::DecodeExt()
 {
    if (ird_ & 0x40)
    {
-      // word to long
-      d_[ird_ & 0x7] = (int)(short)(d_[ird_ & 0x7]&0xFFFF);
+      // word to long : Copy bit 15 to 31-16
+      //d_[ird_ & 0x7] = (int)(short)(d_[ird_ & 0x7]&0xFFFF);
+      if (d_[ird_ & 0x7] & 0x8000)
+      {
+         d_[ird_ & 0x7] |= 0xFFFF0000;
+      }
+      else
+      {
+         d_[ird_ & 0x7] &= 0x00FFFF;
+      }
+
    }
    else
    {
-      // byte to word
-      d_[ird_ & 0x7] &= 0xFFFF0000;
-      d_[ird_ & 0x7] |= (short)(char)(d_[ird_ & 0x7] & 0xFF);
+      // byte to word : Copy bit 7 to 15-8
+      if (d_[ird_ & 0x7] & 0x80)
+      {
+         d_[ird_ & 0x7] |= 0xFF00;
+      }
+      else
+      {
+         d_[ird_ & 0x7] &= 0x00FF;
+      }
+
+      //d_[ird_ & 0x7] &= 0xFFFF0000;
+      //d_[ird_ & 0x7] |= (short)(char)(d_[ird_ & 0x7] & 0xFF);
    }
    Fetch();
    return true;

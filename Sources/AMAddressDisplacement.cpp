@@ -96,7 +96,14 @@ bool AMAddressDisplacement::ReadComplete(unsigned int& address_to_read)
 {
    // Need to read ?
    address_to_read = address_result_ + size_read_ * (sizeof(unsigned short));
-   return size_read_ == size_to_read_;
+   if (size_ == Byte)
+   {
+      return size_read_ > size_;
+   }
+   else
+   {
+      return size_read_ == size_;
+   }
 }
 void AMAddressDisplacement::AddWord(unsigned short value)
 {

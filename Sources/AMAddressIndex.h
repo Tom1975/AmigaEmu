@@ -48,5 +48,6 @@ protected:
    unsigned int size_;
    unsigned int result_;
    unsigned int size_read_;
+   unsigned int size_to_read_;
    unsigned int fetch_read_;
 };

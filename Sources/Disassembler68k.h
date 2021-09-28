@@ -41,6 +41,7 @@ protected:
    unsigned int BsetOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BsrOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BtstOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
+   unsigned int BtstDnOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int ClrOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int CmpOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int CmpmOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);

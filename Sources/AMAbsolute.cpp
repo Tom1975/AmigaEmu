@@ -2,7 +2,7 @@
 
 ///////////////////////////////////////////////////////////////
 // Addressing mode : Absolute
-AMAbsolute::AMAbsolute()
+AMAbsolute::AMAbsolute() : size_to_read_(0)
 {
 }
 
@@ -18,9 +18,9 @@ void AMAbsolute::Init(unsigned int size, unsigned int size_to_read)
 
    switch (size_)
    {
-   case 0 : operand_size_ = Byte; break;
-   case 1: operand_size_ = Word; break;
-   case 2: operand_size_ = Long; break;
+   case Byte: size_to_read_ = 1; operand_size_ = Byte; break;
+   case Word: size_to_read_ = 1; operand_size_ = Word; break;
+   case Long: size_to_read_ = 2; operand_size_ = Long; break;
    }
 }
 
@@ -71,14 +71,7 @@ bool AMAbsolute::FetchComplete()
 bool AMAbsolute::ReadComplete(unsigned int& address_to_read)
 {
    address_to_read = address_to_read_ + size_read_ * (sizeof(unsigned short));
-   if (size_ == Byte)
-   {
-      return size_read_ > size_;
-   }
-   else
-   {
-      return size_read_ == size_;
-   }
+   return size_read_ == size_to_read_;
 }
 void AMAbsolute::AddWord(unsigned short value)
 {

@@ -9,7 +9,19 @@ ok jusque FE6BA2
 Command 9 pour DoIO , vers input.device
 FE6C64: jsr ($FE38,A6)            ; DoIO  => Pas de retour....
 
+14e init
 input.device : Voir l'init... FE5F8E
+=> PutMsg, FC1B9A (Signalk the task) seems ok
+=> Lancement du vector de command FE51AC
+=> FE61A6 (commande 9) qui clean juste le flags...
+
+Retour au WaitIO, ..; Switch (pour donner la main a la tache réveillée ?)
+on sort du wait, le signal est levé
+FE6314
+FE636E : OpenDevice "gameport.device" => No error
+...
+FE63D4 => Wait infini...
+
 
 *********************
 ;struct Node {
