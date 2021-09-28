@@ -21,6 +21,9 @@ FE6314
 FE636E : OpenDevice "gameport.device" => No error
 ...
 FE63D4 => Wait infini...
+Il semble que la tache attendue n'existe pas : On switch toujours sur la même tache, la tache en cours. Vérifier 
+- Que la tache est bien crée
+- Qu'elle est bien endormie
 
 
 *********************
