@@ -24,6 +24,16 @@ FE63D4 => Wait infini...
 Il semble que la tache attendue n'existe pas : On switch toujours sur la même tache, la tache en cours. Vérifier 
 - Que la tache est bien crée
 - Qu'elle est bien endormie
+TACHE input : 32d2
+creation ok
+
+Voir Reschedule : tout est bon... 
+###
+On lance bien la tache "input" : FE62D4 => A SUIVRE 
+###
+
+
+
 
 
 *********************
