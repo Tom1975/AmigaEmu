@@ -30,6 +30,12 @@ creation ok
 Voir Reschedule : tout est bon... 
 ###
 On lance bien la tache "input" : FE62D4 => A SUIVRE 
+On se met bien sur le WAIT (signals : c0000000)
+COTE console (tache 1970): On positionne le signal
+on wait pour la reponse (FC071E)
+COTE 32d2 : On recoit le signal.
+On va donc en FE6314
+TBC...
 ###
 
 
