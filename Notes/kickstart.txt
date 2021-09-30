@@ -44,6 +44,7 @@ A implémenter :
 *** FAIT
 A VERIFIER :
 LSD/LSD2/ROd/ROD2 => Flags... 
+CIA : effet CRA-TODIN ?
 ###
 
 
