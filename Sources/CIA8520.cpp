@@ -138,7 +138,15 @@ unsigned char CIA8520::In(unsigned char addr)
       return tmp_icr;
       break;
    }
-      
+   // CRA
+   case 0xE:
+      return cra_;
+      break;
+   // CRB
+   case 0xF:
+      return crb_;
+      break;
+
 
    default:
    {
