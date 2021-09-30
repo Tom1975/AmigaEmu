@@ -58,6 +58,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF0C0, 0xB0C0, &Disassembler68k::CmpAOpcode_);
 
    AddCommand(0xFEC0, 0xE2C0, &Disassembler68k::LsdOpcode);
+   AddCommand(0xFEC0, 0xE6C0, &Disassembler68k::RodOpcode);
    AddCommand(0xF1C0, 0xC0C0, &Disassembler68k::MuluOpcode_);
    AddCommand(0xF1C0, 0xC1C0, &Disassembler68k::MulsOpcode_);
    AddCommand(0xF1C0, 0x80C0, &Disassembler68k::DivuOpcode_);
@@ -508,6 +509,7 @@ unsigned int Disassembler68k::LsdOpcode2(Motherboard* motherboard, unsigned shor
    std::string str_opcode;
    bool right = ((opcode >> 8) & 0x1) == 0;
    unsigned int rotat = (opcode >> 9 ) & 0x7;
+   if (rotat == 0) rotat = 8;
    bool immediate = ((opcode >> 5) & 0x1) == 0;
 
    sstream << "ls" << (right ? "r." : "l.") << size2_[(opcode >> 6) & 3] << " ";
@@ -755,6 +757,21 @@ unsigned int Disassembler68k::ResetOpcode(Motherboard* motherboard, unsigned sho
    str_asm = "reset";
    return pc;
 }
+
+unsigned int Disassembler68k::RodOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+
+   std::string str_opcode;
+   bool right = ((opcode >> 8) & 0x1) == 0;
+
+   sstream << "ro" << (right ? "r." : "l.") << size2_[(opcode >> 6) & 3] << " ";
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   sstream << str_opcode;
+   str_asm = sstream.str();
+   return pc;
+}
+
 
 unsigned int Disassembler68k::SubOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
@@ -1310,6 +1327,7 @@ unsigned int Disassembler68k::RodOpcode2(Motherboard* motherboard, unsigned shor
    std::string str_opcode;
    bool right = ((opcode >> 8) & 0x1) == 0;
    unsigned int rotat = (opcode >> 9) & 0x7;
+   if (rotat == 0) rotat = 8;
    bool immediate = ((opcode >> 5) & 0x1) == 0;
 
    sstream << "ro" << (right ? "r." : "l.") << size2_[(opcode >> 6) & 3] << " ";

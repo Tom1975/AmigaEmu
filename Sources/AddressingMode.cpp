@@ -205,3 +205,46 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
    }
    written_input_ = 1;
 }
+
+
+void AddressingMode::Rod(bool right, unsigned short& sr)
+{
+   input_ = GetU16();
+   if (input_ == 0)
+   {
+      sr &= ~(0x2 | 0x8 | 0x1);
+      sr |= 0x4;
+   }
+   else if (right)
+   {
+      if (input_ & 0x1)
+      {
+         sr &= ~(0x2 | 0x8 | 0x1);
+         sr |= 0x1|0x8;
+         input_ >>= 1;
+         input_ |= 0x8000;
+      }
+      else
+      {
+         sr &= ~(0x8|0x2|0x1);
+         input_ >>= 1;
+      }
+   }
+   else
+   {
+      if (input_ & 0x800)
+      {
+         sr &= ~(0x2 | 0x8 | 0x1);
+         sr |= 0x1;
+         input_ <<= 1;
+         input_ |= 0x1;
+      }
+      else
+      {
+         sr &= ~(0x2 | 0x8 | 0x1);
+         input_ <<= 1;
+      }
+      if (input_ & 0x800) sr |= 0x8;
+   }
+   written_input_ = 1;
+}

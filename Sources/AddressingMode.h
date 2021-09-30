@@ -51,6 +51,7 @@ public:
    virtual void Not(unsigned short& sr) = 0;
    virtual void Or(AddressingMode* source, unsigned short& sr) = 0;
    virtual void Lsd(bool right, unsigned short& sr);
+   virtual void Rod(bool right, unsigned short& sr);
    virtual void Btst(unsigned int bit_tested, unsigned short& sr);
 
    //////////////////

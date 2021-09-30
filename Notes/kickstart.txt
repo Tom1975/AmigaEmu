@@ -36,6 +36,14 @@ on wait pour la reponse (FC071E)
 COTE 32d2 : On recoit le signal.
 On va donc en FE6314
 TBC...
+
+A implémenter : 
+00025F30: Illegal                   EF 58 => rol.w #7, D0
+00025F32: Illegal					E2 18 => ror.b #1, D0
+00025F34: Illegal                   E4 58 => ror.w #2, D0
+*** FAIT
+A VERIFIER :
+LSD/LSD2/ROd/ROD2 => Flags... 
 ###
 
 
