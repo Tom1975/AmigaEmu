@@ -36,6 +36,7 @@ On passe ici :FE6316
 ###
 A VERIFIER :
 LSD/LSD2/ROd/ROD2 => Flags... 
+CIA : effet CRA-TODIN ?
 ###
 
 
