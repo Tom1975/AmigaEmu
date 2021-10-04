@@ -9,39 +9,31 @@ ok jusque FE6BA2
 Command 9 pour DoIO , vers input.device
 FE6C64: jsr ($FE38,A6)            ; DoIO  => Pas de retour....
 
+
 14e init
 input.device : Voir l'init... FE5F8E
-=> PutMsg, FC1B9A (Signalk the task) seems ok
-=> Lancement du vector de command FE51AC
-=> FE61A6 (commande 9) qui clean juste le flags...
-
-Retour au WaitIO, ..; Switch (pour donner la main a la tache réveillée ?)
-on sort du wait, le signal est levé
-FE6314
-FE636E : OpenDevice "gameport.device" => No error
-...
 FE63D4 => Wait infini...
-Il semble que la tache attendue n'existe pas : On switch toujours sur la même tache, la tache en cours. Vérifier 
-- Que la tache est bien crée
-- Qu'elle est bien endormie
 TACHE input : 32d2
 creation ok
-
 Voir Reschedule : tout est bon... 
 ###
 On lance bien la tache "input" : FE62D4 => A SUIVRE 
 On se met bien sur le WAIT (signals : c0000000)
 COTE console (tache 1970): On positionne le signal
 on wait pour la reponse (FC071E)
+====> En attente du NT_REPLYMSG. ( FC0716 : iorequest, offset 8 => #7)
+(il manque un appel a FC1BDC (ReplyMsg)
 COTE 32d2 : On recoit le signal.
 On va donc en FE6314
-TBC...
+=> FE636E ok
+=> FE638E Command + wait ok
+=> FE63A8 Command + wait ok
+=> BRA FE65F2
 
-A implémenter : 
-00025F30: Illegal                   EF 58 => rol.w #7, D0
-00025F32: Illegal					E2 18 => ror.b #1, D0
-00025F34: Illegal                   E4 58 => ror.w #2, D0
-*** FAIT
+On passe ici :FE6316
+
+
+###
 A VERIFIER :
 LSD/LSD2/ROd/ROD2 => Flags... 
 ###

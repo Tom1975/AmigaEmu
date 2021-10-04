@@ -2976,8 +2976,9 @@ unsigned int M68k::DecodeBtst_D()
    // decode size
    size_ = (ird_ >> 6) & 0x3;
 
+   // Always long
    source_alu_ = source_factory_.InitAlu(0, (ird_>>9)&0x7, 2);
-   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, 2);
    time_counter_ = 0;
    Fetch();
    return true;
