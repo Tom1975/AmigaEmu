@@ -122,11 +122,11 @@ unsigned char CIA8520::In(unsigned char addr)
    case 7:
       return (timer_b_ >>8) & 0xFF;
    case 8:
-      latched_alarm_ = event_;
-      return latched_alarm_ & 0xFF;
+      return event_/*latched_alarm_ */& 0xFF;
    case 9:
-      return (latched_alarm_ >>8) & 0xFF;
+      return (event_/*latched_alarm_ */ >>8) & 0xFF;
    case 10:
+      latched_alarm_ = event_;
       return (latched_alarm_ >>16) & 0xFF;
 
    case 0xD:
@@ -205,19 +205,43 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
       }
       break;
    case 8:
-      alarm_ &= ~0xFF;
-      alarm_ |= data;
-      tod_counter_on_ = true;
+      if (crb_ & TODIN)
+      {
+         alarm_ &= ~0xFF;
+         alarm_ |= data;
+      }
+      else
+      {
+         event_ &= ~0xFF;
+         event_ |= data;
+         tod_counter_on_ = true;
+      }
       break;
    case 9:
-      alarm_ &= ~0xFF00;
-      alarm_ |= (data << 8);
-      tod_counter_on_ = false;
+      if (crb_ & TODIN)
+      {
+         alarm_ &= ~0xFF00;
+         alarm_ |= (data << 8);
+      }
+      else
+      {
+         event_ &= ~0xFF00;
+         event_ |= (data << 8);
+         tod_counter_on_ = false;
+      }
       break;
    case 0xA:
-      alarm_ &= ~0xFF0000;
-      alarm_ |= (data << 16);
-      tod_counter_on_ = false;
+      if (crb_ & TODIN)
+      {
+         alarm_ &= ~0xFF0000;
+         alarm_ |= (data << 16);
+      }
+      else
+      {
+         event_ &= ~0xFF0000;
+         event_ |= (data << 16);
+         tod_counter_on_ = false;
+      }
       break;
    case 0xC:
       sdr_ = data;

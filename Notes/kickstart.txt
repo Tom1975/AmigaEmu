@@ -29,8 +29,16 @@ On va donc en FE6314
 => FE638E Command + wait ok
 => FE63A8 Command + wait ok
 => BRA FE65F2
+On va donc en FE6316
+On enqueue la command et on l'execute : 
+FE6256
+...
+FE528C => ReplyMsg !
+Par contre, ca ne semble pas reveiller notre tache.
+A check :
+- La tache cible : est-ce la bonne ?
 
-On passe ici :FE6316
+
 
 
 ###
