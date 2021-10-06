@@ -3,14 +3,13 @@ Reprise a zero :
 => 0xFC0B28 (InitResident)
 FE510E (input.device) 		: Ok 
 FE98E4 (trackdisk.device)	: Ok
-FD3F5C (intuition.library)  : Non.
-FC0B48  jsr       -$54(A6)             
-...
-FD3F8A: jsr FD6ADC Pas de reponse...
-...
-FD6936: jsr FDAA6E Pas de reponse
-=>FDAAC6 ok .
+FD3F5C (intuition.library)  : Ok
+FC323A (alert.hook) 		: Ok
+FE424C (mathffp.library)	: Ok
+FEB400 (workbench.task)     : Ok
+FE8801 (strap.strap) 		:
 
+not implemented : FD8812 => OpcodeNop todo
 
 ###
 A VERIFIER :
@@ -63,6 +62,11 @@ STRUCTURES
 ********************************
 *** HISTORIQUE 
 ********************************
+
+=> FC2DB4 ObtainSemaphore = attente sur 4d2a
+Pq addq incorrect sur flags
+
+
 => Pb Console.device: (FE510E)
 - RT_INIT : FE6B88 qui appelle Makelibrary
 Le MakeLibrary ne sort jamais (relative vector FC1508)

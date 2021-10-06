@@ -81,7 +81,6 @@ M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::Opcode
 M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::NotSupported, &M68k::NotSupported2, &M68k::NotSupported3, &M68k::SourceRead, &M68k::NotSupported4, &M68k::CpuFetch, nullptr, };
 
 // TO IMPLEMENT & DISASSEMBLE
-//M68k::Func M68k::Btst_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::MoveToCcr_[] = { &M68k::NotImplemented, nullptr };
@@ -97,9 +96,7 @@ M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::AddX_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Asd_[] = { &M68k::NotImplemented, nullptr };
-//M68k::Func M68k::Rod_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Roxd_[] = { &M68k::NotImplemented, nullptr };
-//M68k::Func M68k::Rod2_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Roxd2_[] = { &M68k::NotImplemented, nullptr };
 
 
@@ -2146,22 +2143,29 @@ unsigned int M68k::OpcodeAdd ()
       break;
    }
    rm = sm + dm;
+   switch (size_)
+   {
+   case 0:
+      rm &= 0xFF;
+      break;
+   case 1:
+      rm &= 0xFFFF;
+      break;
+   }
    destination_alu_->WriteInput(rm);
 
    sr_ &= 0xFFE0;
-   switch (operand_size_)
+   if (rm == 0) sr_ |= F_Z;
+   switch (size_)
    {
    case BYTE:
-      if (destination_alu_->GetU8() == 0) sr_ |= F_Z;
-      if (destination_alu_->GetU8() >= 0x80) sr_ |= F_N;
+      if (rm & 0x80) sr_ |= F_N;
       break;
    case WORD:
-      if (destination_alu_->GetU16() == 0) sr_ |= F_Z;
-      if (destination_alu_->GetU16() >= 0x8000) sr_ |= F_N;
+      if (rm & 0x8000) sr_ |= F_N;
       break;
    case LONG:
-      if (destination_alu_->GetU32() == 0) sr_ |= F_Z;
-      if (destination_alu_->GetU32() >= 0x80000000) sr_ |= F_N;
+      if (rm & 0x80000000) sr_ |= F_N;
       break;
    }
    if ( (sm&dm&(!rm)) | ((!sm)&(!dm)&(rm)))
