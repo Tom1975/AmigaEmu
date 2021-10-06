@@ -4,9 +4,12 @@ Reprise a zero :
 FE510E (input.device) 		: Ok 
 FE98E4 (trackdisk.device)	: Ok
 FD3F5C (intuition.library)  : Non.
-
-
-
+FC0B48  jsr       -$54(A6)             
+...
+FD3F8A: jsr FD6ADC Pas de reponse...
+...
+FD6936: jsr FDAA6E Pas de reponse
+=>FDAAC6 ok .
 
 
 ###
