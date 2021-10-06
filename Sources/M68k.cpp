@@ -2691,30 +2691,28 @@ unsigned int M68k::OpcodeEor()
    switch (operand_size_)
    {
    case BYTE:
-      input = source_alu_->GetU8() | (destination_alu_->GetU8() & 0xFF);
+      input = source_alu_->GetU8() ^ (destination_alu_->GetU8() & 0xFF);
       break;
    case WORD:
-      input = source_alu_->GetU16() | (destination_alu_->GetU16() & 0xFFFF);
+      input = source_alu_->GetU16() ^ (destination_alu_->GetU16() & 0xFFFF);
       break;
    case LONG:
-      input = source_alu_->GetU32() | (destination_alu_->GetU32());
+      input = source_alu_->GetU32() ^ (destination_alu_->GetU32());
       break;
    }
    destination_alu_->WriteInput(input);
 
+   if (input == 0) sr_ |= F_Z;
    switch (operand_size_)
    {
    case BYTE:
-      if (destination_alu_->GetU8() == 0) sr_ |= F_Z;
-      if (destination_alu_->GetU8() >= 0x80) sr_ |= F_N;
+      if (input & 0x80) sr_ |= F_N;
       break;
    case WORD:
-      if (destination_alu_->GetU16() == 0) sr_ |= F_Z;
-      if (destination_alu_->GetU16() >= 0x8000) sr_ |= F_N;
+      if (input & 0x8000) sr_ |= F_N;
       break;
    case LONG:
-      if (destination_alu_->GetU32() == 0) sr_ |= F_Z;
-      if (destination_alu_->GetU32() >= 0x80000000) sr_ |= F_N;
+      if (input & 0x80000000) sr_ |= F_N;
       break;
    }
 

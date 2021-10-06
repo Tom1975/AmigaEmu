@@ -1,42 +1,10 @@
 
 Reprise a zero : 
 => 0xFC0B28 (InitResident)
-=> Pb Console.device: (FE510E)
-- RT_INIT : FE6B88 qui appelle Makelibrary
-Le MakeLibrary ne sort jamais (relative vector FC1508)
-Dans le Makelib = 
-ok jusque FE6BA2
-Command 9 pour DoIO , vers input.device
-FE6C64: jsr ($FE38,A6)            ; DoIO  => Pas de retour....
+FE510E (input.device) 		: Ok 
+FE98E4 (trackdisk.device)	: Ok
+FD3F5C (intuition.library)  : Non.
 
-
-14e init
-input.device : Voir l'init... FE5F8E
-FE63D4 => Wait infini...
-TACHE input : 32d2
-creation ok
-Voir Reschedule : tout est bon... 
-###
-On lance bien la tache "input" : FE62D4 => A SUIVRE 
-On se met bien sur le WAIT (signals : c0000000)
-COTE console (tache 1970): On positionne le signal
-on wait pour la reponse (FC071E)
-====> En attente du NT_REPLYMSG. ( FC0716 : iorequest, offset 8 => #7)
-(il manque un appel a FC1BDC (ReplyMsg)
-COTE 32d2 : On recoit le signal.
-On va donc en FE6314
-=> FE636E ok
-=> FE638E Command + wait ok
-=> FE63A8 Command + wait ok
-=> BRA FE65F2
-On va donc en FE6316
-On enqueue la command et on l'execute : 
-FE6256
-...
-FE528C => ReplyMsg !
-Par contre, ca ne semble pas reveiller notre tache.
-A check :
-- La tache cible : est-ce la bonne ?
 
 
 
@@ -47,10 +15,16 @@ LSD/LSD2/ROd/ROD2 => Flags...
 CIA : effet CRA-TODIN ?
 ###
 
+Erreur sur les affichages : 
+Addresses de bitplanes incorrectes () et incrément sans limite = error !
+DMACON fixé vers ici FCAF18
+Copper list 2 fixée ici :FC6D00
+Plus particulierement sur l'uinterrupt handler
+FC6CDC
 
 
-
-
+********************************
+STRUCTURES
 *********************
 ;struct Node {
 ;    struct  Node *ln_Succ;	/* Pointer to next (successor) */
@@ -83,16 +57,19 @@ CIA : effet CRA-TODIN ?
 ;    BYTE    io_Error;		    /* error or warning num */ 1 
 ;};28 bytes ( $1C)
 *********************
-Erreur sur les affichages : 
-Addresses de bitplanes incorrectes () et incrément sans limite = error !
-DMACON fixé vers ici FCAF18
-Copper list 2 fixée ici :FC6D00
-Plus particulierement sur l'uinterrupt handler
-FC6CDC
-
-**************************
+********************************
 *** HISTORIQUE 
-**************************
+********************************
+=> Pb Console.device: (FE510E)
+- RT_INIT : FE6B88 qui appelle Makelibrary
+Le MakeLibrary ne sort jamais (relative vector FC1508)
+Dans le Makelib = 
+ok jusque FE6BA2
+Command 9 pour DoIO , vers input.device
+FE6C64: jsr ($FE38,A6)            ; DoIO  => Pas de retour....
+*** PB : EOR INCORRECT !!
+
+
 FCAC92 => recuperation d'une allocation.
 
 
