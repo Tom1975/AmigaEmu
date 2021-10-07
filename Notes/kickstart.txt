@@ -13,6 +13,7 @@ FE9BEE ok, mais pas jusqua FE9C1A
 ...
 FE89B0 ok.
 FE8A02 => DoIO qui ne sort pas...
+Command2 = ; FEA734
 
 
 ###
