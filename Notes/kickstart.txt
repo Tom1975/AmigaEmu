@@ -7,9 +7,13 @@ FD3F5C (intuition.library)  : Ok
 FC323A (alert.hook) 		: Ok
 FE424C (mathffp.library)	: Ok
 FEB400 (workbench.task)     : Ok
-FE8801 (strap.strap) 		:
+FE8884 (strap.strap) 		:
 
-not implemented : FD8812 => OpcodeNop todo
+FE9BEE ok, mais pas jusqua FE9C1A
+...
+FE89B0 ok.
+FE8A02 => DoIO qui ne sort pas...
+
 
 ###
 A VERIFIER :

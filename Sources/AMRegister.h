@@ -36,6 +36,7 @@ public:
    virtual void Btst(unsigned int bit_tested, unsigned short& sr);
 
    virtual bool IsDataRegister() { return type_address_==false; }
+   virtual bool IsAddressRegister() { return type_address_ == true; }
 
 protected: 
    // Generic datas

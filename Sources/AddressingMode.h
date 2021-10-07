@@ -61,6 +61,7 @@ public:
    void Cmp(unsigned int data, unsigned short& sr, bool data_is_source);
 
    virtual bool IsDataRegister() { return false; }
+   virtual bool IsAddressRegister() { return false; }
 
 protected:
    Size operand_size_;

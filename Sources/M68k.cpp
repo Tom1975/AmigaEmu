@@ -11,7 +11,7 @@ M68k::Func M68k::Add_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::Destina
 M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AddI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Addq_[] = { &M68k::DecodeAddq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Addq_[] = { &M68k::DecodeAddq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AndiToCcr_[] = { &M68k::DecodeAndiToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -54,6 +54,7 @@ M68k::Func M68k::MoveUsp_[] = { &M68k::OpcodeMoveUsp, &M68k::CpuFetch, &M68k::Op
 M68k::Func M68k::Muls_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMuls, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Mulu_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMulu, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Neg_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNeg, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Nop_[] = { &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Not_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNot, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Or_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Ori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -88,7 +89,6 @@ M68k::Func M68k::Negx_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Trap_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Nop_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Trapv_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Chk_[] = { &M68k::NotImplemented, nullptr };
@@ -2176,6 +2176,50 @@ unsigned int M68k::OpcodeAdd ()
    {
       sr_ |= F_C | F_X;
    }
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
+   Fetch();
+   return true;
+}
+
+unsigned int M68k::OpcodeAddq()
+{
+   // No Address register : default Add
+   if (destination_alu_->IsAddressRegister() == false)
+   {
+      return OpcodeAdd();
+   }
+   // If adress register : 
+   // - Flags are not affected
+   // - Entire destination address register is used regardless of the operation size.
+
+   unsigned int sm, dm, rm = 0;
+      dm = destination_alu_->GetU32();
+
+   switch (source_alu_->GetSize())
+   {
+   case 0:
+      sm = source_alu_->GetU8();
+      break;
+   case 1:
+      sm = source_alu_->GetU16();
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      break;
+   }
+   rm = sm + dm;
+   destination_alu_->WriteInput(rm);
 
    if (!destination_alu_->WriteComplete())
    {
