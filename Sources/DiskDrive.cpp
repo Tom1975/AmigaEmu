@@ -103,6 +103,12 @@ bool DiskDrive::GetRDY()
    {
       bool value = (identification_ & (1<< 31-identification_index_) == 0);
       identification_index_++;
+      return value;
+   }
+   else
+   {
+      // TODO : handle disk acceleration
+      return true;
    }
    return false;
 

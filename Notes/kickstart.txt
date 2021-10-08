@@ -6,14 +6,18 @@ FE98E4 (trackdisk.device)	: Ok
 FD3F5C (intuition.library)  : Ok
 FC323A (alert.hook) 		: Ok
 FE424C (mathffp.library)	: Ok
-FEB400 (workbench.task)     : Ok
-FE8884 (strap.strap) 		:
+(FEB400) (workbench.task)
+(FF425A) (dos)
+FE8884 (strap.strap) 		: bloqué
+end.
 
 FE9BEE ok, mais pas jusqua FE9C1A
 ...
 FE89B0 ok.
 FE8A02 => DoIO qui ne sort pas...
 Command2 = ; FEA734
+FE5226 => On ne va pas dans le ReplyMsg
+FE5EF4 = on y passe plusieurs fois 
 
 
 ###
@@ -33,6 +37,13 @@ FC6CDC
 ********************************
 STRUCTURES
 *********************
+1F12 => ID lecteurs
+unsigned int id_lecteur_0
+unsigned int id_lecteur_1
+unsigned int id_lecteur_2
+ 
+
+
 ;struct Node {
 ;    struct  Node *ln_Succ;	/* Pointer to next (successor) */
 ;    struct  Node *ln_Pred;	/* Pointer to previous (predecessor) */

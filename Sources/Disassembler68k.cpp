@@ -668,7 +668,7 @@ unsigned int Disassembler68k::NegOpcode(Motherboard* motherboard, unsigned short
 
 unsigned int Disassembler68k::NopOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
-   str_asm += "nop";
+   str_asm = "nop";
    return pc;
 }
 
