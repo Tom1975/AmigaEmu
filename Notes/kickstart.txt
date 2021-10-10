@@ -1,20 +1,44 @@
 
+
 Reprise a zero : 
+
+
+
 => 0xFC0B28 (InitResident)
-FE510E (input.device) 		: Ok 
-FE98E4 (trackdisk.device)	: Ok
-FD3F5C (intuition.library)  : Ok
-FC323A (alert.hook) 		: Ok
-FE424C (mathffp.library)	: Ok
+Diff D5/D7 = 1...
+FC4afc (expansion.library)	: 
+FE4880 (potgo.resource)		: 
+FE4FE4 (keymap.resource)	:
+FC450C (cia.resource)		:
+FC4794 (disk.resource)		: Ok
+FE4774 (misc.resource)		: Ok
+FC5378 (graphics.library)	: 
+( jusqu'a FCAC92 ok)
+
+FE510E (input.device) 		: 
+FE98E4 (trackdisk.device)	: 
+FD3F5C (intuition.library)  : 
+FC323A (alert.hook) 		: 
+FE424C (mathffp.library)	: 
 (FEB400) (workbench.task)
 (FF425A) (dos)
-FE8884 (strap.strap) 		: bloqué
+FE8884 (strap.strap) 		: bloqué (init FE88D6 
 end.
 
-FE9BEE ok, mais pas jusqua FE9C1A
-...
-FE89B0 ok.
 FE8A02 => DoIO qui ne sort pas...
+4694 : Device node
+trackdisk.device : 
+
+Task cree correctement 
+FEAE50
+Recherche de disque présent. Non.
+=> FE9A0C
+=>  FE9A5E
+
+
+
+
+
 Command2 = ; FEA734
 FE5226 => On ne va pas dans le ReplyMsg
 FE5EF4 = on y passe plusieurs fois 
