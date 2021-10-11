@@ -11,13 +11,19 @@ FE4880 (potgo.resource)		:
 FE4FE4 (keymap.resource)	:
 FC450C (cia.resource)		:
 FC4794 (disk.resource)		: Ok
-FE4774 (misc.resource)		: Ok
+FE4774 (misc.resource)		: Ok 
 FC5378 (graphics.library)	: 
 ( jusqu'a FCAC92 ok)
-
-FE510E (input.device) 		: 
-FE98E4 (trackdisk.device)	: 
-=>FEADF2 ?
+FE502E (keyboard.device)	: Ok => everything seems ok 
+FE507A (gameport.device)	: 
+FE90EC (timer.device)		: 
+FC34CC (audio.device)		:
+FE50C6 (input.device)		:
+FE0D90 (layers.library)		: Ok => everything seems ok 
+FE510E (console.device) 	: 
+FE98E4 (trackdisk.device)	: (un décalage existe) 
+      FEADF2 ?
+=> FE9C1E ok (avec winuae)
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 
@@ -35,7 +41,7 @@ Task cree correctement
 FEAE50
 
 Recherche de disque présent. Non.
-=>FEADEE => jsr ($FFEE,A6)      return -1
+=>FEADEE => jsr ($FFEE,A6)      return -1 OK !
 
 Check : 
 FC49A2: addq.b #1, ($126,A0)      
