@@ -17,6 +17,8 @@ FC5378 (graphics.library)	:
 
 FE510E (input.device) 		: 
 FE98E4 (trackdisk.device)	: 
+=>FEADF2 ?
+
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 
 FE424C (mathffp.library)	: 
@@ -31,11 +33,14 @@ trackdisk.device :
 
 Task cree correctement 
 FEAE50
+
 Recherche de disque présent. Non.
-=> FE9A0C
-=>  FE9A5E
+=>FEADEE => jsr ($FFEE,A6)      return -1
 
-
+Check : 
+FC49A2: addq.b #1, ($126,A0)      
+FC49A6: bset #$7, ($26,A6)        08 EE 00 07 00 26 
+FC49AC: bne.s FC49BA  : Action sur Flags ??
 
 
 
