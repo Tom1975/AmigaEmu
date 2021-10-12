@@ -1,6 +1,10 @@
 #include "DebugDialog.h"
 #include "ui_DebugDialog.h"
 
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
 #include <QDir>
 #include <QMenuBar>
 
@@ -129,21 +133,32 @@ void DebugDialog::AddBreakpoint()
    UpdateDebug();
 }
 
+void DebugDialog::on_bpAddress_returnPressed()
+{
+   on_add_bp_clicked();
+}
+
 void DebugDialog::on_add_bp_clicked()
 {
-   QString text = ui->textEdit->toPlainText();
-   BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
-   pb_handler->CreateBreakpoint(text.toUtf8().constData());
-   UpdateDebug();
+   QString text = ui->bpAddress->text();
+   if (text.length() > 0)
+   {
+      BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+      pb_handler->CreateBreakpoint(text.toUtf8().constData());
+      UpdateDebug();
+   }
 }
 
 void DebugDialog::on_remove_bp_clicked()
 {
    QList<QListWidgetItem *> list_of_items = ui->list_breakpoints->selectedItems();
-   BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
-   // todo : handle multiple selection
-   emu_handler_->RemoveBreakpoint(pb_handler->GetBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt()));
-   UpdateDebug();
+   if (list_of_items.size() > 0)
+   {
+      BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+      // todo : handle multiple selection
+      emu_handler_->RemoveBreakpoint(pb_handler->GetBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt()));
+      UpdateDebug();
+   }
 }
 
 void DebugDialog::on_clear_bp_clicked()
@@ -155,6 +170,9 @@ void DebugDialog::on_clear_bp_clicked()
 
 void DebugDialog::UpdateDebug()
 {
+   unsigned int offset, offset_old;
+   char addr[16];
+
    // Update parent window
    this->parentWidget()->repaint();
 
@@ -164,9 +182,21 @@ void DebugDialog::UpdateDebug()
    // Registers
    QString str = QString("%1").arg(m68k->GetPc(), 6, 16);
    ui->registers_list_->item(0, 1)->setText( str );
+
+   unsigned int stack_pointer = (m68k->GetDataSr() & 0x2000) ? m68k->GetDataSsp() : m68k->GetDataUsp();
    for (int i = 0; i < 8; i++)
    {
-      str = QString("%1").arg(m68k->GetAddressRegister(i), 6, 16);
+      if (i != 7)
+      {
+         str = QString("%1").arg(m68k->GetAddressRegister(i), 6, 16);
+      }
+      else
+      {
+         
+         // A7 is the stackpointer. Depends on either usp/ssp
+         str = QString("%1").arg(stack_pointer, 6, 16);
+      }
+
       ui->registers_list_->item(9+i, 1)->setText(str);
 
       str = QString("%1").arg(m68k->GetDataRegister(i), 6, 16);
@@ -180,12 +210,39 @@ void DebugDialog::UpdateDebug()
    str = QString("%1").arg(m68k->GetDataSr(), 6, 16);
    ui->registers_list_->item(19, 1)->setText(str);
 
+   // CallStack
+   unsigned char* mem = emu_handler_->GetMotherboard()->GetBus()->GetRam();
+   str = QString("%1").arg(stack_pointer, 6, 16);
+   offset = stack_pointer;
+   ui->callStack->clear();
+   if (stack_pointer < 512 * 1024)
+   {
+      for (int i = 0; i < 16; i++)
+      {
+         std::stringstream sstream;
+         QListWidgetItem* stackitem = new QListWidgetItem;
+         stackitem->setData(Qt::UserRole, offset);
+
+         unsigned int dword_value = mem[offset+3] |
+            (mem[offset + 2] << 8) |
+            (mem[offset + 1] << 16) |
+            (mem[offset] << 24);
+                                    
+         sstream << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << offset;
+         sstream << "  ";
+         sstream << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << dword_value;
+
+         stackitem->setText(sstream.str().c_str());
+
+         ui->callStack->addItem(stackitem);
+         offset += 4;
+      }
+   }
+
    // Disassemble the next lines
-   unsigned int offset, offset_old;
    offset = offset_old = emu_handler_->GetMotherboard()->GetCpu()->GetPc() - 4; // -2 because of prefetch
    std::string str_asm;
    ui->listWidget->clear();
-   char addr[16];
    for (int i = 0; i < 32; i++)
    {
 #define ASM_SIZE 26

@@ -32,6 +32,7 @@ public:
       void on_add_bp_clicked();
       void on_remove_bp_clicked();
       void on_clear_bp_clicked();
+      void on_bpAddress_returnPressed();
 
     // Update the view
     virtual void Update();

@@ -27,6 +27,7 @@ public:
     // Update the view
     virtual void Update();
     void on_setAddress_clicked();
+    void on_address_returnPressed();
 
 protected:
    // Menu action

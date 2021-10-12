@@ -11,6 +11,7 @@ MemoryDialog::MemoryDialog(QWidget *parent) :
 {
    ui->setupUi(this);
    ui->memoryWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+   
 }
 
 MemoryDialog::~MemoryDialog()
@@ -46,9 +47,14 @@ void MemoryDialog::Update()
 
 }
 
+void MemoryDialog::on_address_returnPressed()
+{
+   on_setAddress_clicked();
+}
+
 void MemoryDialog::on_setAddress_clicked()
 {
-   QString text = ui->address->toPlainText();
+   QString text = ui->address->text();
    start_addr_ = (unsigned int)strtoul(text.toUtf8().constData(), NULL, 16);
    ;
    UpdateDebug();
@@ -84,13 +90,30 @@ void MemoryDialog::UpdateDebug()
       {
          for (int j = 0; j < 16; j++)
          {
-            sprintf(addr, "%2.2X ", mem[current_address++]);
+            // Hex line
+            sprintf(addr, "%2.2X ", mem[current_address]);
             strcat(hexa_line, addr);
-            // ascii ?
+            
+            // ASCII line
+            unsigned char b = mem[current_address];
+            if (b >= 0x20 && b <= 126)
+            {
+               sprintf(addr,"%c", b);
+            }
+            else
+            {
+               sprintf (addr, ".");
+            }
+            strcat(ascii_line, addr);
+
+            current_address++;
+
          }
       }
       
       str_asm += hexa_line;
+      str_asm += "   ";
+      str_asm += ascii_line;
 
       ui->memoryWidget->addItem(str_asm.c_str());
    }
