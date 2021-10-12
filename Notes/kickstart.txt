@@ -23,7 +23,12 @@ FE0D90 (layers.library)		: Ok => everything seems ok
 FE510E (console.device) 	: 
 FE98E4 (trackdisk.device)	: (un décalage existe) 
       FEADF2 ?
-=> FE9C1E ok (avec winuae)
+=> FE63A6 ok (avec winuae)
+=> FE5A2A ok (avec winuae)
+
+*** FE5A52: sub.l  D1, D3  *** ==> PAS DE Z FLAG AFFECTE SI 0 !!!
+VOIR void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
+
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 

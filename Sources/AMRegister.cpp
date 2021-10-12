@@ -213,6 +213,9 @@ void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
       *current_register_ = *current_register_ - (long)source->GetU32();
       break;
    }
+
+   // Check flags
+   // TODO
 }
 
 void AMRegister::Not(unsigned short& sr)

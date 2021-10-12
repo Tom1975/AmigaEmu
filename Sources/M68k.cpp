@@ -2028,6 +2028,7 @@ unsigned int M68k::DecodeSwap()
 unsigned int M68k::OpcodeSub()
 {
    destination_alu_->Sub(source_alu_, sr_);
+
    return WriteSourceToDestination();
 }
 
