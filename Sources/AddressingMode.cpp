@@ -5,6 +5,12 @@ unsigned int AddressingMode::word_to_fetch_[3] =
    1, 1, 2
 };
 
+unsigned int AddressingMode::mask_msb_[3]=
+{
+   0x80, 0x8000, 0x80000000
+};
+
+
 void AddressingMode::Complete()
 {
    
@@ -14,6 +20,22 @@ bool AddressingMode::WriteInput(unsigned int value)
 {
    input_ = value;
    return true;
+}
+
+void AddressingMode::ComputeFlagsSub(unsigned short& sr, unsigned int sm, unsigned int dm, unsigned int rm, unsigned int size)
+{
+   unsigned short flag = sr & 0xFFF0;
+   
+   // V
+   if ((~sm)&dm&(~rm) | sm & (~dm)&rm) flag |= 0x2;
+   // C-X
+   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x9;
+   // Z
+   if ( rm == 0) flag |= 0x4;
+   // N
+   if ( rm & mask_msb_[size]) flag |= 0x8;
+
+   sr = flag;
 }
 
 void AddressingMode::ComputeFlagsNul(unsigned short& sr, unsigned int value, unsigned int size )

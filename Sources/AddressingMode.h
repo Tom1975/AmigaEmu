@@ -15,6 +15,7 @@ public:
    } Size;
 
    static unsigned int word_to_fetch_[3];
+   static unsigned int mask_msb_[3];
 
    virtual void Increment() = 0;
    virtual void Decrement() = 0;
@@ -57,6 +58,7 @@ public:
    //////////////////
    // Helper functions !
    void ComputeFlagsNul(unsigned short& sr, unsigned int value, unsigned int size);
+   void ComputeFlagsSub(unsigned short& sr, unsigned int sm, unsigned int dm, unsigned int rm, unsigned int size);
    void ComputeFlags(unsigned short& sr, unsigned int old_value, unsigned int new_value, unsigned char data);
    void Cmp(unsigned int data, unsigned short& sr, bool data_is_source);
 
@@ -70,5 +72,6 @@ protected:
    unsigned int written_input_;
    unsigned int address_to_write_;
    unsigned int address_to_read_;
+
 
 };

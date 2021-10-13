@@ -10,6 +10,7 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this)
    bus_.SetCIA(&cia_a_, &cia_b_);
    bus_.SetDMAControl(&dma_control_);
    bus_.SetCustomChips(&agnus_, &denise_, &paula_, &bitplanes_);
+   bus_.SetRom(rom_);
    bitplanes_.Init(this);
    paula_.SetIntPin(m68k_.GetIntPin());
    agnus_.Init(this);
@@ -31,7 +32,7 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware)
    {
       fread(rom_, 512 * 1024, 1, f);
       fclose(f);
-      bus_.SetRom(rom_);
+      //bus_.SetRom(rom_);
    }
    else return false;
 

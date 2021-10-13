@@ -201,6 +201,11 @@ void AMRegister::Or(AddressingMode* source, unsigned short& sr)
 
 void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
 {
+   unsigned int sm, dm, rm;
+   
+   sm = source->GetU32();
+   dm = *current_register_;
+
    switch (size_)
    {
    case 0:
@@ -213,9 +218,14 @@ void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
       *current_register_ = *current_register_ - (long)source->GetU32();
       break;
    }
+   rm = *current_register_;
 
-   // Check flags
-   // TODO
+   // Flags
+   if (IsAddressRegister() == false)
+   {
+      ComputeFlagsSub(sr, sm, dm, rm, size_);
+   }
+
 }
 
 void AMRegister::Not(unsigned short& sr)

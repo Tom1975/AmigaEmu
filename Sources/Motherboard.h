@@ -34,6 +34,8 @@ public :
    Paula* GetPaula() { return &paula_; }
    DiskDrive* GetdiskDrive() { return &drive_; }
 
+   unsigned char* GetRom () { return rom_; }
+
    // Lines implementations
    void VSync();
    void HSync();
