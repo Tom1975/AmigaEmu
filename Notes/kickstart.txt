@@ -42,6 +42,17 @@ BFED01 : lecture de 88 sur winuae
 Appel de la procedure qui va bien => (A2, 40-70)
 (sur bit 8 = SP ?)
 ===> (passe-t-on vers FE998C ??) <===
+CHGN : 0 = pas de changement ?!!!!
+
+On passe dans FE9550 
+
+FEA510 = DoIo dont on ne sort pas...
+IORequest : 5A2E
+IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)
+IORequest.io_Message.mn_Node.ln_Pred = 0 (au lieu de quelque chose)
+IORequest.io_Message.mn_Node.ln_Type = 05 (devrait etre 07)
+
+
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 
@@ -131,6 +142,13 @@ unsigned int id_lecteur_2
 ********************************
 *** HISTORIQUE 
 ********************************
+
+AllocMem FC17EE : On a un pointeur null... ?? (==> voir 3e appel FD660A
+A2 : ***5010*** => On a 0000 0000 0000 0676 00FC 07DC 00FC 07DE
+     au lieu de : 0000 0000 001D 000A 0002 00FD 610A 0300
+FD66DC: add.w D0, A0              calcul qui tronque FD !!?
+*** Correction ADDA 
+
 
 => FC2DB4 ObtainSemaphore = attente sur 4d2a
 Pq addq incorrect sur flags

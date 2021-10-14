@@ -325,6 +325,7 @@ protected:
    unsigned int NotSupported3();
    unsigned int NotSupported4();
    unsigned int OpcodeAdd();
+   unsigned int OpcodeAddA();
    unsigned int OpcodeAddq();
    unsigned int OpcodeAnd();
    unsigned int OpcodeBcc();

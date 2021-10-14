@@ -40,5 +40,7 @@ private:
    unsigned long identification_;
    unsigned char identification_index_;
 
+   // 
+   bool chng_;
 
 };

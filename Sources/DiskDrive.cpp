@@ -1,6 +1,6 @@
 #include "DiskDrive.h"
 
-DiskDrive::DiskDrive() : identification_(0xFFFFFFFF), identification_index_(0)
+DiskDrive::DiskDrive() : identification_(0xFFFFFFFF), identification_index_(0), chng_(true)
 {
    Reset();
 }
@@ -12,6 +12,7 @@ DiskDrive::~DiskDrive()
 
 void DiskDrive::Reset()
 {
+   chng_ = true;
 }
 
 void DiskDrive::SetSEL0(bool set)
@@ -41,7 +42,12 @@ void DiskDrive::SetDIR(bool set)
 
 void DiskDrive::SetSTEP(bool set)
 {
-
+   if (set)
+   {
+      // If no disk : set chng_ to false;
+      // if (no disk - todo)
+      chng_ = false;
+   }
 }
 
 void DiskDrive::SetWD(bool set)
@@ -64,8 +70,8 @@ void DiskDrive::SetSIDE(bool set)
 // Read signals
 bool DiskDrive::GetCHNG()
 {
-   //todo
-   return false;
+   // CHNG : status change when a step is sent.
+   return chng_;
 }
 
 bool DiskDrive::GetINDEX()
