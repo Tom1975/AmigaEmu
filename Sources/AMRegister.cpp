@@ -213,7 +213,7 @@ void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
       break;
    case 1:
       *current_register_ = *current_register_ - (short)source->GetU16();
-      break;
+      break; 
    case 2:
       *current_register_ = *current_register_ - (long)source->GetU32();
       break;

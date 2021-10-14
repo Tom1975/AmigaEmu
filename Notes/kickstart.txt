@@ -25,10 +25,17 @@ FE98E4 (trackdisk.device)	: (un décalage existe)
       FEADF2 ?
 => FE63A6 ok (avec winuae)
 => FE5A2A ok (avec winuae)
+=> FE631A ok (avec winuae)
 
-*** FE5A52: sub.l  D1, D3  *** ==> PAS DE Z FLAG AFFECTE SI 0 !!!
-VOIR void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
-
+FE55F2: cmp.w ($72,A6), D0        B0 6E 00 72  => DIFF : 4(moi)/ 9(winuae)
+devrait avoir : 0000 0014 00FF 0000 00FD 0000 00FE 0000
+j'ai 0000-0000
+Ca se trouve ici : FE5822 => issue d'une interruption !
+quand on remonte la stack :
+FC4682
+FC461C (On y passe !)
+FC4620: move.b BFED01, D2         14 39 00 BF ED 01  => 0 au lieu de 188 ??
+*** HANDLE ICR FROM CIA !!! ***
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 
