@@ -26,9 +26,13 @@ FE98E4 (trackdisk.device)	: (un décalage existe)
 => FE63A6 ok (avec winuae)
 => FE5A2A ok (avec winuae)
 
-*** FE5A52: sub.l  D1, D3  *** ==> PAS DE Z FLAG AFFECTE SI 0 !!!
-VOIR void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
 
+FE5822 (?) ($72, ...) : we should write some data here...
+stack : FC461C 
+BFED01 : lecture de 88 sur winuae 
+Appel de la procedure qui va bien => (A2, 40-70)
+(sur bit 8 = SP ?)
+===> (passe-t-on vers FE998C ??) <===
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 

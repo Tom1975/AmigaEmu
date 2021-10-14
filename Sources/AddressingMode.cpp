@@ -26,14 +26,19 @@ void AddressingMode::ComputeFlagsSub(unsigned short& sr, unsigned int sm, unsign
 {
    unsigned short flag = sr & 0xFFF0;
    
+   // Z
+   if (rm == 0) flag |= 0x4;
+
+   rm &= mask_msb_[size];
+   dm &= mask_msb_[size];
+   sm &= mask_msb_[size];
+
+   // N
+   if (rm ) flag |= 0x8;
    // V
    if ((~sm)&dm&(~rm) | sm & (~dm)&rm) flag |= 0x2;
    // C-X
    if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x9;
-   // Z
-   if ( rm == 0) flag |= 0x4;
-   // N
-   if ( rm & mask_msb_[size]) flag |= 0x8;
 
    sr = flag;
 }
