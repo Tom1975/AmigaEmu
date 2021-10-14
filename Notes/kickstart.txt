@@ -36,6 +36,12 @@ FC4682
 FC461C (On y passe !)
 FC4620: move.b BFED01, D2         14 39 00 BF ED 01  => 0 au lieu de 188 ??
 *** HANDLE ICR FROM CIA !!! ***
+FE5822 (?) ($72, ...) : we should write some data here...
+stack : FC461C 
+BFED01 : lecture de 88 sur winuae 
+Appel de la procedure qui va bien => (A2, 40-70)
+(sur bit 8 = SP ?)
+===> (passe-t-on vers FE998C ??) <===
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 
