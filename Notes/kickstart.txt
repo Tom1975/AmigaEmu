@@ -47,11 +47,14 @@ CHGN : 0 = pas de changement ?!!!!
 On passe dans FE9550 
 
 FEA510 = DoIo dont on ne sort pas...
-IORequest : 5A2E
+
+IORequest : 6096
 IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)
 IORequest.io_Message.mn_Node.ln_Pred = 0 (au lieu de quelque chose)
 IORequest.io_Message.mn_Node.ln_Type = 05 (devrait etre 07)
-
+Cette IO Request, c'est le bloc 6038 décalé
+FE9DA4 => 6096 est présent (dans le bloc 6010-) mais vide
+FE9576=> Copie partielle !
 
 
 FD3F5C (intuition.library)  : 
@@ -62,6 +65,7 @@ FE424C (mathffp.library)	:
 FE8884 (strap.strap) 		: bloqué (init FE88D6 
 end.
 
+FE89C2: jsr ($FE38,A6)            			; DoIO qui ne sort pas...
 FE8A02 => DoIO qui ne sort pas...
 4694 : Device node
 trackdisk.device : 
