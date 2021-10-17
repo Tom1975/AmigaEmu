@@ -81,13 +81,13 @@ bool RegisterList::Tranfert(AddressingMode*& source, AddressingMode*& destinatio
       if (predecrement_ )
       {
          if (offset_write_ > 0)
-            temporary_ea_[offset_write_]->Decrement();
+            temporary_ea_[offset_write_]->Decrement(offset_write_);
       }
       else
       {
          if (offset_write_ > 0)
          {
-            temporary_ea_[offset_write_-1]->Increment();
+            temporary_ea_[offset_write_]->Increment(offset_write_);
          }
       }
 

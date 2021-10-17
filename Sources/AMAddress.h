@@ -16,8 +16,8 @@ public:
    virtual void Init(unsigned int reg_number, Size size, IncrementType increment = INCREMENT_NONE);
    virtual void Complete();
 
-   virtual void Increment();
-   virtual void Decrement();
+   virtual void Increment(int nb_increment);
+   virtual void Decrement(int nb_increment);
 
    virtual unsigned char GetU8();
    virtual unsigned short GetU16();
@@ -48,6 +48,8 @@ protected:
    unsigned int * usp_;
    unsigned int * ssp_;
    unsigned short * sr_;
+
+   int offset_;
 
    // Current usage
    unsigned int* current_register_;

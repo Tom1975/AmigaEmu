@@ -9,8 +9,8 @@ public:
    AMAbsolute();
    virtual void Init(unsigned int size, unsigned int size_to_read);
 
-   virtual void Increment();
-   virtual void Decrement();
+   virtual void Increment(int nb_increment);
+   virtual void Decrement(int nb_increment);
 
    virtual unsigned char GetU8();
    virtual unsigned short GetU16();

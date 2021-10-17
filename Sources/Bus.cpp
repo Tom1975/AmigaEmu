@@ -65,6 +65,10 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
+   if (address >= 0x464C && address <= 0x464F)
+   {
+      int dbg = 1;
+   }
    address_ = address;
    operation_complete_ = false;
    current_operation_ = WRITE;

@@ -12,12 +12,12 @@ void AMPc::Init()
    operand_size_ = Long;
 }
 
-void AMPc::Increment()
+void AMPc::Increment(int nb_increment)
 {
    // No used !
 }
 
-void AMPc::Decrement()
+void AMPc::Decrement(int nb_increment)
 {
    // No used !
 }

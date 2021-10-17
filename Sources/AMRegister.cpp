@@ -38,12 +38,12 @@ void AMRegister::Init(unsigned int reg_number, unsigned int size)
 
 }
 
-void AMRegister::Increment()
+void AMRegister::Increment(int nb_increment)
 {
    // No used !
 }
 
-void AMRegister::Decrement()
+void AMRegister::Decrement(int nb_increment)
 {
    // No used !
 }

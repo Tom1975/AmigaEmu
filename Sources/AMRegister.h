@@ -9,8 +9,8 @@ public:
    AMRegister(unsigned int* registers, unsigned int * pc, bool address, unsigned int* usp, unsigned int *ssp, unsigned short *sr);
    virtual void Init(unsigned int reg_number, unsigned int size);
 
-   virtual void Increment();
-   virtual void Decrement();
+   virtual void Increment(int nb_increment);
+   virtual void Decrement(int nb_increment);
    
    virtual unsigned char GetU8();
    virtual unsigned short GetU16();

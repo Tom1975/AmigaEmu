@@ -37,12 +37,12 @@ unsigned int AMImmediate::GetEffectiveAddress()
    return result_;
 }
 
-void AMImmediate::Increment()
+void AMImmediate::Increment(int nb_increment)
 {
    // No used !
 }
 
-void AMImmediate::Decrement()
+void AMImmediate::Decrement(int nb_increment)
 {
    // No used !
 }

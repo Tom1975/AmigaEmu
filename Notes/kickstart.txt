@@ -147,6 +147,9 @@ unsigned int id_lecteur_2
 *** HISTORIQUE 
 ********************************
 
+*** FE6C2E: add.w #$FFD6, A1          ; => CA DOIT ETRE UNE SOUSTRACTION !!
+
+
 AllocMem FC17EE : On a un pointeur null... ?? (==> voir 3e appel FD660A
 A2 : ***5010*** => On a 0000 0000 0000 0676 00FC 07DC 00FC 07DE
      au lieu de : 0000 0000 001D 000A 0002 00FD 610A 0300

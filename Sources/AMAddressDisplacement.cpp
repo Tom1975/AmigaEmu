@@ -49,14 +49,14 @@ void AMAddressDisplacement::Init(unsigned int reg_number, Size size)
    }
 }
 
-void AMAddressDisplacement::Increment()
+void AMAddressDisplacement::Increment(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
    address_result_ += (sizeof(unsigned short))*size_to_read_;
 }
 
-void AMAddressDisplacement::Decrement()
+void AMAddressDisplacement::Decrement(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;

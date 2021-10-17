@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////
 // Addressing mode : Register
 AMAddress::AMAddress(unsigned int* registers, unsigned int * pc, unsigned int* usp, unsigned int* ssp, unsigned short* sr) : 
-   registers_(registers), pc_(pc), size_to_read_(0), usp_(usp), ssp_(ssp), sr_(sr)
+   registers_(registers), pc_(pc), size_to_read_(0), usp_(usp), ssp_(ssp), sr_(sr), offset_(0)
 {
 }
 
@@ -53,6 +53,7 @@ void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment
 
    address_to_write_ = *current_register_;
    address_to_read_ = *current_register_;
+   offset_ = 0;
 }
 
 
@@ -70,19 +71,28 @@ void AMAddress::Complete()
    }
 }
 
-void AMAddress::Increment()
+void AMAddress::Increment(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
    if (increment_ == INCREMENT_POST)
    {
       *current_register_ += (sizeof(unsigned short))*size_to_read_;
+      address_to_write_ = *current_register_;;
+      address_to_read_ = *current_register_;;
    }
-   address_to_write_ += (sizeof(unsigned short))*size_to_read_;
-   address_to_read_ += (sizeof(unsigned short))*size_to_read_;
+   else
+   {
+      switch (operand_size_)
+      {
+      case Byte: offset_ = nb_increment; break;
+      case Word: offset_ = nb_increment * 2; break;
+      case Long: offset_ = nb_increment * 4; break;
+      }      
+   }
 }
 
-void AMAddress::Decrement()
+void AMAddress::Decrement(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
@@ -90,9 +100,19 @@ void AMAddress::Decrement()
    if (increment_ == DECREMENT_PRE)
    {
       *current_register_ -= (sizeof(unsigned short))*size_to_read_;
+      address_to_write_ = *current_register_;
+      address_to_read_ = *current_register_;
    }
-   address_to_write_ -= (sizeof(unsigned short))*size_to_read_;
-   address_to_read_ -= (sizeof(unsigned short))*size_to_read_;
+   else
+   {
+      switch (operand_size_)
+      {
+      case Byte: offset_ = nb_increment; break;
+      case Word: offset_ = nb_increment * 2; break;
+      case Long: offset_ = nb_increment * 4; break;
+      }
+   }
+
 }
 
 //////////////////
@@ -127,7 +147,7 @@ bool AMAddress::FetchComplete()
 bool AMAddress::ReadComplete(unsigned int& address_to_read)
 {
    // Need to read !
-   address_to_read = address_to_read_ + size_read_ * (sizeof (unsigned short));
+   address_to_read = address_to_read_ + size_read_ * (sizeof (unsigned short)) + offset_;
    return size_read_ == size_to_read_;
 }
 
@@ -166,7 +186,7 @@ bool AMAddress::WriteInput(AddressingMode* source)
       input_ = source->GetU32();
       break;
    }
-   address_to_write_ = *current_register_;
+   address_to_write_ = *current_register_ + offset_;
 
    return true;
 }

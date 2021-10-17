@@ -9,8 +9,8 @@ public:
    AMPc( unsigned int * pc);
    virtual void Init();
 
-   virtual void Increment();
-   virtual void Decrement();
+   virtual void Increment(int nb_increment);
+   virtual void Decrement(int nb_increment);
    
    virtual unsigned char GetU8();
    virtual unsigned short GetU16();

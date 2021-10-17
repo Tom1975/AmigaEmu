@@ -38,14 +38,14 @@ void AMAddressIndex::Init(unsigned int reg_number, unsigned int size)
    }
 }
 
-void AMAddressIndex::Increment()
+void AMAddressIndex::Increment(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
    address_to_read_ += (sizeof(unsigned short))*size_read_;
 }
 
-void AMAddressIndex::Decrement()
+void AMAddressIndex::Decrement(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;

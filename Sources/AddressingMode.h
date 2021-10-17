@@ -17,8 +17,8 @@ public:
    static unsigned int word_to_fetch_[3];
    static unsigned int mask_msb_[3];
 
-   virtual void Increment() = 0;
-   virtual void Decrement() = 0;
+   virtual void Increment(int nb_increment) = 0;
+   virtual void Decrement(int nb_increment) = 0;
 
 
    virtual unsigned char GetU8() = 0;

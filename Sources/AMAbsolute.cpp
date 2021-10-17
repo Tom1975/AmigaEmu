@@ -24,14 +24,14 @@ void AMAbsolute::Init(unsigned int size, unsigned int size_to_read)
    }
 }
 
-void AMAbsolute::Increment()
+void AMAbsolute::Increment(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
    address_to_read_ += (sizeof(unsigned short))*size_read_;
 }
 
-void AMAbsolute::Decrement()
+void AMAbsolute::Decrement(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;

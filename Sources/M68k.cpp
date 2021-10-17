@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <stdarg.h>
 
+static unsigned int last_opcodes[256];
+static unsigned char op_index = 0;
 
 
 M68k::Func M68k::ResetList_[] = { &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr };
@@ -138,6 +140,10 @@ void M68k::Tick()
       new_opcode_ = 0;
    }
    
+   if (pc_ > 0x676 && pc_ < 0xFC0000)
+   {
+      int dbg = 1;
+   }
    while ((new_opcode_==0) && ((this->*current_function_)()))
    {
       index_list_++;
@@ -159,8 +165,6 @@ void M68k::Tick()
          {
             // Fetch next opcode
             // save last opcodes
-            static unsigned int last_opcodes[256];
-            static unsigned char op_index = 0;
             last_opcodes[(op_index++) & 0xFF] = pc_-4;
 
 
@@ -2124,6 +2128,11 @@ unsigned int M68k::OpcodeAddA()
    {
    case 1:
       sm = source_alu_->GetU16();
+      if (sm & 0x8000)
+      {
+         // sign extend operation.
+         sm |= 0xFFFF0000;
+      }
       break;
    case 2:
       sm = source_alu_->GetU32();
