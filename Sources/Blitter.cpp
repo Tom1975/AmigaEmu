@@ -52,7 +52,7 @@ bool Blitter::DmaTick()
          pipeline_counter_ = 0;
 
          // Something preprocessed to write ? 
-         if (output_ready_ && !dma_used )
+         if (output_ready_ && !dma_used)
          {
             //todo : compute D
             blt_d_dat_;
@@ -60,17 +60,17 @@ bool Blitter::DmaTick()
             output_ready_ = false;
 
             // 
-            if (--window_width_ == 0)
+         }
+         if (--window_width_ == 0)
+         {
+            if (--window_height_ == 0)
             {
-               if (--window_height_ == 0)
-               {
-                  // End of blitter action
-                  dmacon_->dmacon_ &= ~0x4000; // busy
+               // End of blitter action
+               dmacon_->dmacon_ &= ~0x4000; // busy
 
-                  // Interrupt
-                  motherboard_->GetPaula()->Int(0x40);
+               // Interrupt
+               motherboard_->GetPaula()->Int(0x40);
 
-               }
             }
          }
          output_ready_ = true;

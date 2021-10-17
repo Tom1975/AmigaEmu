@@ -212,7 +212,17 @@ void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
       *current_register_ = *current_register_ - (char)source->GetU8();
       break;
    case 1:
-      *current_register_ = *current_register_ - (short)source->GetU16();
+      if (IsAddressRegister() == false)
+      {
+         unsigned int tmp = source->GetU16();
+         if (tmp & 0x8000)
+            tmp |= 0xFFFF0000;
+         *current_register_ = *current_register_ - tmp;
+      }
+      else
+      {
+         *current_register_ = *current_register_ - (short)source->GetU16();
+      }
       break; 
    case 2:
       *current_register_ = *current_register_ - (long)source->GetU32();

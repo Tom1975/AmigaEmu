@@ -492,6 +492,9 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x58:  // BLTSIZE
          blitter_->SetBltSize(data);
          break;
+
+
+
       case 0x60:  //BLTCMOD
          blitter_->SetBltMod(2, data);
          break;
