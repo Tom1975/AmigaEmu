@@ -66,6 +66,9 @@ FE8884 (strap.strap) 		: bloqué (init FE88D6
 end.
 
 FE89C2: jsr ($FE38,A6)            			; DoIO qui ne sort pas...
+L'IO request : ok.
+
+
 FE8A02 => DoIO qui ne sort pas...
 4694 : Device node
 trackdisk.device : 
