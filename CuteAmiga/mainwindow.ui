@@ -44,6 +44,7 @@
     <addaction name="actionCPU"/>
     <addaction name="actionMemory"/>
     <addaction name="actionCopper"/>
+    <addaction name="actionExec"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -128,7 +129,12 @@
   </action>
   <action name="actionCopper">
    <property name="text">
-    <string>Copper windows</string>
+    <string>Copper window</string>
+   </property>
+  </action>
+  <action name="actionExec">
+   <property name="text">
+    <string>Exec window</string>
    </property>
   </action>
  </widget>

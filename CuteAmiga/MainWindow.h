@@ -5,6 +5,7 @@
 #include "DebugDialog.h"
 #include "MemoryDialog.h"
 #include "CopperDialog.h"
+#include "ExecDialog.h"
 #include "AmigaEmulation.h"
 
 namespace Ui {
@@ -24,6 +25,7 @@ public:
     void Break();
     void Memory();
     void Copper();
+    void Exec();
     void SaveConfig();
     void LoadConfig();
 
@@ -41,6 +43,7 @@ private:
     DebugDialog debug_;
     MemoryDialog memory_;
     CopperDialog copper_;
+    ExecDialog exec_;
 
     // Ressources
     QPixmap* led_on_;

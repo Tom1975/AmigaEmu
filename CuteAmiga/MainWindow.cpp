@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
    debug_(this),
    memory_(this),
    copper_(this),
+   exec_(this),
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(ui->actionCPU, &QAction::triggered, this, &MainWindow::Break);
    connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::Memory);
    connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
+   connect(ui->actionExec, &QAction::triggered, this, &MainWindow::Exec);
    
    connect(ui->display_, SIGNAL(Update()),
       this, SLOT(Update()), Qt::QueuedConnection);
@@ -28,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
    debug_.SetEmulator(emu_handler_);
    memory_.SetEmulator(emu_handler_);
    copper_.SetEmulator(emu_handler_);
+   exec_.SetEmulator(emu_handler_);
 
    led_on_ = new QPixmap(":/Images/led_on.png");
    led_off_ = new QPixmap(":/Images/led_off.png");
@@ -121,6 +124,7 @@ void MainWindow::Break()
    debug_.show();
    memory_.Update();
    copper_.Update();
+   exec_.Update();
 }
 
 void MainWindow::Copper ()
@@ -133,6 +137,12 @@ void MainWindow::Memory()
 {
    memory_.Update();
    memory_.show();
+}
+
+void MainWindow::Exec()
+{
+   exec_.Update();
+   exec_.show();
 }
 
 /////////////////////////////////////////////////////////////////////////////
