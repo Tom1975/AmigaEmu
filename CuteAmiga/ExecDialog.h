@@ -30,6 +30,7 @@ public:
 protected:
    // Menu action
    void UpdateDebug();
+   void UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item);
 
 private:
 
@@ -37,6 +38,6 @@ private:
     AmigaEmulation* emu_handler_;
 
     QTreeWidgetItem * exec_base_item_;
-    std::vector<QTreeWidgetItem> list_items_;
+    std::vector<QTreeWidgetItem*> list_items_;
 
 };

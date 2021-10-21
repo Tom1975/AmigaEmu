@@ -57,6 +57,32 @@ void ExecDialog::Update()
 
 }
 
+void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item)
+{
+   unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
+   unsigned char * rom = emu_handler_->GetMotherboard()->GetRom();
+
+   unsigned long current_list_node = EXTRACT_LONG((&ram[list_adress]));
+
+   // From head to tail...
+   while (current_list_node != 0)
+   {
+      QTreeWidgetItem* item = new QTreeWidgetItem;
+      // Add a device
+      unsigned long name_address = EXTRACT_LONG((&ram[current_list_node + 10]));
+      char* name = (char*)&rom[name_address & 0x3FFFF];
+      item->setText(0, QString(name));
+      root_item->addChild(item);
+      list_items_.push_back(item);
+
+      // Add specific informations
+
+      current_list_node = EXTRACT_LONG((&ram[current_list_node]));
+
+   }
+
+}
+
 void ExecDialog::UpdateDebug()
 {
    // Update parent window
@@ -73,37 +99,38 @@ void ExecDialog::UpdateDebug()
 
    exec_base_item_->setText(0, QString("ExecBase : %3").arg(exec_base, 6, 16));
 
+   for (auto it : list_items_)
+   {
+      delete it;
+   }
    list_items_.clear();
 
    if (exec_base < 1024 * 512) // TODO : handle this with real memory size...
    {
       // Add Devices
-      QTreeWidgetItem item_device_list;
-      item_device_list.setText(0, QString("DEVICES"));
-      unsigned long device_list = exec_base + 0x15E;
-
-      unsigned long current_device_node = EXTRACT_LONG((&ram[device_list]));
-
-      // From head to tail...
-      while (current_device_node != 0)
-      {
-         QTreeWidgetItem item_device;
-         // Add a device
-         unsigned long device_name_address = EXTRACT_LONG((&ram[current_device_node + 10]));
-         char* device_name = (char*)&rom[device_name_address &0x3FFFF];
-         item_device.setText(1, QString(device_name));
-         item_device_list.addChild(&item_device);
-         list_items_.push_back(item_device);
-
-
-         current_device_node = EXTRACT_LONG((&ram[current_device_node]));
-
-      }
-
-      ui->ExecWidget->addTopLevelItem(&item_device_list);
-
-
+      QTreeWidgetItem *item_device_list = new QTreeWidgetItem;
+      item_device_list->setText(0, QString("DEVICES"));
+      UpdateList(exec_base + 0x15E, item_device_list);
+      ui->ExecWidget->addTopLevelItem(item_device_list);
       list_items_.push_back(item_device_list);
+
+      QTreeWidgetItem *item_resource_list = new QTreeWidgetItem;
+      item_resource_list->setText(0, QString("RESOURCE"));
+      UpdateList(exec_base + 0x150, item_resource_list);
+      ui->ExecWidget->addTopLevelItem(item_resource_list);
+      list_items_.push_back(item_resource_list);
+      
+      QTreeWidgetItem *item_task_list = new QTreeWidgetItem;
+      item_task_list->setText(0, QString("TASK_READY"));
+      UpdateList(exec_base + 0x196, item_task_list);
+      ui->ExecWidget->addTopLevelItem(item_task_list);
+      list_items_.push_back(item_task_list);
+
+      item_task_list = new QTreeWidgetItem;
+      item_task_list->setText(0, QString("TASK_WAIT"));
+      UpdateList(exec_base + 0x1A4, item_task_list);
+      ui->ExecWidget->addTopLevelItem(item_task_list);
+      list_items_.push_back(item_task_list);
    }
 
 }
