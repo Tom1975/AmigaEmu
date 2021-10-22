@@ -27,6 +27,10 @@ FE98E4 (trackdisk.device)	: (un décalage existe)
 => FE5A2A ok (avec winuae)
 => FE631A ok (avec winuae)
 
+FC48FC : Detection des drives...
+Task : FEAE50
+
+
 FE55F2: cmp.w ($72,A6), D0        B0 6E 00 72  => DIFF : 4(moi)/ 9(winuae)
 devrait avoir : 0000 0014 00FF 0000 00FD 0000 00FE 0000
 j'ai 0000-0000
@@ -47,6 +51,7 @@ CHGN : 0 = pas de changement ?!!!!
 On passe dans FE9550 
 
 FEA510 = DoIo dont on ne sort pas...
+
 
 IORequest : 6096
 IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)

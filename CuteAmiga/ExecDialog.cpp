@@ -63,20 +63,26 @@ void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_it
    unsigned char * rom = emu_handler_->GetMotherboard()->GetRom();
 
    unsigned long current_list_node = EXTRACT_LONG((&ram[list_adress]));
-
    // From head to tail...
-   while (current_list_node != 0)
+   while (current_list_node != 0  )
    {
       QTreeWidgetItem* item = new QTreeWidgetItem;
       // Add a device
       unsigned long name_address = EXTRACT_LONG((&ram[current_list_node + 10]));
-      char* name = (char*)&rom[name_address & 0x3FFFF];
-      item->setText(0, QString(name));
-      root_item->addChild(item);
-      list_items_.push_back(item);
+      char* name = (name_address >= 0xFC0000) ? (char*)&rom[name_address & 0x3FFFF] : (char*)&ram[name_address];
+      if (strlen(name) > 0)
+      {
+         item->setText(0, QString(name));
+         // Add base address
+         QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
+         base_address_item->setText(0, QString("Base address : %1").arg(current_list_node, 6, 16));
+         item->addChild(base_address_item);
+         list_items_.push_back(base_address_item);
+         root_item->addChild(item);
+         list_items_.push_back(item);
+         // Add specific informations
 
-      // Add specific informations
-
+      }
       current_list_node = EXTRACT_LONG((&ram[current_list_node]));
 
    }
