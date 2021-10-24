@@ -1412,6 +1412,7 @@ unsigned int M68k::DecodeOr()
 unsigned int M68k::OpcodeOr()
 {
    destination_alu_->Or(source_alu_, sr_);
+   sr_ &= ~(0xF);
    switch (size_)
    {
    case BYTE:

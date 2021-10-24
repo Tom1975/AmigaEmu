@@ -30,7 +30,8 @@ public:
 protected:
    // Menu action
    void UpdateDebug();
-   void UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item);
+   void UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item, void(*list_handler)(unsigned long, QTreeWidgetItem*, std::vector<QTreeWidgetItem*> *) = nullptr);
+   static void UpdateTask(unsigned long task_adress, QTreeWidgetItem* base_item, std::vector<QTreeWidgetItem*> *list_items);
 
 private:
 

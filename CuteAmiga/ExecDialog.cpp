@@ -57,7 +57,16 @@ void ExecDialog::Update()
 
 }
 
-void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item)
+void ExecDialog::UpdateTask(unsigned long task_adress, QTreeWidgetItem* base_item, std::vector<QTreeWidgetItem*> *list_items)
+{
+   QTreeWidgetItem* item = new QTreeWidgetItem;
+   // Add Signals
+
+   base_item->addChild(item);
+   list_items->push_back(base_item);
+}
+
+void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item, void(*list_handler)(unsigned long, QTreeWidgetItem*, std::vector<QTreeWidgetItem*> *))
 {
    unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
    unsigned char * rom = emu_handler_->GetMotherboard()->GetRom();
@@ -76,6 +85,10 @@ void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_it
          // Add base address
          QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
          base_address_item->setText(0, QString("Base address : %1").arg(current_list_node, 6, 16));
+         if (list_handler != nullptr)
+         {
+            list_handler(current_list_node, item, &list_items_);
+         }
          item->addChild(base_address_item);
          list_items_.push_back(base_address_item);
          root_item->addChild(item);
@@ -128,13 +141,13 @@ void ExecDialog::UpdateDebug()
       
       QTreeWidgetItem *item_task_list = new QTreeWidgetItem;
       item_task_list->setText(0, QString("TASK_READY"));
-      UpdateList(exec_base + 0x196, item_task_list);
+      UpdateList(exec_base + 0x196, item_task_list, UpdateTask);
       ui->ExecWidget->addTopLevelItem(item_task_list);
       list_items_.push_back(item_task_list);
 
       item_task_list = new QTreeWidgetItem;
       item_task_list->setText(0, QString("TASK_WAIT"));
-      UpdateList(exec_base + 0x1A4, item_task_list);
+      UpdateList(exec_base + 0x1A4, item_task_list, UpdateTask);
       ui->ExecWidget->addTopLevelItem(item_task_list);
       list_items_.push_back(item_task_list);
    }

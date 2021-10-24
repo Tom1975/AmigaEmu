@@ -65,7 +65,7 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   if (address >= 0x464C && address <= 0x464F)
+   if (address >= 0x8000 && address <= 0x9000)
    {
       int dbg = 1;
    }
@@ -400,7 +400,7 @@ void Bus::DmaOperationMemory::DoDma ()
       if (address_ < 0x200000
          || (address_ & 0xF00000) == 0xF00000) // CHECK THIS !
       {
-         if (address_ == 0x2398)
+         if (address_ >= 0x8000 && address_ <= 0x9000)
          {
             int dbg = 1;
          }
