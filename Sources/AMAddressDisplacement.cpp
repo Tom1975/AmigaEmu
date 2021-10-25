@@ -130,13 +130,13 @@ void AMAddressDisplacement::AddWord(unsigned short value)
 void AMAddressDisplacement::Add(AddressingMode* source, unsigned short& sr)
 {
    // todo
-   input_ = this->GetU32() + source->GetU32();
+   result_ = input_ = this->GetU32() + source->GetU32();
 }
 
 void AMAddressDisplacement::Sub(AddressingMode* source, unsigned short& sr)
 {
    // todo
-   input_ = this->GetU32() - source->GetU32();
+   result_ = input_ = this->GetU32() - source->GetU32();
 }
 
 void AMAddressDisplacement::Or(AddressingMode* source, unsigned short& sr)
@@ -144,20 +144,20 @@ void AMAddressDisplacement::Or(AddressingMode* source, unsigned short& sr)
    switch (size_)
    {
    case Byte:
-      input_ = source->GetU8() | (result_ & 0xFF);
+      result_ = input_ = source->GetU8() | (result_ & 0xFF);
       break;
    case Word:
-      input_ = source->GetU16() | (result_ & 0xFFFF);
+      result_ = input_ = source->GetU16() | (result_ & 0xFFFF);
       break;
    case Long:
-      input_ = source->GetU32() | (result_ );
+      result_ = input_ = source->GetU32() | (result_ );
       break;
    }
 }
 
 void AMAddressDisplacement::Not(unsigned short& sr)
 {
-   input_ = ~(this->GetU32());
+   result_ = input_ = ~(this->GetU32());
    ComputeFlagsNul(sr, input_, size_);
 }
 
@@ -168,15 +168,15 @@ bool AMAddressDisplacement::WriteInput(AddressingMode* source)
    {
    case 0:
       written_input_ = 1;
-      input_ = source->GetU8();
+      result_ = input_ = source->GetU8();
       break;
    case 1:
       written_input_ = 1;
-      input_ = source->GetU16();
+      result_ = input_ = source->GetU16();
       break;
    case 2:
       written_input_ = 2;
-      input_ = source->GetU32();
+      result_ = input_ = source->GetU32();
       break;
    }
 
@@ -208,15 +208,15 @@ void AMAddressDisplacement::Subq(unsigned char data, unsigned char size, unsigne
    {
    case 0:
       written_input_ = 1;
-      input_ = result_&0xFF;
+      result_ = input_ = result_&0xFF;
       break;
    case 1:
       written_input_ = 1;
-      input_ = result_ & 0xFFFF;
+      result_ = input_ = result_ & 0xFFFF;
       break;
    case 2:
       written_input_ = 2;
-      input_ = result_ & 0xFFFFFFFF;
+      result_ = input_ = result_ & 0xFFFFFFFF;
       break;
    }
 

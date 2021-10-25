@@ -34,9 +34,8 @@ Input : ok
 FE89C2 : ok
 FE9FEC : Ok
 => FC0F54 STOP : Ok. 
-Interrupt/exception => not the same !!
-Contenu 80000 = different !
-VOIR CIAB => FC6D20 !!! CRB NOT UPDATED !!!
+On passe bien dans le FC6D34 (avec Signal du process)
+Check : concordance Signals.
 
 ###
 FE55F2: cmp.w ($72,A6), D0        B0 6E 00 72  => DIFF : 4(moi)/ 9(winuae)
@@ -58,17 +57,22 @@ CHGN : 0 = pas de changement ?!!!!
 
 On passe dans FE9550 
 
-FEA510 = DoIo dont on ne sort pas...
+FEA510 = DoIo dont on ne sort pas... OK
+***IL MANQUAIT L'UPDATE DE ICR SUR TB/TA !
 
-
-IORequest : 6096
+(    IORequest : 6096
 IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)
 IORequest.io_Message.mn_Node.ln_Pred = 0 (au lieu de quelque chose)
 IORequest.io_Message.mn_Node.ln_Type = 05 (devrait etre 07)
-Cette IO Request, c'est le bloc 6038 décalé
-FE9DA4 => 6096 est présent (dans le bloc 6010-) mais vide
-FE9576=> Copie partielle !
-
+IORequest.io_Message.mn_ReplyPort = 60E6
+mp_SigBit = 0A
+SigTask = 6166 "trackdisk.device"
+Device : 2EDE (Timer)
+Unit : 2F08
+command : 09
+=> FE97EC, set TBLO/TBLHI a BB8
+Le timer decremente et interrupt bien !
+=> FC461C    )
 
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 

@@ -63,7 +63,7 @@ void ExecDialog::UpdateTask(unsigned long task_adress, QTreeWidgetItem* base_ite
    // Add Signals
 
    base_item->addChild(item);
-   list_items->push_back(base_item);
+   list_items->push_back(item);
 }
 
 void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_item, void(*list_handler)(unsigned long, QTreeWidgetItem*, std::vector<QTreeWidgetItem*> *))

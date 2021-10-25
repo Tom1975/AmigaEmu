@@ -64,8 +64,13 @@ void CIA8520::Tick()
       {
          timer_a_--;
       }
+      else
+      {
+         int dbg = 1;
+      }
       if (timer_a_ == 0xFFFF)
       {
+         icr_ |= TA;
          if (icr_mask_ & TA)
          {
             motherboard_->GetPaula()->Int(8);
@@ -75,6 +80,7 @@ void CIA8520::Tick()
             timer_b_--;
             if (timer_b_ == 0xFFFF)
             {
+               icr_ |= TB;
                if (icr_mask_ & TB)
                {
                   motherboard_->GetPaula()->Int(8);
@@ -91,8 +97,14 @@ void CIA8520::Tick()
       {
          timer_b_--;
       }
+      else
+      {
+         int dbg = 1;
+      }
+
       if (timer_b_ == 0xFFFF)
       {
+         icr_ |= TB;
          if (icr_mask_ & TB)
          {
             motherboard_->GetPaula()->Int(8);
