@@ -93,6 +93,9 @@ Device 4694
 Unit 6038
 Command 02
 flags 81
+=> Reveille trackdisk a FEAE76
+FEAE9A: bclr #$3, ($40,A3)        08 AB 00 03 00 40 
+Le bit semble pas clear...
 
 4694 : Device node
 trackdisk.device : 
