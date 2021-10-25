@@ -82,17 +82,22 @@ FE424C (mathffp.library)	:
 FE8884 (strap.strap) 		: bloqué (init FE88D6 
 end.
 
-FE89C2: jsr ($FE38,A6)            			; DoIO qui ne sort pas...
-L'IO request : ok.
-
 
 FE8A02 => DoIO qui ne sort pas...
+IORequest 18e6. 
+mn_ReplyPort 1916
+	flags : 0
+	Sigbit : 1F
+	SigTask : 1970 (exec ?)
+Device 4694
+Unit 6038
+Command 02
+flags 81
+
 4694 : Device node
 trackdisk.device : 
-
 Task cree correctement 
 FEAE50
-
 Recherche de disque présent. Non.
 =>FEADEE => jsr ($FFEE,A6)      return -1 OK !
 
