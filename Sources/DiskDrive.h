@@ -34,6 +34,7 @@ private:
    ////////////////////////////////
    // Various registers
    bool mtr_;
+   bool sel_0_;
 
    ////////////////////////////////
    // Indentification register

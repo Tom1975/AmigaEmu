@@ -1,6 +1,6 @@
 #include "DiskDrive.h"
 
-DiskDrive::DiskDrive() : identification_(0xFFFFFFFF), identification_index_(0), chng_(true)
+DiskDrive::DiskDrive() : identification_(0xFFFFFFFF), identification_index_(0), chng_(true), sel_0_(false)
 {
    Reset();
 }
@@ -17,7 +17,7 @@ void DiskDrive::Reset()
 
 void DiskDrive::SetSEL0(bool set)
 {
-
+   sel_0_ = set;
 }
 
 void DiskDrive::SetSEL1(bool set)
@@ -42,11 +42,11 @@ void DiskDrive::SetDIR(bool set)
 
 void DiskDrive::SetSTEP(bool set)
 {
-   if (set)
+   if (set && sel_0_)
    {
       // If no disk : set chng_ to false;
       // if (no disk - todo)
-      chng_ = false;
+      chng_ = true;
    }
 }
 
@@ -91,7 +91,7 @@ bool DiskDrive::GetTRK0()
 bool DiskDrive::GetWPROT()
 {
    //todo
-   return false;
+   return true;
 
 }
 

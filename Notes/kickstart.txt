@@ -96,10 +96,13 @@ flags 81
 => Reveille trackdisk a FEAE76
 FEAE9A: bclr #$3, ($40,A3)        08 AB 00 03 00 40 
 Le bit semble pas clear... => pas de disque ? (ou autre chose ??)
-bit 3 = ??
+On continue : FEAF36 ok
+FEA01C ok
+bsr FE998C => C'est lui qui Signal (FC1E48)
+FE99A2 => On recoit F0 (et nous : 3E.. ?)
+=>FE99AC: btst #2, D2 pas identique => CHNG DOIT ETRE A 0 !!!!
+FE9A08: bsr FEA4F0                 	; (Goto signal here !
 
-A3 = 6038 => 
-Positionnement du bit 3 de $40 :FE9FA2
 On ne passe pas ici : FE9F92
 
 4694 : Device node
@@ -119,6 +122,11 @@ FC49AC: bne.s FC49BA  : Action sur Flags ??
 Command2 = ; FEA734
 FE5226 => On ne va pas dans le ReplyMsg
 FE5EF4 = on y passe plusieurs fois 
+
+===> FE8B7E
+Crash ....
+Illegal instruction + 
+FE5CEE: jsr ($FFEE,A6)   => Go 19d8 ???
 
 
 ###
