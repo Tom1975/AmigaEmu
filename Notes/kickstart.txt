@@ -1,11 +1,5 @@
 
-
-Reprise a zero : 
-
-
-
 => 0xFC0B28 (InitResident)
-Diff D5/D7 = 1...
 FC4afc (expansion.library)	: 
 FE4880 (potgo.resource)		: 
 FE4FE4 (keymap.resource)	:
@@ -22,58 +16,6 @@ FE50C6 (input.device)		:
 FE0D90 (layers.library)		: Ok => everything seems ok 
 FE510E (console.device) 	: 
 FE98E4 (trackdisk.device)	: (un décalage existe) 
-      FEADF2 ?
-=> FE63A6 ok (avec winuae)
-=> FE5A2A ok (avec winuae)
-=> FE631A ok (avec winuae)
-
-FC48FC : Detection des drives...
-Task : FEAE50
-###
-Input : ok
-FE89C2 : ok
-FE9FEC : Ok
-=> FC0F54 STOP : Ok. 
-On passe bien dans le FC6D34 (avec Signal du process)
-Check : concordance Signals.
-
-###
-FE55F2: cmp.w ($72,A6), D0        B0 6E 00 72  => DIFF : 4(moi)/ 9(winuae)
-devrait avoir : 0000 0014 00FF 0000 00FD 0000 00FE 0000
-j'ai 0000-0000
-Ca se trouve ici : FE5822 => issue d'une interruption !
-quand on remonte la stack :
-FC4682
-FC461C (On y passe !)
-FC4620: move.b BFED01, D2         14 39 00 BF ED 01  => 0 au lieu de 188 ??
-*** HANDLE ICR FROM CIA !!! ***
-FE5822 (?) ($72, ...) : we should write some data here...
-stack : FC461C 
-BFED01 : lecture de 88 sur winuae 
-Appel de la procedure qui va bien => (A2, 40-70)
-(sur bit 8 = SP ?)
-===> (passe-t-on vers FE998C ??) <===
-CHGN : 0 = pas de changement ?!!!!
-
-On passe dans FE9550 
-
-FEA510 = DoIo dont on ne sort pas... OK
-***IL MANQUAIT L'UPDATE DE ICR SUR TB/TA !
-
-(    IORequest : 6096
-IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)
-IORequest.io_Message.mn_Node.ln_Pred = 0 (au lieu de quelque chose)
-IORequest.io_Message.mn_Node.ln_Type = 05 (devrait etre 07)
-IORequest.io_Message.mn_ReplyPort = 60E6
-mp_SigBit = 0A
-SigTask = 6166 "trackdisk.device"
-Device : 2EDE (Timer)
-Unit : 2F08
-command : 09
-=> FE97EC, set TBLO/TBLHI a BB8
-Le timer decremente et interrupt bien !
-=> FC461C    )
-
 FD3F5C (intuition.library)  : 
 FC323A (alert.hook) 		: 
 FE424C (mathffp.library)	: 
@@ -82,52 +24,22 @@ FE424C (mathffp.library)	:
 FE8884 (strap.strap) 		: bloqué (init FE88D6 
 end.
 
-
-FE8A02 => DoIO qui ne sort pas...
-IORequest 18e6. 
-mn_ReplyPort 1916
-	flags : 0
-	Sigbit : 1F
-	SigTask : 1970 (exec ?)
-Device 4694
-Unit 6038
-Command 02
-flags 81
-=> Reveille trackdisk a FEAE76
-FEAE9A: bclr #$3, ($40,A3)        08 AB 00 03 00 40 
-Le bit semble pas clear... => pas de disque ? (ou autre chose ??)
-On continue : FEAF36 ok
-FEA01C ok
-bsr FE998C => C'est lui qui Signal (FC1E48)
-FE99A2 => On recoit F0 (et nous : 3E.. ?)
-=>FE99AC: btst #2, D2 pas identique => CHNG DOIT ETRE A 0 !!!!
-FE9A08: bsr FEA4F0                 	; (Goto signal here !
-
-On ne passe pas ici : FE9F92
-
-4694 : Device node
-trackdisk.device : 
-Task cree correctement 
-FEAE50
-Recherche de disque présent. Non.
-=>FEADEE => jsr ($FFEE,A6)      return -1 OK !
-
-Check : 
-FC49A2: addq.b #1, ($126,A0)      
-FC49A6: bset #$7, ($26,A6)        08 EE 00 07 00 26 
-FC49AC: bne.s FC49BA  : Action sur Flags ??
-
-
-
-Command2 = ; FEA734
-FE5226 => On ne va pas dans le ReplyMsg
-FE5EF4 = on y passe plusieurs fois 
-
 ===> FE8B7E
+FE8C74 ok
+FCC722 ok
+FCC7F0
+FCC908
+FCC97A
+FCCA70
+FC653A
+FE8CCE
+
+A5 = 18ba
 Crash ....
 Illegal instruction + 
 FE5CEE: jsr ($FFEE,A6)   => Go 19d8 ???
 
+FE8CCA => FCC6BA
 
 ###
 A VERIFIER :
@@ -187,6 +99,80 @@ unsigned int id_lecteur_2
 ********************************
 *** HISTORIQUE 
 ********************************
+
+**** Blocage dans trackdisk 
+
+
+FE8A02 => DoIO qui ne sort pas...
+IORequest 18e6. 
+mn_ReplyPort 1916
+	flags : 0
+	Sigbit : 1F
+	SigTask : 1970 (exec ?)
+Device 4694
+Unit 6038
+Command 02
+flags 81
+=> Reveille trackdisk a FEAE76
+FEAE9A: bclr #$3, ($40,A3)        08 AB 00 03 00 40 
+Le bit semble pas clear... => pas de disque ? (ou autre chose ??)
+On continue : FEAF36 ok
+FEA01C ok
+bsr FE998C => C'est lui qui Signal (FC1E48)
+FE99A2 => On recoit F0 (et nous : 3E.. ?)
+=>FE99AC: btst #2, D2 pas identique => CHNG DOIT ETRE A 0 !!!!
+FE9A08: bsr FEA4F0                 	; (Goto signal here !
+
+On ne passe pas ici : FE9F92
+
+4694 : Device node
+trackdisk.device : 
+Task cree correctement 
+FEAE50
+Recherche de disque présent. Non.
+=>FEADEE => jsr ($FFEE,A6)      return -1 OK !
+
+FC48FC : Detection des drives...
+Task : FEAE50
+###
+=> FC0F54 STOP : Ok. 
+
+###
+FE55F2: cmp.w ($72,A6), D0        B0 6E 00 72  => DIFF : 4(moi)/ 9(winuae)
+devrait avoir : 0000 0014 00FF 0000 00FD 0000 00FE 0000
+j'ai 0000-0000
+Ca se trouve ici : FE5822 => issue d'une interruption !
+quand on remonte la stack :
+FC4682
+FC461C (On y passe !)
+FC4620: move.b BFED01, D2         14 39 00 BF ED 01  => 0 au lieu de 188 ??
+*** HANDLE ICR FROM CIA !!! ***
+FE5822 (?) ($72, ...) : we should write some data here...
+stack : FC461C 
+BFED01 : lecture de 88 sur winuae 
+Appel de la procedure qui va bien => (A2, 40-70)
+(sur bit 8 = SP ?)
+===> (passe-t-on vers FE998C ??) <===
+CHGN : 0 = pas de changement ?!!!!
+
+On passe dans FE9550 
+
+FEA510 = DoIo dont on ne sort pas... OK
+***IL MANQUAIT L'UPDATE DE ICR SUR TB/TA !
+
+(    IORequest : 6096
+IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)
+IORequest.io_Message.mn_Node.ln_Pred = 0 (au lieu de quelque chose)
+IORequest.io_Message.mn_Node.ln_Type = 05 (devrait etre 07)
+IORequest.io_Message.mn_ReplyPort = 60E6
+mp_SigBit = 0A
+SigTask = 6166 "trackdisk.device"
+Device : 2EDE (Timer)
+Unit : 2F08
+command : 09
+=> FE97EC, set TBLO/TBLHI a BB8
+Le timer decremente et interrupt bien !
+=> FC461C    )
 
 *** FE6C2E: add.w #$FFD6, A1          ; => CA DOIT ETRE UNE SOUSTRACTION !!
 
