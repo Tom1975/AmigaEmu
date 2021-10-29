@@ -48,6 +48,8 @@ bool Blitter::DmaTick()
       {
          // pipeline is full : process the first part
          //todo
+
+
          channel_read_ = 0;
          pipeline_counter_ = 0;
 

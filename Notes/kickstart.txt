@@ -35,11 +35,22 @@ FC653A
 FE8CCE
 
 A5 = 18ba
+
+FE8E42 => int a ce moment la (blitter)
+==> Crash a la suite.
+
 Crash ....
 Illegal instruction + 
 FE5CEE: jsr ($FFEE,A6)   => Go 19d8 ???
+19d8 => jmp FE4996.
+2d54 => gameport Device
+Ecrasement ? Oui, a FC797x ...
+index positioné a prealable :
+FC7500: move.w #$FF18, D3
+FC7508 => lsr.b => flag C correctement posé ?
 
 FE8CCA => FCC6BA
+
 
 ###
 A VERIFIER :

@@ -273,9 +273,39 @@ void AMRegister::Subq(unsigned char data, unsigned char size, unsigned short& sr
    unsigned int new_value;
    unsigned int old_value;
 
-   old_value = *current_register_;
-   *current_register_ -= data;
-   new_value = *current_register_;
+   if (IsAddressRegister() == false)
+   {
+      unsigned int result;
+      switch (size_)
+      {
+         case 0:
+         {
+            result = *current_register_ & 0xFF;
+            *current_register_ &= 0xFFFFFF00;
+            break;
+         }
+         case 1:
+         {
+            result = *current_register_ & 0xFFFF;
+            *current_register_ &= 0xFFFF0000;
+            break;
+         }
+         case 2:
+         {
+            result = *current_register_;
+            *current_register_ = 0;
+            break;
+         }
+      }
+      old_value = result;
+      result -= data;
+      *current_register_ |= result;
+      new_value = result;
 
-   ComputeFlags(sr, old_value, new_value, data);
+      ComputeFlags(sr, old_value, new_value, data);
+   }
+   else
+   {
+      *current_register_ -= data;
+   }
 }
