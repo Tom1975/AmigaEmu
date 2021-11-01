@@ -65,7 +65,7 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   if (address >= 0x19da && address <= 0x19dd)
+   if (address == 0x2230 )
    {
       int dbg = 1;
    }

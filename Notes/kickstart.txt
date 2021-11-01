@@ -1,3 +1,23 @@
+*** Copperlist : 
+2e copperlist a 676 ?
+FC6CFC: move.l ($32,A1), D0       
+FC6D00: move.l D0, ($84,A0)       		; D0=> Address copper list 2
+Cause : A1+32 = 676 (2230)
+0000D5C6: move.w ($10,A0), ($9E,A2) 35 68 00 10 00 9E 
+0000D5CC: move.l ($4,A0), A1        22 68 00 04 
+0000D5D0: move.l ($4,A1), ($32,A2)  25 69 00 04 00 32 
+0000D5D6: move.l ($8,A0), A1        22 68 00 08 
+FCD5D0 : A1 = 0 !!
+Parce que A0+4 = 0. Memoire => 493a
+FC6368
+FE0882 
+FDCAAA ( A1 = 4936 !) => empilé. A3 = 4936...
+FDCA58
+FDCA24: lea ($22,A0), A3  ;=> A3 recupere 4936; A0 = 4914
+FDCA0E
+Issue de quelque part entre FDCA7C et FDCABA (appel a ...FC6D00)
+
+
 
 => 0xFC0B28 (InitResident)
 FC4afc (expansion.library)	: 
@@ -23,34 +43,6 @@ FE424C (mathffp.library)	:
 (FF425A) (dos)
 FE8884 (strap.strap) 		: bloqué (init FE88D6 
 end.
-
-===> FE8B7E
-FE8C74 ok
-FCC722 ok
-FCC7F0
-FCC908
-FCC97A
-FCCA70
-FC653A
-FE8CCE
-
-A5 = 18ba
-
-FE8E42 => int a ce moment la (blitter)
-==> Crash a la suite.
-
-Crash ....
-Illegal instruction + 
-FE5CEE: jsr ($FFEE,A6)   => Go 19d8 ???
-19d8 => jmp FE4996.
-2d54 => gameport Device
-Ecrasement ? Oui, a FC797x ...
-index positioné a prealable :
-FC7500: move.w #$FF18, D3
-FC7508 => lsr.b => flag C correctement posé ?
-
-FE8CCA => FCC6BA
-
 
 ###
 A VERIFIER :
@@ -112,6 +104,34 @@ unsigned int id_lecteur_2
 ********************************
 
 **** Blocage dans trackdisk 
+
+===> FE8B7E
+FE8C74 ok
+FCC722 ok
+FCC7F0
+FCC908
+FCC97A
+FCCA70
+FC653A
+FE8CCE
+
+A5 = 18ba
+
+FE8E42 => int a ce moment la (blitter)
+==> Crash a la suite.
+
+Crash ....
+Illegal instruction + 
+FE5CEE: jsr ($FFEE,A6)   => Go 19d8 ???
+19d8 => jmp FE4996.
+2d54 => gameport Device
+Ecrasement ? Oui, a FC797x ...
+index positioné a prealable :
+FC7500: move.w #$FF18, D3
+FC7508 => lsr.b => flag C correctement posé ?
+
+FE8CCA => FCC6BA
+
 
 
 FE8A02 => DoIO qui ne sort pas...
