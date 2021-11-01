@@ -14,7 +14,10 @@ FE0882
 FDCAAA ( A1 = 4936 !) => empilé. A3 = 4936...
 FDCA58
 FDCA24: lea ($22,A0), A3  ;=> A3 recupere 4936; A0 = 4914
-FDCA0E
+Issu de A6
+
+FDB8EE
+
 Issue de quelque part entre FDCA7C et FDCABA (appel a ...FC6D00)
 
 
