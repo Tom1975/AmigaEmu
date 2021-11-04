@@ -16,6 +16,7 @@ Copper::~Copper()
 void Copper::VerticalRetraceBegin()
 {
    counter_ = address_1_;
+   current_state_ = NONE;
 
 }
 

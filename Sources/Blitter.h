@@ -26,13 +26,14 @@ public:
    void SetBltCon0(unsigned short data) { bltcon0_ = data; }
    void SetBltCon1(unsigned short data) { bltcon1_ = data; }
 
+   void SetBltDat(unsigned char zone, unsigned short data);
    void SetBltPt(unsigned char zone, unsigned short data);
    void SetBltMod (unsigned char zone, unsigned short data);
    void SetBltSize(unsigned short data);
    void SetDmaCon(DMAControl* dmacon);
 
 
-protected:
+private:
 
    Motherboard* motherboard_;
    DMAControl * dmacon_;
@@ -76,4 +77,8 @@ protected:
    unsigned char window_width_;
    unsigned short window_height_;
 
+   // line drawing variable
+   unsigned int line_x_;
+   unsigned int line_y_;
+   unsigned int x_mod_;
 };

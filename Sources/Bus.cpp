@@ -355,6 +355,9 @@ void Bus::DmaOperationMemory::DoDma ()
       {
          switch (address_ & 0x1FF)
          {
+         case 0x002:    // DMACONR
+            data_ = dma_control_->dmacon_;
+            break;
          case 0x004:    // VPOS
             data_ = agnus_->GetVpos();
             break;
@@ -504,9 +507,18 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x64:  //BLTAMOD
          blitter_->SetBltMod(0, data);
          break;
-
-      case 0x68:  //BLTDMOD
+      case 0x66:  //BLTDMOD
          blitter_->SetBltMod(3, data);
+         break;
+
+      case 0x70:  // BLTCDAT
+         blitter_->SetBltDat(2, data);
+         break;
+      case 0x72:  // BLTBDAT
+         blitter_->SetBltDat(1, data);
+         break;
+      case 0x74:  // BLTADAT
+         blitter_->SetBltDat(0, data);
          break;
 
       case 0x80:  // 1rst address COPPER (bit 16-18)
@@ -773,6 +785,29 @@ unsigned char Bus::Read8(unsigned int address)
          real_address = &ram_[address & 0x7FFFF];
    }
    return real_address[0];
+}
+
+void Bus::Write16(unsigned int address, unsigned short data)
+{
+   unsigned short written_value = SWAP_UINT16(data);
+
+   // todo : add here all the stuff that should prevent from direct reading => OVL signal make the ROM over the RAM
+   void* real_address;
+   if (address > 0xF80000
+      || (memory_overlay_ && address < 0x80000))
+   {
+      real_address = &rom_[address & 0x3FFFF];
+   }
+   else
+   {
+      // Chip ram
+      if ((address & 0xE00000) != 0)
+         real_address = &ram_[address & 0x7FFFF];
+      else if (address < 0xA00000)
+         // FAST ram - TODO
+         real_address = &ram_[address & 0x7FFFF];
+   }
+   static_cast<unsigned short*>(real_address)[0] = written_value;
 }
 
 unsigned short Bus::Read16(unsigned int address)

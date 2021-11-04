@@ -26,7 +26,7 @@ bool Blitter::DmaTick()
       && (dmacon_->dmacon_ & 0x4000))
    {
       // First part of the pipeline : Fetch the source data
-      if ( (bltcon0_ & 0x800) && ((channel_read_ & 0x8) == 0))
+      if ((bltcon0_ & 0x800) && ((channel_read_ & 0x8) == 0))
       {
          // A is enabled, and not read yet
          pipeline_[pipeline_counter_++] = blt_a_dat_;
@@ -47,21 +47,69 @@ bool Blitter::DmaTick()
       else
       {
          // pipeline is full : process the first part
-         //todo
-
-
-         channel_read_ = 0;
-         pipeline_counter_ = 0;
-
-         // Something preprocessed to write ? 
-         if (output_ready_ && !dma_used)
+         if (bltcon1_ & 1)
          {
-            //todo : compute D
-            blt_d_dat_;
+            // address_c_ is read. TODO : Handle this with proper DMA
+            bool endloop = false;
+            // Plot x, y : 
+            blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_);
+            blt_d_dat_ = blt_c_dat_;
+            do
+            {
+               blt_d_dat_ = blt_d_dat_ | (1 << x_mod_);
+               x_mod_++;
+               x_mod_ &= 0xF;
+               window_height_--;
+               // if D > 0
+               if ((short)address_a_ > 0)
+               {
+                  address_a_ += modulo_a_;
+                  address_c_ += modulo_c_;
+                  address_d_ += modulo_c_;   // Undocumented : TODO = find about this one ...
+                  endloop = true;
+               }
+               else
+               {
+                  address_a_ += modulo_b_;
+               }
 
-            output_ready_ = false;
+            } while (x_mod_ != 0 && !endloop && window_height_ != 0);
+            if (x_mod_ == 0)
+            {
+               address_c_++;
+               address_d_++;
+            }
 
-            // 
+            // If still on the same line, same word, continue.
+
+            // D is ready to be written.
+            motherboard_->GetBus()->Write16(address_d_, blt_d_dat_);
+
+            if (window_height_ == 0)
+            {
+               // End of blitter action
+               dmacon_->dmacon_ &= ~0x4000; // busy
+               // Interrupt
+               motherboard_->GetPaula()->Int(0x40);
+
+            }
+         }
+         else
+         {
+
+            channel_read_ = 0;
+            pipeline_counter_ = 0;
+
+            // Something preprocessed to write ? 
+            if (output_ready_ && !dma_used)
+            {
+               //todo : compute D
+               blt_d_dat_;
+
+               output_ready_ = false;
+
+               // 
+            }
          }
          if (--window_width_ == 0)
          {
@@ -101,8 +149,30 @@ void Blitter::SetBltSize(unsigned short data)
    // Blitter automaticaly starts : Reset pipeline
    memset(pipeline_, 0, sizeof(pipeline_));
    pipeline_counter_ = 0;
-   
+  
    dmacon_->dmacon_ |= 0x4000; // busy
+
+   line_x_ = address_c_;
+   x_mod_ = (dmacon_->dmacon_ >> 12) & 0xF;
+}
+
+void Blitter::SetBltDat(unsigned char zone, unsigned short data)
+{
+   switch (zone)
+   {
+   case 0:
+      blt_a_dat_ = data;
+      break;
+   case 1:
+      blt_b_dat_ = data;
+      break;
+   case 2:
+      blt_c_dat_ = data;
+      break;
+   case 3:
+      blt_d_dat_ = data;
+      break;
+   }
 }
 
 void Blitter::SetBltPt(unsigned char zone, unsigned short data)
@@ -110,36 +180,36 @@ void Blitter::SetBltPt(unsigned char zone, unsigned short data)
    switch (zone)
    {
    case 0x22:
-      modulo_c_ &= 0xFFFF;
-      modulo_c_ |= (data&0x7)<<16;
+      address_c_ &= 0xFFFF;
+      address_c_ |= (data&0x7)<<16;
       break;
    case 0x2:
-      modulo_c_ &= 0xFFFF0000;
-      modulo_c_ |= data;
+      address_c_ &= 0xFFFF0000;
+      address_c_ |= data;
       break;
    case 0x21:
-      modulo_b_ &= 0xFFFF;
-      modulo_b_ |= (data & 0x7) << 16;
+      address_b_ &= 0xFFFF;
+      address_b_ |= (data & 0x7) << 16;
       break;
    case 0x1:
-      modulo_b_ &= 0xFFFF0000;
-      modulo_b_ |= data;
+      address_b_ &= 0xFFFF0000;
+      address_b_ |= data;
       break;
    case 0x20:
-      modulo_a_ &= 0xFFFF;
-      modulo_a_ |= (data & 0x7) << 16;
+      address_a_ &= 0xFFFF;
+      address_a_ |= (data & 0x7) << 16;
       break;
    case 0x0:
-      modulo_a_ &= 0xFFFF0000;
-      modulo_a_ |= data;
+      address_a_ &= 0xFFFF0000;
+      address_a_ |= data;
       break;
    case 0x23:
-      modulo_d_ &= 0xFFFF;
-      modulo_d_ |= (data & 0x7) << 16;
+      address_d_ &= 0xFFFF;
+      address_d_ |= (data & 0x7) << 16;
       break;
    case 0x3:
-      modulo_d_ &= 0xFFFF0000;
-      modulo_d_ |= data;
+      address_d_ &= 0xFFFF0000;
+      address_d_ |= data;
       break;
 
    }

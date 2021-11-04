@@ -103,6 +103,8 @@ public:
    void SetAddress (unsigned long address ) { address_ = address; }
    unsigned int GetAddress() { return address_; }
 
+   void Write16(unsigned int address, unsigned short data);
+
    virtual unsigned int Read32(unsigned int address);
    virtual unsigned short Read16(unsigned int address);
    virtual unsigned char Read8(unsigned int address);
