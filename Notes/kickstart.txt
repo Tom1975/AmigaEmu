@@ -1,24 +1,12 @@
-*** Copperlist : 
-2e copperlist a 676 ?
-FC6CFC: move.l ($32,A1), D0       
-FC6D00: move.l D0, ($84,A0)       		; D0=> Address copper list 2
-Cause : A1+32 = 676 (2230)
-0000D5C6: move.w ($10,A0), ($9E,A2) 35 68 00 10 00 9E 
-0000D5CC: move.l ($4,A0), A1        22 68 00 04 
-0000D5D0: move.l ($4,A1), ($32,A2)  25 69 00 04 00 32 
-0000D5D6: move.l ($8,A0), A1        22 68 00 08 
-FCD5D0 : A1 = 0 !!
-Parce que A0+4 = 0. Memoire => 493a
-FC6368
-FE0882 
-FDCAAA ( A1 = 4936 !) => empilé. A3 = 4936...
-FDCA58
-FDCA24: lea ($22,A0), A3  ;=> A3 recupere 4936; A0 = 4914
-Issu de A6
+*** Dessin kickstart :
 
-FDB8EE
+FE8CF8 : FE8E43 dans A2 => Plantage !?
+FCB52C: jsr FCA8DC  => Pas de sortie
+FCAB4E: jsr FCBBD4  => Pas de sortie
+FCBDF2 => Pas de sortie si run de la
 
-Issue de quelque part entre FDCA7C et FDCABA (appel a ...FC6D00)
+FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
+The bits in INTENA/REQ are blitter interrupt requests, I would not use them for the purpose of waiting for the blitter to finish."
 
 
 
