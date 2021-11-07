@@ -4,7 +4,9 @@
 
 #include "Motherboard.h"
 
-Blitter::Blitter() : pipeline_counter_(0), channel_read_(0), output_ready_(false)
+Blitter::Blitter() : pipeline_counter_(0), channel_read_(0), output_ready_(false), 
+                     address_a_(0), address_b_(0), address_c_(0), address_d_(0),
+                     modulo_a_(0), modulo_b_(0), modulo_c_(0), modulo_d_(0)
 {
    
 }

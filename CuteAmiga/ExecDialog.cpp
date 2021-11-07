@@ -127,18 +127,25 @@ void ExecDialog::UpdateDebug()
    if (exec_base < 1024 * 512) // TODO : handle this with real memory size...
    {
       // Add Devices
-      QTreeWidgetItem *item_device_list = new QTreeWidgetItem;
-      item_device_list->setText(0, QString("DEVICES"));
-      UpdateList(exec_base + 0x15E, item_device_list);
-      ui->ExecWidget->addTopLevelItem(item_device_list);
-      list_items_.push_back(item_device_list);
+      QTreeWidgetItem *item_memory_list = new QTreeWidgetItem;
+      item_memory_list = new QTreeWidgetItem;
+      item_memory_list->setText(0, QString("MEMORY LIST"));
+      UpdateList(exec_base + 0x142, item_memory_list);
+      ui->ExecWidget->addTopLevelItem(item_memory_list);
+      list_items_.push_back(item_memory_list);
 
       QTreeWidgetItem *item_resource_list = new QTreeWidgetItem;
       item_resource_list->setText(0, QString("RESOURCE"));
       UpdateList(exec_base + 0x150, item_resource_list);
       ui->ExecWidget->addTopLevelItem(item_resource_list);
       list_items_.push_back(item_resource_list);
-      
+
+      QTreeWidgetItem *item_device_list = new QTreeWidgetItem;
+      item_device_list->setText(0, QString("DEVICES"));
+      UpdateList(exec_base + 0x15E, item_device_list);
+      ui->ExecWidget->addTopLevelItem(item_device_list);
+      list_items_.push_back(item_device_list);
+
       QTreeWidgetItem *item_task_list = new QTreeWidgetItem;
       item_task_list->setText(0, QString("TASK_READY"));
       UpdateList(exec_base + 0x196, item_task_list, UpdateTask);
@@ -150,6 +157,7 @@ void ExecDialog::UpdateDebug()
       UpdateList(exec_base + 0x1A4, item_task_list, UpdateTask);
       ui->ExecWidget->addTopLevelItem(item_task_list);
       list_items_.push_back(item_task_list);
+
    }
 
 }

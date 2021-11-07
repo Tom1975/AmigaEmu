@@ -353,22 +353,23 @@ void Bus::DmaOperationMemory::DoDma ()
       // IO
       if ((address_ & 0xE3F000) == 0xC3F000)
       {
+         unsigned short word_of_data = 0;
          switch (address_ & 0x1FF)
          {
          case 0x002:    // DMACONR
-            data_ = dma_control_->dmacon_;
+            word_of_data = dma_control_->dmacon_;
             break;
          case 0x004:    // VPOS
-            data_ = agnus_->GetVpos();
+            word_of_data = agnus_->GetVpos();
             break;
          case 0x006:    // VHPOS
-            data_ = agnus_->GetVhpos();
+            word_of_data = agnus_->GetVhpos();
             break;
          case 0x01C:    // INTENAR
-            data_ = paula_->GetIntEna();
+            word_of_data = paula_->GetIntEna();
             break;
          case 0x01E:    // INTREQR
-            data_ = paula_->GetIntReqR();
+            word_of_data = paula_->GetIntReqR();
             break;
          default:
          {
@@ -376,6 +377,15 @@ void Bus::DmaOperationMemory::DoDma ()
             break;
          }
          }
+         data_ = 0;
+         if (uds_ == ACTIVE)
+            data_ = (word_of_data >> 8) & 0xFF;
+         if (lds_ == ACTIVE)
+         {
+            data_ <<= 8;
+            data_ |= (word_of_data & 0xFF);
+         }
+
       }
       else
       {

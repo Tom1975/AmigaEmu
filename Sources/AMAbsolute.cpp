@@ -98,6 +98,27 @@ void AMAbsolute::AddWord(unsigned short value)
 }
 //////////////////
 // Write 
+//////////////////
+// Write 
+bool AMAbsolute::WriteInput(unsigned int value)
+{
+   input_ = value;
+   switch (size_)
+   {
+   case 0:
+      written_input_ = 1;
+      break;
+   case 1:
+      written_input_ = 1;
+      break;
+   case 2:
+      written_input_ = 2;
+      break;
+   }
+   return true;
+
+}
+
 bool AMAbsolute::WriteInput(AddressingMode* source)
 {
    // Ok, prepare to write :

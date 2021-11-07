@@ -22,6 +22,7 @@ public:
    virtual bool ReadComplete(unsigned int& address_to_read);
    virtual void AddWord(unsigned short);
 
+   virtual bool WriteInput(unsigned int value);
    virtual bool WriteInput(AddressingMode* source);
    virtual bool WriteComplete();
    virtual unsigned short WriteNextWord(unsigned int& address_to_write);
