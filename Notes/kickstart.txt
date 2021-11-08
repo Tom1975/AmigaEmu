@@ -9,7 +9,9 @@ FCBDF2 => Pas de sortie si run de la
 FCA9F0 ok
 FCC1F4 ok
 FCC1EE: jsr FD1888 : return D0 that contains value differents.
+
 F44E => buffer vide alors que ca ne devrait pas... Pq ??
+alloué ici : FE8BBA
 
 FCC216 : pas ok
 
