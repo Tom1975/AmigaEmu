@@ -11,7 +11,11 @@ FCC1F4 ok
 FCC1EE: jsr FD1888 : return D0 that contains value differents.
 
 F44E => buffer vide alors que ca ne devrait pas... Pq ??
+Adresse de base : A3E0
 alloué ici : FE8BBA
+third buffer of big struct. Used by InitTmpRas(as A1 = buffer)
+=> Buffer renseigné et rempli via blitter. (drawline)
+
 
 FCC216 : pas ok
 
@@ -65,6 +69,121 @@ FC6CDC
 ********************************
 STRUCTURES
 *********************
+; the 5E9A buffer  (allocated in FE8BBA ) is a big structure that containts : 
+; A3E0 is base addres
+struct{
+	ViewPort viewport; 	// 40 bytes  - A3E0
+	View view;			// 18 bytes  - A408
+	RastPort rastport;	// 100 bytes - A41A
+	TmpRas tmpras		// 8 bytes 	 - A47E
+	RasInfo rasinfo		// 12 bytes  - A486
+	Bitmap bmp	 		// 40 bytes  - A492
+	char[] b1				// 1F40 byte - A4BA
+	char[] b2				// 1F40 byte - C3FA
+	char[] b3				// 1F40 byte = E33A
+	// 12 bytes
+};
+
+A5 : offset 08: ViewPort *
+	 offset 0C: View*
+	 offset 10: RastPort *
+	 offset 14: TmpRas *
+	 offset 18: RasInfo*
+	 offset 1C: bitmap*
+	 offset 20: char*
+	 offset 24: char*
+	 offset 28: char*...
+;
+
+struct ViewPort (size : 0x28)
+{
+   struct   ViewPort *Next;
+   struct   ColorMap  *ColorMap;    /* table of colors for this viewport */
+		  /* if this is nil, MakeVPort assumes default values */
+   struct   CopList  *DspIns;	    /* user by MakeView() */
+   struct   CopList  *SprIns;	    /* used by sprite stuff */
+   struct   CopList  *ClrIns;	    /* used by sprite stuff */
+   struct   UCopList *UCopIns;	    /* User copper list */
+   WORD    DWidth,DHeight;
+   WORD    DxOffset,DyOffset;
+   UWORD    Modes;
+   UBYTE	SpritePriorities;		/* used by makevp */
+   UBYTE	ExtendedModes;
+   struct   RasInfo *RasInfo;
+};
+
+struct View (size : 0x12)
+{
+   struct ViewPort *ViewPort;
+   struct cprlist *LOFCprList;	 /* used for interlaced and noninterlaced */
+   struct cprlist *SHFCprList;	 /* only used during interlace */
+   WORD DyOffset,DxOffset;   /* for complete View positioning */
+			      /* offsets are +- adjustments to standard #s */
+   UWORD   Modes;	      /* such as INTERLACE, GENLOC */
+};
+
+struct RasInfo	/* used by callers to and InitDspC() */
+{
+   struct   RasInfo *Next;	    /* used for dualpf */
+   struct   BitMap *BitMap;
+   WORD    RxOffset,RyOffset;	   /* scroll offsets in this BitMap */
+};
+
+struct TmpRas
+{
+    BYTE *RasPtr;
+    LONG Size;
+};
+
+typedef UBYTE *PLANEPTR;
+struct BitMap (size : 40)
+{
+    UWORD   BytesPerRow;
+    UWORD   Rows;
+    UBYTE   Flags;
+    UBYTE   Depth;
+    UWORD   pad;
+    PLANEPTR Planes[8];
+};
+
+struct RastPort
+{
+    struct  Layer  *Layer;
+    struct  BitMap *BitMap;
+    UWORD          *AreaPtrn;  /* Ptr to areafill pattern */
+    struct  TmpRas *TmpRas;
+    struct  AreaInfo *AreaInfo;
+    struct  GelsInfo *GelsInfo;
+    UBYTE   Mask;              /* Write mask for this raster */
+    BYTE    FgPen;             /* Foreground pen for this raster */
+    BYTE    BgPen;             /* Background pen  */
+    BYTE    AOlPen;            /* Areafill outline pen */
+    BYTE    DrawMode;          /* Drawing mode for fill, lines, and text */
+    BYTE    AreaPtSz;          /* 2^n words for areafill pattern */
+    BYTE    linpatcnt;         /* Current line drawing pattern preshift */
+    BYTE    dummy;
+    UWORD   Flags;             /* Miscellaneous control bits */
+    UWORD   LinePtrn;          /* 16 bits for textured lines */
+    WORD    cp_x, cp_y;	       /* Current pen position */
+    UBYTE   minterms[8];
+    WORD    PenWidth;
+    WORD    PenHeight;
+    struct  TextFont *Font;    /* Current font address */
+    UBYTE   AlgoStyle;         /* The algorithmically generated style */
+    UBYTE   TxFlags;           /* Text specific flags */
+    UWORD   TxHeight;          /* Text height */
+    UWORD   TxWidth;           /* Text nominal width */
+    UWORD   TxBaseline;        /* Text baseline */
+    WORD    TxSpacing;         /* Text spacing (per character) */
+    APTR    *RP_User;
+    ULONG   longreserved[2];
+#ifndef GFX_RASTPORT_1_2
+    UWORD   wordreserved[7];   /* Used to be a node */
+    UBYTE   reserved[8];       /* For future use */
+#endif
+};
+
+
 1F12 => ID lecteurs
 unsigned int id_lecteur_0
 unsigned int id_lecteur_1
