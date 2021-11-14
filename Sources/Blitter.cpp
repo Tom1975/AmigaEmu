@@ -51,37 +51,79 @@ bool Blitter::DmaTick()
          // pipeline is full : process the first part
          if (bltcon1_ & 1)
          {
+            // Set few variable, depending on the octant
             // address_c_ is read. TODO : Handle this with proper DMA
             bool endloop = false;
             // Plot x, y : 
             blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_);
             blt_d_dat_ = blt_c_dat_;
-            do
+
+            int inc_x = (bltcon1_ & 0x4) ? -1 : 1;
+            int max_x = (bltcon1_ & 0x4) ? 0xF : 0;
+            int inc_y = (bltcon1_ & 0x10) ? 1 : -1;
+
+            // SUD = 1 : increaqse x each time
+            // decrease window height
+            window_height_--;
+
+            if (bltcon1_ & 0x8)
             {
+               //do
+               {
+                  // add the next pixel.
+                  blt_d_dat_ = blt_d_dat_ | (1 << x_mod_);
+
+                  // Increase x (on the octant 0)
+                  x_mod_+= inc_x;
+                  x_mod_ &= 0xF;
+
+                  // if D > 0 : change line.
+                  if ((short)address_a_ > 0)
+                  {
+                     address_a_ += modulo_a_;
+                     address_c_ += (inc_y*modulo_c_);
+                     address_d_ += (inc_y*modulo_c_);   // Undocumented : TODO = find about this one ...
+                     endloop = true;
+                  }
+                  else
+                  {
+                     address_a_ += modulo_b_;
+                  }
+
+               }// while (x_mod_ != max_x && !endloop && window_height_ != 0);
+               if (x_mod_ == max_x)
+               {
+                  address_c_+= inc_x;
+                  address_d_+= inc_x;
+               }
+            }
+            else
+            {
+               // y increased each time
                blt_d_dat_ = blt_d_dat_ | (1 << x_mod_);
-               x_mod_++;
-               x_mod_ &= 0xF;
-               window_height_--;
-               // if D > 0
+
+               // Increase y (on the octant 0)
+               address_a_ += modulo_a_;
+               address_c_ += (inc_y*modulo_c_);
+               address_d_ += (inc_y*modulo_c_);   // Undocumented : TODO = find about this one ...
+
+               // if D > 0 : change line.
                if ((short)address_a_ > 0)
                {
-                  address_a_ += modulo_a_;
-                  address_c_ += modulo_c_;
-                  address_d_ += modulo_c_;   // Undocumented : TODO = find about this one ...
-                  endloop = true;
+                  x_mod_ += inc_x;
+                  x_mod_ &= 0xF;
+
+                  if (x_mod_ == max_x)
+                  {
+                     address_c_ += inc_x;
+                     address_d_ += inc_x;
+                  }
                }
                else
                {
                   address_a_ += modulo_b_;
                }
-
-            } while (x_mod_ != 0 && !endloop && window_height_ != 0);
-            if (x_mod_ == 0)
-            {
-               address_c_++;
-               address_d_++;
             }
-
             // If still on the same line, same word, continue.
 
             // D is ready to be written.
