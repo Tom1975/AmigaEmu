@@ -15,7 +15,6 @@ find_package(Qt5Widgets REQUIRED)
 
 qt5_add_resources(QRCS resources.qrc)
 
-
 file( GLOB SRCS
 	"*.cpp"
 	)
@@ -24,13 +23,13 @@ file( GLOB HEADERS
 )
 
 set ( UIS
+ BitplaneDialog.ui
  mainwindow.ui
  DebugDialog.ui
  MemoryDialog.ui
  CopperDialog.ui
  ExecDialog.ui
 )
-
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Sources )
 
 if(WIN32)

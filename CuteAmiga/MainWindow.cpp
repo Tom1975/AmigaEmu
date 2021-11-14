@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
    memory_(this),
    copper_(this),
    exec_(this),
+   bitplane_(this),
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
@@ -22,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::Memory);
    connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
    connect(ui->actionExec, &QAction::triggered, this, &MainWindow::Exec);
+   connect(ui->actionBitplane, &QAction::triggered, this, &MainWindow::Bitplane);
    
    connect(ui->display_, SIGNAL(Update()),
       this, SLOT(Update()), Qt::QueuedConnection);
@@ -31,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
    memory_.SetEmulator(emu_handler_);
    copper_.SetEmulator(emu_handler_);
    exec_.SetEmulator(emu_handler_);
+   bitplane_.SetEmulator(emu_handler_);
 
    led_on_ = new QPixmap(":/Images/led_on.png");
    led_off_ = new QPixmap(":/Images/led_off.png");
@@ -125,6 +128,7 @@ void MainWindow::Break()
    memory_.Update();
    copper_.Update();
    exec_.Update();
+   bitplane_.Update();
 }
 
 void MainWindow::Copper ()
@@ -143,6 +147,12 @@ void MainWindow::Exec()
 {
    exec_.Update();
    exec_.show();
+}
+
+void MainWindow::Bitplane()
+{
+   bitplane_.Update();
+   bitplane_.show();
 }
 
 /////////////////////////////////////////////////////////////////////////////

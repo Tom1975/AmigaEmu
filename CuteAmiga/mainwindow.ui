@@ -45,6 +45,7 @@
     <addaction name="actionMemory"/>
     <addaction name="actionCopper"/>
     <addaction name="actionExec"/>
+    <addaction name="actionBitplane"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -137,12 +138,17 @@
     <string>Exec window</string>
    </property>
   </action>
+  <action name="actionBitplane">
+   <property name="text">
+    <string>Bitplane window</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>Display</class>
    <extends>QWidget</extends>
-   <header>display.h</header>
+   <header location="global">display.h</header>
    <slots>
     <signal>signal1()</signal>
     <slot>Update()</slot>
