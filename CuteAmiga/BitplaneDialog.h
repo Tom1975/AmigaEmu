@@ -26,6 +26,8 @@ public:
 
 
 public slots:
+   void on_add_rasterport__clicked();
+   void on_add_rasterport__returnPressed();
 
     // Update the view
     virtual void Update();
@@ -49,5 +51,7 @@ private:
    Ui::BitplaneDialog *ui;
    AmigaEmulation* emu_handler_;
    QListWidgetItem * bp_tree_;
-   std::vector<bitplane_struct> list_items_;
+
+   std::vector <QListWidgetItem*> list_items_;
+   //std::vector<bitplane_struct> list_items_;
 };

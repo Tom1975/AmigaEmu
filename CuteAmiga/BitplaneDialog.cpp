@@ -10,8 +10,6 @@
 #define EXTRACT_WORD(c) \
    ((c[0]<<8)|(c[1]))
 
-//Q_DECLARE_METATYPE(BitplaneDialog::bitplane_struct);
-
 BitplaneDialog::BitplaneDialog(QWidget *parent) :
    QDialog(parent),
    ui(new Ui::BitplaneDialog)
@@ -40,6 +38,50 @@ void BitplaneDialog::SetEmulator(AmigaEmulation* emu_handler)
 
 }
 
+void BitplaneDialog::on_add_rasterport__returnPressed()
+{
+   on_add_rasterport__clicked();
+}
+
+void BitplaneDialog::on_add_rasterport__clicked()
+{
+   // Add a bitmap 
+   QString text = ui->rasterport_address_->text();
+   if (text.length() > 0)
+   {
+      bitplane_struct *bp_struct = new bitplane_struct;
+      unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
+
+      // Get address, width, height
+      QString text = ui->rasterport_address_->text();
+      if (text.length() > 0)
+      {
+         bool ok;
+         unsigned int addr = text.toInt(&ok, 16);
+
+         if (ok)
+         {
+            QListWidgetItem *item = new QListWidgetItem;
+            item->setText(QString("Bitmap #%1").arg(text.toUInt() + 4, 6, 16));
+
+            bp_struct->byte_per_row = EXTRACT_WORD((&ram[addr]));
+            bp_struct->rows = EXTRACT_WORD((&ram[addr + 2]));
+            bp_struct->depth = ram[addr + 5];
+            for (int i = 0; i < bp_struct->depth; i++)
+            {
+               // Get address
+               bp_struct->bitplanes[i] = EXTRACT_LONG((&ram[addr + 8 + i * 4]));
+            }
+
+            //      item->setData( Qt::UserRole, bp_struct);
+            item->setData(Qt::UserRole, (int)bp_struct);
+            list_items_.push_back(item);
+            ui->bitmap_list_->addItem(item);
+         }
+      }
+   }
+}
+
 void BitplaneDialog::Update()
 {
    // Send "update" command
@@ -59,15 +101,16 @@ void BitplaneDialog::UpdateBitplaneOverview()
    */
    if (list_items_.empty())
       return;
+   
+   QListWidgetItem* item = list_items_[0];
+   bitplane_struct* bp_struct = (bitplane_struct*)item->data(Qt::UserRole).toUInt();
 
-   bitplane_struct bp_struct = list_items_[0];
-
-   unsigned int addr_base = bp_struct.bitplanes[0];
+   unsigned int addr_base = bp_struct->bitplanes[0];
    unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
-   for (int i = 0; i < bp_struct.rows; i++)
+   for (int i = 0; i < bp_struct->rows; i++)
    {
       unsigned int * ptr = ui->display_->GetFrameBuffer(i);
-      for (int x = 0; x < bp_struct.byte_per_row; x++)
+      for (int x = 0; x < bp_struct->byte_per_row; x++)
       {
          unsigned char current_byte = ram[addr_base++];
          // add pixel
@@ -85,7 +128,7 @@ void BitplaneDialog::UpdateDebug()
 
    // update ui->display_
    // Get biplane address
-   Bitplanes* bp = emu_handler_->GetMotherboard()->GetBitplanes();
+   /*Bitplanes* bp = emu_handler_->GetMotherboard()->GetBitplanes();
    unsigned int nb_bitplanes_ = ((bp->bplcon0_ & 0x7000) >> 12);
 
    for (auto it : list_items_)
@@ -110,45 +153,7 @@ void BitplaneDialog::UpdateDebug()
       // Get address
       bp_struct.bitplanes[i] = bp->bplxpt_[i];
    }
-   //list_items_.push_back(item);
-   //ui->bitmap_list_->addItem(item);
-   //item->setData( Qt::UserRole, bp_struct);
-   
-
-   // add rasterport (if any)
-   QString text = ui->rasterport_address_->text();
-   if (text.length() > 0)
-   {
-      bitplane_struct bp_struct;
-      item = new QListWidgetItem;
-      item->setText( QString("Bitmap #%1").arg(text.toUInt()+4, 6, 16));
-
-      unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
-
-      // Get address, width, height
-      QString text = ui->rasterport_address_->text();
-      if (text.length() > 0)
-      {
-         bool ok;
-         unsigned int addr = text.toInt(&ok, 16);
-
-         if (ok)
-         {
-            bp_struct.byte_per_row = EXTRACT_WORD((&ram[addr]));
-            bp_struct.rows = EXTRACT_WORD((&ram[addr + 2]));
-            bp_struct.depth = ram[addr + 5];
-            for (int i = 0; i < bp_struct.depth; i++)
-            {
-               // Get address
-               bp_struct.bitplanes[i] = EXTRACT_LONG((&ram[addr + 8 + i * 4]));
-            }
-
-            //      item->setData( Qt::UserRole, bp_struct);
-            list_items_.push_back(bp_struct);
-            ui->bitmap_list_->addItem(item);
-         }
-      }
-   }
+   */
    // Get width / stride / height
    // update display
    UpdateBitplaneOverview();

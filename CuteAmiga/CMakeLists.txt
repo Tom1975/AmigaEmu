@@ -30,6 +30,7 @@ set ( UIS
  CopperDialog.ui
  ExecDialog.ui
 )
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Sources )
 
 if(WIN32)
