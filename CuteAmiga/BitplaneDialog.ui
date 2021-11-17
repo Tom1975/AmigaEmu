@@ -43,7 +43,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="add_raterport_">
+  <widget class="QPushButton" name="add_rasterport_">
    <property name="geometry">
     <rect>
      <x>140</x>

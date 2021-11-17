@@ -19,6 +19,12 @@ BitplaneDialog::BitplaneDialog(QWidget *parent) :
 
 BitplaneDialog::~BitplaneDialog()
 {
+   // Empty list
+   for (auto it : list_items_)
+   {
+      delete (bitplane_struct*)it->data(Qt::UserRole).toUInt();
+      delete it;
+   }
 }
 
 bool BitplaneDialog::event(QEvent *event)
@@ -38,6 +44,7 @@ void BitplaneDialog::SetEmulator(AmigaEmulation* emu_handler)
 
 }
 
+// Ajout de rasterport
 void BitplaneDialog::on_add_rasterport__returnPressed()
 {
    on_add_rasterport__clicked();
@@ -49,9 +56,6 @@ void BitplaneDialog::on_add_rasterport__clicked()
    QString text = ui->rasterport_address_->text();
    if (text.length() > 0)
    {
-      bitplane_struct *bp_struct = new bitplane_struct;
-      unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
-
       // Get address, width, height
       QString text = ui->rasterport_address_->text();
       if (text.length() > 0)
@@ -62,24 +66,53 @@ void BitplaneDialog::on_add_rasterport__clicked()
          if (ok)
          {
             QListWidgetItem *item = new QListWidgetItem;
-            item->setText(QString("Bitmap #%1").arg(text.toUInt() + 4, 6, 16));
-
-            bp_struct->byte_per_row = EXTRACT_WORD((&ram[addr]));
-            bp_struct->rows = EXTRACT_WORD((&ram[addr + 2]));
-            bp_struct->depth = ram[addr + 5];
-            for (int i = 0; i < bp_struct->depth; i++)
-            {
-               // Get address
-               bp_struct->bitplanes[i] = EXTRACT_LONG((&ram[addr + 8 + i * 4]));
-            }
-
-            //      item->setData( Qt::UserRole, bp_struct);
-            item->setData(Qt::UserRole, (int)bp_struct);
+            item->setText(QString("Bitmap #%1").arg(addr, 6, 16));
+            item->setData(Qt::UserRole, addr);
             list_items_.push_back(item);
             ui->bitmap_list_->addItem(item);
+
+            // Select this item, and update the bitplane list
+            ui->bitmap_list_->setCurrentItem(item, QItemSelectionModel::Current);
+            UpdateBitplaneList();
          }
       }
    }
+}
+
+void BitplaneDialog::UpdateBitmapStructure()
+{
+   QList<QListWidgetItem*> item_list = ui->bitmap_list_->selectedItems();
+   if (item_list.size() > 0)
+   {
+      unsigned int addr = item_list[0]->data(Qt::UserRole).toUInt();
+      unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
+
+      // get address from selected bitmap
+      current_bitmap_.byte_per_row = EXTRACT_WORD((&ram[addr]));
+      current_bitmap_.rows = EXTRACT_WORD((&ram[addr + 2]));
+      current_bitmap_.depth = ram[addr + 5];
+      for (int i = 0; i < current_bitmap_.depth && i < 8; i++)
+      {
+         // Get address
+         current_bitmap_.bitplanes[i] = EXTRACT_LONG((&ram[addr + 8 + i * 4]));
+      }
+   }
+   else
+   {
+      memset(&current_bitmap_, 0, sizeof(current_bitmap_));
+   }
+}
+
+// Select a rasterport
+void BitplaneDialog::on_bitmap_list__itemSelectionChanged()
+{
+   UpdateBitplaneList();
+}
+// Select a bitplane
+
+void BitplaneDialog::on_bitplanes_list__itemSelectionChanged()
+{
+   UpdateBitplaneOverview();
 }
 
 void BitplaneDialog::Update()
@@ -90,27 +123,37 @@ void BitplaneDialog::Update()
 
 }
 
+// Update
+void BitplaneDialog::UpdateBitplaneList()
+{
+   ui->bitplanes_list_->clear();
+
+   UpdateBitmapStructure();
+   for (int i = 0; i < current_bitmap_.depth && i < 8; i++)
+   {
+      QString label = QString("Bitplane #%1").arg(i);
+      ui->bitplanes_list_->addItem(label);
+   }
+   UpdateBitplaneOverview();
+}
+
 void BitplaneDialog::UpdateBitplaneOverview()
 {
-   // Depending on the biplane selected, display it.
-   /*QList<QListWidgetItem *> list_item = ui->bitmap_list_->selectedItems();
-   if (list_item.isEmpty())
-      return;
-
-   bitplane_struct bp_struct = list_item[0]->data(Qt::UserRole).value<bitplane_struct >();
-   */
-   if (list_items_.empty())
-      return;
+   // Get current bitplane from bitplane list
+   QList<QListWidgetItem*> item_list = ui->bitplanes_list_->selectedItems();
    
-   QListWidgetItem* item = list_items_[0];
-   bitplane_struct* bp_struct = (bitplane_struct*)item->data(Qt::UserRole).toUInt();
+   if (item_list.size() == 0 )
+      return;
 
-   unsigned int addr_base = bp_struct->bitplanes[0];
+   unsigned int index = ui->bitplanes_list_->currentRow();
+   bitplane_struct* bp_struct = &current_bitmap_;
+
+   unsigned int addr_base = bp_struct->bitplanes[index];
    unsigned char * ram = emu_handler_->GetMotherboard()->GetBus()->GetRam();
-   for (int i = 0; i < bp_struct->rows; i++)
+   for (int i = 0; i < bp_struct->rows && i < 300; i++)
    {
       unsigned int * ptr = ui->display_->GetFrameBuffer(i);
-      for (int x = 0; x < bp_struct->byte_per_row; x++)
+      for (int x = 0; x < bp_struct->byte_per_row && x < 100; x++)
       {
          unsigned char current_byte = ram[addr_base++];
          // add pixel
@@ -119,42 +162,11 @@ void BitplaneDialog::UpdateBitplaneOverview()
             ptr[x * 8 + b] = ((current_byte >> b) & 0x1) ? 0: 0xFFFFFF;
          }
       }
-   }
-   
+   }  
 }
 
 void BitplaneDialog::UpdateDebug()
 {
-
-   // update ui->display_
-   // Get biplane address
-   /*Bitplanes* bp = emu_handler_->GetMotherboard()->GetBitplanes();
-   unsigned int nb_bitplanes_ = ((bp->bplcon0_ & 0x7000) >> 12);
-
-   for (auto it : list_items_)
-   {
-      //delete it;
-   }
-   list_items_.clear();
-
-   ui->bitmap_list_->clear();
-
-   bitplane_struct bp_struct;
-   QListWidgetItem *item = new QListWidgetItem;
-
-   item->setText( QString("CURRENT BITPLANE"));
-   bp_struct.depth = nb_bitplanes_;
-
-   // byte per row ?
-   // rows ?
-
-   for (int i = 0; i < nb_bitplanes_; i++)
-   {
-      // Get address
-      bp_struct.bitplanes[i] = bp->bplxpt_[i];
-   }
-   */
-   // Get width / stride / height
    // update display
-   UpdateBitplaneOverview();
+   UpdateBitplaneList();
 }

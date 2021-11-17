@@ -21,13 +21,16 @@ public:
     void SetEmulator(AmigaEmulation* emu_handler);
     virtual bool event(QEvent *event);
 
+    void UpdateBitmapStructure();
     void UpdateDebug();
     void UpdateBitplaneOverview();
-
+    void UpdateBitplaneList();
 
 public slots:
    void on_add_rasterport__clicked();
    void on_add_rasterport__returnPressed();
+   void on_bitmap_list__itemSelectionChanged();
+   void on_bitplanes_list__itemSelectionChanged();
 
     // Update the view
     virtual void Update();
@@ -53,5 +56,5 @@ private:
    QListWidgetItem * bp_tree_;
 
    std::vector <QListWidgetItem*> list_items_;
-   //std::vector<bitplane_struct> list_items_;
+   bitplane_struct current_bitmap_;
 };

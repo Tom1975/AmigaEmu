@@ -73,7 +73,7 @@ void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_it
 
    unsigned long current_list_node = EXTRACT_LONG((&ram[list_adress]));
    // From head to tail...
-   while (current_list_node != 0  )
+   while (current_list_node != 0  && current_list_node < 0x7FFFF)
    {
       QTreeWidgetItem* item = new QTreeWidgetItem;
       // Add a device
