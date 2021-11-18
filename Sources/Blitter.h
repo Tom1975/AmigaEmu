@@ -81,4 +81,5 @@ private:
    unsigned int line_x_;
    unsigned int line_y_;
    unsigned int x_mod_;
+   short remain_;
 };

@@ -78,16 +78,16 @@ bool Blitter::DmaTick()
                   x_mod_ &= 0xF;
 
                   // if D > 0 : change line.
-                  if ((short)address_a_ > 0)
+                  if (remain_ > 0)
                   {
-                     address_a_ += modulo_a_;
-                     address_c_ += (inc_y*modulo_c_);
-                     address_d_ += (inc_y*modulo_c_);   // Undocumented : TODO = find about this one ...
+                     remain_ += (short)modulo_a_;
+                     address_c_ += (inc_y*(short)modulo_c_);
+                     address_d_ += (inc_y*(short)modulo_c_);   // Undocumented : TODO = find about this one ...
                      endloop = true;
                   }
                   else
                   {
-                     address_a_ += modulo_b_;
+                     remain_ += modulo_b_;
                   }
 
                }// while (x_mod_ != max_x && !endloop && window_height_ != 0);
@@ -103,12 +103,12 @@ bool Blitter::DmaTick()
                blt_d_dat_ = blt_d_dat_ | (1 << x_mod_);
 
                // Increase y (on the octant 0)
-               address_a_ += modulo_a_;
-               address_c_ += (inc_y*modulo_c_);
-               address_d_ += (inc_y*modulo_c_);   // Undocumented : TODO = find about this one ...
+               remain_ += (short)modulo_a_;
+               address_c_ += (inc_y*(short)modulo_c_);
+               address_d_ += (inc_y*(short)modulo_c_);   // Undocumented : TODO = find about this one ...
 
                // if D > 0 : change line.
-               if ((short)address_a_ > 0)
+               if (remain_ > 0)
                {
                   x_mod_ += inc_x;
                   x_mod_ &= 0xF;
@@ -121,7 +121,7 @@ bool Blitter::DmaTick()
                }
                else
                {
-                  address_a_ += modulo_b_;
+                  remain_ += modulo_b_;
                }
             }
             // If still on the same line, same word, continue.
@@ -198,6 +198,7 @@ void Blitter::SetBltSize(unsigned short data)
 
    line_x_ = address_c_;
    x_mod_ = (dmacon_->dmacon_ >> 12) & 0xF;
+   remain_ = (short)address_a_;
 }
 
 void Blitter::SetBltDat(unsigned char zone, unsigned short data)
