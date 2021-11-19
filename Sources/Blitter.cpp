@@ -60,7 +60,7 @@ bool Blitter::DmaTick()
 
             int inc_x = (bltcon1_ & 0x4) ? -1 : 1;
             int max_x = (bltcon1_ & 0x4) ? 0xF : 0;
-            int inc_y = (bltcon1_ & 0x10) ? 1 : -1;
+            int inc_y = (bltcon1_ & 0x10) ? -1 : 1;
 
             // SUD = 1 : increaqse x each time
             // decrease window height
