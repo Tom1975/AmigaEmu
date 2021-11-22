@@ -1,5 +1,9 @@
 *** Dessin kickstart :
 
+
+FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?
+
+
 FE8CF8 : FE8E43 dans A2 => Plantage !?
 FCB52C: jsr FCA8DC  => Pas de sortie
 FCAB4E: jsr FCBBD4  => Pas de sortie

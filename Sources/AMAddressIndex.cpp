@@ -42,6 +42,7 @@ void AMAddressIndex::Increment(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
+   // remove this
    address_to_read_ += (sizeof(unsigned short))*size_read_;
 }
 
@@ -86,6 +87,10 @@ bool AMAddressIndex::ReadComplete(unsigned int& address_to_read)
 {
    // Need to read !
    address_to_read = address_to_read_ + size_read_ * (sizeof(unsigned short));
+   //address_to_read = address_to_read_;
+   // TODO : check if we just shouldn't add something with +2 each time (no increment on "increment")
+   //address_to_read_ += 2;
+
    return size_read_ == size_to_read_;
 }
 
