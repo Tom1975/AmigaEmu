@@ -119,10 +119,44 @@ TEST(Cpu68k, CPU_MOVE_B_Dn_AbsoluteL)
 // MOVEM  :
 /////////////////////////////////////////
 // Size : WORD / LONG
-// D -> EA
+//    D -> EA
 //    D -> (An)
 //    D -> -(An)
-//    D -> (d16.An)
+//    .w D -> (d16.An)
+TEST(Cpu68k_MOVEM, CPU_MOVEM_W_D_D16AN)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetAddressRegister(1, 0x500);
+   test_engine.Get68k()->SetDataRegister(0, 0x77778899);
+   test_engine.Get68k()->SetDataRegister(1, 0x55556644);
+   unsigned char opcode[] = { 0x48, 0xA9, 0x00, 0x03, 0x00, 0x24}; // movem.w D0/D1,$24(A1)
+   unsigned char check_buffer[] = { 0x5A, 0x5A, 0x88, 0x99, 0x66, 0x44, 0x5A };
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x5A, 512 * 1024);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   ASSERT_EQ(memcmp(&ram[0x522], check_buffer, sizeof(check_buffer)), 0); // Check Memory written
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(1), 0x500); // Check A1
+}
+
+TEST(Cpu68k_MOVEM, CPU_MOVEM_W_D16AN_D)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetAddressRegister(1, 0x500);
+   test_engine.Get68k()->SetDataRegister(2, 0x77777777);
+   test_engine.Get68k()->SetDataRegister(3, 0x88888888);
+   unsigned char opcode[] = { 0x4C, 0xA9, 0x00, 0x0C, 0x00, 0x24   }; // movem.w ($24,A1), D2/D3/
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x5A, 512 * 1024);
+   ram[0x524] = 0x12;
+   ram[0x525] = 0x34;
+   ram[0x526] = 0x56;
+   ram[0x527] = 0x78;
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(1), 0x500); // Check A1
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(2), 0x77771234); // Check D2
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(3), 0x88885678); // Check D3
+}
 //    D -> (d8.An.Xn)
 //    D -> (xxx).W
 //    D -> (xxx).L

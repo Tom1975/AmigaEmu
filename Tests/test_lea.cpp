@@ -22,9 +22,9 @@ TEST(Cpu68k, CPU_LEA_AN)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetAddressRegister(1, 0x123456);
-   unsigned char opcode[] = { 0x41, 0xE1}; // LEA (A1),A0
+   unsigned char opcode[] = { 0x4B, 0xD1}; // LEA (A1),A5
    test_engine.RunOpcode(opcode, sizeof(opcode), 1);
-   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(0), 0x123456); // Check : A0 = FBFFF0
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(5), 0x123456); // Check : A0 = FBFFF0
    ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000D8); // Check : pc = 6
 }
  
@@ -44,11 +44,11 @@ TEST(Cpu68k, CPU_LEA_i8_AN_XN)
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetDataRegister(1, 0x100);
    test_engine.Get68k()->SetAddressRegister(0, 0x2000);
-   // LEA (8, A0, D1), A1; A0 = &2000, D1=&100, index = &10; Result => A1 = A0 + D1*4(long) + 8 => &2410
+   // LEA (8, A0, D1), A1; A0 = &2000, D1=&100, index = &10; Result => A1 = A0 + D1(long) + 8 => &2110
    unsigned char opcode[] = { 0x43,0xF0,0x18,0x10 }; 
    // Tick 8x time to init the fetch
    test_engine.RunOpcode(opcode, sizeof(opcode), 1);
-   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(1), 0x2410); // Check : SP = 0x40000
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(1), 0x2110); // Check : SP = 0x40000
    ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000DA); // Check : pc = 6
 }
 
@@ -60,7 +60,7 @@ TEST(Cpu68k, CPU_LEA_W)
    unsigned char opcode[] = { 0x4F,0xF8,0x00,0x04 }; // LEA 0x4, SP
    // Tick 8x time to init the fetch
    test_engine.RunOpcode(opcode, sizeof(opcode), 1);
-   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(7), 0x4); // Check : SP = 0x4
+   ASSERT_EQ(test_engine.Get68k()->GetDataSsp(), 0x4); // Check : SP = 0x4
    ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000DA); // Check : pc = 6
 }
 
@@ -71,6 +71,6 @@ TEST(Cpu68k, CPU_LEA_L)
    unsigned char opcode[] = { 0x4F,0xF9,0x00,0x04,0x00,0x00 }; // LEA 0x40000, SP
    // Tick 8x time to init the fetch
    test_engine.RunOpcode(opcode, sizeof(opcode), 1);
-   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(7), 0x40000); // Check : SP = 0x40000
+   ASSERT_EQ(test_engine.Get68k()->GetDataSsp(), 0x40000); // Check : SP = 0x40000
    ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000DC); // Check : pc = 6
 }

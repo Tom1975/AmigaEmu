@@ -18,7 +18,7 @@
 // CMP
 TEST(Cpu68k, CmpI)
 {
-   unsigned int data_register_array[8] = { 0 };
+   unsigned int data_register_array[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
    unsigned int pc = 0;
    unsigned int usp, ssp;
    unsigned short sr = 0;
@@ -32,7 +32,7 @@ TEST(Cpu68k, CmpI)
    ASSERT_EQ(sr, 0x4); //  !N, Z, !V, !C,
 
    data_register.Cmp(0x40, sr, true);
-   ASSERT_EQ(sr, 0xB); //  N, !Z, V, C
+   ASSERT_EQ(sr, 0x9); //  N, !Z, V, C
 
    data_register.Cmp(0x3E, sr, true);
    ASSERT_EQ(sr, 0x0); //  !N, !Z, !V, !C
