@@ -136,6 +136,7 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
    }
    else
    {
+      motherboard_->GetDenise()->DisplayWordBkg();
    }
    return false;
 }
