@@ -2,7 +2,7 @@
 
 
 FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?
-
+FC55D8: movem.w D0/D1, ($24,A1) => D0 ecrit ok, D1 shifted by 2 bytes
 
 FE8CF8 : FE8E43 dans A2 => Plantage !?
 FCB52C: jsr FCA8DC  => Pas de sortie
