@@ -1,3 +1,6 @@
+Pb : Ecriture FF a6+129 (79f) (flag CPU 68000/10/20) => Pb lors des it..
+
+...
 *** Dessin kickstart :
 
 
