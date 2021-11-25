@@ -1,15 +1,4 @@
-Pb : 
-FC125C : crash...
-addq.b    #1,$0127(A6)  => Ecrit sur 79e au lieu de 79d
-
-OK Ecriture FF a6+129 (79f) (flag CPU 68000/10/20) => Pb lors des it..
-
-...
 *** Dessin kickstart :
-
-
-FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?
-FC55D8: movem.w D0/D1, ($24,A1) => D0 ecrit ok, D1 shifted by 2 bytes
 
 FE8CF8 : FE8E43 dans A2 => Plantage !?
 FCB52C: jsr FCA8DC  => Pas de sortie
@@ -236,6 +225,10 @@ unsigned int id_lecteur_2
 ********************************
 *** HISTORIQUE 
 ********************************
+
+**** Dessin Kickstart
+FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?
+FC55D8: movem.w D0/D1, ($24,A1) => D0 ecrit ok, D1 shifted by 2 bytes => OK
 
 **** Blocage dans trackdisk 
 
