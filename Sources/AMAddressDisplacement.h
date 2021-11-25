@@ -50,6 +50,7 @@ protected:
    unsigned int result_;
    unsigned int size_read_;
    unsigned int size_to_read_;
-   unsigned int address_result_;
+   unsigned int address_read_;
+   unsigned int address_write_;
 
 };

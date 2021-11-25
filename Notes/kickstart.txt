@@ -1,4 +1,8 @@
-Pb : Ecriture FF a6+129 (79f) (flag CPU 68000/10/20) => Pb lors des it..
+Pb : 
+FC125C : crash...
+addq.b    #1,$0127(A6)  => Ecrit sur 79e au lieu de 79d
+
+OK Ecriture FF a6+129 (79f) (flag CPU 68000/10/20) => Pb lors des it..
 
 ...
 *** Dessin kickstart :

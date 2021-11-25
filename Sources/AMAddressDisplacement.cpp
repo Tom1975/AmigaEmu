@@ -61,7 +61,7 @@ void AMAddressDisplacement::Decrement(int nb_increment)
 {
    // Reinit the size read
    size_read_ = 0;
-   address_result_ -= (sizeof(unsigned short))*size_to_read_;
+   address_write_ -= (sizeof(unsigned short))*size_to_read_;
 }
 
 //////////////////
@@ -83,7 +83,7 @@ unsigned int AMAddressDisplacement::GetU32()
 
 unsigned int AMAddressDisplacement::GetEffectiveAddress()
 {
-   return address_result_;
+   return address_read_;
 }
 
 //////////////////
@@ -97,23 +97,29 @@ bool AMAddressDisplacement::ReadComplete(unsigned int& address_to_read)
 {
    // Need to read ?
    //address_to_read = address_result_ +size_read_ * (sizeof(unsigned short));
-   address_to_read = address_result_;
+   address_to_read = address_read_;
 
    // TODO : check if we just shouldn't add something with +2 each time (no increment on "increment")
    if (size_ == Byte)
    {
       if (size_read_ > size_)
       {
-         address_result_ += 1;
          return true;
+      }
+      else
+      {
+         address_read_ += 1;
       }
    }
    else
    {
       if (size_read_ == size_)
       {
-         address_result_ += 2;
          return true;
+      }
+      else
+      {
+         address_read_ += 2;
       }
    }
    return false;
@@ -126,7 +132,7 @@ void AMAddressDisplacement::AddWord(unsigned short value)
       displacement_read_ = true;
       displacement_ = static_cast<short> (value);
 
-      address_result_ = ((register_number_ == -1) ? (*pc_ - 2) : *current_register_) + displacement_;
+      address_write_ = address_read_ = ((register_number_ == -1) ? (*pc_ - 2) : *current_register_) + displacement_;
    }
    else
    {
@@ -202,9 +208,9 @@ bool AMAddressDisplacement::WriteComplete()
 }
 unsigned short AMAddressDisplacement::WriteNextWord(unsigned int& address_to_write)
 {
-   address_to_write = address_result_;
+   address_to_write = address_write_;
    written_input_--;
-   address_result_ += 2;
+   address_write_ += 2;
    return input_ >> (written_input_ * 16);
 }
 

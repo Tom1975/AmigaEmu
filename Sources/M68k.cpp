@@ -131,7 +131,7 @@ void M68k::SetBus(Bus* bus)
 // Main function : Tick
 void M68k::Tick()
 {
-   static unsigned int oldpc, oldpc2 = 0;
+   static unsigned int oldpc, oldpc2 = 0; 
     // Handle bus state
    if (new_opcode_ == 0)
       BusManagement();
