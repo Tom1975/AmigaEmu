@@ -1,4 +1,6 @@
 *** Dessin kickstart :
+FC5558: sub.b  D0, ($1F,A1)       => Pasd e modif de a439 (1f,a1)...
+
 
 FE8CF8 : FE8E43 dans A2 => Plantage !?
 FCB52C: jsr FCA8DC  => Pas de sortie

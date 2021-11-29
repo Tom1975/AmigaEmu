@@ -477,7 +477,12 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x42:  // BLTCON1
          blitter_->SetBltCon1(data);
          break;
-
+      case 0x44:  // BLTAFWM
+         blitter_->SetBltMaskA(true, data);
+         break;
+      case 0x46:  // BLTALWM
+         blitter_->SetBltMaskA(false, data);
+         break;
       case 0x48:  // BLTCPTH
          blitter_->SetBltPt(0x22, data);
          break;

@@ -278,3 +278,15 @@ void Blitter::SetBltMod(unsigned char zone, unsigned short data)
       break;
    }
 }
+
+void Blitter::SetBltMaskA(bool low, unsigned short data)
+{
+   if (low)
+   {
+      mask_a_ = (mask_a_ & 0xFFFF0000) | data;
+   }
+   else
+   {
+      mask_a_ = (mask_a_ & 0xFFFF) | (data<<16);
+   }
+}

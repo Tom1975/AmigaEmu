@@ -29,6 +29,7 @@ public:
    void SetBltDat(unsigned char zone, unsigned short data);
    void SetBltPt(unsigned char zone, unsigned short data);
    void SetBltMod (unsigned char zone, unsigned short data);
+   void SetBltMaskA (bool low, unsigned short data);
    void SetBltSize(unsigned short data);
    void SetDmaCon(DMAControl* dmacon);
 
@@ -63,6 +64,7 @@ private:
    // A
    unsigned short modulo_a_;
    unsigned int address_a_;
+   unsigned int mask_a_;
    // B
    unsigned short modulo_b_;
    unsigned int address_b_;
