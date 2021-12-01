@@ -178,6 +178,268 @@ bool Blitter::DmaTick()
    return dma_used;
 }
 
+void Blitter::Reset()
+{
+   blitter_state_ = BLT_IDLE;
+
+   internal_.r_d_avail = 0;
+   internal_.r_blt_done = 0;
+   internal_.r_ash_inc = 0;
+   internal_.r_ash_dec = 0;
+   internal_.r_bsh_dec = 0;
+   internal_.r_dma_blt_p3 = 0;
+   internal_.r_pinc_blt_p3 = 0;
+   internal_.r_pdec_blt_p3 = 0;
+   internal_.r_madd_blt_p3 = 0;
+   internal_.r_msub_blt_p3 = 0;
+   internal_.r_rga_blt_p3 = 0x1FE;
+   internal_.r_rga_bltp_p3 = 0x3FE;
+   internal_.r_rga_bltm_p3 = 0x1FE;
+   internal_.r_ch_blt_p3 = 0x1F;
+   internal_.r_last_cyc_p3 = 0;
+}
+
+bool Blitter::DmaTickStateMachine()
+{
+   switch (blitter_state_)
+   {
+   case BLT_IDLE:
+      internal_.r_d_avail = 0;
+      internal_.r_ash_inc = 0;
+      internal_.r_ash_dec  = 0;
+      internal_.r_bsh_dec  = 0;
+      internal_.r_blt_done  = 0;
+      internal_.r_dma_blt_p3  = 0;
+      internal_.r_pinc_blt_p3  = 0;
+      internal_.r_pdec_blt_p3  = 0;
+      internal_.r_madd_blt_p3  = 0;
+      internal_.r_msub_blt_p3  = 0;
+      internal_.r_rga_blt_p3 = 0x1FE;
+      internal_.r_rga_bltp_p3 = 0x3FE;
+      internal_.r_rga_bltm_p3 = 0x1FE;
+      internal_.r_ch_blt_p3 = 0x1F;
+      if (internal_.r_stblit) blitter_state_ = BLT_INIT;
+      break;
+   case BLT_INIT:
+      internal_.r_d_avail  = 0;
+      internal_.r_ash_inc  = 0;
+      internal_.r_ash_dec  = 0;
+      internal_.r_bsh_dec  = 0;
+      internal_.r_blt_done  = 0;
+      internal_.r_dma_blt_p3  = 0;
+      internal_.r_pinc_blt_p3  = 0;
+      internal_.r_pdec_blt_p3  = 0;
+      internal_.r_madd_blt_p3  = 0;
+      internal_.r_msub_blt_p3  = 0;
+      internal_.r_rga_blt_p3 = 0x1FE;
+      internal_.r_rga_bltp_p3 = 0x3FE;
+      internal_.r_rga_bltm_p3 = 0x1FE;
+      internal_.r_ch_blt_p3 = 0x1F;
+      if (bltcon1_ & 1)
+         blitter_state_ = BLT_LINE_1;
+      else
+         blitter_state_ = BLT_SRC_A;
+      break;
+   case BLT_SRC_A:
+      break;
+   case BLT_SRC_B:
+      break;
+   case BLT_SRC_C:
+      break;
+   case BLT_DST_D:
+      break;
+   
+   // Update error accumulator
+   case BLT_LINE_1:
+      internal_.r_ash_inc = 0;
+      internal_.r_ash_dec = 0;
+      internal_.r_bsh_dec = 0;
+      internal_.r_dma_blt_p3 = 0;
+      internal_.r_pinc_blt_p3 = 0;
+      internal_.r_pdec_blt_p3 = 0;
+      internal_.r_madd_blt_p3 = 1;
+      internal_.r_msub_blt_p3 = 0;
+      internal_.r_rga_bltp_p3 = 0x250;  // BLTAPTR
+      if (bltcon1_ & 0x40)
+         internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD
+      else
+         internal_.r_rga_bltm_p3 = 0x064; // BLTAMOD
+      internal_.r_rga_blt_p3 = 0x1FE;
+      internal_.r_ch_blt_p3 = 0x1F;
+      blitter_state_ = BLT_LINE_2;
+      break;
+   // Fetch data with channel C
+   case BLT_LINE_2:
+      internal_.r_ash_inc = 0;
+      internal_.r_ash_dec = 0;
+      internal_.r_bsh_dec = 0;
+      internal_.r_dma_blt_p3 = bltcon0_ & 0x200;
+      internal_.r_pinc_blt_p3 = 0;
+      internal_.r_pdec_blt_p3 = 0;
+      internal_.r_madd_blt_p3 = 0;
+      internal_.r_msub_blt_p3 = 0;
+      internal_.r_rga_bltp_p3 = 0x248; // BLTCPTR
+      internal_.r_rga_bltm_p3 = 0x1FE;
+      internal_.r_rga_blt_p3 = 0x070;  // BLTCDAT
+      internal_.r_ch_blt_p3 = 0x1A;
+      blitter_state_ = BLT_LINE_3;
+      break;
+   // Free cycle
+   case BLT_LINE_3:
+      internal_.r_ash_inc = 0;
+      internal_.r_ash_dec = 0;
+      internal_.r_bsh_dec = 0;
+      internal_.r_dma_blt_p3 = 0;
+      internal_.r_pinc_blt_p3 = 0;
+      internal_.r_pdec_blt_p3 = 0;
+      internal_.r_madd_blt_p3 = 0;
+      internal_.r_msub_blt_p3 = 0;
+      internal_.r_rga_bltp_p3 = 0x3FE;
+      internal_.r_rga_bltm_p3 = 0x1FE;
+      internal_.r_rga_blt_p3 = 0x1FE;
+      internal_.r_ch_blt_p3 = 0x1F;
+      blitter_state_ = BLT_LINE_4;
+      break;
+   case BLT_LINE_4:
+      internal_.r_d_avail = 1;
+
+         //          |     
+         //      \   |   /    
+         //       \ 3|1 /
+         //        \ | /     
+         //      7  \|/  6
+         //  --------*--------
+         //      5  /|\  4
+         //        / | \     
+         //       / 2|0 \
+          //      /   |   \      
+          //          |
+          //
+          // X displacement :
+          // ----------------
+          // if [0,1,4,6]
+          //   if (ash == 15)
+          //     if [4,6] || sign = 0
+          //       ptr++
+          //     endif
+          //   endif
+          //   ash++
+          // else
+          //   if (ash == 0)
+          //     if [5,7] || sign = 0
+          //       ptr--
+          //     endif
+          //   endif
+          //   ash--
+          // endif
+          //
+          // Y displacement :
+          // ----------------
+          // if [0,2,4,5]
+          //   if [0,2] || sign = 0
+          //     ptr += modulo
+          //   endif
+          // else
+          //   if [1,3] || sign = 0
+          //     ptr -= modulo
+          //   endif
+          // endif
+          //
+         case (w_OCTANT)
+         3'd0 :
+         begin
+         r_ash_inc <= 1'b1;
+         r_ash_dec <= 1'b0;
+         r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
+      r_pdec_blt_p3 <= 1'b0;
+         r_madd_blt_p3 <= 1'b1;
+         r_msub_blt_p3 <= 1'b0;
+         end
+         3'd1 :
+         begin
+         r_ash_inc <= 1'b1;
+         r_ash_dec <= 1'b0;
+         r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
+      r_pdec_blt_p3 <= 1'b0;
+         r_madd_blt_p3 <= 1'b0;
+         r_msub_blt_p3 <= 1'b1;
+         end
+         3'd2 :
+         begin
+         r_ash_inc <= 1'b0;
+         r_ash_dec <= 1'b1;
+         r_pinc_blt_p3 <= 1'b0;
+         r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
+      r_madd_blt_p3 <= 1'b1;
+         r_msub_blt_p3 <= 1'b0;
+         end
+         3'd3 :
+         begin
+         r_ash_inc <= 1'b0;
+         r_ash_dec <= 1'b1;
+         r_pinc_blt_p3 <= 1'b0;
+         r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
+      r_madd_blt_p3 <= 1'b0;
+         r_msub_blt_p3 <= 1'b1;
+         end
+         3'd4 :
+         begin
+         r_ash_inc <= 1'b1;
+         r_ash_dec <= 1'b0;
+         r_pinc_blt_p3 <= r_ash_msk[15];
+      r_pdec_blt_p3 <= 1'b0;
+         r_madd_blt_p3 <= ~bltsign;
+      r_msub_blt_p3 <= 1'b0;
+         end
+         3'd5 :
+         begin
+         r_ash_inc <= 1'b0;
+         r_ash_dec <= 1'b1;
+         r_pinc_blt_p3 <= 1'b0;
+         r_pdec_blt_p3 <= r_ash_msk[0];
+      r_madd_blt_p3 <= ~bltsign;
+      r_msub_blt_p3 <= 1'b0;
+         end
+         3'd6 :
+         begin
+         r_ash_inc <= 1'b1;
+         r_ash_dec <= 1'b0;
+         r_pinc_blt_p3 <= r_ash_msk[15];
+      r_pdec_blt_p3 <= 1'b0;
+         r_madd_blt_p3 <= 1'b0;
+         r_msub_blt_p3 <= ~bltsign;
+      end
+         3'd7 :
+         begin
+         r_ash_inc <= 1'b0;
+         r_ash_dec <= 1'b1;
+         r_pinc_blt_p3 <= 1'b0;
+         r_pdec_blt_p3 <= r_ash_msk[0];
+      r_madd_blt_p3 <= 1'b0;
+         r_msub_blt_p3 <= ~bltsign;
+      end
+         endcase
+         r_bsh_dec <= 1'b1;
+
+         //if (r_d_avail)
+         r_rga_bltp_p3 <= 10'h248; // BLTCPTR
+         //else
+         //  r_rga_bltp_p3 <= 10'h254; // BLTDPTR
+         r_rga_bltm_p3 <= 9'h060;  // BLTCMOD
+         if (r_USEx[1]) begin
+            r_rga_blt_p3 <= 9'h000; // BLTDDAT
+            r_ch_blt_p3 <= 5'h1B;
+            end else begin
+            r_rga_blt_p3 <= 9'h1FE; // Idling
+            r_ch_blt_p3 <= 5'h1F;
+            end
+      break;
+
+   }
+
+   return false;
+}
+
 //////////////////////////////////////////////
 // Blitter Register access
 void Blitter::SetDmaCon(DMAControl* dmacon)
@@ -199,6 +461,10 @@ void Blitter::SetBltSize(unsigned short data)
    line_x_ = address_c_;
    x_mod_ = (dmacon_->dmacon_ >> 12) & 0xF;
    remain_ = (short)address_a_;
+
+   internal_.r_stblit = (dmacon_->dmacon_ & 0x40) ? 1 : 0;
+   internal_.r_bltbusy = (dmacon_->dmacon_ & 0x40) ? 1 : 0;
+
 }
 
 void Blitter::SetBltDat(unsigned char zone, unsigned short data)

@@ -15,11 +15,14 @@ public:
    void Init(Motherboard* motherboard)
    {
       motherboard_ = motherboard;
+      Reset();
    }
+   void Reset();
 
    //////////////////////////////////////////////
    // Actions
    bool DmaTick();
+   bool DmaTickStateMachine ();
 
    //////////////////////////////////////////////
    // Blitter Register access
@@ -38,6 +41,43 @@ private:
 
    Motherboard* motherboard_;
    DMAControl * dmacon_;
+
+   ////////////////////////////////////////////
+   // Blitter state machine
+   typedef enum {
+      BLT_IDLE,
+      BLT_INIT,
+      BLT_SRC_A,
+      BLT_SRC_B,
+      BLT_SRC_C,
+      BLT_DST_D,
+      BLT_LINE_1,
+      BLT_LINE_2,
+      BLT_LINE_3,
+      BLT_LINE_4,
+   } BlitterState;
+   BlitterState blitter_state_;
+
+   struct InnerRegister
+   {
+      int r_stblit : 1;
+      int r_bltbusy : 1;
+      int r_d_avail : 1;
+      int r_blt_done : 1;
+      int r_ash_inc : 1;
+      int r_ash_dec : 1;
+      int r_bsh_dec : 1;
+      int r_dma_blt_p3 : 1;
+      int r_pinc_blt_p3 : 1;
+      int r_pdec_blt_p3 : 1;
+      int r_madd_blt_p3 : 1;
+      int r_msub_blt_p3 : 1;
+      int r_rga_blt_p3 : 9;
+      int r_rga_bltp_p3 : 10;
+      int r_rga_bltm_p3 : 9;
+      int r_ch_blt_p3 : 5;
+      int r_last_cyc_p3 : 1;
+   } internal_;     
 
    ////////////////////////////////////////////
    // Blitter engine

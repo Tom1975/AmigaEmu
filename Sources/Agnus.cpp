@@ -18,6 +18,8 @@ void Agnus::Reset()
    hsync_ = vsync_ = vblank_ = 0;
    lof_ = 0;
    ddfstrt_ = ddfstop_ = 0;
+
+   blitter_.Reset();
 }
 
 void Agnus::Tick(bool up)
