@@ -31,24 +31,28 @@ bool Blitter::DmaTick()
       if ((bltcon0_ & 0x800) && ((channel_read_ & 0x8) == 0))
       {
          // A is enabled, and not read yet
+         blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
          pipeline_[pipeline_counter_++] = blt_a_dat_;
          channel_read_ |= 8;
       }
       else if ((bltcon0_ & 0x400) && ((channel_read_ & 0x4) == 0))
       {
          // B is enabled, and not read yet
+         blt_b_dat_ = motherboard_->GetBus()->Read16(address_b_);
          pipeline_[pipeline_counter_++] = blt_b_dat_;
          channel_read_ |= 4;
       }
       else if ((bltcon0_ & 0x200) && ((channel_read_ & 0x2) == 0))
       {
          // C is enabled, and not read yet
+         blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_);
          pipeline_[pipeline_counter_++] = blt_c_dat_;
          channel_read_ |= 2;
       }
       else
       {
          // pipeline is full : process the first part
+         // LINE MODE
          if (bltcon1_ & 1)
          {
             // Set few variable, depending on the octant
@@ -251,15 +255,8 @@ bool Blitter::DmaTickStateMachine()
    
    // Update error accumulator
    case BLT_LINE_1:
-      internal_.r_ash_inc = 0;
-      internal_.r_ash_dec = 0;
-      internal_.r_bsh_dec = 0;
-      internal_.r_dma_blt_p3 = 0;
-      internal_.r_pinc_blt_p3 = 0;
-      internal_.r_pdec_blt_p3 = 0;
-      internal_.r_madd_blt_p3 = 1;
-      internal_.r_msub_blt_p3 = 0;
-      internal_.r_rga_bltp_p3 = 0x250;  // BLTAPTR
+      blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
+
       if (bltcon1_ & 0x40)
          internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD
       else
@@ -345,7 +342,7 @@ bool Blitter::DmaTickStateMachine()
           //   endif
           // endif
           //
-         case (w_OCTANT)
+/*         case (w_OCTANT)
          3'd0 :
          begin
          r_ash_inc <= 1'b1;
@@ -433,6 +430,7 @@ bool Blitter::DmaTickStateMachine()
             r_rga_blt_p3 <= 9'h1FE; // Idling
             r_ch_blt_p3 <= 5'h1F;
             end
+            */
       break;
 
    }

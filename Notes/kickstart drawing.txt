@@ -1,3 +1,19 @@
+Line drawing:
+
+1- BLT_INIT = bltcon1
+2- LINE1 = BLTAPTR, (sign)?BLTBMOD/BLTAMOD
+3- LINE2 = r_USEx[1] (use C ?), CPTR=> C DAT
+3- LINE3 = -
+4- LINE4 = SWITCH OCTANT :
+	x : ptr/ash(+/-)
+	y : ptr+/- modulo
+
+
+
+
+
+
+
 FF 01 23 0B => Color 05;  Move 23+46, 0B+28 (69,33)
 3A 0B		=> Draw 46+3a; 28+0b (69,33) - (80, 33) : 
 OCTANT : octant 0/7	BLTCON1 : F041
