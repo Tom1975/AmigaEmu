@@ -257,7 +257,7 @@ bool Blitter::DmaTickStateMachine()
    case BLT_LINE_1:
       blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
 
-      if (bltcon1_ & 0x40)
+      if (bltcon1_ & 0x40) // BLTSIGN
          internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD
       else
          internal_.r_rga_bltm_p3 = 0x064; // BLTAMOD
@@ -275,7 +275,7 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_pdec_blt_p3 = 0;
       internal_.r_madd_blt_p3 = 0;
       internal_.r_msub_blt_p3 = 0;
-      internal_.r_rga_bltp_p3 = 0x248; // BLTCPTR
+      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
       internal_.r_rga_bltm_p3 = 0x1FE;
       internal_.r_rga_blt_p3 = 0x070;  // BLTCDAT
       internal_.r_ch_blt_p3 = 0x1A;
@@ -342,95 +342,121 @@ bool Blitter::DmaTickStateMachine()
           //   endif
           // endif
           //
-/*         case (w_OCTANT)
-         3'd0 :
-         begin
-         r_ash_inc <= 1'b1;
-         r_ash_dec <= 1'b0;
-         r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
-      r_pdec_blt_p3 <= 1'b0;
-         r_madd_blt_p3 <= 1'b1;
-         r_msub_blt_p3 <= 1'b0;
-         end
-         3'd1 :
-         begin
-         r_ash_inc <= 1'b1;
-         r_ash_dec <= 1'b0;
-         r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
-      r_pdec_blt_p3 <= 1'b0;
-         r_madd_blt_p3 <= 1'b0;
-         r_msub_blt_p3 <= 1'b1;
-         end
-         3'd2 :
-         begin
-         r_ash_inc <= 1'b0;
-         r_ash_dec <= 1'b1;
-         r_pinc_blt_p3 <= 1'b0;
-         r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
-      r_madd_blt_p3 <= 1'b1;
-         r_msub_blt_p3 <= 1'b0;
-         end
-         3'd3 :
-         begin
-         r_ash_inc <= 1'b0;
-         r_ash_dec <= 1'b1;
-         r_pinc_blt_p3 <= 1'b0;
-         r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
-      r_madd_blt_p3 <= 1'b0;
-         r_msub_blt_p3 <= 1'b1;
-         end
-         3'd4 :
-         begin
-         r_ash_inc <= 1'b1;
-         r_ash_dec <= 1'b0;
-         r_pinc_blt_p3 <= r_ash_msk[15];
-      r_pdec_blt_p3 <= 1'b0;
-         r_madd_blt_p3 <= ~bltsign;
-      r_msub_blt_p3 <= 1'b0;
-         end
-         3'd5 :
-         begin
-         r_ash_inc <= 1'b0;
-         r_ash_dec <= 1'b1;
-         r_pinc_blt_p3 <= 1'b0;
-         r_pdec_blt_p3 <= r_ash_msk[0];
-      r_madd_blt_p3 <= ~bltsign;
-      r_msub_blt_p3 <= 1'b0;
-         end
-         3'd6 :
-         begin
-         r_ash_inc <= 1'b1;
-         r_ash_dec <= 1'b0;
-         r_pinc_blt_p3 <= r_ash_msk[15];
-      r_pdec_blt_p3 <= 1'b0;
-         r_madd_blt_p3 <= 1'b0;
-         r_msub_blt_p3 <= ~bltsign;
-      end
-         3'd7 :
-         begin
-         r_ash_inc <= 1'b0;
-         r_ash_dec <= 1'b1;
-         r_pinc_blt_p3 <= 1'b0;
-         r_pdec_blt_p3 <= r_ash_msk[0];
-      r_madd_blt_p3 <= 1'b0;
-         r_msub_blt_p3 <= ~bltsign;
-      end
-         endcase
-         r_bsh_dec <= 1'b1;
+         //         case (w_OCTANT)
+      switch ((bltcon1_ >> 3) & 0x7)
+      {
+      case 0:
+         if ( remain_ >= 0)
+         {
+            if (x_mod_ & 0x8000)
+            {
+               x_mod_ = 1;
+               address_c_++;
+               address_d_++;
+            }
+            remain_ += (short)modulo_a_;
+         }
+         else
+         {
+            x_mod_ << 1;
+         }
+         address_c_ += (short)modulo_c_;
+         address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
 
-         //if (r_d_avail)
-         r_rga_bltp_p3 <= 10'h248; // BLTCPTR
-         //else
-         //  r_rga_bltp_p3 <= 10'h254; // BLTDPTR
-         r_rga_bltm_p3 <= 9'h060;  // BLTCMOD
-         if (r_USEx[1]) begin
-            r_rga_blt_p3 <= 9'h000; // BLTDDAT
-            r_ch_blt_p3 <= 5'h1B;
-            end else begin
-            r_rga_blt_p3 <= 9'h1FE; // Idling
-            r_ch_blt_p3 <= 5'h1F;
+            
+            /*3'd0 :
+            begin
+            r_ash_inc <= 1'b1;
+            r_ash_dec <= 1'b0;
+            r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
+         r_pdec_blt_p3 <= 1'b0;
+            r_madd_blt_p3 <= 1'b1;
+            r_msub_blt_p3 <= 1'b0;
             end
             */
+         break;
+
+                  /*
+                  3'd1 :
+                  begin
+                  r_ash_inc <= 1'b1;
+                  r_ash_dec <= 1'b0;
+                  r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
+               r_pdec_blt_p3 <= 1'b0;
+                  r_madd_blt_p3 <= 1'b0;
+                  r_msub_blt_p3 <= 1'b1;
+                  end
+                  3'd2 :
+                  begin
+                  r_ash_inc <= 1'b0;
+                  r_ash_dec <= 1'b1;
+                  r_pinc_blt_p3 <= 1'b0;
+                  r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
+               r_madd_blt_p3 <= 1'b1;
+                  r_msub_blt_p3 <= 1'b0;
+                  end
+                  3'd3 :
+                  begin
+                  r_ash_inc <= 1'b0;
+                  r_ash_dec <= 1'b1;
+                  r_pinc_blt_p3 <= 1'b0;
+                  r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
+               r_madd_blt_p3 <= 1'b0;
+                  r_msub_blt_p3 <= 1'b1;
+                  end
+                  3'd4 :
+                  begin
+                  r_ash_inc <= 1'b1;
+                  r_ash_dec <= 1'b0;
+                  r_pinc_blt_p3 <= r_ash_msk[15];
+               r_pdec_blt_p3 <= 1'b0;
+                  r_madd_blt_p3 <= ~bltsign;
+               r_msub_blt_p3 <= 1'b0;
+                  end
+                  3'd5 :
+                  begin
+                  r_ash_inc <= 1'b0;
+                  r_ash_dec <= 1'b1;
+                  r_pinc_blt_p3 <= 1'b0;
+                  r_pdec_blt_p3 <= r_ash_msk[0];
+               r_madd_blt_p3 <= ~bltsign;
+               r_msub_blt_p3 <= 1'b0;
+                  end
+                  3'd6 :
+                  begin
+                  r_ash_inc <= 1'b1;
+                  r_ash_dec <= 1'b0;
+                  r_pinc_blt_p3 <= r_ash_msk[15];
+               r_pdec_blt_p3 <= 1'b0;
+                  r_madd_blt_p3 <= 1'b0;
+                  r_msub_blt_p3 <= ~bltsign;
+               end
+                  3'd7 :
+                  begin
+                  r_ash_inc <= 1'b0;
+                  r_ash_dec <= 1'b1;
+                  r_pinc_blt_p3 <= 1'b0;
+                  r_pdec_blt_p3 <= r_ash_msk[0];
+               r_madd_blt_p3 <= 1'b0;
+                  r_msub_blt_p3 <= ~bltsign;
+               end
+                  endcase
+                  r_bsh_dec <= 1'b1;
+
+                  //if (r_d_avail)
+                  r_rga_bltp_p3 <= 10'h248; // BLTCPTR
+                  //else
+                  //  r_rga_bltp_p3 <= 10'h254; // BLTDPTR
+                  r_rga_bltm_p3 <= 9'h060;  // BLTCMOD
+                  if (r_USEx[1]) begin
+                     r_rga_blt_p3 <= 9'h000; // BLTDDAT
+                     r_ch_blt_p3 <= 5'h1B;
+                     end else begin
+                     r_rga_blt_p3 <= 9'h1FE; // Idling
+                     r_ch_blt_p3 <= 5'h1F;
+                     end
+                     */
+      }
       break;
 
    }
@@ -457,12 +483,10 @@ void Blitter::SetBltSize(unsigned short data)
    dmacon_->dmacon_ |= 0x4000; // busy
 
    line_x_ = address_c_;
-   x_mod_ = (dmacon_->dmacon_ >> 12) & 0xF;
+   x_mod_ = 1<<((dmacon_->dmacon_ >> 12) & 0xF);
    remain_ = (short)address_a_;
 
-   internal_.r_stblit = (dmacon_->dmacon_ & 0x40) ? 1 : 0;
-   internal_.r_bltbusy = (dmacon_->dmacon_ & 0x40) ? 1 : 0;
-
+   internal_.r_bltbusy = internal_.r_stblit = ((dmacon_->dmacon_ & 0x240)==0x240) ? 1 : 0;
 }
 
 void Blitter::SetBltDat(unsigned char zone, unsigned short data)
