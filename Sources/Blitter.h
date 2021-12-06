@@ -77,6 +77,8 @@ private:
       int r_rga_bltm_p3 : 9;
       int r_ch_blt_p3 : 5;
       int r_last_cyc_p3 : 1;
+      unsigned short r_ash_msk : 16;
+      int r_ptr_wr_val : 23;
    } internal_;     
 
    ////////////////////////////////////////////

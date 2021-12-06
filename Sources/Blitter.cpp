@@ -201,6 +201,7 @@ void Blitter::Reset()
    internal_.r_rga_bltm_p3 = 0x1FE;
    internal_.r_ch_blt_p3 = 0x1F;
    internal_.r_last_cyc_p3 = 0;
+   internal_.r_ash_msk = 1;
 }
 
 bool Blitter::DmaTickStateMachine()
@@ -346,6 +347,18 @@ bool Blitter::DmaTickStateMachine()
       switch ((bltcon1_ >> 3) & 0x7)
       {
       case 0:
+
+         internal_.r_ash_inc = 1;
+         internal_.r_ash_dec = 0;
+         internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & ~internal_.bltsign;
+         // bltsign = r_ptr_wr_val[15);  r_ptr_wr_val[22:1] <= w_ptr_val + w_mod_rd_val; (si modd par exemple); w_ptr_val+ inc
+         internal_.r_pdec_blt_p3 = 0;
+         internal_.r_madd_blt_p3 = 1;
+         internal_.r_msub_blt_p3 = 0;
+
+
+         blt_c_dat_ |= x_mod_;
+         motherboard_->GetBus()->Write16(address_c_, blt_c_dat_);
          if ( remain_ >= 0)
          {
             if (x_mod_ & 0x8000)
@@ -362,7 +375,7 @@ bool Blitter::DmaTickStateMachine()
          }
          address_c_ += (short)modulo_c_;
          address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
-
+         internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
             
             /*3'd0 :
             begin
@@ -441,22 +454,28 @@ bool Blitter::DmaTickStateMachine()
                   r_msub_blt_p3 <= ~bltsign;
                end
                   endcase
-                  r_bsh_dec <= 1'b1;
-
-                  //if (r_d_avail)
-                  r_rga_bltp_p3 <= 10'h248; // BLTCPTR
-                  //else
-                  //  r_rga_bltp_p3 <= 10'h254; // BLTDPTR
-                  r_rga_bltm_p3 <= 9'h060;  // BLTCMOD
-                  if (r_USEx[1]) begin
-                     r_rga_blt_p3 <= 9'h000; // BLTDDAT
-                     r_ch_blt_p3 <= 5'h1B;
-                     end else begin
-                     r_rga_blt_p3 <= 9'h1FE; // Idling
-                     r_ch_blt_p3 <= 5'h1F;
-                     end
-                     */
+                 */
       }
+      if (internal_.r_ash_inc)
+      {
+
+      }
+      /* r_bsh_dec <= 1'b1;
+
+      //if (r_d_avail)
+      r_rga_bltp_p3 <= 10'h248; // BLTCPTR
+      //else
+      //  r_rga_bltp_p3 <= 10'h254; // BLTDPTR
+      r_rga_bltm_p3 <= 9'h060;  // BLTCMOD
+      if (r_USEx[1]) begin
+         r_rga_blt_p3 <= 9'h000; // BLTDDAT
+         r_ch_blt_p3 <= 5'h1B;
+         end else begin
+         r_rga_blt_p3 <= 9'h1FE; // Idling
+         r_ch_blt_p3 <= 5'h1F;
+         end
+         */
+      
       break;
 
    }
@@ -483,7 +502,7 @@ void Blitter::SetBltSize(unsigned short data)
    dmacon_->dmacon_ |= 0x4000; // busy
 
    line_x_ = address_c_;
-   x_mod_ = 1<<((dmacon_->dmacon_ >> 12) & 0xF);
+   internal_.r_ash_msk  = x_mod_ = 1<<((dmacon_->dmacon_ >> 12) & 0xF);
    remain_ = (short)address_a_;
 
    internal_.r_bltbusy = internal_.r_stblit = ((dmacon_->dmacon_ & 0x240)==0x240) ? 1 : 0;
