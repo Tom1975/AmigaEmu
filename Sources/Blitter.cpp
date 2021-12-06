@@ -350,7 +350,7 @@ bool Blitter::DmaTickStateMachine()
 
          internal_.r_ash_inc = 1;
          internal_.r_ash_dec = 0;
-         internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & ~internal_.bltsign;
+         internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & (internal_.r_ptr_wr_val&0x8000);
          // bltsign = r_ptr_wr_val[15);  r_ptr_wr_val[22:1] <= w_ptr_val + w_mod_rd_val; (si modd par exemple); w_ptr_val+ inc
          internal_.r_pdec_blt_p3 = 0;
          internal_.r_madd_blt_p3 = 1;
