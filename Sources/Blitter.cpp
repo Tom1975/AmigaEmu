@@ -458,8 +458,45 @@ bool Blitter::DmaTickStateMachine()
       }
       if (internal_.r_ash_inc)
       {
+         x_mod_ <<= 1;
+         if (x_mod_ == 0)
+         {
+            address_c_++;
+            address_d_++;
+            x_mod_ = 1;
+         }
+      }
+      else if (internal_.r_ash_dec)
+      {
+         x_mod_ >>= 1;
+         if (x_mod_ == 0)
+         {
+            address_c_--;
+            address_d_--;
+            x_mod_ = 0x8000;
+         }
+      }
+
+      if (internal_.r_pinc_blt_p3)
+      {
 
       }
+      else if (internal_.r_pdec_blt_p3)
+      {
+
+      }
+
+      if (internal_.r_madd_blt_p3)
+      {
+         address_c_ += (short)modulo_c_;
+         address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
+      }
+      else if (internal_.r_msub_blt_p3)
+      {
+         address_c_ -= (short)modulo_c_;
+         address_d_ -= (short)modulo_c_;   // Undocumented : TODO = find about this one ...
+      }
+
       /* r_bsh_dec <= 1'b1;
 
       //if (r_d_avail)

@@ -10,8 +10,19 @@ Line drawing:
 
 
 
+address computation
+on clk : et cdac_r & ~cck
 
+si w_mod_add
+r_ptr_wr_val[22:1] <= w_ptr_val + w_mod_rd_val;
+sinon si w_mod_sub
+r_ptr_wr_val[22:1] <= w_ptr_val - w_mod_rd_val;
+sinon
+r_ptr_wr_val[22:1] <= w_ptr_val;
 
+w_ptr_val = w_ptr_rd_val[22:1] + w_ptr_inc_val;
+w_ptr_rd_val = w_rdat_b = r_mem_blk[address_b];
+w_ptr_inc_val = r_pinc_blt_p3 = r_ash_msk[15] & ~bltsign;
 
 
 FF 01 23 0B => Color 05;  Move 23+46, 0B+28 (69,33)
