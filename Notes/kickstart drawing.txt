@@ -20,6 +20,11 @@ r_ptr_wr_val[22:1] <= w_ptr_val - w_mod_rd_val;
 sinon
 r_ptr_wr_val[22:1] <= w_ptr_val;
 
+calcul r_ptr_wr_val:
+Si : 
+clk + cdac_r + ~cck + w_mod_add
+
+
 w_ptr_val = w_ptr_rd_val[22:1] + w_ptr_inc_val;
 w_ptr_rd_val = w_rdat_b = r_mem_blk[address_b];
 w_ptr_inc_val = r_pinc_blt_p3 = r_ash_msk[15] & ~bltsign;

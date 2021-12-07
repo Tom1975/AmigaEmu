@@ -258,10 +258,14 @@ bool Blitter::DmaTickStateMachine()
    case BLT_LINE_1:
       blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
 
+      internal_.r_madd_blt_p3 = 1;
       if (bltcon1_ & 0x40) // BLTSIGN
          internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD
       else
          internal_.r_rga_bltm_p3 = 0x064; // BLTAMOD
+
+      internal_.mod_rd_val = motherboard_->GetBus()->Read16(internal_.r_rga_bltm_p3);
+
       internal_.r_rga_blt_p3 = 0x1FE;
       internal_.r_ch_blt_p3 = 0x1F;
       blitter_state_ = BLT_LINE_2;
@@ -350,7 +354,9 @@ bool Blitter::DmaTickStateMachine()
 
          internal_.r_ash_inc = 1;
          internal_.r_ash_dec = 0;
-         internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & (internal_.r_ptr_wr_val&0x8000);
+         //internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & (internal_.r_ptr_wr_val&0x8000);
+         internal_.r_pinc_blt_p3 = ((x_mod_ >> 15) & 1) & (internal_.r_ptr_wr_val & 0x8000);
+         
          // bltsign = r_ptr_wr_val[15);  r_ptr_wr_val[22:1] <= w_ptr_val + w_mod_rd_val; (si modd par exemple); w_ptr_val+ inc
          internal_.r_pdec_blt_p3 = 0;
          internal_.r_madd_blt_p3 = 1;
@@ -461,8 +467,6 @@ bool Blitter::DmaTickStateMachine()
          x_mod_ <<= 1;
          if (x_mod_ == 0)
          {
-            address_c_++;
-            address_d_++;
             x_mod_ = 1;
          }
       }
@@ -471,19 +475,19 @@ bool Blitter::DmaTickStateMachine()
          x_mod_ >>= 1;
          if (x_mod_ == 0)
          {
-            address_c_--;
-            address_d_--;
             x_mod_ = 0x8000;
          }
       }
 
       if (internal_.r_pinc_blt_p3)
       {
-
+         address_c_++;
+         address_d_++;
       }
       else if (internal_.r_pdec_blt_p3)
       {
-
+         address_c_--;
+         address_d_--;
       }
 
       if (internal_.r_madd_blt_p3)
@@ -495,6 +499,19 @@ bool Blitter::DmaTickStateMachine()
       {
          address_c_ -= (short)modulo_c_;
          address_d_ -= (short)modulo_c_;   // Undocumented : TODO = find about this one ...
+      }
+
+      if (internal_.r_madd_blt_p3)
+      {
+         internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3 + internal_.mod_rd_val;
+      }
+      else if (internal_.r_msub_blt_p3)
+      {
+         internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3 - internal_.mod_rd_val;
+      }
+      else
+      {
+         internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3;
       }
 
       /* r_bsh_dec <= 1'b1;
@@ -516,6 +533,9 @@ bool Blitter::DmaTickStateMachine()
       break;
 
    }
+
+   // size update
+   // todo
 
    return false;
 }

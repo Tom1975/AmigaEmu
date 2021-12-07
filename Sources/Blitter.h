@@ -79,6 +79,7 @@ private:
       int r_last_cyc_p3 : 1;
       unsigned short r_ash_msk : 16;
       int r_ptr_wr_val : 23;
+      int mod_rd_val : 22;
    } internal_;     
 
    ////////////////////////////////////////////
