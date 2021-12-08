@@ -246,6 +246,34 @@ bool Blitter::DmaTickStateMachine()
          blitter_state_ = BLT_SRC_A;
       break;
    case BLT_SRC_A:
+      // Read source A
+
+
+      // Increment/decrement
+      // 
+      /*
+         r_dma_blt_p3 <= r_USEx[3];
+         r_pinc_blt_p3 <= r_USEx[3] & ~w_DESC;
+         r_pdec_blt_p3 <= r_USEx[3] & w_DESC;
+         r_madd_blt_p3 <= r_USEx[3] & r_last_word & ~w_DESC;
+         r_msub_blt_p3 <= r_USEx[3] & r_last_word &  w_DESC;
+         r_rga_bltp_p3 <= 10'h250; // BLTAPTR
+         r_rga_bltm_p3 <= 9'h064;  // BLTAMOD
+         if (r_USEx[3]) begin
+            r_rga_blt_p3 <= 9'h074; // BLTADAT
+            r_ch_blt_p3 <= 5'h1A;
+            end else begin
+            r_rga_blt_p3 <= 9'h1FE; // Idling
+            r_ch_blt_p3 <= 5'h1F;
+            end
+
+            if (r_USEx[2])
+               r_blt_fsm <= `BLT_SRC_B;
+            else if (r_USEx[1] | ~r_USEx[0])
+               r_blt_fsm <= `BLT_SRC_C;
+            else
+               r_blt_fsm <= `BLT_DST_D;
+               */
       break;
    case BLT_SRC_B:
       break;

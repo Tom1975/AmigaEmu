@@ -23,6 +23,8 @@ r_ptr_wr_val[22:1] <= w_ptr_val;
 calcul r_ptr_wr_val:
 Si : 
 clk + cdac_r + ~cck + w_mod_add
+=> Un CDAC rise sur deux => 4 mhz
+
 
 
 w_ptr_val = w_ptr_rd_val[22:1] + w_ptr_inc_val;
