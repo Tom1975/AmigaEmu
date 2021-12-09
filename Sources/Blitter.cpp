@@ -204,6 +204,12 @@ void Blitter::Reset()
    internal_.r_ash_msk = 1;
 }
 
+void Blitter::UpdateSize()
+{
+   // Compute next word
+   // Compute last word / last line
+}
+
 bool Blitter::DmaTickStateMachine()
 {
    switch (blitter_state_)
@@ -247,7 +253,23 @@ bool Blitter::DmaTickStateMachine()
       break;
    case BLT_SRC_A:
       // Read source A
-
+      if (bltcon0_ & 0x800)
+      {
+         blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
+         // Inc address a. If last word, add modulo
+         if ((bltcon1_ & 0x3) == 1)
+            address_a_++;
+         else
+            address_a_--;
+         // r_last_word
+         if ()
+         {
+            if ((bltcon1_ & 0x3) == 1)
+               address_a_ += modulo_a_;
+            else
+               address_a_ -= modulo_a_;
+         }
+      }
 
       // Increment/decrement
       // 
@@ -278,8 +300,23 @@ bool Blitter::DmaTickStateMachine()
    case BLT_SRC_B:
       break;
    case BLT_SRC_C:
+      // ... todo
+
+      if (bltcon0_ & 0x100)
+      {
+         blitter_state_ = BLT_DST_D;
+      }
+      else
+      {
+         UpdateSize();
+      }
       break;
    case BLT_DST_D:
+      
+      // ... todo
+
+      UpdateSize();
+
       break;
    
    // Update error accumulator

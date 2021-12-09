@@ -38,6 +38,8 @@ public:
 
 
 private:
+   void UpdateSize();
+
 
    Motherboard* motherboard_;
    DMAControl * dmacon_;
