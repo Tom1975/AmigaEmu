@@ -21,6 +21,8 @@ Blitter::~Blitter()
 // Handle a DMA copper. If nothing is done (wait, or DMACON disable copper), return false.
 bool Blitter::DmaTick()
 {
+   return DmaTickStateMachine();
+
    bool dma_used = false;
 
    // DMA blitter and busy
@@ -202,12 +204,90 @@ void Blitter::Reset()
    internal_.r_ch_blt_p3 = 0x1F;
    internal_.r_last_cyc_p3 = 0;
    internal_.r_ash_msk = 1;
+   internal_.r_stblit = 0;
 }
 
 void Blitter::UpdateSize()
 {
-   // Compute next word
    // Compute last word / last line
+   bool last_word = (--window_width_ == 0);
+   bool last_line = last_word && (--window_height_ == 0);
+
+   if (last_line && last_line)
+   {
+      // End of blitter action
+      dmacon_->dmacon_ &= ~0x4000; // busy
+
+      // Interrupt
+      motherboard_->GetPaula()->Int(0x40);
+
+      blitter_state_ = BLT_IDLE;
+   }
+
+   // Inc address a. If last word, add modulo
+   if (bltcon0_ & 0x800)
+   {
+      if ((bltcon1_ & 0x3) == 1)
+         address_a_++;
+      else
+         address_a_--;
+      // r_last_word
+      if (last_word)
+      {
+         if ((bltcon1_ & 0x3) == 1)
+            address_a_ += modulo_a_;
+         else
+            address_a_ -= modulo_a_;
+      }
+   }
+   // B
+   if (bltcon0_ & 0x400)
+   {
+      if ((bltcon1_ & 0x3) == 1)
+         address_b_++;
+      else
+         address_b_--;
+      // r_last_word
+      if (last_word)
+      {
+         if ((bltcon1_ & 0x3) == 1)
+            address_b_ += modulo_b_;
+         else
+            address_b_ -= modulo_b_;
+      }
+   }
+   // C
+   if (bltcon0_ & 0x200)
+   {
+      if ((bltcon1_ & 0x3) == 1)
+         address_c_++;
+      else
+         address_c_--;
+      // r_last_word
+      if (last_word)
+      {
+         if ((bltcon1_ & 0x3) == 1)
+            address_c_ += modulo_c_;
+         else
+            address_c_ -= modulo_c_;
+      }
+   }
+   // D
+   if (bltcon0_ & 0x100)
+   {
+      if ((bltcon1_ & 0x3) == 1)
+         address_d_++;
+      else
+         address_d_--;
+      // r_last_word
+      if (last_word)
+      {
+         if ((bltcon1_ & 0x3) == 1)
+            address_d_ += modulo_d_;
+         else
+            address_d_ -= modulo_d_;
+      }
+   }
 }
 
 bool Blitter::DmaTickStateMachine()
@@ -256,20 +336,14 @@ bool Blitter::DmaTickStateMachine()
       if (bltcon0_ & 0x800)
       {
          blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
-         // Inc address a. If last word, add modulo
-         if ((bltcon1_ & 0x3) == 1)
-            address_a_++;
-         else
-            address_a_--;
-         // r_last_word
-         if ()
-         {
-            if ((bltcon1_ & 0x3) == 1)
-               address_a_ += modulo_a_;
-            else
-               address_a_ -= modulo_a_;
-         }
+
       }
+      if (bltcon0_ & 0x400)
+         blitter_state_ = BLT_SRC_B;
+      else if ((bltcon0_ & 0x300) == 0x200)
+         blitter_state_ = BLT_SRC_C;
+      else
+         blitter_state_ = BLT_DST_D;
 
       // Increment/decrement
       // 
@@ -298,6 +372,10 @@ bool Blitter::DmaTickStateMachine()
                */
       break;
    case BLT_SRC_B:
+      if (bltcon0_ & 0x400)
+      {
+
+      }
       break;
    case BLT_SRC_C:
       // ... todo
@@ -417,7 +495,7 @@ bool Blitter::DmaTickStateMachine()
       {
       case 0:
 
-         internal_.r_ash_inc = 1;
+         internal_.r_ash_inc = 1; // ??? sure ? it can just not change if x is not changing as well
          internal_.r_ash_dec = 0;
          //internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & (internal_.r_ptr_wr_val&0x8000);
          internal_.r_pinc_blt_p3 = ((x_mod_ >> 15) & 1) & (internal_.r_ptr_wr_val & 0x8000);
@@ -430,7 +508,7 @@ bool Blitter::DmaTickStateMachine()
 
          blt_c_dat_ |= x_mod_;
          motherboard_->GetBus()->Write16(address_c_, blt_c_dat_);
-         if ( remain_ >= 0)
+         /*if ( remain_ >= 0)
          {
             if (x_mod_ & 0x8000)
             {
@@ -442,10 +520,10 @@ bool Blitter::DmaTickStateMachine()
          }
          else
          {
-            x_mod_ << 1;
-         }
-         address_c_ += (short)modulo_c_;
-         address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
+            x_mod_ <<= 1;
+         }*/
+         //address_c_ += (short)modulo_c_;
+         //address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
          internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
             
             /*3'd0 :
@@ -578,6 +656,7 @@ bool Blitter::DmaTickStateMachine()
       {
          internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3;
       }
+      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
 
       /* r_bsh_dec <= 1'b1;
 

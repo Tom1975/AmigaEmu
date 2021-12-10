@@ -17,6 +17,7 @@ Denise::~Denise()
 
 void Denise::Reset()
 {
+   memset(color_, 0, sizeof(color_));
 }
 
 ////////////////////////////////
