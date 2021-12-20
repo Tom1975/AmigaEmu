@@ -290,6 +290,34 @@ void Blitter::UpdateSize()
    }
 }
 
+void Blitter::ComputeMinTerm()
+{
+   // Compute min term.
+   unsigned short r_LF[8];
+   memset(r_LF, 0, sizeof(r_LF));
+
+   for (unsigned char j = 0; j < 8; j++)
+   {
+      for (unsigned char k = 0; k < 16; k++)
+      {
+         r_LF[j] |=  (bltcon0_ & (1<<j));
+      }
+   }
+
+   r_mt_out = 0;
+   for (unsigned char i = 0; i < 16; i++)
+   {
+      r_mt_out |= (~r_bltahold & ~r_bltbhold & ~r_BLTCDAT & r_LF[0]
+         | ~r_bltahold & ~r_bltbhold & r_BLTCDAT & r_LF[1]
+         | ~r_bltahold & r_bltbhold & ~r_BLTCDAT & r_LF[2]
+         | ~r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[3]
+         | r_bltahold & ~r_bltbhold & ~r_BLTCDAT & r_LF[4]
+         | r_bltahold & ~r_bltbhold & r_BLTCDAT & r_LF[5]
+         | r_bltahold & r_bltbhold & ~r_BLTCDAT & r_LF[6]
+         | r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[7])&(1<<i);
+   }
+}
+
 bool Blitter::DmaTickStateMachine()
 {
    switch (blitter_state_)
@@ -494,6 +522,16 @@ bool Blitter::DmaTickStateMachine()
       switch ((bltcon1_ >> 3) & 0x7)
       {
       case 0:
+
+         // write new value to blt_d_ : old + pattern bit at the right place
+
+         // inc ash_inc : pattern used for drawing - B data reg contains the pattern
+
+         // add modulo
+
+         // write to memory
+
+
 
          internal_.r_ash_inc = 1; // ??? sure ? it can just not change if x is not changing as well
          internal_.r_ash_dec = 0;
