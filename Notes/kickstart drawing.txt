@@ -1,3 +1,28 @@
+Blitter :
+
+Barrel shifter:  (IN : desc, mask, a_old, a_new; OUT : aout)
+Barrel shifter:  (IN : desc, mask, b_old, b_new; OUT : bout)
+
+decalage : 
+w_seq_end = vrai si : useDChannel ? BLT_DST_D|BLT_LINE_4 : BLT_SRC_C|BLT_LINE_3
+Ensuite, decalage de 4 ticks
+Puis : 
+cdac_r & cck : 
+si r_blt_fsm = INIt :
+	r_bltbold <= 0;
+	r_bltaold <= 0;
+sinon
+	r_bltbold <= r_BLTBDAT;
+	r_bltaold <= w_bltadat; ( <= r_BLTADAT & r_bltamsk; )
+	
+	r_bltahold <= w_bltash; // A hold
+    r_bltbhold <= w_bltbsh; // B hold
+
+	
+a_old = shifter(aout)
+b_old = shifter(bout)
+
+
 Line drawing:
 
 1- BLT_INIT = bltcon1

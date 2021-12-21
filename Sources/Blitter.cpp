@@ -290,6 +290,42 @@ void Blitter::UpdateSize()
    }
 }
 
+//
+// Barrel shifter
+//
+// Input : desc, bitmask, data_old, data_new
+// Output : data_out
+//
+void Blitter::BarrelShifter(bool desc, unsigned short bit_mask, unsigned short data_old, unsigned short data_new, unsigned short& data_out)
+{
+   unsigned int w_mult_val = 0;
+   if (desc)
+   {
+      w_mult_val = bit_mask;
+   }
+   else
+   {
+      // inverse bits
+      for (int i = 0; i < 16; i++)
+      {
+         // 0<-0; i <-bit_mask[15]; 2<-bit_mask[14];...
+         w_mult_val |= (1 & (bit_mask >> (15 - i))) << (i + 1);
+      }
+   }
+   unsigned int w_mult_old = w_mult_val * data_old;
+   unsigned int w_mult_new = w_mult_val * data_new;
+
+   data_out = desc
+                ? (( w_mult_old >> 16) | (w_mult_new & 0xFF))
+                : (( w_mult_new >> 16) | (w_mult_old & 0xFF));
+
+}
+
+// Compute MinTerm
+// 
+// Input : r_bltahold, r_bltbhold, r_BLTCDAT, bltcon0_
+// Output: r_mt_out
+//
 void Blitter::ComputeMinTerm()
 {
    // Compute min term.
@@ -300,7 +336,7 @@ void Blitter::ComputeMinTerm()
    {
       for (unsigned char k = 0; k < 16; k++)
       {
-         r_LF[j] |=  (bltcon0_ & (1<<j));
+         r_LF[j] |=  (bltcon0_ & (1<<k));
       }
    }
 
@@ -340,6 +376,8 @@ bool Blitter::DmaTickStateMachine()
       if (internal_.r_stblit) blitter_state_ = BLT_INIT;
       break;
    case BLT_INIT:
+
+      r_bltaold = 0;
       internal_.r_d_avail  = 0;
       internal_.r_ash_inc  = 0;
       internal_.r_ash_dec  = 0;
@@ -414,12 +452,18 @@ bool Blitter::DmaTickStateMachine()
       }
       else
       {
+         // there should be a timed shift
+         r_bltaold = blt_a_dat_;
+         r_bltbold = blt_b_dat_;
          UpdateSize();
       }
       break;
    case BLT_DST_D:
       
       // ... todo
+      // there should be a timed shift
+      r_bltaold = blt_a_dat_;
+      r_bltbold = blt_b_dat_;
 
       UpdateSize();
 
@@ -471,6 +515,14 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_rga_bltm_p3 = 0x1FE;
       internal_.r_rga_blt_p3 = 0x1FE;
       internal_.r_ch_blt_p3 = 0x1F;
+
+      // there should be a timed shift
+      if (bltcon0_ & 0x100)
+      {
+         r_bltaold = blt_a_dat_;
+         r_bltbold = blt_b_dat_;
+      }
+
       blitter_state_ = BLT_LINE_4;
       break;
    case BLT_LINE_4:
@@ -642,6 +694,9 @@ bool Blitter::DmaTickStateMachine()
                end
                   endcase
                  */
+         r_bltaold = blt_a_dat_;
+         r_bltbold = blt_b_dat_;
+
       }
       if (internal_.r_ash_inc)
       {
@@ -716,6 +771,11 @@ bool Blitter::DmaTickStateMachine()
 
    }
 
+   // Barrel shifters
+   BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+   BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold,blt_b_dat_, r_bltbhold);
+   ComputeMinTerm();
+
    // size update
    // todo
 
@@ -742,6 +802,7 @@ void Blitter::SetBltSize(unsigned short data)
 
    line_x_ = address_c_;
    internal_.r_ash_msk  = x_mod_ = 1<<((dmacon_->dmacon_ >> 12) & 0xF);
+   internal_.r_bsh_msk = 1 << ((bltcon1_>> 12) & 0xF);
    remain_ = (short)address_a_;
 
    internal_.r_bltbusy = internal_.r_stblit = ((dmacon_->dmacon_ & 0x240)==0x240) ? 1 : 0;

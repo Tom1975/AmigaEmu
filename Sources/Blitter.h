@@ -40,6 +40,7 @@ public:
 private:
    void UpdateSize();
    void ComputeMinTerm();
+   void BarrelShifter(bool desc, unsigned short bit_mask, unsigned short data_old, unsigned short data_new, unsigned short& data_out);
 
    Motherboard* motherboard_;
    DMAControl * dmacon_;
@@ -80,6 +81,7 @@ private:
       int r_ch_blt_p3 : 5;
       int r_last_cyc_p3 : 1;
       unsigned short r_ash_msk : 16;
+      unsigned short r_bsh_msk : 16;
       int r_ptr_wr_val : 23;
       int mod_rd_val : 22;
    } internal_;     
@@ -134,5 +136,10 @@ private:
    unsigned short r_bltahold;
    unsigned short r_bltbhold;
    unsigned short r_BLTCDAT;
+
+   unsigned short r_bltaold;
+   unsigned short r_bltbold;
+
+
 
 };
