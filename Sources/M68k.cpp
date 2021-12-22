@@ -2382,8 +2382,19 @@ unsigned int M68k::DecodeAsd2()
             sr_ &= ~(F_X | F_C);
 
          sr_ &= ~(F_V);
-         unsigned char tmp = d_[ird_ & 0x7] & 0xFFFFFF80;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) >> rotat);
+
+         unsigned long tmp = 0;
+         if (d_[ird_ & 0x7] & 0x80)
+         {
+            tmp = (0xFF << (8 - rotat)) & 0xFF;
+         }
+         tmp |= (d_[ird_ & 0x7] & 0xFFFFFF00);
+
+         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFF) >> rotat);
+
+         /*unsigned char tmp = d_[ird_ & 0x7] & 0xFFFFFF80;
+
+         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) >> rotat);*/
       }
       else
       {
@@ -2438,8 +2449,15 @@ unsigned int M68k::DecodeAsd2()
             sr_ &= ~(F_X | F_C);
 
          sr_ &= ~(F_V);
-         unsigned char tmp = d_[ird_ & 0x7] & 0xFFFF8000;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFF) >> rotat);
+
+         unsigned long tmp = 0;
+         if (d_[ird_ & 0x7] & 0x8000)
+         {
+            tmp = (0xFFFF << (16 - rotat) )& 0xFFFF;
+         }
+         tmp |= d_[ird_ & 0x7] & 0xFFFF0000;
+         
+         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFF) >> rotat);
       }
       else
       {
@@ -2492,8 +2510,13 @@ unsigned int M68k::DecodeAsd2()
             sr_ &= ~(F_X | F_C);
 
          sr_ &= ~(F_V);
-         unsigned char tmp = d_[ird_ & 0x7] & 0x80000000;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFFFFFF) >> rotat);
+         unsigned long tmp = 0;
+         if (d_[ird_ & 0x7] & 0x80000000)
+         {
+            tmp = 0xFFFFFFFF << (32- rotat);
+         }
+
+         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFFFFFF) >> rotat);
       }
       else
       {

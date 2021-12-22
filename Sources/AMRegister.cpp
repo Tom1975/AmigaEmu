@@ -129,7 +129,10 @@ bool AMRegister::WriteInput(AddressingMode* source)
    case 1: // Word
       if (type_address_)
       {
-         *current_register_ = source->GetU16();
+         unsigned long src = source->GetU16();
+         // Sign extension !
+         if (src & 0x8000) src |= 0xFFFF0000;
+         *current_register_ = src;
       }
       else
       {
@@ -188,13 +191,13 @@ void AMRegister::Or(AddressingMode* source, unsigned short& sr)
    switch (size_)
    {
    case 0:
-      *current_register_ = *current_register_ | (char)source->GetU8();
+      *current_register_ = *current_register_ | (unsigned char)source->GetU8();
       break;
    case 1:
-      *current_register_ = *current_register_ | (short)source->GetU16();
+      *current_register_ = *current_register_ | (unsigned short)source->GetU16();
       break;
    case 2:
-      *current_register_ = *current_register_ | (long)source->GetU32();
+      *current_register_ = *current_register_ | (unsigned long)source->GetU32();
       break;
    }
 }
@@ -206,29 +209,30 @@ void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
    sm = source->GetU32();
    dm = *current_register_;
 
+ 
    switch (size_)
    {
    case 0:
-      *current_register_ = *current_register_ - (char)source->GetU8();
+      rm = (char)dm - (char)source->GetU8();
       break;
    case 1:
       if (IsAddressRegister() == false)
       {
-         unsigned int tmp = source->GetU16();
-         if (tmp & 0x8000)
-            tmp |= 0xFFFF0000;
-         *current_register_ = *current_register_ - tmp;
+         sm = source->GetU16();
+         dm = GetU16();
+         rm = (short)dm - (short)sm;
       }
       else
       {
-         *current_register_ = *current_register_ - (short)source->GetU16();
+         rm = (short)dm - (short)source->GetU16();
       }
-      break; 
+      break;
    case 2:
-      *current_register_ = *current_register_ - (long)source->GetU32();
+      rm = (long)dm - (long)sm;
       break;
    }
-   rm = *current_register_;
+   WriteInput(rm);
+   //rm = *current_register_;
 
    // Flags
    if (IsAddressRegister() == false)

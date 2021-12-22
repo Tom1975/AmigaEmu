@@ -1,6 +1,11 @@
 *** Dessin kickstart :
 FC5558: sub.b  D0, ($1F,A1)       => Pasd e modif de a439 (1f,a1)...
 
+***
+***FC5598 : sub.w D0, D1 => seul D1.w doit être impacté !! (FF8F au lieu de FFFFFF8F) Ok
+***FC565A: move.w D2, A3             	 : => Sign extension !!! resultat= FFFFFFEA OK 
+***FC56A0 asrl.w #4, D1
+FC56A2: or.w  D1, D7 => SUR LE WORD SEULEMENT !!!
 
 FE8CF8 : FE8E43 dans A2 => Plantage !?
 FCB52C: jsr FCA8DC  => Pas de sortie

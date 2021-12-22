@@ -100,3 +100,19 @@ FF 01 44 6A 44 6D 46 70 48 70 4C 6F 4D 6C 49 69 44 6A FF 01 36 68 3E 6A
 40 67 3C 63 39 63 36 65 36 68 FF 01 7E 0B 89 16 89 5E FE 01 22 0B FE 01
 3B 0B FE 01 61 0F FE 01 6A 1B FE 01 70 0F FE 01 7E 5E FE 01 4B 60 FE 01
 2E 39 FF FF
+
+
+kickstart :
+1/ FCADCA. Width = 1; Height = 1; 
+BLATCON0 : 0
+BLATCON1 : 0
+=> No output
+2/  FC570E. Width = 3 ; h = 1
+BLATCON0 : 3ea
+BLATCON1 : 0
+addr_c : 0xACBF
+3/ FC570E
+w = 0x17; h = 0x2
+bltcon0 = 0xbea => a, c, d; minterm = ea => 4a + 80 = 80 + 40 + 8 + 2
+bltcon1 = 8041 => LINE1
+addr 

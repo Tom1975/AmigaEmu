@@ -205,6 +205,11 @@ void Blitter::Reset()
    internal_.r_last_cyc_p3 = 0;
    internal_.r_ash_msk = 1;
    internal_.r_stblit = 0;
+
+   r_bltaold = 0;
+   r_bltbold = 0;
+
+   r_BLTCDAT = 0;
 }
 
 void Blitter::UpdateSize()
@@ -332,13 +337,13 @@ void Blitter::ComputeMinTerm()
    unsigned short r_LF[8];
    memset(r_LF, 0, sizeof(r_LF));
 
+
    for (unsigned char j = 0; j < 8; j++)
    {
-      for (unsigned char k = 0; k < 16; k++)
-      {
-         r_LF[j] |=  (bltcon0_ & (1<<k));
-      }
+      r_LF[j] =  (bltcon0_ & (1<<j))?0xFFFF:0;
    }
+
+   r_BLTCDAT = blt_c_dat_;
 
    r_mt_out = 0;
    for (unsigned char i = 0; i < 16; i++)
@@ -376,7 +381,7 @@ bool Blitter::DmaTickStateMachine()
       if (internal_.r_stblit) blitter_state_ = BLT_INIT;
       break;
    case BLT_INIT:
-
+      internal_.r_stblit = 0;
       r_bltaold = 0;
       internal_.r_d_avail  = 0;
       internal_.r_ash_inc  = 0;
@@ -398,6 +403,7 @@ bool Blitter::DmaTickStateMachine()
          blitter_state_ = BLT_SRC_A;
       break;
    case BLT_SRC_A:
+      internal_.r_stblit = 0;
       // Read source A
       if (bltcon0_ & 0x800)
       {
@@ -406,10 +412,11 @@ bool Blitter::DmaTickStateMachine()
       }
       if (bltcon0_ & 0x400)
          blitter_state_ = BLT_SRC_B;
-      else if ((bltcon0_ & 0x300) == 0x200)
-         blitter_state_ = BLT_SRC_C;
-      else
+      else if ((bltcon0_ & 0x300) == 0x100)
          blitter_state_ = BLT_DST_D;
+      else
+         blitter_state_ = BLT_SRC_C;
+
 
       // Increment/decrement
       // 
@@ -438,30 +445,64 @@ bool Blitter::DmaTickStateMachine()
                */
       break;
    case BLT_SRC_B:
+      internal_.r_stblit = 0;
       if (bltcon0_ & 0x400)
       {
+         blt_b_dat_ = motherboard_->GetBus()->Read16(address_b_);
 
       }
+      if ((bltcon0_ & 0x300) == 0x100)
+         blitter_state_ = BLT_DST_D;
+      else
+         blitter_state_ = BLT_SRC_C;
+
       break;
    case BLT_SRC_C:
       // ... todo
+      internal_.r_stblit = 0;
+      if (bltcon0_ & 0x200)
+      {
+         blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_);
 
+      }
       if (bltcon0_ & 0x100)
       {
          blitter_state_ = BLT_DST_D;
       }
       else
       {
+         // Barrel shifters
+         BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+         BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+         ComputeMinTerm();
+
+         // write r_mt_out... If 
+         blt_d_dat_ = r_mt_out;
+
          // there should be a timed shift
+         blitter_state_ = BLT_SRC_A;
          r_bltaold = blt_a_dat_;
          r_bltbold = blt_b_dat_;
          UpdateSize();
+
+         
       }
       break;
    case BLT_DST_D:
-      
+      internal_.r_stblit = 0;
       // ... todo
+   // Barrel shifters
+      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+      ComputeMinTerm();
+
+      blt_d_dat_ = r_mt_out;
+
+      if (bltcon0_ & 0x100)
+         motherboard_->GetBus()->Write16(address_d_, blt_d_dat_);
+
       // there should be a timed shift
+      blitter_state_ = BLT_SRC_A;
       r_bltaold = blt_a_dat_;
       r_bltbold = blt_b_dat_;
 
@@ -471,6 +512,16 @@ bool Blitter::DmaTickStateMachine()
    
    // Update error accumulator
    case BLT_LINE_1:
+
+      // TMP : JUST DONT DRAW ANYTHING ! and check the rest
+      dmacon_->dmacon_ &= ~0x4000; // busy
+      motherboard_->GetPaula()->Int(0x40);
+      blitter_state_ = BLT_IDLE;
+      break;
+      // END TMP
+
+
+      internal_.r_stblit = 0;
       blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
 
       internal_.r_madd_blt_p3 = 1;
@@ -487,6 +538,7 @@ bool Blitter::DmaTickStateMachine()
       break;
    // Fetch data with channel C
    case BLT_LINE_2:
+      internal_.r_stblit = 0;
       internal_.r_ash_inc = 0;
       internal_.r_ash_dec = 0;
       internal_.r_bsh_dec = 0;
@@ -503,6 +555,7 @@ bool Blitter::DmaTickStateMachine()
       break;
    // Free cycle
    case BLT_LINE_3:
+      internal_.r_stblit = 0;
       internal_.r_ash_inc = 0;
       internal_.r_ash_dec = 0;
       internal_.r_bsh_dec = 0;
@@ -526,6 +579,7 @@ bool Blitter::DmaTickStateMachine()
       blitter_state_ = BLT_LINE_4;
       break;
    case BLT_LINE_4:
+      internal_.r_stblit = 0;
       internal_.r_d_avail = 1;
 
          //          |     
@@ -751,6 +805,7 @@ bool Blitter::DmaTickStateMachine()
       }
       internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
 
+      UpdateSize();
       /* r_bsh_dec <= 1'b1;
 
       //if (r_d_avail)
@@ -770,11 +825,6 @@ bool Blitter::DmaTickStateMachine()
       break;
 
    }
-
-   // Barrel shifters
-   BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
-   BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold,blt_b_dat_, r_bltbhold);
-   ComputeMinTerm();
 
    // size update
    // todo
