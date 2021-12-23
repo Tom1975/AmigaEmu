@@ -1,32 +1,6 @@
 *** Dessin kickstart :
-FC5558: sub.b  D0, ($1F,A1)       => Pasd e modif de a439 (1f,a1)...
 
-***
-***FC5598 : sub.w D0, D1 => seul D1.w doit être impacté !! (FF8F au lieu de FFFFFF8F) Ok
-***FC565A: move.w D2, A3             	 : => Sign extension !!! resultat= FFFFFFEA OK 
-***FC56A0 asrl.w #4, D1
-FC56A2: or.w  D1, D7 => SUR LE WORD SEULEMENT !!!
-
-FE8CF8 : FE8E43 dans A2 => Plantage !?
-FCB52C: jsr FCA8DC  => Pas de sortie
-FCAB4E: jsr FCBBD4  => Pas de sortie
-
-FCBDF2 => Pas de sortie si run de la
-
-FCA9F0 ok
-FCC1F4 ok
-FCC1EE: jsr FD1888 : return D0 that contains value differents.
-
-F44E => buffer vide alors que ca ne devrait pas... Pq ??
-Adresse de base : A3E0
-alloué ici : FE8BBA
-third buffer of big struct. Used by InitTmpRas(as A1 = buffer)
-=> Buffer renseigné et rempli via blitter. (drawline)
-
-
-FCC216 : pas ok
-
-*** FCBC50 jsr FCC1CA => Apres cette sub, difference sur D1/A1 !
+FCA9C8 => Ok ?
 
 
 FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
