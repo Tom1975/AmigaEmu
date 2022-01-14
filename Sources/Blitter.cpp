@@ -589,14 +589,14 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_rga_bltm_p3 = 0x1FE;
       internal_.r_rga_blt_p3 = 0x1FE;
       internal_.r_ch_blt_p3 = 0x1F;
-
+      */
       // there should be a timed shift
       if (bltcon0_ & 0x100)
       {
          r_bltaold = blt_a_dat_;
          r_bltbold = blt_b_dat_;
       }
-      */
+      
 
       blitter_state_ = BLT_LINE_4;
       break;
@@ -629,25 +629,68 @@ bool Blitter::DmaTickStateMachine()
          blitter_state_ = BLT_LINE_4;
 
       //
+      internal_.r_ash_msk = 1 << ((bltcon0_ >> 12) & 0xF);
+      internal_.r_bsh_msk = 1 << ((bltcon1_ >> 12) & 0xF);
+
       BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
       BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       ComputeMinTerm();
 
-      //bool last_word = (--window_width_ == 0);
-      //bool last_line = last_word && (--window_height_ == 0);
+      // set ash, bsh
+      if ( (bltcon1_&0x10) && !(bltcon1_&0x4) || !(bltcon1_&0x10) && !(bltcon1_&0x8) && !sign_del) 
+      {
+         unsigned char val = (bltcon0_ >> 12) & 0xF;
+         val = (val + 1)& 0xF;
+         bltcon0_ &= ~0xF000;
+         bltcon0_ |= (val << 12);
+      }
+         
+      if ( bltcon1_&0x10 && bltcon1_ & 0x4 || !bltcon1_ & 0x10 && bltcon1_ & 0x08 && !sign_del)
+      {
+         unsigned char val = (bltcon0_ >> 12) & 0xF;
+         val = (val -1) & 0xF;
+         bltcon0_ &= ~0xF000;
+         bltcon0_ |= (val << 12);
+      }
+         
+      {
+         unsigned char val = (bltcon1_ >> 12) & 0xF;
+         val = (val + 1) & 0xF;
+         bltcon1_ &= ~0xF000;
+         bltcon1_ |= (val << 12);
+      }
 
-      // MASK :
-      // if needed, increase mask 
-      // if needed, decrease mask 
+      // set d data register
+      blt_d_dat_ = r_mt_out;
+      r_bltaold = blt_a_dat_;
+      r_bltbold = blt_b_dat_;
 
-      // if needed, increase pointer
-      // if needed, decrease pointer
+      // write it
+      if (bltcon0_ & 0x100)
+         motherboard_->GetBus()->Write16(address_d_, blt_d_dat_);
 
-      // if needed, add modulo to pointer
-      // if needed, sub modulo to pointer
+      // change ptr to a, b, c, d...
+      // Address generator
+      if (incptr && !decptr)
+      {
+
+      }
+      else if (!incptr && decptr)
+      {
+
+      }
+
+      if (addmod && !submod)
+      {
+
+      }
+      else if (!addmod && submod)
+      {
+
+      }
+      // size change
 
 
-      
       break;
 
    }
