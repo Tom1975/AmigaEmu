@@ -26,7 +26,7 @@ public:
 
    //////////////////////////////////////////////
    // Blitter Register access
-   void SetBltCon0(unsigned short data) { bltcon0_ = data; }
+   void SetBltCon0(unsigned short data) { bltcon0_ = data; sign = (bltcon0_ & 0x40)?true:false;}
    void SetBltCon1(unsigned short data) { bltcon1_ = data; }
 
    void SetBltDat(unsigned char zone, unsigned short data);
@@ -141,5 +141,7 @@ private:
    unsigned short r_bltbold;
 
 
-
+   bool sign;
+   bool sign_del;
+   unsigned char first_pixel;
 };

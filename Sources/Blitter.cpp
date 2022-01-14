@@ -381,6 +381,9 @@ bool Blitter::DmaTickStateMachine()
       if (internal_.r_stblit) blitter_state_ = BLT_INIT;
       break;
    case BLT_INIT:
+
+      first_pixel = 1;
+
       internal_.r_stblit = 0;
       r_bltaold = 0;
       internal_.r_d_avail  = 0;
@@ -514,31 +517,48 @@ bool Blitter::DmaTickStateMachine()
    case BLT_LINE_1:
 
       // TMP : JUST DONT DRAW ANYTHING ! and check the rest
-      dmacon_->dmacon_ &= ~0x4000; // busy
+      /*dmacon_->dmacon_ &= ~0x4000; // busy
       motherboard_->GetPaula()->Int(0x40);
       blitter_state_ = BLT_IDLE;
       break;
+      */
       // END TMP
 
+      // Update error accumulator
+      blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
+      if (bltcon1_ & 0x40) // BLTSIGN
+         // B MOD
+         internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x062);
+      else
+         // A MOD
+         internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x064);
+
+      blt_a_dat_ += internal_.mod_rd_val;
+      sign_del = sign = (blt_a_dat_ & 0x8000)?true:false;
+      /*
 
       internal_.r_stblit = 0;
-      blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
 
       internal_.r_madd_blt_p3 = 1;
       if (bltcon1_ & 0x40) // BLTSIGN
-         internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD
+         internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD : 4 * dy
       else
-         internal_.r_rga_bltm_p3 = 0x064; // BLTAMOD
+         internal_.r_rga_bltm_p3 = 0x064; // BLTAMOD : 4 * ( dy - dx )
 
       internal_.mod_rd_val = motherboard_->GetBus()->Read16(internal_.r_rga_bltm_p3);
 
       internal_.r_rga_blt_p3 = 0x1FE;
       internal_.r_ch_blt_p3 = 0x1F;
+      */
       blitter_state_ = BLT_LINE_2;
       break;
    // Fetch data with channel C
    case BLT_LINE_2:
-      internal_.r_stblit = 0;
+
+      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR : 
+      blitter_state_ = BLT_LINE_3;
+
+      /*internal_.r_stblit = 0;
       internal_.r_ash_inc = 0;
       internal_.r_ash_dec = 0;
       internal_.r_bsh_dec = 0;
@@ -547,14 +567,15 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_pdec_blt_p3 = 0;
       internal_.r_madd_blt_p3 = 0;
       internal_.r_msub_blt_p3 = 0;
-      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
+      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR : 
       internal_.r_rga_bltm_p3 = 0x1FE;
       internal_.r_rga_blt_p3 = 0x070;  // BLTCDAT
       internal_.r_ch_blt_p3 = 0x1A;
-      blitter_state_ = BLT_LINE_3;
+      blitter_state_ = BLT_LINE_3;*/
       break;
    // Free cycle
    case BLT_LINE_3:
+      /*
       internal_.r_stblit = 0;
       internal_.r_ash_inc = 0;
       internal_.r_ash_dec = 0;
@@ -575,252 +596,57 @@ bool Blitter::DmaTickStateMachine()
          r_bltaold = blt_a_dat_;
          r_bltbold = blt_b_dat_;
       }
+      */
 
       blitter_state_ = BLT_LINE_4;
       break;
    case BLT_LINE_4:
-      internal_.r_stblit = 0;
-      internal_.r_d_avail = 1;
 
-         //          |     
-         //      \   |   /    
-         //       \ 3|1 /
-         //        \ | /     
-         //      7  \|/  6
-         //  --------*--------
-         //      5  /|\  4
-         //        / | \     
-         //       / 2|0 \
-          //      /   |   \      
-          //          |
-          //
-          // X displacement :
-          // ----------------
-          // if [0,1,4,6]
-          //   if (ash == 15)
-          //     if [4,6] || sign = 0
-          //       ptr++
-          //     endif
-          //   endif
-          //   ash++
-          // else
-          //   if (ash == 0)
-          //     if [5,7] || sign = 0
-          //       ptr--
-          //     endif
-          //   endif
-          //   ash--
-          // endif
-          //
-          // Y displacement :
-          // ----------------
-          // if [0,2,4,5]
-          //   if [0,2] || sign = 0
-          //     ptr += modulo
-          //   endif
-          // else
-          //   if [1,3] || sign = 0
-          //     ptr -= modulo
-          //   endif
-          // endif
-          //
-         //         case (w_OCTANT)
-      switch ((bltcon1_ >> 3) & 0x7)
-      {
-      case 0:
+      //	incptr = ((bltcon1_&0x10) && !(bltcon1_&0x4) || !(bltcon1_&0x10) && !(bltcon1_&0x8) && !sign_del) && ash==4'b1111 ? 1'b1 : 1'b0;
+      unsigned char ash = (bltcon0_ >> 12) & 0xF;
+      bool incptr = ( (bltcon1_&0x10) && !(bltcon1_ & 0x4) || !(bltcon1_ & 0x10) && !(bltcon1_ & 0x8) && !sign_del) && ash == 0xF ;
+      //decptr = ((bltcon1_&0x10) && (bltcon1_&0x4) || !(bltcon1_&0x10) && (bltcon1_&0x8) && !sign_del) && ash == 4'b0000 ? 1'b1 : 1'b0;
+      bool decptr = ((bltcon1_&0x10) && (bltcon1_&0x4) || !(bltcon1_&0x10) && (bltcon1_&0x8) && !sign_del) && (ash == 0000);
+      //addmod = !(bltcon1_&0x10) && !(bltcon1_&0x4) || (bltcon1_&0x10) && !(bltcon1_&0x8) && !sign_del ? 1'b1 : 1'b0;
+      bool addmod = !(bltcon1_&0x10) && !(bltcon1_&0x4) || (bltcon1_&0x10) && !(bltcon1_&0x8) && !sign_del;
+      //submod = !(bltcon1_&0x10) && (bltcon1_&0x4) || (bltcon1_&0x10) && (bltcon1_&0x8) && !sign_del ? 1'b1 : 1'b0;
+      bool submod = !(bltcon1_&0x10) && (bltcon1_&0x4) || (bltcon1_&0x10) && (bltcon1_&0x8) && !sign_del;
+      // in 'one dot' mode this might be a free bus cycle
 
-         // write new value to blt_d_ : old + pattern bit at the right place
+      bool dma_req = ((bltcon0_>>9) & (~(bltcon1_>>1)) |(~(bltcon1_>>4)) | first_pixel) & 0x1; // request DMA cycle
 
-         // inc ash_inc : pattern used for drawing - B data reg contains the pattern
+      first_pixel = !sign_del;
+      
+      bool last_line = window_height_ == 1;
 
-         // add modulo
-
-         // write to memory
-
-
-
-         internal_.r_ash_inc = 1; // ??? sure ? it can just not change if x is not changing as well
-         internal_.r_ash_dec = 0;
-         //internal_.r_pinc_blt_p3 = (internal_.r_ash_msk>>15)&1 & (internal_.r_ptr_wr_val&0x8000);
-         internal_.r_pinc_blt_p3 = ((x_mod_ >> 15) & 1) & (internal_.r_ptr_wr_val & 0x8000);
-         
-         // bltsign = r_ptr_wr_val[15);  r_ptr_wr_val[22:1] <= w_ptr_val + w_mod_rd_val; (si modd par exemple); w_ptr_val+ inc
-         internal_.r_pdec_blt_p3 = 0;
-         internal_.r_madd_blt_p3 = 1;
-         internal_.r_msub_blt_p3 = 0;
-
-
-         blt_c_dat_ |= x_mod_;
-         motherboard_->GetBus()->Write16(address_c_, blt_c_dat_);
-         /*if ( remain_ >= 0)
-         {
-            if (x_mod_ & 0x8000)
-            {
-               x_mod_ = 1;
-               address_c_++;
-               address_d_++;
-            }
-            remain_ += (short)modulo_a_;
-         }
+      bool enable = true;
+      if (enable)
+         if (last_line) // if last data store go to idle state
+            blitter_state_ = BLT_IDLE;
          else
-         {
-            x_mod_ <<= 1;
-         }*/
-         //address_c_ += (short)modulo_c_;
-         //address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
-         internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
-            
-            /*3'd0 :
-            begin
-            r_ash_inc <= 1'b1;
-            r_ash_dec <= 1'b0;
-            r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
-         r_pdec_blt_p3 <= 1'b0;
-            r_madd_blt_p3 <= 1'b1;
-            r_msub_blt_p3 <= 1'b0;
-            end
-            */
-         break;
-
-                  /*
-                  3'd1 :
-                  begin
-                  r_ash_inc <= 1'b1;
-                  r_ash_dec <= 1'b0;
-                  r_pinc_blt_p3 <= r_ash_msk[15] & ~bltsign;
-               r_pdec_blt_p3 <= 1'b0;
-                  r_madd_blt_p3 <= 1'b0;
-                  r_msub_blt_p3 <= 1'b1;
-                  end
-                  3'd2 :
-                  begin
-                  r_ash_inc <= 1'b0;
-                  r_ash_dec <= 1'b1;
-                  r_pinc_blt_p3 <= 1'b0;
-                  r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
-               r_madd_blt_p3 <= 1'b1;
-                  r_msub_blt_p3 <= 1'b0;
-                  end
-                  3'd3 :
-                  begin
-                  r_ash_inc <= 1'b0;
-                  r_ash_dec <= 1'b1;
-                  r_pinc_blt_p3 <= 1'b0;
-                  r_pdec_blt_p3 <= r_ash_msk[0] & ~bltsign;
-               r_madd_blt_p3 <= 1'b0;
-                  r_msub_blt_p3 <= 1'b1;
-                  end
-                  3'd4 :
-                  begin
-                  r_ash_inc <= 1'b1;
-                  r_ash_dec <= 1'b0;
-                  r_pinc_blt_p3 <= r_ash_msk[15];
-               r_pdec_blt_p3 <= 1'b0;
-                  r_madd_blt_p3 <= ~bltsign;
-               r_msub_blt_p3 <= 1'b0;
-                  end
-                  3'd5 :
-                  begin
-                  r_ash_inc <= 1'b0;
-                  r_ash_dec <= 1'b1;
-                  r_pinc_blt_p3 <= 1'b0;
-                  r_pdec_blt_p3 <= r_ash_msk[0];
-               r_madd_blt_p3 <= ~bltsign;
-               r_msub_blt_p3 <= 1'b0;
-                  end
-                  3'd6 :
-                  begin
-                  r_ash_inc <= 1'b1;
-                  r_ash_dec <= 1'b0;
-                  r_pinc_blt_p3 <= r_ash_msk[15];
-               r_pdec_blt_p3 <= 1'b0;
-                  r_madd_blt_p3 <= 1'b0;
-                  r_msub_blt_p3 <= ~bltsign;
-               end
-                  3'd7 :
-                  begin
-                  r_ash_inc <= 1'b0;
-                  r_ash_dec <= 1'b1;
-                  r_pinc_blt_p3 <= 1'b0;
-                  r_pdec_blt_p3 <= r_ash_msk[0];
-               r_madd_blt_p3 <= 1'b0;
-                  r_msub_blt_p3 <= ~bltsign;
-               end
-                  endcase
-                 */
-         r_bltaold = blt_a_dat_;
-         r_bltbold = blt_b_dat_;
-
-      }
-      if (internal_.r_ash_inc)
-      {
-         x_mod_ <<= 1;
-         if (x_mod_ == 0)
-         {
-            x_mod_ = 1;
-         }
-      }
-      else if (internal_.r_ash_dec)
-      {
-         x_mod_ >>= 1;
-         if (x_mod_ == 0)
-         {
-            x_mod_ = 0x8000;
-         }
-      }
-
-      if (internal_.r_pinc_blt_p3)
-      {
-         address_c_++;
-         address_d_++;
-      }
-      else if (internal_.r_pdec_blt_p3)
-      {
-         address_c_--;
-         address_d_--;
-      }
-
-      if (internal_.r_madd_blt_p3)
-      {
-         address_c_ += (short)modulo_c_;
-         address_d_ += (short)modulo_c_;   // Undocumented : TODO = find about this one ...
-      }
-      else if (internal_.r_msub_blt_p3)
-      {
-         address_c_ -= (short)modulo_c_;
-         address_d_ -= (short)modulo_c_;   // Undocumented : TODO = find about this one ...
-      }
-
-      if (internal_.r_madd_blt_p3)
-      {
-         internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3 + internal_.mod_rd_val;
-      }
-      else if (internal_.r_msub_blt_p3)
-      {
-         internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3 - internal_.mod_rd_val;
-      }
+            blitter_state_ = BLT_LINE_1;
       else
-      {
-         internal_.r_ptr_wr_val += internal_.r_pinc_blt_p3;
-      }
-      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR
+         blitter_state_ = BLT_LINE_4;
 
-      UpdateSize();
-      /* r_bsh_dec <= 1'b1;
+      //
+      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+      ComputeMinTerm();
 
-      //if (r_d_avail)
-      r_rga_bltp_p3 <= 10'h248; // BLTCPTR
-      //else
-      //  r_rga_bltp_p3 <= 10'h254; // BLTDPTR
-      r_rga_bltm_p3 <= 9'h060;  // BLTCMOD
-      if (r_USEx[1]) begin
-         r_rga_blt_p3 <= 9'h000; // BLTDDAT
-         r_ch_blt_p3 <= 5'h1B;
-         end else begin
-         r_rga_blt_p3 <= 9'h1FE; // Idling
-         r_ch_blt_p3 <= 5'h1F;
-         end
-         */
+      //bool last_word = (--window_width_ == 0);
+      //bool last_line = last_word && (--window_height_ == 0);
+
+      // MASK :
+      // if needed, increase mask 
+      // if needed, decrease mask 
+
+      // if needed, increase pointer
+      // if needed, decrease pointer
+
+      // if needed, add modulo to pointer
+      // if needed, sub modulo to pointer
+
+
       
       break;
 
