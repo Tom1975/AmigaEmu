@@ -218,7 +218,7 @@ void Blitter::UpdateSize()
    bool last_word = (--window_width_ == 0);
    bool last_line = last_word && (--window_height_ == 0);
 
-   if (last_line && last_line)
+   if (last_word && last_line)
    {
       // End of blitter action
       dmacon_->dmacon_ &= ~0x4000; // busy
@@ -525,7 +525,8 @@ bool Blitter::DmaTickStateMachine()
       // END TMP
 
       // Update error accumulator
-      blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
+      blt_a_dat_ = address_a_;
+      
       if (bltcon1_ & 0x40) // BLTSIGN
          // B MOD
          internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x062);
@@ -534,6 +535,7 @@ bool Blitter::DmaTickStateMachine()
          internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x064);
 
       blt_a_dat_ += internal_.mod_rd_val;
+      address_a_ = blt_a_dat_;
       sign_del = sign = (blt_a_dat_ & 0x8000)?true:false;
       /*
 
@@ -673,23 +675,38 @@ bool Blitter::DmaTickStateMachine()
       // Address generator
       if (incptr && !decptr)
       {
-
+         address_d_ ++;
+         address_c_ ++;
       }
       else if (!incptr && decptr)
       {
-
+         address_d_ --;
+         address_c_--;
       }
 
       if (addmod && !submod)
       {
-
+         address_d_ += modulo_c_; // modulo_d_;
+         address_c_ += modulo_c_;
       }
       else if (!addmod && submod)
       {
-
+         address_d_ -= modulo_c_; // modulo_d_;
+         address_c_ -= modulo_c_;
       }
       // size change
+      --window_height_;
 
+      if (last_line )
+      {
+         // End of blitter action
+         dmacon_->dmacon_ &= ~0x4000; // busy
+
+         // Interrupt
+         motherboard_->GetPaula()->Int(0x40);
+
+         blitter_state_ = BLT_IDLE;
+      }
 
       break;
 
