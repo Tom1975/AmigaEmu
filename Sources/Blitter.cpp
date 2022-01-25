@@ -593,12 +593,6 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_ch_blt_p3 = 0x1F;
       */
       // there should be a timed shift
-      if (bltcon0_ & 0x100)
-      {
-         r_bltaold = blt_a_dat_;
-         r_bltbold = blt_b_dat_;
-      }
-      
 
       blitter_state_ = BLT_LINE_4;
       break;
