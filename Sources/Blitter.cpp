@@ -628,7 +628,7 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_ash_msk = 1 << ((bltcon0_ >> 12) & 0xF);
       internal_.r_bsh_msk = 1 << ((bltcon1_ >> 12) & 0xF);
 
-      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, 0/*r_bltaold*/, blt_a_dat_, r_bltahold);//0 all the time
       BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       ComputeMinTerm();
 
@@ -641,7 +641,7 @@ bool Blitter::DmaTickStateMachine()
          bltcon0_ |= (val << 12);
       }
          
-      if ( bltcon1_&0x10 && bltcon1_ & 0x4 || !bltcon1_ & 0x10 && bltcon1_ & 0x08 && !sign_del)
+      if ( (bltcon1_&0x10) && (bltcon1_ & 0x4) || !(bltcon1_ & 0x10) && (bltcon1_ & 0x08) && !sign_del)
       {
          unsigned char val = (bltcon0_ >> 12) & 0xF;
          val = (val -1) & 0xF;
@@ -658,7 +658,7 @@ bool Blitter::DmaTickStateMachine()
 
       // set d data register
       blt_d_dat_ = r_mt_out;
-      r_bltaold = blt_a_dat_;
+      r_bltaold = 0; // blt_a_dat_;
       r_bltbold = blt_b_dat_;
 
       // write it
