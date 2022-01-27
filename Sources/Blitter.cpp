@@ -321,8 +321,8 @@ void Blitter::BarrelShifter(bool desc, unsigned short bit_mask, unsigned short d
    unsigned int w_mult_new = w_mult_val * data_new;
 
    data_out = desc
-                ? (( w_mult_old >> 16) | (w_mult_new & 0xFF))
-                : (( w_mult_new >> 16) | (w_mult_old & 0xFF));
+                ? (( w_mult_old & 0xFFFF0000) | (w_mult_new & 0xFFFF))
+                : (( w_mult_new & 0xFFFF0000) | (w_mult_old & 0xFFFF));
 
 }
 
@@ -475,6 +475,7 @@ bool Blitter::DmaTickStateMachine()
       else
       {
          // Barrel shifters
+         // first word = 
          BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
          BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
          ComputeMinTerm();
@@ -525,7 +526,7 @@ bool Blitter::DmaTickStateMachine()
       // END TMP
 
       // Update error accumulator
-      blt_a_dat_ = address_a_;
+      //blt_a_dat_ = address_a_;
       
       if (bltcon1_ & 0x40) // BLTSIGN
          // B MOD
@@ -534,9 +535,8 @@ bool Blitter::DmaTickStateMachine()
          // A MOD
          internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x064);
 
-      blt_a_dat_ += internal_.mod_rd_val;
-      address_a_ = blt_a_dat_;
-      sign_del = sign = (blt_a_dat_ & 0x8000)?true:false;
+      address_a_ += internal_.mod_rd_val;
+      sign_del = sign = (address_a_ & 0x8000)?true:false;
       /*
 
       internal_.r_stblit = 0;
@@ -630,6 +630,8 @@ bool Blitter::DmaTickStateMachine()
 
       BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, 0/*r_bltaold*/, blt_a_dat_, r_bltahold);//0 all the time
       BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+      r_bltbhold = (r_bltbhold & 1) ? 0xFFFF : 0;
+
       ComputeMinTerm();
 
       // set ash, bsh
@@ -659,7 +661,7 @@ bool Blitter::DmaTickStateMachine()
       // set d data register
       blt_d_dat_ = r_mt_out;
       r_bltaold = 0; // blt_a_dat_;
-      r_bltbold = blt_b_dat_;
+      //r_bltbold = blt_b_dat_;
 
       // write it
       if (bltcon0_ & 0x100)
