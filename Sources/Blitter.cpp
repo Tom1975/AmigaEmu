@@ -321,8 +321,8 @@ void Blitter::BarrelShifter(bool desc, unsigned short bit_mask, unsigned short d
    unsigned int w_mult_new = w_mult_val * data_new;
 
    data_out = desc
-                ? (( w_mult_old & 0xFFFF0000) | (w_mult_new & 0xFFFF))
-                : (( w_mult_new & 0xFFFF0000) | (w_mult_old & 0xFFFF));
+                ? (( w_mult_old >> 16 ) | (w_mult_new & 0xFFFF))
+                : (( w_mult_new >> 16) | (w_mult_old & 0xFFFF));
 
 }
 
@@ -476,8 +476,8 @@ bool Blitter::DmaTickStateMachine()
       {
          // Barrel shifters
          // first word = 
-         BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
-         BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+         BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+         BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
          ComputeMinTerm();
 
          // write r_mt_out... If 
@@ -496,8 +496,8 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_stblit = 0;
       // ... todo
    // Barrel shifters
-      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
-      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+      BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+      BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       ComputeMinTerm();
 
       blt_d_dat_ = r_mt_out;
@@ -625,16 +625,18 @@ bool Blitter::DmaTickStateMachine()
          blitter_state_ = BLT_LINE_4;
 
       //
+
       internal_.r_ash_msk = 1 << ((bltcon0_ >> 12) & 0xF);
       internal_.r_bsh_msk = 1 << ((bltcon1_ >> 12) & 0xF);
 
-      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_ash_msk, 0/*r_bltaold*/, blt_a_dat_, r_bltahold);//0 all the time
-      BarrelShifter((bltcon0_ ^ 1)& ((bltcon0_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
+      BarrelShifter( (((bltcon1_&1) ^ 1)& (bltcon0_ >> 1) ), internal_.r_ash_msk, 0/*r_bltaold*/, blt_a_dat_, r_bltahold);//0 all the time
+      BarrelShifter( (((bltcon1_ & 1) ^ 1)& (bltcon0_ >> 1)), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       r_bltbhold = (r_bltbhold & 1) ? 0xFFFF : 0;
 
       ComputeMinTerm();
 
       // set ash, bsh
+      //incash = enable && blt_state == BLT_L4 && (bltcon1[4] && !bltcon1[2] || !bltcon1[4] && !bltcon1[3] && !sign_del) ? 1'b1 : 1'b0;
       if ( (bltcon1_&0x10) && !(bltcon1_&0x4) || !(bltcon1_&0x10) && !(bltcon1_&0x8) && !sign_del) 
       {
          unsigned char val = (bltcon0_ >> 12) & 0xF;
