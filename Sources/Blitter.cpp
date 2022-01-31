@@ -161,9 +161,9 @@ bool Blitter::DmaTick()
                // 
             }
          }
-         if (--window_width_ == 0)
+         if (--window_width_count_ == 0)
          {
-            if (--window_height_ == 0)
+            if (--window_height_count_ == 0)
             {
                // End of blitter action
                dmacon_->dmacon_ &= ~0x4000; // busy
@@ -215,8 +215,8 @@ void Blitter::Reset()
 void Blitter::UpdateSize()
 {
    // Compute last word / last line
-   bool last_word = (--window_width_ == 0);
-   bool last_line = last_word && (--window_height_ == 0);
+   bool last_word = (--window_width_count_ == 0);
+   bool last_line = last_word && (--window_height_count_ == 0);
 
    if (last_word && last_line)
    {
@@ -493,10 +493,19 @@ bool Blitter::DmaTickStateMachine()
       }
       break;
    case BLT_DST_D:
+   {
       internal_.r_stblit = 0;
       // ... todo
    // Barrel shifters
-      BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_, r_bltahold);
+
+      unsigned int mask_a = 0xFFFF;
+      first_word_ = window_width_count_ == window_width_;
+      last_word_ = window_width_count_ == 1;
+      if (last_word_&& first_word_) mask_a = (mask_a_ >> 16)&(mask_a_ & 0xFFFF);
+      else if (first_word_) mask_a = (mask_a_ & 0xFFFF);
+      else if (last_word_) mask_a = (mask_a_ >> 16);
+
+      BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_&mask_a, r_bltahold);
       BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       ComputeMinTerm();
 
@@ -513,7 +522,7 @@ bool Blitter::DmaTickStateMachine()
       UpdateSize();
 
       break;
-   
+   }
    // Update error accumulator
    case BLT_LINE_1:
 
@@ -530,10 +539,10 @@ bool Blitter::DmaTickStateMachine()
       
       if (bltcon1_ & 0x40) // BLTSIGN
          // B MOD
-         internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x062);
+         internal_.mod_rd_val = modulo_b_;// motherboard_->GetBus()->Read16(0x062);
       else
          // A MOD
-         internal_.mod_rd_val = motherboard_->GetBus()->Read16(0x064);
+         internal_.mod_rd_val = modulo_a_;// motherboard_->GetBus()->Read16(0x064);
 
       address_a_ += internal_.mod_rd_val;
       sign_del = sign = (address_a_ & 0x8000)?true:false;
@@ -613,7 +622,7 @@ bool Blitter::DmaTickStateMachine()
 
       first_pixel = !sign_del;
       
-      bool last_line = window_height_ == 1;
+      bool last_line = window_height_count_ == 1;
 
       bool enable = true;
       if (enable)
@@ -693,7 +702,7 @@ bool Blitter::DmaTickStateMachine()
          address_c_ -= modulo_c_;
       }
       // size change
-      --window_height_;
+      --window_height_count_;
 
       if (last_line )
       {
@@ -727,6 +736,9 @@ void Blitter::SetBltSize(unsigned short data)
 {
    window_height_ = data >> 6;
    window_width_ = data & 0x3F;
+
+   window_width_count_ = 0;
+   window_height_count_ = 0;
 
    // Blitter automaticaly starts : Reset pipeline
    memset(pipeline_, 0, sizeof(pipeline_));

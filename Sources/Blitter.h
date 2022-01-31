@@ -124,7 +124,9 @@ private:
 
    // Window Size
    unsigned char window_width_;
+   unsigned char  window_width_count_;
    unsigned short window_height_;
+   unsigned short window_height_count_;
 
    // line drawing variable
    unsigned int line_x_;
@@ -144,4 +146,7 @@ private:
    bool sign;
    bool sign_del;
    unsigned char first_pixel;
+
+   bool last_word_;
+   bool first_word_;
 };
