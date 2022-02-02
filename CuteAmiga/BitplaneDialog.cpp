@@ -153,13 +153,18 @@ void BitplaneDialog::UpdateBitplaneOverview()
    for (int i = 0; i < bp_struct->rows && i < 300; i++)
    {
       unsigned int * ptr = ui->display_->GetFrameBuffer(i);
-      for (int x = 0; x < bp_struct->byte_per_row && x < 100; x++)
+      for (int x = 0; x < bp_struct->byte_per_row && x < 100; x+=2)
       {
-         unsigned char current_byte = ram[addr_base++];
-         // add pixel
-         for (int b = 0; b < 8; b++)
+         unsigned short current_word = (ram[addr_base]<<8) | ram[addr_base+1];
+         if (current_word != 0)
          {
-            ptr[x * 8 + b] = ((current_byte >> b) & 0x1) ? 0: 0xFFFFFF;
+            int dbg = 1;
+         }
+         addr_base += 2;
+         // add pixel
+         for (int b = 0; b < 16; b++)
+         {
+            ptr[x * 8 + b] = ((current_word >> (15-b)) & 0x1) ? 0: 0xFFFFFF;
          }
       }
    }  

@@ -228,69 +228,71 @@ void Blitter::UpdateSize()
 
       blitter_state_ = BLT_IDLE;
    }
-
-   // Inc address a. If last word, add modulo
-   if (bltcon0_ & 0x800)
+   else
    {
-      if ((bltcon1_ & 0x3) == 1)
-         address_a_++;
-      else
-         address_a_--;
-      // r_last_word
-      if (last_word)
+      // Inc address a. If last word, add modulo
+      if (bltcon0_ & 0x800)
       {
-         if ((bltcon1_ & 0x3) == 1)
-            address_a_ += modulo_a_;
+         if (bltcon1_ & 0x2)
+            address_a_ -= 2;
          else
-            address_a_ -= modulo_a_;
+            address_a_ += 2;
+         // r_last_word
+         if (last_word)
+         {
+            if (bltcon1_ & 0x2)
+               address_a_ -= modulo_a_;
+            else
+               address_a_ += modulo_a_;
+         }
       }
-   }
-   // B
-   if (bltcon0_ & 0x400)
-   {
-      if ((bltcon1_ & 0x3) == 1)
-         address_b_++;
-      else
-         address_b_--;
-      // r_last_word
-      if (last_word)
+      // B
+      if (bltcon0_ & 0x400)
       {
-         if ((bltcon1_ & 0x3) == 1)
-            address_b_ += modulo_b_;
+         if (bltcon1_ & 0x2)
+            address_b_ -= 2;
          else
-            address_b_ -= modulo_b_;
+            address_b_ += 2;
+         // r_last_word
+         if (last_word)
+         {
+            if (bltcon1_ & 0x2)
+               address_b_ -= modulo_b_;
+            else
+               address_b_ += modulo_b_;
+         }
       }
-   }
-   // C
-   if (bltcon0_ & 0x200)
-   {
-      if ((bltcon1_ & 0x3) == 1)
-         address_c_++;
-      else
-         address_c_--;
-      // r_last_word
-      if (last_word)
+      // C
+      if (bltcon0_ & 0x200)
       {
-         if ((bltcon1_ & 0x3) == 1)
-            address_c_ += modulo_c_;
+         if (bltcon1_ & 0x2)
+            address_c_ -= 2;
          else
-            address_c_ -= modulo_c_;
+            address_c_ += 2;
+         // r_last_word
+         if (last_word)
+         {
+            if (bltcon1_ & 0x2)
+               address_c_ -= modulo_c_;
+            else
+               address_c_ += modulo_c_;
+         }
       }
-   }
-   // D
-   if (bltcon0_ & 0x100)
-   {
-      if ((bltcon1_ & 0x3) == 1)
-         address_d_++;
-      else
-         address_d_--;
-      // r_last_word
-      if (last_word)
+      // D
+      if (bltcon0_ & 0x100)
       {
-         if ((bltcon1_ & 0x3) == 1)
-            address_d_ += modulo_d_;
+         if (bltcon1_ & 0x2)
+            address_d_ -= 2;
          else
-            address_d_ -= modulo_d_;
+            address_d_ += 2;
+         // r_last_word
+         if (last_word)
+         {
+            if (bltcon1_ & 0x2)
+               address_d_ -= modulo_d_;
+            else
+               address_d_ += modulo_d_;
+         }
       }
    }
 }
@@ -401,7 +403,10 @@ bool Blitter::DmaTickStateMachine()
       internal_.r_rga_bltm_p3 = 0x1FE;
       internal_.r_ch_blt_p3 = 0x1F;
       if (bltcon1_ & 1)
+      {
+         sign_del = (bltcon1_ & 0x40);
          blitter_state_ = BLT_LINE_1;
+      }
       else
          blitter_state_ = BLT_SRC_A;
       break;
@@ -505,6 +510,9 @@ bool Blitter::DmaTickStateMachine()
       else if (first_word_) mask_a = (mask_a_ & 0xFFFF);
       else if (last_word_) mask_a = (mask_a_ >> 16);
 
+      internal_.r_ash_msk = 1 << ((bltcon0_ >> 12) & 0xF);
+      internal_.r_bsh_msk = 1 << ((bltcon1_ >> 12) & 0xF);
+
       BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_&mask_a, r_bltahold);
       BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       ComputeMinTerm();
@@ -523,6 +531,7 @@ bool Blitter::DmaTickStateMachine()
 
       break;
    }
+
    // Update error accumulator
    case BLT_LINE_1:
 
@@ -536,8 +545,7 @@ bool Blitter::DmaTickStateMachine()
 
       // Update error accumulator
       //blt_a_dat_ = address_a_;
-      
-      if (bltcon1_ & 0x40) // BLTSIGN
+      if (sign_del) // BLTSIGN
          // B MOD
          internal_.mod_rd_val = modulo_b_;// motherboard_->GetBus()->Read16(0x062);
       else
@@ -682,13 +690,13 @@ bool Blitter::DmaTickStateMachine()
       // Address generator
       if (incptr && !decptr)
       {
-         address_d_ ++;
-         address_c_ ++;
+         address_d_ += 2;
+         address_c_ += 2;
       }
       else if (!incptr && decptr)
       {
-         address_d_ --;
-         address_c_--;
+         address_d_ -= 2;
+         address_c_ -= 2;
       }
 
       if (addmod && !submod)
@@ -737,8 +745,8 @@ void Blitter::SetBltSize(unsigned short data)
    window_height_ = data >> 6;
    window_width_ = data & 0x3F;
 
-   window_width_count_ = 0;
-   window_height_count_ = 0;
+   window_width_count_ = window_width_;
+   window_height_count_ = window_height_;
 
    // Blitter automaticaly starts : Reset pipeline
    memset(pipeline_, 0, sizeof(pipeline_));
