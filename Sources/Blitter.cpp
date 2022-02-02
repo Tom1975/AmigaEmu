@@ -755,7 +755,7 @@ void Blitter::SetBltSize(unsigned short data)
    dmacon_->dmacon_ |= 0x4000; // busy
 
    line_x_ = address_c_;
-   internal_.r_ash_msk  = x_mod_ = 1<<((dmacon_->dmacon_ >> 12) & 0xF);
+   internal_.r_ash_msk  = x_mod_ = 1<<((bltcon0_ >> 12) & 0xF);
    internal_.r_bsh_msk = 1 << ((bltcon1_>> 12) & 0xF);
    remain_ = (short)address_a_;
 
