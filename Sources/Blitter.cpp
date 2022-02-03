@@ -791,7 +791,7 @@ void Blitter::SetBltPt(unsigned char zone, unsigned short data)
       break;
    case 0x2:
       address_c_ &= 0xFFFF0000;
-      address_c_ |= data;
+      address_c_ |= data & 0xFFFE;
       break;
    case 0x21:
       address_b_ &= 0xFFFF;
@@ -799,7 +799,7 @@ void Blitter::SetBltPt(unsigned char zone, unsigned short data)
       break;
    case 0x1:
       address_b_ &= 0xFFFF0000;
-      address_b_ |= data;
+      address_b_ |= data & 0xFFFE;
       break;
    case 0x20:
       address_a_ &= 0xFFFF;
@@ -807,7 +807,7 @@ void Blitter::SetBltPt(unsigned char zone, unsigned short data)
       break;
    case 0x0:
       address_a_ &= 0xFFFF0000;
-      address_a_ |= data;
+      address_a_ |= data & 0xFFFE;
       break;
    case 0x23:
       address_d_ &= 0xFFFF;
@@ -815,7 +815,7 @@ void Blitter::SetBltPt(unsigned char zone, unsigned short data)
       break;
    case 0x3:
       address_d_ &= 0xFFFF0000;
-      address_d_ |= data;
+      address_d_ |= data&0xFFFE;
       break;
 
    }
