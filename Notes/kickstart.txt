@@ -1,12 +1,35 @@
 *** Dessin kickstart :
 
-FCA9C8 => Ok ?
+FILL Debug : 
+FCA8DC ok
+FCA932 Ok
+FCA958 ok
+FCA9EA ok
+FCA9FA ok
+FCAA92 ok
+
+2e appel FD0AA2: jsr FD0EA4 : Crash
+=> La zone A492 est ecrasé bien avant...
+CAUSE : 
+
+FC1BDA
+Appel a GetMsg qui va avoir un RTS corrompu (FF01990d...)
+Nombre d'appel : 
+23 ok 
+24e corrompu !
+move.w    #$C000,DFF09A => Interrupt.
+It : vertical blank
+IT : 
+- FC6CDC
+- FE5CC8 => C'est lui qui va bourriner la mémoire !
+
+- FE96DA
+
+
 
 
 FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
 The bits in INTENA/REQ are blitter interrupt requests, I would not use them for the purpose of waiting for the blitter to finish."
-
-
 
 => 0xFC0B28 (InitResident)
 FC4afc (expansion.library)	: 
