@@ -806,6 +806,12 @@ void Bus::Write16(unsigned int address, unsigned short data)
 {
    unsigned short written_value = SWAP_UINT16(data);
 
+   if (address >= 0xA490 && address <= 0xA494)
+   {
+      int dbg = 1;
+   }
+
+
    // todo : add here all the stuff that should prevent from direct reading => OVL signal make the ROM over the RAM
    void* real_address;
    if (address > 0xF80000

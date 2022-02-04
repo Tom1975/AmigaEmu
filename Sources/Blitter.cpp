@@ -216,7 +216,14 @@ void Blitter::UpdateSize()
 {
    // Compute last word / last line
    bool last_word = (--window_width_count_ == 0);
-   bool last_line = last_word && (--window_height_count_ == 0);
+
+   bool last_line = false;
+   if (last_word)
+   { 
+      last_line = (--window_height_count_ == 0);
+      window_width_count_ = window_width_;
+   }
+   
 
    if (last_word && last_line)
    {
