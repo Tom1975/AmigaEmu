@@ -1,29 +1,8 @@
 *** Dessin kickstart :
 
-FILL Debug : 
-FCA8DC ok
-FCA932 Ok
-FCA958 ok
-FCA9EA ok
-FCA9FA ok
-FCAA92 ok
+Copper : Pas de passage a la copperlist 2...
 
-2e appel FD0AA2: jsr FD0EA4 : Crash
-=> La zone A492 est ecrasé bien avant...
-CAUSE : 
 
-FC1BDA
-Appel a GetMsg qui va avoir un RTS corrompu (FF01990d...)
-Nombre d'appel : 
-23 ok 
-24e corrompu !
-move.w    #$C000,DFF09A => Interrupt.
-It : vertical blank
-IT : 
-- FC6CDC
-- FE5CC8 => C'est lui qui va bourriner la mémoire !
-
-- FE96DA
 
 
 

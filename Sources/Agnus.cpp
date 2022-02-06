@@ -104,6 +104,6 @@ void Agnus::TickCCK(bool up)
 
 bool Agnus::WithinWindow()
 {
-   return ((line_counter_ > diwstrt_ >> 8) && line_counter_  < (diwstop_ >> 8)
-      && horizontal_counter_ > ddfstrt_ * 2 && horizontal_counter_ < ddfstop_ * 2);
+   return ((line_counter_ > (diwstrt_ >> 8)) && line_counter_  < (diwstop_ >> 8)
+      && horizontal_counter_ > (ddfstrt_ * 2) && horizontal_counter_ < (ddfstop_ * 2));
 }

@@ -2358,7 +2358,7 @@ unsigned int M68k::DecodeAsd2()
 
    if (((ird_ >> 5) & 0x1) == 1)
    {
-      rotat = d_[rotat] & 0x2F;
+      rotat = d_[rotat] & 0x3F;
    }
 
    // Rotate

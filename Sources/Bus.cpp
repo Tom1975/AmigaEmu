@@ -514,16 +514,16 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
 
 
       case 0x60:  //BLTCMOD
-         blitter_->SetBltMod(2, data);
+         blitter_->SetBltMod(2, data & 0xFFFE);
          break;
       case 0x62:  //BLTBMOD
-         blitter_->SetBltMod(1, data);
+         blitter_->SetBltMod(1, data & 0xFFFE);
          break;
       case 0x64:  //BLTAMOD
-         blitter_->SetBltMod(0, data);
+         blitter_->SetBltMod(0, data & 0xFFFE);
          break;
       case 0x66:  //BLTDMOD
-         blitter_->SetBltMod(3, data);
+         blitter_->SetBltMod(3, data&0xFFFE);
          break;
 
       case 0x70:  // BLTCDAT
