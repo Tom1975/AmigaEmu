@@ -27,7 +27,7 @@ bool Copper::Compare()
 {
    // BFD
    if (bfd_ && ((dmacon_->dmacon_&0x4000)== 0x4000)) return false;
-//   if ((motherboard_->GetAgnus()->GetVerticalPos() & ve_) > vp_) return true;
+   if ((motherboard_->GetAgnus()->GetVerticalPos() & ve_) > vp_) return true;
 
    return ((motherboard_->GetAgnus()->GetHorizontalPos() & he_) >= hp_
       && (motherboard_->GetAgnus()->GetVerticalPos() & ve_) >= vp_);
@@ -128,10 +128,16 @@ void Copper::DmaDecode()
       // todo
       motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
 
-      /*char trace[256];
-      sprintf (trace, "COPPER Move %X => %X\n", ram_data_, destination_address_);
-      OutputDebugStringA(trace);*/
-
+      if (ram_data_ != 0 && destination_address_ != 0)
+      {
+         char trace[256];
+         sprintf(trace, "COPPER Move %X => %X\n", ram_data_, destination_address_);
+         OutputDebugStringA(trace);
+         if (ram_data_ == 0x302 && destination_address_ == 0x100)
+         {
+            int dbg = 1;
+         }
+      }
       current_state_ = NONE;
    }
 }
