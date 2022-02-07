@@ -1,9 +1,14 @@
 *** Dessin kickstart :
 
-Copper : Pas de passage a la copperlist 2...
+Copper : 
+- bcp de move 0, 0....
+- passage a la copperlist 2 alors qu'on est trop bas ?
+- garbage au debut
+- Apres passage a la coperlist 2 (2398) : copper bloqué ??
 
-
-
+Fonctionnement de l'écran :
+** Attention au test : 
+Si ve > vp, return true.
 
 
 

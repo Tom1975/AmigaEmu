@@ -161,7 +161,7 @@ QString CopperDialog::Decode(unsigned short instr1, unsigned short instr2)
       unsigned short he = (instr2 & 0xFE) << 2;
       unsigned short bfd = instr2 >> 15;
 
-      str += QString("x:%1(%2); y:%3(%4)").arg(vp, 2, 16, QLatin1Char('0')).arg(ve, 2, 16, QLatin1Char('0')).arg(hp, 2, 16, QLatin1Char('0')).arg(he, 2, 16, QLatin1Char('0')).toUpper();
+      str += QString("x:%1(%2); y:%3(%4)").arg(hp, 2, 16, QLatin1Char('0')).arg(he, 2, 16, QLatin1Char('0')).arg(vp, 2, 16, QLatin1Char('0')).arg(ve, 2, 16, QLatin1Char('0')).toUpper();
 
    }
    else

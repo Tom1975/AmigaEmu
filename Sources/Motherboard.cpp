@@ -79,7 +79,7 @@ void Motherboard::VSync()
 {
    // CIA-A TOD
    cia_a_.Tod();
-   agnus_.GetCopper()->VerticalRetraceBegin();
+   //agnus_.GetCopper()->VerticalRetraceBegin();
 
    // Int VBlank
    paula_.Int(0x20);

@@ -97,6 +97,7 @@ void Agnus::TickCCK(bool up)
          {
             line_counter_ = 0;
             motherboard_->ResetHCounter();
+            GetCopper()->VerticalRetraceBegin();
          }
       }
    }

@@ -1,3 +1,6 @@
+#include <windows.h>
+#include <stdio.h>
+
 #include "Copper.h"
 #include "Motherboard.h"
 
@@ -22,8 +25,10 @@ void Copper::VerticalRetraceBegin()
 
 bool Copper::Compare()
 {
-   // compare counter. Return true if >= 
-   // TOFIX
+   // BFD
+   if (bfd_ && ((dmacon_->dmacon_&0x4000)== 0x4000)) return false;
+//   if ((motherboard_->GetAgnus()->GetVerticalPos() & ve_) > vp_) return true;
+
    return ((motherboard_->GetAgnus()->GetHorizontalPos() & he_) >= hp_
       && (motherboard_->GetAgnus()->GetVerticalPos() & ve_) >= vp_);
 }
@@ -34,8 +39,8 @@ bool Copper::DmaTick()
    if ((dmacon_->dmacon_ & 0x280) == 0x280)
    {
       // todo : remove when understanding fully what's going on !
-      if (counter_ == 0xFFFFFFFF)
-         VerticalRetraceBegin();
+      /*if (counter_ == 0xFFFFFFFF)
+         VerticalRetraceBegin();*/
 
       switch (current_state_)
       {
@@ -122,6 +127,11 @@ void Copper::DmaDecode()
       // Any delay to add ?
       // todo
       motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
+
+      /*char trace[256];
+      sprintf (trace, "COPPER Move %X => %X\n", ram_data_, destination_address_);
+      OutputDebugStringA(trace);*/
+
       current_state_ = NONE;
    }
 }
