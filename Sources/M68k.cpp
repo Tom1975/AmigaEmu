@@ -1684,11 +1684,15 @@ unsigned int M68k::DecodeLsd2()
 {
    bool right = ((ird_>> 8) & 0x1) == 0;
    unsigned int rotat = (ird_ >> 9) & 0x7;
-   if (rotat == 0)rotat = 8;
+   
 
    if (((ird_ >> 5) & 0x1) == 1)
    {
       rotat = d_[rotat]&0x3F;
+   }
+   else
+   {
+      if (rotat == 0)rotat = 8;
    }
 
    // Rotate
@@ -1800,11 +1804,14 @@ unsigned int M68k::DecodeRod2()
 {
    bool right = ((ird_ >> 8) & 0x1) == 0;
    unsigned int rotat = (ird_ >> 9) & 0x7;
-   if (rotat == 0)rotat = 8;
-
+   
    if (((ird_ >> 5) & 0x1) == 1)
    {
       rotat = d_[rotat] & 0x3F;
+   }
+   else
+   {
+      if (rotat == 0)rotat = 8;
    }
 
    sr_ &= ~(F_V|F_N|F_C|F_Z);
@@ -2355,11 +2362,14 @@ unsigned int M68k::DecodeAsd2()
 {
    bool right = ((ird_ >> 8) & 0x1) == 0;
    unsigned int rotat = (ird_ >> 9) & 0x7;
-   if (rotat == 0)rotat = 8;
 
    if (((ird_ >> 5) & 0x1) == 1)
    {
       rotat = d_[rotat] & 0x3F;
+   }
+   else
+   {
+      if (rotat == 0)rotat = 8;
    }
 
    // Rotate
