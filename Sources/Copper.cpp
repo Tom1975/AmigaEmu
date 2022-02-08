@@ -126,16 +126,20 @@ void Copper::DmaDecode()
 
       // Any delay to add ?
       // todo
-      motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
 
-      if (ram_data_ != 0 && destination_address_ != 0)
+      if (counter_ < 0x103F0)
       {
-         char trace[256];
-         sprintf(trace, "COPPER Move %X => %X\n", ram_data_, destination_address_);
-         OutputDebugStringA(trace);
-         if (ram_data_ == 0x302 && destination_address_ == 0x100)
+         motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
+
+         if (ram_data_ != 0 || destination_address_ != 0)
          {
-            int dbg = 1;
+            char trace[256];
+            //sprintf(trace, "COPPER %4.4X : Move %X => %X\n", counter_, ram_data_, destination_address_);
+            //OutputDebugStringA(trace);
+            if (ram_data_ == 0x302 && destination_address_ == 0x100)
+            {
+               int dbg = 1;
+            }
          }
       }
       current_state_ = NONE;

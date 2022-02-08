@@ -1,15 +1,15 @@
 *** Dessin kickstart :
 
 Copper : 
-- bcp de move 0, 0....
-- passage a la copperlist 2 alors qu'on est trop bas ?
-- garbage au debut
-- Apres passage a la coperlist 2 (2398) : copper bloqué ??
+
+103DA avec un faux C3
+Issue de 1030C = 00C3 !!!
+Qui écrit la ??
+
 
 Fonctionnement de l'écran :
 ** Attention au test : 
 Si ve > vp, return true.
-
 
 
 FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
@@ -379,3 +379,6 @@ Sauvegarde de l'id du drive dans (A3)
 004940: btst #5, BFE001           			Lecture bit READY
 NE LIT PAS l'adresse BFE001... !
 ===> OK !
+
+**************************
+==> asl.l #0, D0 : ASL 8 !!!
