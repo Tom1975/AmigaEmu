@@ -35,7 +35,8 @@ void Bitplanes::NewLine()
 {
    for (int i = 0; i < nb_bitplanes_; i++)
    {
-      //bplxpt_[i] += 
+      // todo : handle even/odd planes
+      bplxpt_[i] += (i&1)?bpl1mod_: bpl2mod_;
    }
 }
 
@@ -44,7 +45,7 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
    if ((dmacon_->dmacon_ & 0x300) == 0x300 && nb_bitplanes_ > 0)
    {
       // Check : Bitplane is on, and position is winthin the display window
-      int bitplane = 0;
+      int bitplane = -1;
       if (motherboard_->GetAgnus()->WithinWindow() && nb_bitplanes_ > 0)
       {
          
@@ -119,6 +120,9 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
             break;
          default: return false;
          }
+
+         if (bitplane == -1)
+            return false;
 
          motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
          bplxpt_[bitplane] += 2;

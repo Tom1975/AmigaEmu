@@ -78,6 +78,8 @@ void Agnus::TickCCK(bool up)
          motherboard_->GetBus()->ResetDmaCount();
 
          horizontal_counter_ = 0;
+         motherboard_->ResetHCounter();
+
          line_counter_++;
 
          // Check ending line  
@@ -96,7 +98,6 @@ void Agnus::TickCCK(bool up)
          if (line_counter_ == 312)
          {
             line_counter_ = 0;
-            motherboard_->ResetHCounter();
             GetCopper()->VerticalRetraceBegin();
          }
       }
@@ -105,6 +106,14 @@ void Agnus::TickCCK(bool up)
 
 bool Agnus::WithinWindow()
 {
-   return ((line_counter_ > (diwstrt_ >> 8)) && line_counter_  < (diwstop_ >> 8)
-      && horizontal_counter_ > (ddfstrt_ * 2) && horizontal_counter_ < (ddfstop_ * 2));
+   unsigned short hstart = diwstrt_ & 0x7F;
+   unsigned short vstart = (diwstrt_ >> 8);
+
+   unsigned short hstop = 0x100 | (diwstop_ & 0xFF);
+   unsigned short vstop = diwstop_ >> 8;
+   if ((vstop & 0x80) == 0) vstop |= 0x100;
+
+   return ((line_counter_ > vstart) && line_counter_  <= vstop
+      && horizontal_counter_ > hstart && horizontal_counter_ <= hstop
+      && horizontal_counter_ > (ddfstrt_ * 2) && horizontal_counter_ <= (ddfstop_ * 2));
 }

@@ -87,7 +87,7 @@ void Copper::DmaDecode()
       {
          // Skip if
          vp_ = instr_1 >> 8;
-         ve_ = (instr_2 >> 8) & 0x7F;
+         ve_ = ((instr_2 >> 8) & 0x7F)|0x80;
          hp_ = (instr_1 & 0xFE) << 2;
          he_ = (instr_2 & 0xFE) << 2;
          bfd_ = instr_2 >> 15;
@@ -104,7 +104,7 @@ void Copper::DmaDecode()
       {
          // Wait
          vp_ = instr_1 >> 8;
-         ve_ = (instr_2 >> 8) & 0x7F;
+         ve_ = ((instr_2 >> 8) & 0x7F)|0x80;
          hp_ = (instr_1 & 0xFE) << 2;
          he_ = (instr_2 & 0xFE) << 2;
          bfd_ = instr_2 >> 15;
@@ -127,19 +127,16 @@ void Copper::DmaDecode()
       // Any delay to add ?
       // todo
 
-      if (counter_ < 0x103F0)
-      {
-         motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
+      motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
 
-         if (ram_data_ != 0 || destination_address_ != 0)
+      if (ram_data_ != 0 || destination_address_ != 0)
+      {
+         char trace[256];
+         //sprintf(trace, "COPPER %4.4X : Move %X => %X\n", counter_, ram_data_, destination_address_);
+         //OutputDebugStringA(trace);
+         if (ram_data_ == 0x302 && destination_address_ == 0x100)
          {
-            char trace[256];
-            //sprintf(trace, "COPPER %4.4X : Move %X => %X\n", counter_, ram_data_, destination_address_);
-            //OutputDebugStringA(trace);
-            if (ram_data_ == 0x302 && destination_address_ == 0x100)
-            {
-               int dbg = 1;
-            }
+            int dbg = 1;
          }
       }
       current_state_ = NONE;

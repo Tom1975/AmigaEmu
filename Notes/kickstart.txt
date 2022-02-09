@@ -2,9 +2,10 @@
 
 Copper : 
 
-103DA avec un faux C3
-Issue de 1030C = 00C3 !!!
-Qui écrit la ??
+Ecran : 0x28 byte / row;
+Rows : 0xC8
+
+Couleur : Si basse resolution : La série de pixels (16) doit etre etendue....
 
 
 Fonctionnement de l'écran :

@@ -69,6 +69,10 @@ void Denise::GetRGB(unsigned int * display)
 
 void Denise::SetBplDat(unsigned int bitplane_number, unsigned short data)
 {
+   if (data != 0)
+   {
+      int dbg = 1;
+   }
    bplxdat_[bitplane_number] = data;
    if (bitplane_number == 0)
    {
@@ -89,7 +93,11 @@ void Denise::DisplayWord()
       unsigned char color = 0;
       for (int j = 0; j < nb_bitplanes_; j++)
       {
-         color |= ((bplxdat_[j] & (1 << i)) << i);
+         if (bplxdat_[j] & (1 << i))
+         {
+            color |= (1 << j);
+         }
+         //color |= ((bplxdat_[j] & (1 << i))?(1 << j):0;
       }
 
       // Convert color to RGB
