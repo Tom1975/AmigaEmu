@@ -42,6 +42,7 @@ public:
 
 protected:
    
+   unsigned char pixel_counter_;
    unsigned short color_[32];
    unsigned int display_[16];
    Bitplanes * bitplanes_;

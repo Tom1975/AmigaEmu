@@ -18,6 +18,7 @@ Denise::~Denise()
 void Denise::Reset()
 {
    memset(color_, 0, sizeof(color_));
+   pixel_counter_ = 0;
 }
 
 ////////////////////////////////
@@ -52,7 +53,29 @@ void Denise::TickCDAC(bool up)
 void Denise::GetRGB(unsigned int * display)
 {
    //todo : handle priority (sprites, dual playfield, etc)
-   memcpy(display, display_, sizeof(display_));
+
+   // Todo : get proper number of bit, scaled.
+   if ((bitplanes_->bplcon0_ & 0x8000) == 0)
+   {
+      // low res
+      for (int i = 0; i < 16; i+=4)
+      {
+         display[i] = display_[pixel_counter_];
+         display[i+1] = display_[pixel_counter_];
+         display[i+2] = display_[pixel_counter_];
+         display[i+3] = display_[pixel_counter_];
+         pixel_counter_++;
+      }
+      if (pixel_counter_ == 16)
+         pixel_counter_ = 0;
+   }
+   else
+   {
+      //memcpy(display, &display_[pixel_counter_*4], sizeof(display_));
+   }
+   //memcpy(display, display_, sizeof(display_));
+
+   
 
    // handle DIWSTRT, DIWSTOP, DDFSTRT, DDFSTOP
    /*if (hpos_counter_ > *diwstrt_ && hpos_counter_ < *diwstop_)
