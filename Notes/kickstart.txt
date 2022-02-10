@@ -5,6 +5,27 @@ Copper :
 Ecran : 0x28 byte / row;
 Rows : 0xC8
 
+On observe : 
+
+16 pixels dma 8x
+16 pixel monitor 1x
+8 pixels a chaque fois ???
+
+Ecran reel : 1024 pixels (64*16 bits)
+64 us par ligne
+1 pixel = 70ns
+1 pixel lowres = 140ns
+226 DMA memory access (1 every 4 pixels)
+1 DMA access = 280ns
+jusqu'a 160 cycles DMA bitplane
+
+=> 16 pixel = 1 us = 4 memory access
+320 = 8 DMA acess pour 16 pixels (resolution 320)
+4us = 16 pixels
+1 pixel = 1/4 us
+2 pixels monitor = 1 pixel lowres
+1 pixels monitor = 1 pixel hires
+
 Couleur : Si basse resolution : La série de pixels (16) doit etre etendue....
 
 

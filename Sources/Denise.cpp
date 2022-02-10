@@ -58,12 +58,16 @@ void Denise::GetRGB(unsigned int * display)
    if ((bitplanes_->bplcon0_ & 0x8000) == 0)
    {
       // low res
-      for (int i = 0; i < 16; i+=4)
+      for (int i = 0; i < 16; i+=8)
       {
          display[i] = display_[pixel_counter_];
          display[i+1] = display_[pixel_counter_];
          display[i+2] = display_[pixel_counter_];
          display[i+3] = display_[pixel_counter_];
+         display[i + 4] = display_[pixel_counter_];
+         display[i + 5] = display_[pixel_counter_];
+         display[i + 6] = display_[pixel_counter_];
+         display[i + 7] = display_[pixel_counter_];
          pixel_counter_++;
       }
       if (pixel_counter_ == 16)
