@@ -7,26 +7,22 @@ Rows : 0xC8
 
 On observe : 
 
-16 pixels dma 8x
-16 pixel monitor 1x
-8 pixels a chaque fois ???
 
-Ecran reel : 1024 pixels (64*16 bits)
-64 us par ligne
-1 pixel = 70ns
-1 pixel lowres = 140ns
-226 DMA memory access (1 every 4 pixels)
-1 DMA access = 280ns
-jusqu'a 160 cycles DMA bitplane
 
-=> 16 pixel = 1 us = 4 memory access
-320 = 8 DMA acess pour 16 pixels (resolution 320)
-4us = 16 pixels
-1 pixel = 1/4 us
-2 pixels monitor = 1 pixel lowres
-1 pixels monitor = 1 pixel hires
+SYNCHRO LOGIQUE : 
 
-Couleur : Si basse resolution : La série de pixels (16) doit etre etendue....
+*** agnus & timing
+horizontal counter agnus : increment tous les ticks CCK (up)
+
+
+*** Synchro
+16 pixels hires (ou moniteur) = 32 ticks 28mhz
+4 appels DMA = 16 pixels hires = 32 ticks 28mhz
+8 appels DMA = 16 pixels lowres = 64 ticks 28mhz
+1 DMA = 8 ticks 28mhz
+lores : 2 appels moniteur (16 pixels) pour 1 fetch de 16 pixels (8 dma)
+
+
 
 
 Fonctionnement de l'écran :

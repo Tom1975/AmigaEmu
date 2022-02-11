@@ -266,7 +266,7 @@ void Motherboard::TickDebug()
       Tick7Mhz(true);
       break;
    }
-   if ((debug_count_ & 0x0F) == 0x0F)
+   if ((debug_count_ & 0x1F) == 0x1F)
    {
       monitor_.Tick();
    }
