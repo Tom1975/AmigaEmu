@@ -7,22 +7,19 @@ Rows : 0xC8
 
 On observe : 
 
-
-
 SYNCHRO LOGIQUE : 
 
 *** agnus & timing
 horizontal counter agnus : increment tous les ticks CCK (up)
+227 CCK / line (908 pixel/line  ~ 70ns / pixel)
+lores : 8 CCK = 16 pixels
+hires : 4 CCK = 16 pixels
 
-
-*** Synchro
-16 pixels hires (ou moniteur) = 32 ticks 28mhz
-4 appels DMA = 16 pixels hires = 32 ticks 28mhz
-8 appels DMA = 16 pixels lowres = 64 ticks 28mhz
-1 DMA = 8 ticks 28mhz
-lores : 2 appels moniteur (16 pixels) pour 1 fetch de 16 pixels (8 dma)
-
-
+=> A faire :
+- Quand 16 pixels sont prets (via bitplane) => Les envoyer à l'ecran.
+Ca fera 16/32 pixels (hi/lo res).
+- Ecran : Gestion d'une ligne / ecran par agnus (hsync/vsync).
+Remplissage de cette ligne par bitplane/denise 
 
 
 Fonctionnement de l'écran :
