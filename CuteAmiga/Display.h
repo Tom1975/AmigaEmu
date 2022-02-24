@@ -18,7 +18,10 @@ public:
     ~Display();
 
     virtual unsigned int * GetFrameBuffer(unsigned int line);
-    virtual  void VSync();
+
+    virtual void HSync();
+    virtual void VSync();
+    virtual void Add16Pixels(unsigned int*);
 
     virtual void AFrameIsReady();
     void Init();
@@ -47,4 +50,9 @@ signals:
 private:
    QPixmap pixmap_;
    QImage image_;
+
+   // Pixel/line handling
+   unsigned int index_current_line_;
+   unsigned int * current_line_;
+   unsigned int pixel_current_index_;
 };

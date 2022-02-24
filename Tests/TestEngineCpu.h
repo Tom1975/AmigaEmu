@@ -33,6 +33,16 @@ public:
    {
       return LineBuffer;
    }
+   virtual void HSync()
+   {
+
+   }
+
+   virtual void Add16Pixels(unsigned int*)
+   {
+
+   }
+
    virtual  void VSync()
    {
 

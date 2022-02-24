@@ -66,16 +66,32 @@ unsigned int * Display::GetFrameBuffer(unsigned int line)
    
 }
 
+
+
 void Display::ForceRefresh()
 {
    QWidget::repaint();
 }
+
 void Display::VSync()
 {
    emit Update();
    AFrameIsReady();
+
+   index_current_line_ = 0;
+   current_line_ = GetFrameBuffer(index_current_line_);
 }
 
+void Display::HSync()
+{
+   current_line_ = GetFrameBuffer(index_current_line_++);
+}
+
+void Display::Add16Pixels(unsigned int* pixels)
+{
+   memcpy(&current_line_[pixel_current_index_], pixels, 16 * sizeof(unsigned int));
+   pixel_current_index_ += 16;
+}
 
 void Display::paintEvent(QPaintEvent*)
 {
