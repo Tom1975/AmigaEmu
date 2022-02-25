@@ -5,7 +5,11 @@ Copper :
 Ecran : 0x28 byte / row;
 Rows : 0xC8
 
+Stride : 40 (28h)  egalement ?
+
 On observe : 
+30 octets lu (lorsque hc = 227... !)
+
 
 SYNCHRO LOGIQUE : 
 

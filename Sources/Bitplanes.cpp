@@ -122,7 +122,10 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
          }
 
          if (bitplane == -1)
+         {
             return false;
+         }
+            
 
          motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
          bplxpt_[bitplane] += 2;

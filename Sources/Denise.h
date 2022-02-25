@@ -1,5 +1,6 @@
 #pragma once
 #include "Bitplanes.h"
+#include "DisplayFrame.h"
 
 class Denise
 {
@@ -14,6 +15,10 @@ public:
       diwstrt_ = diwstrt;
       diwstop_ = diwstop;
 
+   }
+   void SetDisplayFrame (DisplayFrame* frame)
+   {
+      frame_ = frame;
    }
 
    void Reset();
@@ -45,6 +50,9 @@ protected:
    unsigned char pixel_counter_;
    unsigned short color_[32];
    unsigned int display_[16];
+   unsigned int used_display_[16];
+
+   DisplayFrame* frame_;
    Bitplanes * bitplanes_;
    int hpos_counter_;
 

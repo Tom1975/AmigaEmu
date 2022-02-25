@@ -24,6 +24,8 @@ Motherboard::~Motherboard()
 
 bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware)
 {
+   frame_ = frame;
+   denise_.SetDisplayFrame(frame_);
    hardware_ = hardware;
    monitor_.InitScreen(frame);
    // Load ROM
@@ -77,6 +79,7 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware)
 
 void Motherboard::VSync()
 {
+   frame_->VSync();
    // CIA-A TOD
    cia_a_.Tod();
    //agnus_.GetCopper()->VerticalRetraceBegin();
@@ -87,6 +90,7 @@ void Motherboard::VSync()
 
 void Motherboard::HSync()
 {
+   frame_->HSync();
    // CIA-B TOD
    cia_b_.Tod();
 }
@@ -268,7 +272,7 @@ void Motherboard::TickDebug()
    }
    if ((debug_count_ & 0x1F) == 0x1F)
    {
-      monitor_.Tick();
+      //monitor_.Tick();
    }
 }
 
@@ -325,7 +329,7 @@ void Motherboard::Tick()
    Tick28Mhz(false);
       // CDAC up
    TickCDAC(true);
-   monitor_.Tick();
+   //monitor_.Tick();
    // 28 Mhz up
    Tick28Mhz(true);
    // 28 Mhz down

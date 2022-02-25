@@ -92,4 +92,6 @@ protected:
 
    Monitor monitor_;
    HardwareIO* hardware_;
+
+   DisplayFrame* frame_;
 };

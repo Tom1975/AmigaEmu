@@ -564,10 +564,10 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          agnus_->diwstop_ = data;
          break;
       case 0x92: // DDFSTRT
-         agnus_->ddfstrt_ = data;
+         agnus_->ddfstrt_ = data & 0x1FC;
          break;
       case 0x94: // DDFSTOP
-         agnus_->ddfstop_ = data;
+         agnus_->ddfstop_ = data & 0x1FC;
          break;
 
 

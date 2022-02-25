@@ -5,7 +5,7 @@
 #define COLOR2RGB(col) (unsigned int)((((col>>8)&0xF) << 20) + (((col>>4)&0xF) << 12) + ((col&0xF)<<4))
 
 
-Denise::Denise()
+Denise::Denise() : frame_(nullptr), hpos_counter_(0)
 {
    Reset();
 }
@@ -19,6 +19,7 @@ void Denise::Reset()
 {
    memset(color_, 0, sizeof(color_));
    pixel_counter_ = 0;
+   hpos_counter_ = 0;
 }
 
 ////////////////////////////////
@@ -45,6 +46,20 @@ void Denise::TickCDAC(bool up)
    if (up)
    {
       hpos_counter_++;
+
+      // Pixel writer : Every 16 tick (pixels hires), write the buffer to screen
+      if (hpos_counter_ == 16)
+      {
+         hpos_counter_ = 0;
+
+         // Write 16 pixels to screen
+         unsigned int pixel_buffer[16];
+         GetRGB(pixel_buffer);
+         frame_->Add16Pixels(pixel_buffer);
+      }
+      // Then refresh from ready buffer.
+
+
    }
 }
 
@@ -60,22 +75,19 @@ void Denise::GetRGB(unsigned int * display)
       // low res
       for (int i = 0; i < 16; )
       {
-         display[i++] = display_[pixel_counter_];
-         display[i++] = display_[pixel_counter_];
-         /*display[i+2] = display_[pixel_counter_];
-         display[i+3] = display_[pixel_counter_];
-         /*display[i + 4] = display_[pixel_counter_];
-         display[i + 5] = display_[pixel_counter_];
-         display[i + 6] = display_[pixel_counter_];
-         display[i + 7] = display_[pixel_counter_];*/
+         display[i++] = used_display_[pixel_counter_];
+         display[i++] = used_display_[pixel_counter_];
          pixel_counter_++;
       }
       if (pixel_counter_ == 16)
+      {
          pixel_counter_ = 0;
+         memcpy(used_display_, display_, 16*sizeof(int));
+      }
    }
    else
    {
-      //memcpy(display, &display_[pixel_counter_*4], sizeof(display_));
+      memcpy(display, display_, sizeof(display_));
    }
    //memcpy(display, display_, sizeof(display_));
 
@@ -118,12 +130,17 @@ void Denise::DisplayWord()
    for (int i = 0; i < 16; i++)
    {
       unsigned char color = 0;
-      for (int j = 0; j < nb_bitplanes_; j++)
+
+      // only bitplane 0
+      //for (int j = 0; j < nb_bitplanes_; j++)
       {
-         if (bplxdat_[j] & (1 << i))
+
+         color = ((bplxdat_[0] >> (15 - i)) & 0x1) ? 0xFFFFFF:0;
+
+         /*if (bplxdat_[j] & (1 << i))
          {
             color |= (1 << j);
-         }
+         }*/
          //color |= ((bplxdat_[j] & (1 << i))?(1 << j):0;
       }
 

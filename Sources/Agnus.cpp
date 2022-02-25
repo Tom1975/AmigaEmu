@@ -115,5 +115,5 @@ bool Agnus::WithinWindow()
 
    return ((line_counter_ > vstart) && line_counter_  <= vstop
       && horizontal_counter_ > hstart && horizontal_counter_ <= hstop
-      && horizontal_counter_ > (ddfstrt_ * 2) && horizontal_counter_ <= (ddfstop_ * 2));
+      && horizontal_counter_ >= (ddfstrt_-1 ) && horizontal_counter_ <= (ddfstop_ ));
 }

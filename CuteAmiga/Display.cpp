@@ -57,6 +57,10 @@ void Display::Init()
 
    pixmap_.convertFromImage(image_, Qt::ColorOnly);
    setUpdatesEnabled(true);
+
+   index_current_line_ = 0;
+   current_line_ = GetFrameBuffer(index_current_line_);
+   pixel_current_index_ = 0;
 }
 
 unsigned int * Display::GetFrameBuffer(unsigned int line)
@@ -80,11 +84,14 @@ void Display::VSync()
 
    index_current_line_ = 0;
    current_line_ = GetFrameBuffer(index_current_line_);
+   pixel_current_index_ = 0;
 }
 
 void Display::HSync()
 {
+   pixel_current_index_ = 0;
    current_line_ = GetFrameBuffer(index_current_line_++);
+   
 }
 
 void Display::Add16Pixels(unsigned int* pixels)
