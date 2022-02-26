@@ -66,8 +66,7 @@ void Display::Init()
 unsigned int * Display::GetFrameBuffer(unsigned int line)
 {
    // extract framebuffer from pixmap
-   return (unsigned int*)image_.scanLine(line);
-   
+   return (unsigned int*)image_.scanLine(line);   
 }
 
 

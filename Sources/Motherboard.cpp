@@ -93,6 +93,7 @@ void Motherboard::HSync()
    frame_->HSync();
    // CIA-B TOD
    cia_b_.Tod();
+   denise_.StrHor();
 }
 
 void Motherboard::ResetHCounter()

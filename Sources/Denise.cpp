@@ -132,10 +132,9 @@ void Denise::DisplayWord()
       unsigned char color = 0;
 
       // only bitplane 0
-      //for (int j = 0; j < nb_bitplanes_; j++)
+      for (int j = 0; j < nb_bitplanes_; j++)
       {
-
-         color = ((bplxdat_[0] >> (15 - i)) & 0x1) ? 0xFFFFFF:0;
+         color |= ((bplxdat_[0] >> (15 - i)) & 0x1) ? (1 << j) : 0;
 
          /*if (bplxdat_[j] & (1 << i))
          {
