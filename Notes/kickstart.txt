@@ -1,5 +1,24 @@
 *** Dessin kickstart :
 
+Copie bitmap :
+
+width = 5
+height = 8
+blt a ffff
+blt b 0
+blt c 0
+blt d ffff
+adress A : 1b0ffb8
+adress b : 5fc8
+adress c : d880
+adress d : d880
+mod a ff70
+mod b ffee
+mod c ffce
+mod d ffce
+bltcon0 : 07ea
+bltcon1 : F000
+
 Copper : 
 
 Ecran : 0x28 byte / row;

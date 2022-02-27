@@ -19,170 +19,6 @@ Blitter::~Blitter()
 //////////////////////////////////////////////
 // Actions
 // Handle a DMA copper. If nothing is done (wait, or DMACON disable copper), return false.
-bool Blitter::DmaTick()
-{
-   return DmaTickStateMachine();
-
-   bool dma_used = false;
-
-   // DMA blitter and busy
-   if ((dmacon_->dmacon_ & 0x240) == 0x240 
-      && (dmacon_->dmacon_ & 0x4000))
-   {
-      // First part of the pipeline : Fetch the source data
-      if ((bltcon0_ & 0x800) && ((channel_read_ & 0x8) == 0))
-      {
-         // A is enabled, and not read yet
-         blt_a_dat_ = motherboard_->GetBus()->Read16(address_a_);
-         pipeline_[pipeline_counter_++] = blt_a_dat_;
-         channel_read_ |= 8;
-      }
-      else if ((bltcon0_ & 0x400) && ((channel_read_ & 0x4) == 0))
-      {
-         // B is enabled, and not read yet
-         blt_b_dat_ = motherboard_->GetBus()->Read16(address_b_);
-         pipeline_[pipeline_counter_++] = blt_b_dat_;
-         channel_read_ |= 4;
-      }
-      else if ((bltcon0_ & 0x200) && ((channel_read_ & 0x2) == 0))
-      {
-         // C is enabled, and not read yet
-         blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_);
-         pipeline_[pipeline_counter_++] = blt_c_dat_;
-         channel_read_ |= 2;
-      }
-      else
-      {
-         // pipeline is full : process the first part
-         // LINE MODE
-         if (bltcon1_ & 1)
-         {
-            // Set few variable, depending on the octant
-            // address_c_ is read. TODO : Handle this with proper DMA
-            bool endloop = false;
-            // Plot x, y : 
-            blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_);
-            blt_d_dat_ = blt_c_dat_;
-
-            int inc_x = (bltcon1_ & 0x4) ? -1 : 1;
-            int max_x = (bltcon1_ & 0x4) ? 0xF : 0;
-            int inc_y = (bltcon1_ & 0x10) ? -1 : 1;
-
-            // SUD = 1 : increaqse x each time
-            // decrease window height
-            window_height_--;
-
-            if (bltcon1_ & 0x8)
-            {
-               //do
-               {
-                  // add the next pixel.
-                  blt_d_dat_ = blt_d_dat_ | (1 << x_mod_);
-
-                  // Increase x (on the octant 0)
-                  x_mod_+= inc_x;
-                  x_mod_ &= 0xF;
-
-                  // if D > 0 : change line.
-                  if (remain_ > 0)
-                  {
-                     remain_ += (short)modulo_a_;
-                     address_c_ += (inc_y*(short)modulo_c_);
-                     address_d_ += (inc_y*(short)modulo_c_);   // Undocumented : TODO = find about this one ...
-                     endloop = true;
-                  }
-                  else
-                  {
-                     remain_ += modulo_b_;
-                  }
-
-               }// while (x_mod_ != max_x && !endloop && window_height_ != 0);
-               if (x_mod_ == max_x)
-               {
-                  address_c_+= inc_x;
-                  address_d_+= inc_x;
-               }
-            }
-            else
-            {
-               // y increased each time
-               blt_d_dat_ = blt_d_dat_ | (1 << x_mod_);
-
-               // Increase y (on the octant 0)
-               remain_ += (short)modulo_a_;
-               address_c_ += (inc_y*(short)modulo_c_);
-               address_d_ += (inc_y*(short)modulo_c_);   // Undocumented : TODO = find about this one ...
-
-               // if D > 0 : change line.
-               if (remain_ > 0)
-               {
-                  x_mod_ += inc_x;
-                  x_mod_ &= 0xF;
-
-                  if (x_mod_ == max_x)
-                  {
-                     address_c_ += inc_x;
-                     address_d_ += inc_x;
-                  }
-               }
-               else
-               {
-                  remain_ += modulo_b_;
-               }
-            }
-            // If still on the same line, same word, continue.
-
-            // D is ready to be written.
-            motherboard_->GetBus()->Write16(address_d_, blt_d_dat_);
-
-            if (window_height_ == 0)
-            {
-               // End of blitter action
-               dmacon_->dmacon_ &= ~0x4000; // busy
-               // Interrupt
-               motherboard_->GetPaula()->Int(0x40);
-
-            }
-         }
-         else
-         {
-
-            channel_read_ = 0;
-            pipeline_counter_ = 0;
-
-            // Something preprocessed to write ? 
-            if (output_ready_ && !dma_used)
-            {
-               //todo : compute D
-               blt_d_dat_;
-
-               output_ready_ = false;
-
-               // 
-            }
-         }
-         if (--window_width_count_ == 0)
-         {
-            if (--window_height_count_ == 0)
-            {
-               // End of blitter action
-               dmacon_->dmacon_ &= ~0x4000; // busy
-
-               // Interrupt
-               motherboard_->GetPaula()->Int(0x40);
-
-            }
-         }
-         output_ready_ = true;
-
-      }
-   }
-
-   // Second part : End processing and write
-      
-
-   return dma_used;
-}
 
 void Blitter::Reset()
 {
@@ -248,9 +84,9 @@ void Blitter::UpdateSize()
          if (last_word)
          {
             if (bltcon1_ & 0x2)
-               address_a_ -= modulo_a_;
+               address_a_ -= (short)modulo_a_;
             else
-               address_a_ += modulo_a_;
+               address_a_ += (short)modulo_a_;
          }
       }
       // B
@@ -264,9 +100,9 @@ void Blitter::UpdateSize()
          if (last_word)
          {
             if (bltcon1_ & 0x2)
-               address_b_ -= modulo_b_;
+               address_b_ -= (short)modulo_b_;
             else
-               address_b_ += modulo_b_;
+               address_b_ += (short)modulo_b_;
          }
       }
       // C
@@ -280,9 +116,9 @@ void Blitter::UpdateSize()
          if (last_word)
          {
             if (bltcon1_ & 0x2)
-               address_c_ -= modulo_c_;
+               address_c_ -= (short)modulo_c_;
             else
-               address_c_ += modulo_c_;
+               address_c_ += (short)modulo_c_;
          }
       }
       // D
@@ -296,9 +132,9 @@ void Blitter::UpdateSize()
          if (last_word)
          {
             if (bltcon1_ & 0x2)
-               address_d_ -= modulo_d_;
+               address_d_ -= (short)modulo_d_;
             else
-               address_d_ += modulo_d_;
+               address_d_ += (short)modulo_d_;
          }
       }
    }
@@ -368,7 +204,7 @@ void Blitter::ComputeMinTerm()
    }
 }
 
-bool Blitter::DmaTickStateMachine()
+bool Blitter::DmaTick()
 {
    switch (blitter_state_)
    {
@@ -554,10 +390,10 @@ bool Blitter::DmaTickStateMachine()
       //blt_a_dat_ = address_a_;
       if (sign_del) // BLTSIGN
          // B MOD
-         internal_.mod_rd_val = modulo_b_;// motherboard_->GetBus()->Read16(0x062);
+         internal_.mod_rd_val = (short)modulo_b_;// motherboard_->GetBus()->Read16(0x062);
       else
          // A MOD
-         internal_.mod_rd_val = modulo_a_;// motherboard_->GetBus()->Read16(0x064);
+         internal_.mod_rd_val = (short)modulo_a_;// motherboard_->GetBus()->Read16(0x064);
 
       address_a_ += internal_.mod_rd_val;
       sign_del = sign = (address_a_ & 0x8000)?true:false;
