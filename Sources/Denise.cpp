@@ -76,7 +76,7 @@ void Denise::GetRGB(unsigned int * display)
       for (int i = 0; i < 16; )
       {
          display[i++] = used_display_[pixel_counter_];
-         display[i++] = used_display_[pixel_counter_];
+         //display[i++] = used_display_[pixel_counter_];
          pixel_counter_++;
       }
       if (pixel_counter_ == 16)
@@ -134,7 +134,7 @@ void Denise::DisplayWord()
       // only bitplane 0
       for (int j = 0; j < nb_bitplanes_; j++)
       {
-         color |= ((bplxdat_[0] >> (15 - i)) & 0x1) ? (1 << j) : 0;
+         color |= ((bplxdat_[j] >> (15 - i)) & 0x1) ? (1 << j) : 0;
 
          /*if (bplxdat_[j] & (1 << i))
          {
