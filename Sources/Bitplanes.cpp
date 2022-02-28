@@ -14,6 +14,7 @@ Bitplanes::~Bitplanes()
 
 void Bitplanes::Reset()
 {
+   in_windows_ = false;
 }
 
 //////////////////////////////////////////////
@@ -48,90 +49,95 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
       int bitplane = -1;
       if (motherboard_->GetAgnus()->WithinWindow() && nb_bitplanes_ > 0)
       {
-         
-         switch (dmatick & 0x7)
+         if (in_windows_ == false && (dmatick & 0x7) == 1)
+            in_windows_ = true;
+         if (in_windows_)
          {
-         case 1:        // 4 lowres - 2 hires
-            if (nb_bitplanes_ >= 4 && (bplcon0_ & 0x8000) == 0)
+            switch (dmatick & 0x7)
             {
-               bitplane = 3;
-            }
-            else if (nb_bitplanes_ >= 2 && (bplcon0_ & 0x8000))
-            {
-               bitplane = 1;
+            case 1:        // 4 lowres - 2 hires
+               if (nb_bitplanes_ >= 4 && (bplcon0_ & 0x8000) == 0)
+               {
+                  bitplane = 3;
+               }
+               else if (nb_bitplanes_ >= 2 && (bplcon0_ & 0x8000))
+               {
+                  bitplane = 1;
+               }
+
+               break;
+            case 2:        // 6 lowres - 3 hires
+               if (nb_bitplanes_ >= 6 && (bplcon0_ & 0x8000) == 0)
+               {
+                  bitplane = 5;
+               }
+               else if (nb_bitplanes_ >= 3 && (bplcon0_ & 0x8000))
+               {
+                  bitplane = 2;
+               }
+
+               break;
+            case 3:        // 2 lowres - 1 hires
+               if (nb_bitplanes_ >= 2 && (bplcon0_ & 0x8000) == 0)
+               {
+                  bitplane = 1;
+               }
+               else if (nb_bitplanes_ >= 1 && (bplcon0_ & 0x8000))
+               {
+                  bitplane = 0;
+               }
+
+               break;
+            case 0:        // 4 hires
+            case 4:        // 4 hires
+               if (nb_bitplanes_ >= 4 && (bplcon0_ & 0x8000))
+               {
+                  bitplane = 3;
+               }
+
+               break;
+            case 5:        //3 lowres - 2 hires
+               if (nb_bitplanes_ >= 3 && (bplcon0_ & 0x8000) == 0)
+               {
+                  bitplane = 2;
+               }
+               else if (nb_bitplanes_ >= 2 && (bplcon0_ & 0x8000))
+               {
+                  bitplane = 1;
+               }
+               break;
+            case 6:        //5 lowres - 3 hires
+               if (nb_bitplanes_ >= 5 && (bplcon0_ & 0x8000) == 0)
+               {
+                  bitplane = 4;
+               }
+               else if (nb_bitplanes_ >= 3 && (bplcon0_ & 0x8000))
+               {
+                  bitplane = 2;
+               }
+               break;
+            case 7:        //1 lowres - 1 hires
+               if (nb_bitplanes_ >= 1)
+               {
+                  bitplane = 0;
+               }
+               break;
+            default: return false;
             }
 
-            break;
-         case 2:        // 6 lowres - 3 hires
-            if (nb_bitplanes_ >= 6 && (bplcon0_ & 0x8000) == 0)
+            if (bitplane == -1)
             {
-               bitplane = 5;
-            }
-            else if (nb_bitplanes_ >= 3 && (bplcon0_ & 0x8000))
-            {
-               bitplane = 2;
+               return false;
             }
 
-            break;
-         case 3:        // 2 lowres - 1 hires
-            if (nb_bitplanes_ >= 2 && (bplcon0_ & 0x8000) == 0)
-            {
-               bitplane = 1;
-            }
-            else if (nb_bitplanes_ >= 1 && (bplcon0_ & 0x8000))
-            {
-               bitplane = 0;
-            }
 
-            break;
-         case 0:        // 4 hires
-         case 4:        // 4 hires
-            if (nb_bitplanes_ >= 4 && (bplcon0_ & 0x8000))
-            {
-               bitplane = 3;
-            }
-
-            break;
-         case 5:        //3 lowres - 2 hires
-            if (nb_bitplanes_ >= 3 && (bplcon0_ & 0x8000) == 0)
-            {
-               bitplane = 2;
-            }
-            else if (nb_bitplanes_ >= 2 && (bplcon0_ & 0x8000))
-            {
-               bitplane = 1;
-            }
-            break;
-         case 6:        //5 lowres - 3 hires
-            if (nb_bitplanes_ >= 5 && (bplcon0_ & 0x8000) == 0)
-            {
-               bitplane = 4;
-            }
-            else if (nb_bitplanes_ >= 3 && (bplcon0_ & 0x8000))
-            {
-               bitplane = 2;
-            }
-            break;
-         case 7:        //1 lowres - 1 hires
-            if (nb_bitplanes_ >= 1)
-            {
-               bitplane = 0;
-            }
-            break;
-         default: return false;
+            motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
+            bplxpt_[bitplane] += 2;
          }
-
-         if (bitplane == -1)
-         {
-            return false;
-         }
-            
-
-         motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
-         bplxpt_[bitplane] += 2;
       }
       else
       {
+         in_windows_ = false;
          // No display : Bakground
          motherboard_->GetDenise()->DisplayWordBkg();
          return false;

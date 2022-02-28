@@ -45,6 +45,8 @@ public:
 
    unsigned int bplxpt_[6];
 
+   bool in_windows_;
+
    
 
 protected:
