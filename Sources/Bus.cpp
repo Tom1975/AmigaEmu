@@ -752,7 +752,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x1BA:
       case 0x1BC:
       case 0x1BE:
-         denise_->SetColor((addr & 0x1FF) - 0x180, data);
+         denise_->SetColor(((addr & 0x1FF) - 0x180)>>1, data);
          break;
 
       default:
