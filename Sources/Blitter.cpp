@@ -268,32 +268,6 @@ bool Blitter::DmaTick()
       else
          blitter_state_ = BLT_SRC_C;
 
-
-      // Increment/decrement
-      // 
-      /*
-         r_dma_blt_p3 <= r_USEx[3];
-         r_pinc_blt_p3 <= r_USEx[3] & ~w_DESC;
-         r_pdec_blt_p3 <= r_USEx[3] & w_DESC;
-         r_madd_blt_p3 <= r_USEx[3] & r_last_word & ~w_DESC;
-         r_msub_blt_p3 <= r_USEx[3] & r_last_word &  w_DESC;
-         r_rga_bltp_p3 <= 10'h250; // BLTAPTR
-         r_rga_bltm_p3 <= 9'h064;  // BLTAMOD
-         if (r_USEx[3]) begin
-            r_rga_blt_p3 <= 9'h074; // BLTADAT
-            r_ch_blt_p3 <= 5'h1A;
-            end else begin
-            r_rga_blt_p3 <= 9'h1FE; // Idling
-            r_ch_blt_p3 <= 5'h1F;
-            end
-
-            if (r_USEx[2])
-               r_blt_fsm <= `BLT_SRC_B;
-            else if (r_USEx[1] | ~r_USEx[0])
-               r_blt_fsm <= `BLT_SRC_C;
-            else
-               r_blt_fsm <= `BLT_DST_D;
-               */
       break;
    case BLT_SRC_B:
       internal_.r_stblit = 0;
@@ -397,21 +371,7 @@ bool Blitter::DmaTick()
 
       address_a_ += internal_.mod_rd_val;
       sign_del = sign = (address_a_ & 0x8000)?true:false;
-      /*
-
-      internal_.r_stblit = 0;
-
-      internal_.r_madd_blt_p3 = 1;
-      if (bltcon1_ & 0x40) // BLTSIGN
-         internal_.r_rga_bltm_p3 = 0x062; // BLTBMOD : 4 * dy
-      else
-         internal_.r_rga_bltm_p3 = 0x064; // BLTAMOD : 4 * ( dy - dx )
-
-      internal_.mod_rd_val = motherboard_->GetBus()->Read16(internal_.r_rga_bltm_p3);
-
-      internal_.r_rga_blt_p3 = 0x1FE;
-      internal_.r_ch_blt_p3 = 0x1F;
-      */
+     
       blitter_state_ = BLT_LINE_2;
       break;
    // Fetch data with channel C
@@ -420,40 +380,9 @@ bool Blitter::DmaTick()
       internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR : 
       blitter_state_ = BLT_LINE_3;
 
-      /*internal_.r_stblit = 0;
-      internal_.r_ash_inc = 0;
-      internal_.r_ash_dec = 0;
-      internal_.r_bsh_dec = 0;
-      internal_.r_dma_blt_p3 = bltcon0_ & 0x200;
-      internal_.r_pinc_blt_p3 = 0;
-      internal_.r_pdec_blt_p3 = 0;
-      internal_.r_madd_blt_p3 = 0;
-      internal_.r_msub_blt_p3 = 0;
-      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR : 
-      internal_.r_rga_bltm_p3 = 0x1FE;
-      internal_.r_rga_blt_p3 = 0x070;  // BLTCDAT
-      internal_.r_ch_blt_p3 = 0x1A;
-      blitter_state_ = BLT_LINE_3;*/
       break;
    // Free cycle
    case BLT_LINE_3:
-      /*
-      internal_.r_stblit = 0;
-      internal_.r_ash_inc = 0;
-      internal_.r_ash_dec = 0;
-      internal_.r_bsh_dec = 0;
-      internal_.r_dma_blt_p3 = 0;
-      internal_.r_pinc_blt_p3 = 0;
-      internal_.r_pdec_blt_p3 = 0;
-      internal_.r_madd_blt_p3 = 0;
-      internal_.r_msub_blt_p3 = 0;
-      internal_.r_rga_bltp_p3 = 0x3FE;
-      internal_.r_rga_bltm_p3 = 0x1FE;
-      internal_.r_rga_blt_p3 = 0x1FE;
-      internal_.r_ch_blt_p3 = 0x1F;
-      */
-      // there should be a timed shift
-
       blitter_state_ = BLT_LINE_4;
       break;
    case BLT_LINE_4:

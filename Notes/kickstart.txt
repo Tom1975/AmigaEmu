@@ -1,5 +1,23 @@
 *** Dessin kickstart :
 
+
+FLOOD:
+*** 1 ***
+w = 14
+h = c8
+bltcon0 : 0100 ( channel D)
+bltcon1 : 0
+addr A : fffcffc2
+mask a : ffffffff
+mod a : ff86
+addr b : 0
+mod b : 0
+addr C : cbd6
+mod c : 28
+addr D : e33a
+mod D : 0
+
+
 Ecran : 0x28 byte / row;
 Rows : 0xC8
 
