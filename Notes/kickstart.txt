@@ -1,8 +1,8 @@
 *** Dessin kickstart :
 
 
-FLOOD:
-*** 1 ***
+1er FLOOD: 25h / 45h => CEC2
+*** 1 *** FC5BEA
 w = 14
 h = c8
 bltcon0 : 0100 ( channel D)
@@ -17,6 +17,103 @@ mod c : 28
 addr D : e33a
 mod D : 0
 
+*** 2 *** FC5BEA
+w = 14
+h = c8
+bltcon0 : 0100 ( channel D)
+bltcon1 : 0
+a_dat : 8000
+b_dat : ffff
+c_dat : 0
+d_dat : 0
+addr A : fffcffc2
+mask a : ffffffff
+mod a : ff86
+addr b : 0
+mod b : 0
+addr C : cbd6
+mod c : 28
+addr D : 10400
+mod D : 0
+
+*** 3 *** FC75EA
+w = 14
+h = c8
+bltcon0 : 071a ( channel D)
+bltcon1 : 0002
+a_dat : ffff
+b_dat : ffff
+c_dat : 0
+d_dat : 0
+addr A : fffcffc2
+mask a : ffffffff
+mod a : ff86
+addr b : c3f8
+mod b : 0
+addr C : 10278
+mod c : 0
+addr D : 10278
+mod D : 0
+
+*** 4 *** FC75EA
+w = 14
+h = c8
+bltcon0 : 072a ( channel D)
+bltcon1 : 0002
+a_dat : ffff
+b_dat : 0
+c_dat : 0
+d_dat : 0
+addr A : fffcffc2
+mask a : ffffffff
+mod a : ff86
+addr b : e338
+mod b : 0
+addr C : 10278
+mod c : 0
+addr D : 10278
+mod D : 0
+
+
+*** 5 *** FC54CA (winuae)
+w = 20 
+h = 1 
+bltcon0 : 0100 
+bltcon1 : 0000
+a_dat : ffff
+b_dat : 0
+c_dat : ffff
+d_dat : ffff
+addr A : fffcffc2
+mask a : ffffffff
+mod a : ff86
+addr b : c3fa (c3f8)
+mod b : 0
+addr C : e33a (e338)
+mod c : 0
+addr D : 10400
+mod D : 0
+*** 
+
+*** 6 *** FC54EC (winuae)
+w = 0 (1)
+h = 3e  (20)
+bltcon0 : 0100 
+bltcon1 : 0000
+a_dat : ffff
+b_dat : 0
+c_dat : ffff
+d_dat : 0
+addr A : fffcffc2
+mask a : ffffffff
+mod a : ff86
+addr b : c3fa (c3f8)
+mod b : 0
+addr C : e33a (e338)
+mod c : 0
+addr D : 1043e (10440)
+mod D : 0
+*** 
 
 Ecran : 0x28 byte / row;
 Rows : 0xC8
