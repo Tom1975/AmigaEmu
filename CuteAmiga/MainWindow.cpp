@@ -24,7 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
    connect(ui->actionExec, &QAction::triggered, this, &MainWindow::Exec);
    connect(ui->actionBitplane, &QAction::triggered, this, &MainWindow::Bitplane);
-   
+   connect(ui->actionInsert_disk_df0, &QAction::triggered, this, &MainWindow::InsertDisk);
+
    connect(ui->display_, SIGNAL(Update()),
       this, SLOT(Update()), Qt::QueuedConnection);
 
@@ -153,6 +154,14 @@ void MainWindow::Bitplane()
 {
    bitplane_.Update();
    bitplane_.show();
+}
+
+void MainWindow::InsertDisk()
+{
+   // Select file to open
+
+
+   // Open it.
 }
 
 /////////////////////////////////////////////////////////////////////////////

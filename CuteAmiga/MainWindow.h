@@ -31,6 +31,8 @@ public:
     void SaveConfig();
     void LoadConfig();
 
+    void InsertDisk();
+
 public slots:
    void Update();
 

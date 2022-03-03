@@ -27,9 +27,7 @@ public:
     void Init();
 
     // Display
-    //virtual QPaintEngine* paintEngine() const;
     virtual void resizeEvent(QResizeEvent* event);
-    //virtual void paintEvent(QPaintEvent*);
 
     // Keyboard
     virtual void keyPressEvent(QKeyEvent * event_keyboard);
@@ -48,6 +46,9 @@ signals:
    
 
 private:
+   void OpenFiles(const QStringList& pathList);
+
+
    QPixmap pixmap_;
    QImage image_;
 
