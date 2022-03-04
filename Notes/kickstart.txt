@@ -1,5 +1,22 @@
 *** Dessin kickstart :
 
+Bitplane 1 : A4BA , lg FA0 => A4BA to B45A
+Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
+
+
+TODO : 
+
+- Check what the blitter did : 
+BP sur FC59EC ( blitter finish)
+Check data written by blitter and call.
+
+- Check call to blitter : 
+FC5BEA
+FC75EA
+FC54CA
+FC54EC
+
+- Check what's done here : FC754E (wait blit just after)
 
 1er FLOOD: 25h / 45h => CEC2
 *** 1 *** FC5BEA
@@ -52,7 +69,7 @@ addr b : c3f8
 mod b : 0
 addr C : 10278
 mod c : 0
-addr D : 10278
+addr D : 10278 (down to F2D8)
 mod D : 0
 
 *** 4 *** FC75EA
@@ -96,7 +113,7 @@ mod D : 0
 *** 
 
 *** 6 *** FC54EC (winuae)
-w = 0 (1)
+w = 0 (1) (64 words ?!)
 h = 3e  (20)
 bltcon0 : 0100 
 bltcon1 : 0000
@@ -114,6 +131,9 @@ mod c : 0
 addr D : 1043e (10440)
 mod D : 0
 *** 
+
+
+
 
 Ecran : 0x28 byte / row;
 Rows : 0xC8
