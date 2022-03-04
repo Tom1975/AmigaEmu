@@ -44,6 +44,7 @@ void Blitter::Reset()
 
    r_bltaold = 0;
    r_bltbold = 0;
+   blt_d_dat_ = 0;
 
    r_BLTCDAT = 0;
 }
@@ -51,7 +52,8 @@ void Blitter::Reset()
 void Blitter::UpdateSize()
 {
    // Compute last word / last line
-   bool last_word = (--window_width_count_ == 0);
+   window_width_count_ = (window_width_count_ - 1);
+   bool last_word = (window_width_count_ == 0);
 
    bool last_line = false;
    if (last_word)
@@ -174,10 +176,11 @@ void Blitter::BarrelShifter(bool desc, unsigned short bit_mask, unsigned short d
 // Compute MinTerm
 // 
 // Input : r_bltahold, r_bltbhold, r_BLTCDAT, bltcon0_
-// Output: r_mt_out
+// Output: 
 //
 void Blitter::ComputeMinTerm()
 {
+   // hack : no minterm : nothing.
    // Compute min term.
    unsigned short r_LF[8];
    memset(r_LF, 0, sizeof(r_LF));
@@ -190,17 +193,27 @@ void Blitter::ComputeMinTerm()
 
    r_BLTCDAT = blt_c_dat_;
 
-   r_mt_out = 0;
-   for (unsigned char i = 0; i < 16; i++)
+   if (((bltcon1_ & 0x1)==1) || (bltcon0_ & 0xEFF) != 0)
    {
-      r_mt_out |= (~r_bltahold & ~r_bltbhold & ~r_BLTCDAT & r_LF[0]
-         | ~r_bltahold & ~r_bltbhold & r_BLTCDAT & r_LF[1]
-         | ~r_bltahold & r_bltbhold & ~r_BLTCDAT & r_LF[2]
-         | ~r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[3]
-         | r_bltahold & ~r_bltbhold & ~r_BLTCDAT & r_LF[4]
-         | r_bltahold & ~r_bltbhold & r_BLTCDAT & r_LF[5]
-         | r_bltahold & r_bltbhold & ~r_BLTCDAT & r_LF[6]
-         | r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[7])&(1<<i);
+      blt_d_dat_ = 0;
+      for (unsigned char i = 0; i < 16; i++)
+      {
+         blt_d_dat_ |= (~r_bltahold & ~r_bltbhold & ~r_BLTCDAT & r_LF[0]
+            | ~r_bltahold & ~r_bltbhold & r_BLTCDAT & r_LF[1]
+            | ~r_bltahold & r_bltbhold & ~r_BLTCDAT & r_LF[2]
+            | ~r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[3]
+            | r_bltahold & ~r_bltbhold & ~r_BLTCDAT & r_LF[4]
+            | r_bltahold & ~r_bltbhold & r_BLTCDAT & r_LF[5]
+            | r_bltahold & r_bltbhold & ~r_BLTCDAT & r_LF[6]
+            | r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[7])&(1 << i);
+      }
+   }
+   else
+   {
+      if (blt_d_dat_ != 0)
+      {
+         int dbg = 1;
+      }
    }
 }
 
@@ -302,9 +315,6 @@ bool Blitter::DmaTick()
          BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
          ComputeMinTerm();
 
-         // write r_mt_out... If 
-         blt_d_dat_ = r_mt_out;
-
          // there should be a timed shift
          blitter_state_ = BLT_SRC_A;
          r_bltaold = blt_a_dat_;
@@ -333,8 +343,6 @@ bool Blitter::DmaTick()
       BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_ash_msk, r_bltaold, blt_a_dat_&mask_a, r_bltahold);
       BarrelShifter((bltcon1_ ^ 1)& ((bltcon1_ >> 1) & 1), internal_.r_bsh_msk, r_bltbold, blt_b_dat_, r_bltbhold);
       ComputeMinTerm();
-
-      blt_d_dat_ = r_mt_out;
 
       if (bltcon0_ & 0x100)
          motherboard_->GetBus()->Write16(address_d_, blt_d_dat_);
@@ -450,7 +458,6 @@ bool Blitter::DmaTick()
       }
 
       // set d data register
-      blt_d_dat_ = r_mt_out;
       r_bltaold = 0; // blt_a_dat_;
       //r_bltbold = blt_b_dat_;
 
@@ -515,7 +522,12 @@ void Blitter::SetDmaCon(DMAControl* dmacon)
 void Blitter::SetBltSize(unsigned short data)
 {
    window_height_ = data >> 6;
+   if (window_height_ == 0)
+      window_height_ = 1024;
+
    window_width_ = data & 0x3F;
+   if (window_width_ == 0)
+      window_width_ = 0x40;
 
    window_width_count_ = window_width_;
    window_height_count_ = window_height_;

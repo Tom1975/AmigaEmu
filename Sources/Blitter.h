@@ -133,7 +133,6 @@ private:
    unsigned short x_mod_;
    short remain_;
 
-   unsigned short r_mt_out;
    unsigned short r_bltahold;
    unsigned short r_bltbhold;
    unsigned short r_BLTCDAT;
