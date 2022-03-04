@@ -7,6 +7,7 @@ Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
 TODO : 
 
 - Check what the blitter did : 
+Apres passage au flood, 
 BP sur FC59EC ( blitter finish)
 Check data written by blitter and call.
 
