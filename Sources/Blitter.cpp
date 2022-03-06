@@ -193,7 +193,7 @@ void Blitter::ComputeMinTerm()
 
    r_BLTCDAT = blt_c_dat_;
 
-   if (((bltcon1_ & 0x1)==1) || (bltcon0_ & 0xEFF) != 0)
+   //if (((bltcon1_ & 0x1)==1) || (bltcon0_ & 0xEFF) != 0)
    {
       blt_d_dat_ = 0;
       for (unsigned char i = 0; i < 16; i++)
@@ -208,13 +208,13 @@ void Blitter::ComputeMinTerm()
             | r_bltahold & r_bltbhold & r_BLTCDAT & r_LF[7])&(1 << i);
       }
    }
-   else
+   /*else
    {
       if (blt_d_dat_ != 0)
       {
          int dbg = 1;
       }
-   }
+   }*/
 }
 
 bool Blitter::DmaTick()

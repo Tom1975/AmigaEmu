@@ -3,13 +3,33 @@
 Bitplane 1 : A4BA , lg FA0 => A4BA to B45A
 Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
 
+Dbg : 
+1er FLOOD: 25h / 45h => CEC2
+
+FC547A ok
+FC54CA 
+FC54EC : 
+FCAAAE ok
+FCAAC8 ok
+FCAAF6 ok.
+
+*** => FCAB4E => FCBBD4 On n'en ressort pas !!!
+a checker : 
+(FCC334)
+(FCBE3A)
+(FCC0B2)
+blit : FC570E
+=> D0 different (54 au lieu de 41)
+=> D3 different (110e0 au lieu de 10ed)
+=> D7 different (f41a au lieu de f427)
+stack differente
+
+blitt : 14/01
+blton :! 03ca/0
+d: f41a (f426)
 
 TODO : 
 
-- Check what the blitter did : 
-Apres passage au flood, 
-BP sur FC59EC ( blitter finish)
-Check data written by blitter and call.
 
 - Check call to blitter : 
 FC5BEA
@@ -18,121 +38,6 @@ FC54CA
 FC54EC
 
 - Check what's done here : FC754E (wait blit just after)
-
-1er FLOOD: 25h / 45h => CEC2
-*** 1 *** FC5BEA
-w = 14
-h = c8
-bltcon0 : 0100 ( channel D)
-bltcon1 : 0
-addr A : fffcffc2
-mask a : ffffffff
-mod a : ff86
-addr b : 0
-mod b : 0
-addr C : cbd6
-mod c : 28
-addr D : e33a
-mod D : 0
-
-*** 2 *** FC5BEA
-w = 14
-h = c8
-bltcon0 : 0100 ( channel D)
-bltcon1 : 0
-a_dat : 8000
-b_dat : ffff
-c_dat : 0
-d_dat : 0
-addr A : fffcffc2
-mask a : ffffffff
-mod a : ff86
-addr b : 0
-mod b : 0
-addr C : cbd6
-mod c : 28
-addr D : 10400
-mod D : 0
-
-*** 3 *** FC75EA
-w = 14
-h = c8
-bltcon0 : 071a ( channel D)
-bltcon1 : 0002
-a_dat : ffff
-b_dat : ffff
-c_dat : 0
-d_dat : 0
-addr A : fffcffc2
-mask a : ffffffff
-mod a : ff86
-addr b : c3f8
-mod b : 0
-addr C : 10278
-mod c : 0
-addr D : 10278 (down to F2D8)
-mod D : 0
-
-*** 4 *** FC75EA
-w = 14
-h = c8
-bltcon0 : 072a ( channel D)
-bltcon1 : 0002
-a_dat : ffff
-b_dat : 0
-c_dat : 0
-d_dat : 0
-addr A : fffcffc2
-mask a : ffffffff
-mod a : ff86
-addr b : e338
-mod b : 0
-addr C : 10278
-mod c : 0
-addr D : 10278
-mod D : 0
-
-
-*** 5 *** FC54CA (winuae)
-w = 20 
-h = 1 
-bltcon0 : 0100 
-bltcon1 : 0000
-a_dat : ffff
-b_dat : 0
-c_dat : ffff
-d_dat : ffff
-addr A : fffcffc2
-mask a : ffffffff
-mod a : ff86
-addr b : c3fa (c3f8)
-mod b : 0
-addr C : e33a (e338)
-mod c : 0
-addr D : 10400
-mod D : 0
-*** 
-
-*** 6 *** FC54EC (winuae)
-w = 0 (1) (64 words ?!)
-h = 3e  (20)
-bltcon0 : 0100 
-bltcon1 : 0000
-a_dat : ffff
-b_dat : 0
-c_dat : ffff
-d_dat : 0
-addr A : fffcffc2
-mask a : ffffffff
-mod a : ff86
-addr b : c3fa (c3f8)
-mod b : 0
-addr C : e33a (e338)
-mod c : 0
-addr D : 1043e (10440)
-mod D : 0
-*** 
-
 
 
 
