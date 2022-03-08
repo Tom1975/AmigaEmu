@@ -32,10 +32,13 @@ protected:
    unsigned short int_req_;
    unsigned short int_ena_;
 
+   ////////////////////////////////
    // serial port
    unsigned int serper_;
 
+   ////////////////////////////////
    // Disk
    unsigned short dsklen_;
+
 
 };

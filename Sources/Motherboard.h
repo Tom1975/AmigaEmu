@@ -8,7 +8,7 @@
 #include "Monitor.h"
 #include "Denise.h"
 #include "Agnus.h"
-#include "DiskDrive.h"
+#include "DiskController.h"
 
 class HardwareIO
 {
@@ -32,7 +32,7 @@ public :
    Agnus* GetAgnus() { return &agnus_; }
    Denise* GetDenise() { return &denise_; }
    Paula* GetPaula() { return &paula_; }
-   DiskDrive* GetdiskDrive() { return &drive_; }
+   DiskController* GetdiskDrive() { return &drive_; }
 
    Bitplanes * GetBitplanes() { return &bitplanes_; }
 
@@ -81,7 +81,7 @@ protected:
    CIA8520 cia_a_;
    CIA8520 cia_b_;
 
-   DiskDrive drive_;
+   DiskController drive_;
 
    DMAControl dma_control_;
 

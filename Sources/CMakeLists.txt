@@ -29,4 +29,3 @@ set(CompilerFlags
         CMAKE_C_FLAGS_DEBUG
         CMAKE_C_FLAGS_RELEASE
         )
-
