@@ -6,14 +6,20 @@ Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
 Dbg : 
 1er FLOOD: 25h / 45h => CEC2
 
-FC547A ok
+Le bitplane (f44e) semble pas deja ok....
+FC547A (F44E : BB au lieu de B9)
 FC54CA 
 FC54EC : 
 FCAAAE ok
-FCAAC8 ok
+FCAAC8 (F44E : BB au lieu de B9)
 FCAAF6 ok.
 
 *** => FCAB4E => FCBBD4 On n'en ressort pas !!!
+FCBC50 (F44E => 44 au lieu de 46
+FCC1CA => Return pas identique !!
+FCC1EE ok
+FCC206 => (A0) => 44/46 : pas identique !!! (f44e)
+
 a checker : 
 (FCC334)
 (FCBE3A)
@@ -25,7 +31,7 @@ blit : FC570E
 stack differente
 
 blitt : 14/01
-blton :! 03ca/0
+blton : 03ca/0
 d: f41a (f426)
 
 TODO : 
