@@ -25,6 +25,8 @@ FCAAC8 (F44E : BB au lieu de B9)
 FCAAF6
 
 *** => FCAB4E => FCBBD4 On n'en ressort pas !!!
+(occille entre FCC14E et FCC17A)
+
 FCBC50 (F44E => 44 au lieu de 46
 FCC1CA => Return pas identique !!
 FCC1EE

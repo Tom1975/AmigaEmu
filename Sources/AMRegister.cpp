@@ -123,9 +123,12 @@ bool AMRegister::WriteInput(AddressingMode* source)
    switch (size_)
    {
    case 0: // Byte
+   {
+      unsigned char tmp = source->GetU8();
       *current_register_ &= 0xFFFFFF00;
-      *current_register_ |= source->GetU8();
+      *current_register_ |= tmp;
       break;
+   }
    case 1: // Word
       if (type_address_)
       {
@@ -136,9 +139,9 @@ bool AMRegister::WriteInput(AddressingMode* source)
       }
       else
       {
+         unsigned short tmp = source->GetU16();
          *current_register_ &= 0xFFFF0000;
-         *current_register_ |= source->GetU16();
-
+         *current_register_ |= tmp;
       }
       
       break;
