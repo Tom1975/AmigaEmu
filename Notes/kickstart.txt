@@ -3,21 +3,31 @@
 Bitplane 1 : A4BA , lg FA0 => A4BA to B45A
 Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
 
+Dessin : b5ce = 0044 au lieu de 004?? 
+=> Blit : draw line (next byte : fe8e40) 
+cbea/2015 - size : 2-b
+
+FE8D50 ok.
+
 Dbg : 
 1er FLOOD: 25h / 45h => CEC2
 
-Le bitplane (f44e) semble pas deja ok....
+FC6BC4 : BltBitMap ( de a4ba vers e33a
+FC75EA : lancement du blit :  blit de c3f8-> b458 vers 10278 -> F2D8
+F44E => -E2A => source = b5ce = 0044
+
+blit incorrect vers F44E (BB au lieu de B9)
 FC547A (F44E : BB au lieu de B9)
 FC54CA 
 FC54EC : 
-FCAAAE ok
+FCAAAE
 FCAAC8 (F44E : BB au lieu de B9)
-FCAAF6 ok.
+FCAAF6
 
 *** => FCAB4E => FCBBD4 On n'en ressort pas !!!
 FCBC50 (F44E => 44 au lieu de 46
 FCC1CA => Return pas identique !!
-FCC1EE ok
+FCC1EE
 FCC206 => (A0) => 44/46 : pas identique !!! (f44e)
 
 a checker : 

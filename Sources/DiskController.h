@@ -15,6 +15,8 @@ public:
    // Set signals
    void SetSEL0(bool set);
    void SetSEL1(bool set);
+   void SetSEL2(bool set);
+   void SetSEL3(bool set);
    void SetMTRON(bool set);
    void SetDIR(bool set);
    void SetSTEP(bool set);
@@ -31,12 +33,18 @@ public:
    bool GetDKRD();
    bool GetRDY();
 
+
+   bool IsMotorOn(int drive);
+
 private:
 
    ////////////////////////////////
    // Various registers
    bool mtr_;
    bool sel_0_;
+   bool sel_1_;
+   bool sel_2_;
+   bool sel_3_;
 
    ////////////////////////////////
    // Indentification register

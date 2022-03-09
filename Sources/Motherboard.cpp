@@ -4,7 +4,7 @@
 
 #include "Disassembler68k.h"
 
-Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this), cia_b_(this)
+Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this), cia_b_(this), led_(false)
 {
    m68k_.SetBus(&bus_);
    bus_.SetCIA(&cia_a_, &cia_b_);
@@ -149,6 +149,7 @@ void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data, unsigne
       if (a)
       {
          // PRA
+         led_ = ((data & 0x2)==0);
       }
       else
       {
@@ -167,6 +168,10 @@ void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data, unsigne
          // PRB
          if (mask&0x80)
             drive_.SetMTRON((data & 0x80) == 0x10);
+         if (mask & 0x40)
+            drive_.SetSEL3((data & 0x40) == 0x00);
+         if (mask & 0x20)
+            drive_.SetSEL2((data & 0x20) == 0x00);
          if (mask & 0x10)
             drive_.SetSEL1((data & 0x10) == 0x00);
          if (mask & 0x08)

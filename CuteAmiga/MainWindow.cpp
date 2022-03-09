@@ -36,11 +36,22 @@ MainWindow::MainWindow(QWidget *parent) :
    exec_.SetEmulator(emu_handler_);
    bitplane_.SetEmulator(emu_handler_);
 
+   // status bar
    led_on_ = new QPixmap(":/Images/led_on.png");
    led_off_ = new QPixmap(":/Images/led_off.png");
+   drive_led_on_ = new QPixmap(":/Images/drive_led_on.png");
+   drive_led_off_ = new QPixmap(":/Images/drive_led_off.png");
    iconled_ = new QLabel;
    iconled_->setPixmap(*led_off_);
+
    statusBar()->addWidget(iconled_);
+
+   for (int i = 0; i < 4; i++)
+   {
+      icondrive_[i].setText("DFx");
+      icondrive_[i].setPixmap(*drive_led_off_);
+      statusBar()->addWidget(&icondrive_[i]);
+   }
 
 
 }
@@ -170,7 +181,17 @@ void MainWindow::InsertDisk()
 void MainWindow::Update()
 {
    ui->display_->update();
-   // Set led on/off - todo
-   emu_handler_->GetMotherboard();
-   iconled_->setPixmap(*led_off_);
+   
+   Motherboard* mb = emu_handler_->GetMotherboard();
+
+   // Main power Led
+   // Read CIA-A, PA1
+   iconled_->setPixmap(mb->GetLed()?*led_on_ :*led_off_);
+
+   // Disk drive status
+   for (int i = 0; i < 4; i++)
+   {
+      icondrive_[i].setPixmap( mb->GetDriveLed(i)?*drive_led_on_:*drive_led_off_);
+   }
+
 }

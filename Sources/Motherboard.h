@@ -62,6 +62,8 @@ public :
 
    void Reset();
 
+   bool GetLed() { return led_; }
+   bool GetDriveLed(unsigned int drive) { return drive_.IsMotorOn(drive); };
 
 protected:
 
@@ -74,6 +76,8 @@ protected:
    // Main bus and wires
    Bus bus_;
 
+   // Led
+   bool led_;
    // Devices
    M68k m68k_;
 

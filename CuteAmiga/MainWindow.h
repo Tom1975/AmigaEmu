@@ -53,6 +53,12 @@ private:
     // Ressources
     QPixmap* led_on_;
     QPixmap* led_off_;
+    QPixmap* drive_led_on_;
+    QPixmap* drive_led_off_;
+
+
     QLabel* iconled_;
+
+    QLabel icondrive_[4];
 };
 
