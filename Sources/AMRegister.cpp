@@ -167,6 +167,10 @@ unsigned short AMRegister::WriteNextWord(unsigned int& address_to_write)
 void AMRegister::Add(AddressingMode* source, unsigned short& sr)
 {
    // todo
+   if ( this == source)
+   { 
+      int dbg = 1;
+   }
    *current_register_ = this->GetU32() + source->GetU32();
 }
 

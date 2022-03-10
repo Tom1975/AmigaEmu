@@ -61,6 +61,6 @@ target_link_libraries(CuteAmiga ${Qt5Widgets_LIBRARIES} Qt5::Core Qt5::Widgets
 						)
 
 #if(WIN32)
-#    include(Windeployqt)
-#    windeployqt(CuteAmiga ${INSTALL_BIN_PATH})
+    #include(Windeployqt)
+    #windeployqt(CuteAmiga ${INSTALL_BIN_PATH})
 #endif()

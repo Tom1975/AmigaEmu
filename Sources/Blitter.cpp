@@ -24,20 +24,6 @@ void Blitter::Reset()
 {
    blitter_state_ = BLT_IDLE;
 
-   internal_.r_d_avail = 0;
-   internal_.r_blt_done = 0;
-   internal_.r_ash_inc = 0;
-   internal_.r_ash_dec = 0;
-   internal_.r_bsh_dec = 0;
-   internal_.r_dma_blt_p3 = 0;
-   internal_.r_pinc_blt_p3 = 0;
-   internal_.r_pdec_blt_p3 = 0;
-   internal_.r_madd_blt_p3 = 0;
-   internal_.r_msub_blt_p3 = 0;
-   internal_.r_rga_blt_p3 = 0x1FE;
-   internal_.r_rga_bltp_p3 = 0x3FE;
-   internal_.r_rga_bltm_p3 = 0x1FE;
-   internal_.r_ch_blt_p3 = 0x1F;
    internal_.r_last_cyc_p3 = 0;
    internal_.r_ash_msk = 1;
    internal_.r_stblit = 0;
@@ -222,42 +208,14 @@ bool Blitter::DmaTick()
    switch (blitter_state_)
    {
    case BLT_IDLE:
-      internal_.r_d_avail = 0;
-      internal_.r_ash_inc = 0;
-      internal_.r_ash_dec  = 0;
-      internal_.r_bsh_dec  = 0;
-      internal_.r_blt_done  = 0;
-      internal_.r_dma_blt_p3  = 0;
-      internal_.r_pinc_blt_p3  = 0;
-      internal_.r_pdec_blt_p3  = 0;
-      internal_.r_madd_blt_p3  = 0;
-      internal_.r_msub_blt_p3  = 0;
-      internal_.r_rga_blt_p3 = 0x1FE;
-      internal_.r_rga_bltp_p3 = 0x3FE;
-      internal_.r_rga_bltm_p3 = 0x1FE;
-      internal_.r_ch_blt_p3 = 0x1F;
       if (internal_.r_stblit) blitter_state_ = BLT_INIT;
-      break;
+      return false;
    case BLT_INIT:
 
       first_pixel = 1;
 
       internal_.r_stblit = 0;
       r_bltaold = 0;
-      internal_.r_d_avail  = 0;
-      internal_.r_ash_inc  = 0;
-      internal_.r_ash_dec  = 0;
-      internal_.r_bsh_dec  = 0;
-      internal_.r_blt_done  = 0;
-      internal_.r_dma_blt_p3  = 0;
-      internal_.r_pinc_blt_p3  = 0;
-      internal_.r_pdec_blt_p3  = 0;
-      internal_.r_madd_blt_p3  = 0;
-      internal_.r_msub_blt_p3  = 0;
-      internal_.r_rga_blt_p3 = 0x1FE;
-      internal_.r_rga_bltp_p3 = 0x3FE;
-      internal_.r_rga_bltm_p3 = 0x1FE;
-      internal_.r_ch_blt_p3 = 0x1F;
       if (bltcon1_ & 1)
       {
          sign_del = (bltcon1_ & 0x40);
@@ -385,7 +343,7 @@ bool Blitter::DmaTick()
    // Fetch data with channel C
    case BLT_LINE_2:
 
-      internal_.r_rga_bltp_p3 = blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR : 
+      blt_c_dat_ = motherboard_->GetBus()->Read16(address_c_); //0x248; // BLTCPTR : 
       blitter_state_ = BLT_LINE_3;
 
       break;
@@ -538,10 +496,8 @@ void Blitter::SetBltSize(unsigned short data)
   
    dmacon_->dmacon_ |= 0x4000; // busy
 
-   line_x_ = address_c_;
-   internal_.r_ash_msk  = x_mod_ = 1<<((bltcon0_ >> 12) & 0xF);
+   internal_.r_ash_msk  = 1<<((bltcon0_ >> 12) & 0xF);
    internal_.r_bsh_msk = 1 << ((bltcon1_>> 12) & 0xF);
-   remain_ = (short)address_a_;
 
    internal_.r_bltbusy = internal_.r_stblit = ((dmacon_->dmacon_ & 0x240)==0x240) ? 1 : 0;
 }

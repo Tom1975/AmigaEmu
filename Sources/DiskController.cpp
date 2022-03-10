@@ -16,6 +16,12 @@ bool DiskController::IsMotorOn(int drive)
    return disk_drive_[drive].IsMotorOn();
 }
 
+DiskDrive* DiskController::GetDiskDrive(int drive)
+{
+   if (drive >= 4) return nullptr;
+   return &disk_drive_[drive];
+}
+
 void DiskController::Reset()
 {
    chng_ = true;

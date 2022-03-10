@@ -3,6 +3,8 @@
 
 #include <QDir>
 #include <QSettings>
+#include <QFile>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
    QMainWindow(parent),
@@ -170,9 +172,16 @@ void MainWindow::Bitplane()
 void MainWindow::InsertDisk()
 {
    // Select file to open
+   QString filename = QFileDialog::getOpenFileName(this, "Choose File");
 
+   if (filename.isEmpty())
+      return;
 
    // Open it.
+   Motherboard* mb = emu_handler_->GetMotherboard();
+
+   Disk* disk = new Disk (filename.toStdString());
+   mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
 }
 
 /////////////////////////////////////////////////////////////////////////////

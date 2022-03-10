@@ -12,6 +12,8 @@ DiskDrive::~DiskDrive()
 
 void DiskDrive::Eject()
 {
+   if (disk_inserted_ != nullptr) 
+      delete disk_inserted_;
    disk_inserted_ = nullptr;
 }
 

@@ -36,6 +36,8 @@ public:
 
    bool IsMotorOn(int drive);
 
+   DiskDrive* GetDiskDrive(int drive);
+
 private:
 
    ////////////////////////////////

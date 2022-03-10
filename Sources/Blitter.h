@@ -64,20 +64,6 @@ private:
    {
       int r_stblit : 1;
       int r_bltbusy : 1;
-      int r_d_avail : 1;
-      int r_blt_done : 1;
-      int r_ash_inc : 1;
-      int r_ash_dec : 1;
-      int r_bsh_dec : 1;
-      int r_dma_blt_p3 : 1;
-      int r_pinc_blt_p3 : 1;
-      int r_pdec_blt_p3 : 1;
-      int r_madd_blt_p3 : 1;
-      int r_msub_blt_p3 : 1;
-      int r_rga_blt_p3 : 9;
-      int r_rga_bltp_p3 : 10;
-      int r_rga_bltm_p3 : 9;
-      int r_ch_blt_p3 : 5;
       int r_last_cyc_p3 : 1;
       unsigned short r_ash_msk : 16;
       unsigned short r_bsh_msk : 16;
@@ -128,11 +114,7 @@ private:
    unsigned short window_height_count_;
 
    // line drawing variable
-   unsigned int line_x_;
-   unsigned int line_y_;
-   unsigned short x_mod_;
-   short remain_;
-
+   
    unsigned short r_bltahold;
    unsigned short r_bltbhold;
    unsigned short r_BLTCDAT;

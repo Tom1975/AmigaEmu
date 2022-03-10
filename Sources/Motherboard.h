@@ -32,7 +32,7 @@ public :
    Agnus* GetAgnus() { return &agnus_; }
    Denise* GetDenise() { return &denise_; }
    Paula* GetPaula() { return &paula_; }
-   DiskController* GetdiskDrive() { return &drive_; }
+   DiskController* GetDiskController() { return &drive_; }
 
    Bitplanes * GetBitplanes() { return &bitplanes_; }
 

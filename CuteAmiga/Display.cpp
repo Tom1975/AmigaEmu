@@ -146,6 +146,10 @@ void Display::OpenFiles(const QStringList& pathList)
    for (int i = 0; i < pathList.size() && i < 4; +i)
    {
       // Load first 4 files ( df0 to df3 )
+      //    Motherboard* mb = emu_handler_->GetMotherboard();
+      // Disk* disk = new Disk(filename.toStdString());
+      // mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+
 
    }
 }
