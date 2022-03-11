@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/SplashScreen.jpg</file>
         <file>Images/led_off.png</file>
         <file>Images/led_on.png</file>
         <file>Images/drive_led_off.png</file>
