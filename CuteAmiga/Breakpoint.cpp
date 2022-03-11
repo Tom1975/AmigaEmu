@@ -17,6 +17,10 @@ BreakPointHandler::BreakPointHandler()
 
 BreakPointHandler::~BreakPointHandler()
 {
+   for (int i = 0; i < breakpoint_number_; i++)
+   {
+      delete breakpoint_list_[i];
+   }
    delete[]breakpoint_list_;
 }
 
@@ -25,7 +29,7 @@ bool BreakPointHandler::IsBreak()
 {
    // Parcours des breakpoints
    //for (std::vector<IBreakpointItem*>::iterator it = m_BreakpointList.begin(); it != m_BreakpointList.end(); it++)
-   for (int i = 0; i < breakpoint_number_; i++)
+   for (unsigned int i = 0; i < breakpoint_number_; i++)
    {
       // Si on break, on break !
       if (breakpoint_list_[i]->Break())
@@ -37,11 +41,11 @@ bool BreakPointHandler::IsBreak()
 void BreakPointHandler::RemoveBreakpoint(IBreakpointItem* breakpoint)
 {
    //for (std::vector<IBreakpointItem*>::iterator it = m_BreakpointList.begin(); it != m_BreakpointList.end(); it++)
-   for (int i = 0; i < breakpoint_number_; i++)
+   for (unsigned int i = 0; i < breakpoint_number_; i++)
    {
       if (breakpoint_list_[i] == breakpoint)
       {
-         for (int j = i + 1; j < breakpoint_number_; j++)
+         for (unsigned int j = i + 1; j < breakpoint_number_; j++)
          {
             breakpoint_list_[j - 1] = breakpoint_list_[j];
          }
@@ -54,7 +58,7 @@ void BreakPointHandler::RemoveBreakpoint(IBreakpointItem* breakpoint)
 
 bool BreakPointHandler::IsThereBreakOnAdress(unsigned short addr)
 {
-   for (int j = 0; j < breakpoint_number_; j++)
+   for (unsigned int j = 0; j < breakpoint_number_; j++)
    {
       if (breakpoint_list_[j]->IsThereBreakOnAdress(addr))
          return true;
@@ -64,7 +68,7 @@ bool BreakPointHandler::IsThereBreakOnAdress(unsigned short addr)
 
 void BreakPointHandler::ToggleBreakpoint(unsigned short addr)
 {
-   for (int j = 0; j < breakpoint_number_; j++)
+   for (unsigned int j = 0; j < breakpoint_number_; j++)
    {
       if (breakpoint_list_[j]->IsThereBreakOnAdress(addr))
       {
@@ -78,6 +82,14 @@ void BreakPointHandler::ToggleBreakpoint(unsigned short addr)
    AddBreakpoint(breakpoint);
 }
 
+void BreakPointHandler::Clear()
+{
+   for (int i = 0; i < breakpoint_number_; i++)
+   {
+      delete breakpoint_list_[i];
+   }
+   breakpoint_number_ = 0;
+}
 
 void BreakPointHandler::AddBreakpoint(IBreakpointItem* breakpoint)
 {
@@ -162,7 +174,7 @@ IBreakpointItem* BreakPointHandler::CreateBreakpoint(const char* breakpoint_stri
    else
    {
       unsigned short addr;
-      unsigned char value;
+      //unsigned char value;
       if (strcmp(component_string, "CRTC") == 0)
       {
          // Create CRTC breakpoint

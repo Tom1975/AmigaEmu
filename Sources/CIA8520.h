@@ -1,16 +1,18 @@
 #pragma once
 
+class Motherboard;
 
 class CIA8520
 {
 public:
-   CIA8520();
+   CIA8520(Motherboard* motherboard);
    virtual ~CIA8520();
 
    void Reset();
 
    // Phi-2
    void Tick();
+   void Tod();
 
    // Access via bus
    unsigned char In(unsigned char addr);
@@ -30,5 +32,26 @@ protected:
    unsigned char prb_;
    unsigned char ddrb_;
 
-   
+   unsigned short timer_a_;
+   unsigned short timer_a_latch_;
+   unsigned short timer_b_;
+   unsigned short timer_b_latch_;
+
+   // event .
+   bool tod_counter_on_;
+   unsigned int event_;
+   unsigned int alarm_;
+   unsigned int latched_alarm_;
+
+   unsigned char sdr_;
+   // Interruption
+   unsigned char icr_;
+   unsigned char icr_mask_;
+
+   void HandleControlRegister(unsigned int timer);
+   unsigned char cra_;
+   unsigned char crb_;
+
+   // Connexions
+   Motherboard* motherboard_;
 };

@@ -28,7 +28,11 @@ public:
       void on_dbg_run_clicked();
       void DasmShowContextMenu(const QPoint &pos);
       void AddBreakpoint();
+      void RemoveBreakpoint();
       void on_add_bp_clicked();
+      void on_remove_bp_clicked();
+      void on_clear_bp_clicked();
+      void on_bpAddress_returnPressed();
 
     // Update the view
     virtual void Update();

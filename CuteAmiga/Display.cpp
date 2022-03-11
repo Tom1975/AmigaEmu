@@ -1,6 +1,8 @@
 #include "Display.h"
 
 #include <QPainter>
+#include <QMimeData>
+
 
 Display::Display(QWidget* parent) :
    QWidget(parent), pixmap_(1024, 1024), image_(1024, 1024, QImage::Format_RGB32)
@@ -44,38 +46,50 @@ Display::~Display()
 
 void Display::Init()
 {
-   for (int i = 0; i < 1024; i++)
-   {
-      unsigned int * buffer = (unsigned int*)image_.scanLine(i);
-      for (int j = 0; j < 1024; j++)
-      {
-         buffer[j] = (rand()<<15) + rand();
-      }
-   }
-      
-   
-
+  
    pixmap_.convertFromImage(image_, Qt::ColorOnly);
    setUpdatesEnabled(true);
+
+   index_current_line_ = 0;
+   current_line_ = GetFrameBuffer(index_current_line_);
+   pixel_current_index_ = 0;
 }
 
 unsigned int * Display::GetFrameBuffer(unsigned int line)
 {
    // extract framebuffer from pixmap
-   return (unsigned int*)image_.scanLine(line);
-   
+   return (unsigned int*)image_.scanLine(line);   
 }
+
+
 
 void Display::ForceRefresh()
 {
    QWidget::repaint();
 }
+
 void Display::VSync()
 {
    emit Update();
    AFrameIsReady();
+
+   index_current_line_ = 0;
+   current_line_ = GetFrameBuffer(index_current_line_);
+   pixel_current_index_ = 0;
 }
 
+void Display::HSync()
+{
+   pixel_current_index_ = 0;
+   current_line_ = GetFrameBuffer(index_current_line_++);
+   
+}
+
+void Display::Add16Pixels(unsigned int* pixels)
+{
+   memcpy(&current_line_[pixel_current_index_], pixels, 16 * sizeof(unsigned int));
+   pixel_current_index_ += 16;
+}
 
 void Display::paintEvent(QPaintEvent*)
 {
@@ -99,11 +113,45 @@ void Display::keyReleaseEvent(QKeyEvent *event_keyboard)
 ///////////////////////////////////////////////////////////////////////////
 void Display::dragEnterEvent(QDragEnterEvent *event_drag)
 {
+   event_drag->acceptProposedAction();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////
 void Display::dropEvent(QDropEvent* event)
 {
+   // If it's a file, try to load it as a disk
+   const QMimeData* mimeData = event->mimeData();
+
+   // check for our needed mime type, here a file or a list of files
+   if (mimeData->hasUrls())
+   {
+      QStringList pathList;
+      QList<QUrl> urlList = mimeData->urls();
+
+      // extract the local paths of the files
+      for (int i = 0; i < urlList.size() && i < 32; +i)
+      {
+         pathList.append(urlList.at(i).toLocalFile());
+      }
+
+      // call a function to open the files
+      OpenFiles(pathList);
+   }
+
+}
+
+void Display::OpenFiles(const QStringList& pathList)
+{
+   for (int i = 0; i < pathList.size() && i < 4; +i)
+   {
+      // Load first 4 files ( df0 to df3 )
+      //    Motherboard* mb = emu_handler_->GetMotherboard();
+      // Disk* disk = new Disk(filename.toStdString());
+      // mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+
+
+   }
 }
 
 void Display::AFrameIsReady()

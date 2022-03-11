@@ -1,288 +1,277 @@
 #include "AddressingMode.h"
 
-void AddressingMode::ComputeFlags(unsigned short& sr, unsigned int old_value, unsigned int new_value, unsigned char data)
+unsigned int AddressingMode::word_to_fetch_[3] = 
 {
-   unsigned char flag = sr & 0xFC;
-   // update flags
-   bool v = (!old_value&data & !new_value) | (old_value & !data&new_value);
-   if (v) flag |= 0x2;
+   1, 1, 2
+};
 
-   bool c = (old_value&data & new_value) | (!old_value & data&new_value);
-   if (c) flag |= 0x1;
-
-   // no overflow or carry ?
-   sr = flag;
-
-}
+unsigned int AddressingMode::mask_msb_[3]=
+{
+   0x80, 0x8000, 0x80000000
+};
 
 
-
-/*unsigned int AddressingMode::word_to_fetch_[] = { 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1 };
-unsigned int AddressingMode::word_to_read_[] = { 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0};
-
-
-AddressingMode::AddressingMode(unsigned int* address_registers, unsigned int* data_registers, unsigned int * pc) :
-         address_registers_(address_registers), data_registers_(data_registers), pc_(pc),
-         remaining_word_to_fetch_(0)
+void AddressingMode::Complete()
 {
    
 }
 
-bool AddressingMode::InitAlu( unsigned char m, unsigned char xn, unsigned int size)
+bool AddressingMode::WriteInput(unsigned int value)
 {
-   size_ = (size== 0)?1:size;
-   word_to_fetch_total_ = 0;
-   word_to_write_ = 0;
-   // Reset inner value to read
-   // Check for the type of addressing mode
-   if (m != 0x7)
-   {
-      adressing_mode_ = (AdressingMode)m;
-      reg_ = xn;
-   }
-   else
-      switch (xn)
-      {
-      case 0b000: adressing_mode_ = ABSOLUTE_SHORT; word_to_fetch_total_ = 1; break;
-      case 0b001: adressing_mode_ = ABSOLUTE_LONG; word_to_fetch_total_ = 2; break;
-      case 0b010: adressing_mode_ = PC_DISPLACEMENT; 
-         word_to_fetch_total_++; break;
-      case 0b011: adressing_mode_ = PC_INDEX; break;
-         word_to_fetch_total_++; break;
-      case 0b100: adressing_mode_ = IMMEDIATE; 
-         break;
-      default:
-         // Invalid ?
-         return false;
-         break;
-      }
-
-   remaining_word_to_fetch_ = 0;
-   remaining_word_to_read_ = 0;
-   word_to_fetch_total_ += word_to_fetch_[adressing_mode_]*size_;
-
-   if (remaining_word_to_fetch_ == word_to_fetch_total_
-      && remaining_word_to_read_ == word_to_read_[adressing_mode_])
-   {
-      // Compute it NOW !
-      ComputeValue();
-   }
+   input_ = value;
    return true;
 }
 
-void AddressingMode::ComputeValue ()
+void AddressingMode::ComputeFlagsSub(unsigned short& sr, unsigned int sm, unsigned int dm, unsigned int rm, unsigned int size)
 {
-   // depending on address type, compute wanted value
-   switch (adressing_mode_)
-   {
-   case DATA_REGISTER:
-      result_long_ = data_registers_[reg_];
-      break;
-   case ADDRESS_REGISTER:
-      // nothing to do : It's just register !
-      result_long_ = address_registers_[reg_];
-      break;
-   case ADDRESS_DISPLACEMENT:
-      result_long_ = address_registers_[reg_] + (short)(added_values_[0]);
-      break;
-   case IMMEDIATE:
-   case ABSOLUTE_LONG:
-      result_long_ = (remaining_word_to_fetch_ <2)? added_values_[0] :(added_values_[0] << 16) | added_values_[1];
-      break;
-   case PC_DISPLACEMENT:
-      // todo : This -4... Is it correct ?
-      result_long_ = *pc_ + (short)(added_values_[0]) - 2;
-      break;
-
-   }
-}
-
-bool AddressingMode::WriteMemoryAccess()
-{
-   // todo : Is there a write back necessary ?
-   return false;
-
-}
-
-bool AddressingMode::ReadComplete()
-{
-   return (remaining_word_to_fetch_ == word_to_fetch_total_);
-}
-
-void AddressingMode::AddWord(unsigned short data)
-{  
-   if (remaining_word_to_fetch_ < word_to_fetch_total_)
-   {
-      added_values_[remaining_word_to_fetch_++] = data;
-   }
-   else if (remaining_word_to_read_ < word_to_read_[adressing_mode_])
-   {
-      memory_read_[remaining_word_to_read_++] = data;
-   }
-   if (remaining_word_to_fetch_ == word_to_fetch_total_ && remaining_word_to_read_ == word_to_read_[adressing_mode_])
-   {
-      // Compute it NOW !
-      ComputeValue();
-   }
-}
-
-void AddressingMode::WordIsWritten()
-{
-   word_to_write_++;
-   result_long_++;
-}
-
-unsigned int AddressingMode::GetWordCount()
-{
-   return word_to_write_;
-}
-
-AddressingMode::TypeOfRead AddressingMode::AReadIsNeeded(unsigned int& address_to_read)
-{
-   if (remaining_word_to_fetch_ < word_to_fetch_total_)
-      return READ_FETCH;
-   if (remaining_word_to_read_ < word_to_read_[adressing_mode_] * size_)
-   {
-      switch (adressing_mode_)
-      {
-      case ADDRESS:
-         address_to_read = address_registers_[reg_];
-         break;
-      }
-      return READ_MEMORY;
-   }
-   return READ_NONE;
-}
-
-unsigned char AddressingMode::GetByte()
-{
-   return result_long_ & 0xFF;
-}
-
-unsigned short AddressingMode::GetWord()
-{
-   return result_long_ & 0xFFFF;
-}
-
-unsigned short AddressingMode::GetWord(unsigned int index)
-{
-   // Depends : 
-   // On the type
-   // On the state
-   if (size_ == 1) return result_long_&0xFFFF;
-   return ((word_to_write_== 0)?(result_long_>>16): (result_long_)) & 0xFFFF;
-}
-
-unsigned int AddressingMode::GetLong()
-{
-   return result_long_;
-}
-
-bool AddressingMode::WriteInput(AddressingMode* input, int size)
-{
-   // If no register, return false
-   if (adressing_mode_ == DATA_REGISTER || adressing_mode_ == ADDRESS_REGISTER)
-   {
-      unsigned int* output = (adressing_mode_ == DATA_REGISTER) ? data_registers_ : address_registers_;
-
-      switch (size)
-      {
-      case 0: // Byte
-         output[reg_] = input->GetByte();
-            break;
-      case 1: // Word
-         output[reg_] = input->GetWord();
-            break;
-      case 2: // long
-         output[reg_] = input->GetLong();
-            break;
-      }
-
-      return false;
-   }
-   else
-   {
-      // Finished ?
-      if (word_to_write_*2 <= size)
-         return true;
-      else return false;
-   }
+   unsigned short flag = sr & 0xFFF0;
    
-}
+   // Z
+   if (rm == 0) flag |= 0x4;
 
-void AddressingMode::Subq(unsigned char data, unsigned char size, unsigned short& sr)
-{
-   // Do the operation
-   unsigned int new_value;
-   unsigned int old_value;
-   if (adressing_mode_ == DATA_REGISTER || adressing_mode_ == ADDRESS_REGISTER)
-   {
-      unsigned int* output = (adressing_mode_ == DATA_REGISTER) ? data_registers_ : address_registers_;
-      // todo : depends on the size ?
-      old_value = output[reg_];
-      output[reg_] -= data;
-      new_value = output[reg_];
-   }
-   else
-   {
-      // todo
-   }
-   unsigned char flag = sr& 0xFC;
-   // update flags
-   bool v = (!old_value&data & !new_value) | (old_value & !data&new_value);
-   if (v) flag |= 0x2;
+   rm &= mask_msb_[size];
+   dm &= mask_msb_[size];
+   sm &= mask_msb_[size];
 
-   bool c = (old_value&data & new_value) | (!old_value & data&new_value);
-   if (c) flag |= 0x1;
+   // N
+   if (rm ) flag |= 0x8;
+   // V
+   if ((~sm)&dm&(~rm) | sm & (~dm)&rm) flag |= 0x2;
+   // C-X
+   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x9;
 
-   // no overflow or carry ?
    sr = flag;
-
-   // Write something back ?
-   
 }
 
-void AddressingMode::CmpL(unsigned int data, unsigned short& sr)
+void AddressingMode::ComputeFlagsNul(unsigned short& sr, unsigned int value, unsigned int size )
 {
-   // Do the operation
-   unsigned int new_value;
-   unsigned int old_value;
-   switch (adressing_mode_)
+   unsigned short flag = sr & 0xFFE0;
+
+   switch (size)
    {
-      case DATA_REGISTER:
-      case ADDRESS_REGISTER:
-      {
-         unsigned int* output = (adressing_mode_ == DATA_REGISTER) ? data_registers_ : address_registers_;
-         old_value = output[reg_];
-         new_value = output[reg_] - data;
-         break;
-      }
-      case ADDRESS:
-         if (size_ == 1)
-         {
-            // W
-            old_value = memory_read_[0];
-            new_value = memory_read_[0] - data;
-         }
-         break;
-      default:
-      {
-         // todo
-      }
+   case 0: 
+      if (value &0xFF == 0) flag |= 0x4;
+      if ((value >> 7) & 0x1) flag |= 0x8; 
+      break;
+   case 1: 
+      if (value & 0xFFFF == 0) flag |= 0x4; 
+      if ((value >> 15) & 0x1) flag |= 0x8; break;
+   case 2: 
+      if (value == 0) flag |= 0x4; 
+      if ((value >> 31) & 0x1) flag |= 0x8; break;
    }
-   unsigned char flag = sr & 0xFC;
+   sr = flag;
+}
+
+void AddressingMode::Cmp(unsigned int data, unsigned short& sr, bool data_is_source)
+{
+   unsigned int rm = 0;
+   
+   unsigned short flag = sr & 0xFFF0;
+   unsigned int dm, sm;
+
+   unsigned int mask_msb = 0;
+   switch (operand_size_)
+   {
+   case Byte:
+      mask_msb = 0x80;
+      if (data_is_source)
+      {
+         dm = GetU8();
+         sm = data;
+      }
+      else
+      {
+         sm = GetU8();
+         dm = data;
+      }
+      rm = (unsigned char)dm - (unsigned char)sm;
+
+      break;
+   case Word:
+      mask_msb = 0x8000;
+      if (data_is_source)
+      {
+         dm = GetU16();
+         sm = data;
+      }
+      else
+      {
+         sm = GetU16();
+         dm = data;
+      }
+      rm = (unsigned short)dm - (unsigned short)sm;
+
+      break;
+   case Long:
+      mask_msb = 0x80000000;
+      if (data_is_source)
+      {
+         dm = GetU32();
+         sm = data;
+      }
+      else
+      {
+         sm = GetU32();
+         dm = data;
+      }
+      rm = (unsigned int)dm - (unsigned int)sm;
+      break;
+   }
+
    // update flags
-   bool v = (!old_value&data & !new_value) | (old_value & !data&new_value);
+   if (rm == 0) flag |= 0x4;
+
+   dm &= mask_msb;
+   rm &= mask_msb;
+   sm &= mask_msb;
+
+   if (rm ) flag |= 0x8;  // Negbreak;
+
+   //if ((~dm&sm & ~rm) | (dm & ~sm&rm)) flag |= 0x2;
+   if ((~sm)&dm&(~rm)|sm&(~dm)&rm) flag |= 0x2;
+
+   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x1;
+
+   sr = flag;
+}
+
+void AddressingMode::ComputeFlags(unsigned short& sr, unsigned int old_value, unsigned int new_value, unsigned char data)
+{
+   unsigned short flag = sr & 0xFFE0;
+
+   unsigned int mask_msb = 0;
+   unsigned int dm, sm, rm;
+   sm = data;
+   dm = old_value;
+   rm = new_value;
+
+   switch (operand_size_)
+   {
+   case Byte:
+      mask_msb = 0x80;
+      break;
+   case Word:
+      mask_msb = 0x8000;
+      break;
+   case Long:
+      mask_msb = 0x80000000;
+      break;
+   }
+
+   // update flags
+   if (rm == 0) flag |= 0x4;
+
+   dm &= mask_msb;
+   rm &= mask_msb;
+   sm &= mask_msb;
+
+   if (rm) flag |= 0x8;
+
+   // update flags
+   bool v = (~sm&dm& ~rm) | (sm&~dm&rm);
    if (v) flag |= 0x2;
 
-   bool c = (old_value&data & new_value) | (!old_value & data&new_value);
-   if (c) flag |= 0x1;
+   bool c = ( (sm&~dm)| (rm&~dm) | (sm&rm));
+   if (c) flag |= (0x1+0x10);
 
-   if (new_value==0) flag |= 0x4;
-
-   if ((new_value >> ((size_==1)?15:31))&0x1) flag |= 0x8;  // Neg
+   
    // no overflow or carry ?
    sr = flag;
 
 }
-*/
+
+void AddressingMode::Add(AddressingMode* source, unsigned short& sr)
+{
+   // todo
+   unsigned int result = this->GetU32() + source->GetU32();
+}
+
+void AddressingMode::Btst(unsigned int bit_tested, unsigned short& sr)
+{
+   if ( GetU8()  & (1 << (bit_tested & 7)))
+   {
+      sr = sr & ~0x4;
+   }
+   else
+   {
+      sr |= 0x4;
+   }
+
+}
+
+void AddressingMode::Lsd(bool right, unsigned short& sr)
+{
+   if (right)
+   {
+      input_ = GetU16();
+      if (input_ & 0x1)
+      {
+         sr |= 0x10 | 0x1;
+      }
+      else
+      {
+         sr &= ~(0x10 | 0x1);
+      }
+
+      input_ >>= 1;
+   }
+   else
+   {
+      input_ = GetU16();
+      if (input_ & 0x800)
+      {
+         sr |= 0x10 | 0x1;
+      }
+      else
+      {
+         sr &= ~(0x10 | 0x1);
+      }
+
+      input_ <<= 1;
+   }
+   written_input_ = 1;
+}
+
+
+void AddressingMode::Rod(bool right, unsigned short& sr)
+{
+   input_ = GetU16();
+   if (input_ == 0)
+   {
+      sr &= ~(0x2 | 0x8 | 0x1);
+      sr |= 0x4;
+   }
+   else if (right)
+   {
+      if (input_ & 0x1)
+      {
+         sr &= ~(0x2 | 0x8 | 0x1);
+         sr |= 0x1|0x8;
+         input_ >>= 1;
+         input_ |= 0x8000;
+      }
+      else
+      {
+         sr &= ~(0x8|0x2|0x1);
+         input_ >>= 1;
+      }
+   }
+   else
+   {
+      if (input_ & 0x800)
+      {
+         sr &= ~(0x2 | 0x8 | 0x1);
+         sr |= 0x1;
+         input_ <<= 1;
+         input_ |= 0x1;
+      }
+      else
+      {
+         sr &= ~(0x2 | 0x8 | 0x1);
+         input_ <<= 1;
+      }
+      if (input_ & 0x800) sr |= 0x8;
+   }
+   written_input_ = 1;
+}

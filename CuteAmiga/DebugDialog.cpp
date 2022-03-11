@@ -1,6 +1,10 @@
 #include "DebugDialog.h"
 #include "ui_DebugDialog.h"
 
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
 #include <QDir>
 #include <QMenuBar>
 
@@ -14,7 +18,7 @@ DebugDialog::DebugDialog(QWidget *parent) :
 
    ui->registers_list_->clear();
    ui->registers_list_->setColumnCount(2);
-   ui->registers_list_->setRowCount(18);
+   ui->registers_list_->setRowCount(20);
 
    QTableWidgetItem  * item = new QTableWidgetItem("pc");
    ui->registers_list_->setItem(0, 0, item);
@@ -36,9 +40,14 @@ DebugDialog::DebugDialog(QWidget *parent) :
    ui->registers_list_->setItem(13, 0, new QTableWidgetItem("A4"));
    ui->registers_list_->setItem(14, 0, new QTableWidgetItem("A5"));
    ui->registers_list_->setItem(15, 0, new QTableWidgetItem("A6"));
-   ui->registers_list_->setItem(16, 0, new QTableWidgetItem("SP"));
+   ui->registers_list_->setItem(16, 0, new QTableWidgetItem("A7"));
 
-   for (int i = 0; i < 18; i++)
+   ui->registers_list_->setItem(17, 0, new QTableWidgetItem("SSP"));
+   ui->registers_list_->setItem(18, 0, new QTableWidgetItem("USP"));
+
+   ui->registers_list_->setItem(19, 0, new QTableWidgetItem("SR"));
+
+   for (int i = 0; i < 20; i++)
    {
       ui->registers_list_->setItem(i, 1, new QTableWidgetItem("--"));
    }
@@ -101,28 +110,69 @@ void DebugDialog::DasmShowContextMenu(const QPoint &pos)
    // Create menu and insert some actions
    QMenu myMenu;
    myMenu.addAction("Insert breakpoint", this, SLOT(AddBreakpoint()));
-   myMenu.addAction("Erase", this, SLOT(eraseItem()));
+   myMenu.addAction("Erase", this, SLOT(RemoveBreakpoint()));
 
    // Show context menu at handling position
    myMenu.exec(globalPos);
 }
 
+void DebugDialog::RemoveBreakpoint()
+{
+   QList<QListWidgetItem *> list_of_items = ui->listWidget->selectedItems();
+   // todo : handle multiple selection
+   emu_handler_->RemoveBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt());
+   UpdateDebug();
+}
+
+
 void DebugDialog::AddBreakpoint()
 {
-   emu_handler_->AddBreakpoint(0);
+   QList<QListWidgetItem *> list_of_items = ui->listWidget->selectedItems();
+   // todo : handle multiple selection
+   emu_handler_->AddBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt());
    UpdateDebug();
+}
+
+void DebugDialog::on_bpAddress_returnPressed()
+{
+   on_add_bp_clicked();
 }
 
 void DebugDialog::on_add_bp_clicked()
 {
-   QString text = ui->textEdit->toPlainText();
+   QString text = ui->bpAddress->text();
+   if (text.length() > 0)
+   {
+      BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+      pb_handler->CreateBreakpoint(text.toUtf8().constData());
+      UpdateDebug();
+   }
+}
+
+void DebugDialog::on_remove_bp_clicked()
+{
+   QList<QListWidgetItem *> list_of_items = ui->list_breakpoints->selectedItems();
+   if (list_of_items.size() > 0)
+   {
+      BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+      // todo : handle multiple selection
+      emu_handler_->RemoveBreakpoint(pb_handler->GetBreakpoint(list_of_items[0]->data(Qt::UserRole).toUInt()));
+      UpdateDebug();
+   }
+}
+
+void DebugDialog::on_clear_bp_clicked()
+{
    BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
-   pb_handler->CreateBreakpoint(text.toUtf8().constData());
+   pb_handler->Clear();
    UpdateDebug();
 }
 
 void DebugDialog::UpdateDebug()
 {
+   unsigned int offset, offset_old;
+   char addr[16];
+
    // Update parent window
    this->parentWidget()->repaint();
 
@@ -132,39 +182,93 @@ void DebugDialog::UpdateDebug()
    // Registers
    QString str = QString("%1").arg(m68k->GetPc(), 6, 16);
    ui->registers_list_->item(0, 1)->setText( str );
+
+   unsigned int stack_pointer = (m68k->GetDataSr() & 0x2000) ? m68k->GetDataSsp() : m68k->GetDataUsp();
    for (int i = 0; i < 8; i++)
    {
-      str = QString("%1").arg(m68k->GetAddressRegister(i), 6, 16);
+      if (i != 7)
+      {
+         str = QString("%1").arg(m68k->GetAddressRegister(i), 6, 16);
+      }
+      else
+      {
+         
+         // A7 is the stackpointer. Depends on either usp/ssp
+         str = QString("%1").arg(stack_pointer, 6, 16);
+      }
+
       ui->registers_list_->item(9+i, 1)->setText(str);
 
       str = QString("%1").arg(m68k->GetDataRegister(i), 6, 16);
       ui->registers_list_->item(1+i, 1)->setText(str);
    }
 
+   str = QString("%1").arg(m68k->GetDataSsp(), 6, 16);
+   ui->registers_list_->item(17, 1)->setText(str);
+   str = QString("%1").arg(m68k->GetDataUsp(), 6, 16);
+   ui->registers_list_->item(18, 1)->setText(str);
+   str = QString("%1").arg(m68k->GetDataSr(), 6, 16);
+   ui->registers_list_->item(19, 1)->setText(str);
+
+   // CallStack
+   unsigned char* mem = emu_handler_->GetMotherboard()->GetBus()->GetRam();
+   str = QString("%1").arg(stack_pointer, 6, 16);
+   offset = stack_pointer;
+   ui->callStack->clear();
+   if (stack_pointer < 512 * 1024)
+   {
+      for (int i = 0; i < 16; i++)
+      {
+         std::stringstream sstream;
+         QListWidgetItem* stackitem = new QListWidgetItem;
+         stackitem->setData(Qt::UserRole, offset);
+
+         unsigned int dword_value = mem[offset+3] |
+            (mem[offset + 2] << 8) |
+            (mem[offset + 1] << 16) |
+            (mem[offset] << 24);
+                                    
+         sstream << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << offset;
+         sstream << "  ";
+         sstream << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << dword_value;
+
+         stackitem->setText(sstream.str().c_str());
+
+         ui->callStack->addItem(stackitem);
+         offset += 4;
+      }
+   }
+
    // Disassemble the next lines
-   unsigned int offset, offset_old;
    offset = offset_old = emu_handler_->GetMotherboard()->GetCpu()->GetPc() - 4; // -2 because of prefetch
    std::string str_asm;
    ui->listWidget->clear();
-   char addr[16];
    for (int i = 0; i < 32; i++)
    {
-      sprintf(addr, "%8.8X : ", offset);
+#define ASM_SIZE 26
+#define ADD_SIZE 10
+
+      sprintf(addr, "%8.8X: ", offset);
+      QListWidgetItem* item = new QListWidgetItem;
+      item->setData(Qt::UserRole, offset);
+
       offset = disassembler_.Disassemble(emu_handler_->GetMotherboard(), offset, str_asm);
       str_asm = addr + str_asm;
-      int size_tab = 32 - str_asm.size();
+      int size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
       if (size_tab > 0)
       {
          str_asm.append(size_tab, ' ' );
       }
-      for (int i = offset_old; i < offset; i++)
+      for (unsigned int i = offset_old; i < offset; i++)
       {
          char b[4];
          sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(i));
          str_asm += b;
       }
+      item->setText(str_asm.c_str());
+      ui->listWidget->addItem(item);
+
       //
-      ui->listWidget->addItem(str_asm.c_str());
       offset_old = offset;
    }
 

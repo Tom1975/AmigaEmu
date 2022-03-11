@@ -3,10 +3,16 @@
 
 #include <QDir>
 #include <QSettings>
+#include <QFile>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
    QMainWindow(parent),
    debug_(this),
+   memory_(this),
+   copper_(this),
+   exec_(this),
+   bitplane_(this),
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
@@ -16,17 +22,38 @@ MainWindow::MainWindow(QWidget *parent) :
    // Menu connection
    connect(ui->actionReset, &QAction::triggered, emu_handler_, &AmigaEmulation::Reset);
    connect(ui->actionCPU, &QAction::triggered, this, &MainWindow::Break);
+   connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::Memory);
+   connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
+   connect(ui->actionExec, &QAction::triggered, this, &MainWindow::Exec);
+   connect(ui->actionBitplane, &QAction::triggered, this, &MainWindow::Bitplane);
+   connect(ui->actionInsert_disk_df0, &QAction::triggered, this, &MainWindow::InsertDisk);
+
    connect(ui->display_, SIGNAL(Update()),
       this, SLOT(Update()), Qt::QueuedConnection);
 
    // Create debug window
    debug_.SetEmulator(emu_handler_);
+   memory_.SetEmulator(emu_handler_);
+   copper_.SetEmulator(emu_handler_);
+   exec_.SetEmulator(emu_handler_);
+   bitplane_.SetEmulator(emu_handler_);
 
+   // status bar
    led_on_ = new QPixmap(":/Images/led_on.png");
    led_off_ = new QPixmap(":/Images/led_off.png");
+   drive_led_on_ = new QPixmap(":/Images/drive_led_on.png");
+   drive_led_off_ = new QPixmap(":/Images/drive_led_off.png");
    iconled_ = new QLabel;
    iconled_->setPixmap(*led_off_);
+
    statusBar()->addWidget(iconled_);
+
+   for (int i = 0; i < 4; i++)
+   {
+      icondrive_[i].setText("DFx");
+      icondrive_[i].setPixmap(*drive_led_off_);
+      statusBar()->addWidget(&icondrive_[i]);
+   }
 
 
 }
@@ -43,8 +70,7 @@ MainWindow::~MainWindow()
 /////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::InitEmulation()
-{
-   // Load configuration
+{   // Load configuration
    LoadConfig();
 
    // Link various windows to emulator parts
@@ -67,7 +93,7 @@ void MainWindow::SaveConfig()
    unsigned int nb_bp = pb_handler->GetBreakpointNumber();
    
    unsigned int nb_breapkoints_saved = 0;
-   for (int i = 0; i < nb_bp; i++)
+   for (unsigned int i = 0; i < nb_bp; i++)
    {
       IBreakpointItem* bp = pb_handler->GetBreakpoint(i);
       const char* str_def = bp->GetString();
@@ -108,12 +134,54 @@ void MainWindow::closeEvent(QCloseEvent *event)
    SaveConfig();
 }
 
-
 void MainWindow::Break()
 {
    emu_handler_->Break();
    debug_.Update();
-   debug_.show(); 
+   debug_.show();
+   memory_.Update();
+   copper_.Update();
+   exec_.Update();
+   bitplane_.Update();
+}
+
+void MainWindow::Copper ()
+{
+   copper_.Update();
+   copper_.show();
+}
+
+void MainWindow::Memory()
+{
+   memory_.Update();
+   memory_.show();
+}
+
+void MainWindow::Exec()
+{
+   exec_.Update();
+   exec_.show();
+}
+
+void MainWindow::Bitplane()
+{
+   bitplane_.Update();
+   bitplane_.show();
+}
+
+void MainWindow::InsertDisk()
+{
+   // Select file to open
+   QString filename = QFileDialog::getOpenFileName(this, "Choose File");
+
+   if (filename.isEmpty())
+      return;
+
+   // Open it.
+   Motherboard* mb = emu_handler_->GetMotherboard();
+
+   Disk* disk = new Disk (filename.toStdString());
+   mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -122,7 +190,17 @@ void MainWindow::Break()
 void MainWindow::Update()
 {
    ui->display_->update();
-   // Set led on/off - todo
-   emu_handler_->GetMotherboard();
-   iconled_->setPixmap(*led_off_);
+   
+   Motherboard* mb = emu_handler_->GetMotherboard();
+
+   // Main power Led
+   // Read CIA-A, PA1
+   iconled_->setPixmap(mb->GetLed()?*led_on_ :*led_off_);
+
+   // Disk drive status
+   for (int i = 0; i < 4; i++)
+   {
+      icondrive_[i].setPixmap( mb->GetDriveLed(i)?*drive_led_on_:*drive_led_off_);
+   }
+
 }

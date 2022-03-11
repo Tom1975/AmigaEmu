@@ -18,6 +18,11 @@ set(CompilerFlags
 
 set(SRCS
 	test.cpp
+	test_add.cpp
+	test_addressing_modes.cpp
+	test_cmp.cpp
+	test_lea.cpp
+	test_move.cpp
 	TestEngineCpu.cpp
 	)
 

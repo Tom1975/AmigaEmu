@@ -1,0 +1,49 @@
+
+#######################
+# Kickstart 1.2       #
+#######################
+
+-----------
+TO FIX : 
+-----------
+Deadlock somewhere (waiting for a dma to finish, but nothing is on stage...)
+
+-----------
+EXECUTE OK : 
+------------
+Interrupt handler (vertical blanking) : FC12FC
+=> FC6CDC  (a comprendre)
+
+-----------
+TODO : 
+------------
+- Handle interruption / Exceptions
+- COPPER
+- BLITTER
+- DMA 
+
+
+-----------
+FIXED 
+-----------
+*** FC125C  movem.l   D2/D3/A2/A3,-(SP)
+=> Predecrement d'un coup de trop (sur AMAddress : a l'init, suivi de chaque transfert)
+Il faut trouver une solution generique de pre/post increment (valable pour movem & pour move)
+=> Trouvé (decrement que sur -(Adress)
+
+*** FC1634 : FC1634  move.b    9(A1),D1      Get the priority field of the node.
+=> deplacement incorrect
+
+*** FC19F2  move.b    #$0A,8(A0)        MemHeader's node type is NT_MEMORY.
+FC19F8  move.b    D2,9(A0)          Set the MemHeader's priority.
+=> FIX move.b (odd/even address) => uds/lds implementation
+
+*** FC0262  movem.l   $0222(A6),D2-D4   Get KickMemPtr, KickTagPtr, KickCheckSum.
+=> Remet A6 a 0..... Si l'on n'active pas le debugger !
+-> OK : Causé par l'inversion du test : if (((ird_ >> 10) & 0x1)==1 || source_alu_->FetchComplete())  (au lieu de ==0 qui provoque l'erreur)
+movem a tester dans tous les sens quand meme....
+
+*** FC1586  lea       0(A2,D1.w),A3     Compute absolute vector address. 
+=> Incorrect !
+La gestion du 110 (d8, An, Xn) est a revoir
+-> Corrigé en prenant en compte la taille de Xn

@@ -8,6 +8,14 @@
 #include "Monitor.h"
 #include "Denise.h"
 #include "Agnus.h"
+#include "DiskController.h"
+
+class HardwareIO
+{
+public:
+   
+   virtual unsigned char GetJoystick(unsigned int port_number) = 0;
+};
 
 class Motherboard
 {
@@ -16,10 +24,27 @@ public :
    virtual ~Motherboard();
 
    // Init and settings
-   bool Init(DisplayFrame* frame);
+   bool Init(DisplayFrame* frame, HardwareIO* hardware);
 
    // Access 
    M68k* GetCpu() { return &m68k_; }
+   Bus* GetBus() { return &bus_; }
+   Agnus* GetAgnus() { return &agnus_; }
+   Denise* GetDenise() { return &denise_; }
+   Paula* GetPaula() { return &paula_; }
+   DiskController* GetDiskController() { return &drive_; }
+
+   Bitplanes * GetBitplanes() { return &bitplanes_; }
+
+   unsigned char* GetRom () { return rom_; }
+
+   // Lines implementations
+   void VSync();
+   void HSync();
+   void ResetHCounter();
+
+   unsigned char GetCiaPort(CIA8520* cia, bool a);
+   void WriteCiaPort (CIA8520* cia, bool a, unsigned char data, unsigned char mask);
 
    // Bus implémentation
    unsigned int Read32(unsigned int address) { return bus_.Read32(address); };
@@ -37,6 +62,8 @@ public :
 
    void Reset();
 
+   bool GetLed() { return led_; }
+   bool GetDriveLed(unsigned int drive) { return drive_.IsMotorOn(drive); };
 
 protected:
 
@@ -49,11 +76,16 @@ protected:
    // Main bus and wires
    Bus bus_;
 
+   // Led
+   bool led_;
    // Devices
    M68k m68k_;
 
+   unsigned char count_E_;
    CIA8520 cia_a_;
    CIA8520 cia_b_;
+
+   DiskController drive_;
 
    DMAControl dma_control_;
 
@@ -63,5 +95,7 @@ protected:
    Bitplanes bitplanes_;
 
    Monitor monitor_;
+   HardwareIO* hardware_;
 
+   DisplayFrame* frame_;
 };

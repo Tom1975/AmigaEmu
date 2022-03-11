@@ -3,36 +3,36 @@
 
 TestEngineCpu::TestEngineCpu()
 {
-   bus_ = new Bus();
-   m68k_ = new M68k();
-   m68k_->SetBus(bus_);
-   bus_->MemoryOverlay(false);
-   ram_ = bus_->GetRam();
+   motherboard_ = new Motherboard;
+   motherboard_->Init(&framebuffer_, &hardware_interface_);
 }
 
 TestEngineCpu::~TestEngineCpu()
 {
-   delete bus_;
-   delete m68k_;
+   delete motherboard_;
 }
 
 unsigned int TestEngineCpu::RunOpcode(unsigned char* buffer_to_run, unsigned int size_of_buffer, unsigned int tick)
 {
    unsigned char boot[] = { 0x11, 0x11, 0x4E, 0xF9, 0x00, 0x00, 0x00, 0xD2 };
-   memcpy(ram_, boot, sizeof(boot));
-   memcpy(&ram_[0xD2], buffer_to_run, size_of_buffer);
+   M68k * m68k = Get68k();
+   Bus* bus = GetBus();
+   unsigned char* ram = bus->GetRam();
+
+   memcpy(ram, boot, sizeof(boot));
+   memcpy(&ram[0xD2], buffer_to_run, size_of_buffer);
    // Tick 8x time to init the fetch
-   m68k_->Reset();
-   m68k_->NewOpcodeStopped();
+   bus->MemoryOverlay(false);
+   m68k->Reset();
+   m68k->NewOpcodeStopped();
    unsigned int count = 0;
    for (unsigned int i = 0; i < (tick + 1); i++)
    {
       do
       {
-         m68k_->Tick();
-         count++;
-      } while (m68k_->IsNewOpcode() == false);
-      m68k_->NewOpcodeStopped();
+         motherboard_->TickDebug();
+      } while (m68k->IsNewOpcode() == false);
+      m68k->NewOpcodeStopped();
    }
    return count;
 }
@@ -40,14 +40,15 @@ unsigned int TestEngineCpu::RunOpcode(unsigned char* buffer_to_run, unsigned int
 unsigned int TestEngineCpu::RunMoreOpcode(unsigned int tick)
 {
    unsigned int count = 0;
-   for (unsigned int i = 0; i < (tick + 1); i++)
+   M68k * m68k = Get68k();
+   for (unsigned int i = 0; i < (tick ); i++)
    {
       do
       {
-         m68k_->Tick();
+         motherboard_->Tick();
          count++;
-      } while (m68k_->IsNewOpcode() == false);
-      m68k_->NewOpcodeStopped();
+      } while (m68k->IsNewOpcode() == false);
+      m68k->NewOpcodeStopped();
    }
    return count;
 }

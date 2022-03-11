@@ -2,11 +2,13 @@
 
 #include <thread>
 #include <queue>
+#include <functional>
 #include "QObject.h"
 
 
 #include "Motherboard.h"
 #include "Breakpoint.h"
+#include "HardwareInterface.h"
 
 class IUpdate
 {
@@ -30,6 +32,7 @@ public:
    // Access
    Motherboard* GetMotherboard() { return motherboard_; }
    M68k* GetCpu() {return motherboard_->GetCpu(); }
+   Copper* GetCopper() { return motherboard_->GetAgnus()->GetCopper(); }
 
    // Main functions
    void Reset();
@@ -42,6 +45,8 @@ public:
       return &breakpoint_handler_;   
    }
    void AddBreakpoint(unsigned int new_bp);
+   void RemoveBreakpoint(IBreakpointItem*  bp_to_remove);
+   void RemoveBreakpoint(unsigned int bp_to_remove);
 
    // static function
    static void Begin(void* param);
@@ -82,5 +87,6 @@ protected:
    // Inner attributes
    Motherboard  * motherboard_;
    DisplayFrame* frame_;
+   HardwareInterface hardware_io_;
 
 };

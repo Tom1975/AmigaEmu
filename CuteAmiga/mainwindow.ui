@@ -42,10 +42,29 @@
      <string>Debug</string>
     </property>
     <addaction name="actionCPU"/>
+    <addaction name="actionMemory"/>
+    <addaction name="actionCopper"/>
+    <addaction name="actionExec"/>
+    <addaction name="actionBitplane"/>
+   </widget>
+   <widget class="QMenu" name="menuDisk_drive">
+    <property name="title">
+     <string>Disk drive</string>
+    </property>
+    <widget class="QMenu" name="menuDf0">
+     <property name="title">
+      <string>Df0:</string>
+     </property>
+     <addaction name="actionInsert_disk_df0"/>
+     <addaction name="actionEject_disk"/>
+     <addaction name="actionInsert_blank_disk"/>
+    </widget>
+    <addaction name="menuDf0"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
    <addaction name="menuDebug"/>
+   <addaction name="menuDisk_drive"/>
   </widget>
   <widget class="StatusBarAmiga" name="statusbar">
    <property name="minimumSize">
@@ -119,12 +138,47 @@
     <string>Set Kickstart</string>
    </property>
   </action>
+  <action name="actionMemory">
+   <property name="text">
+    <string>Memory window</string>
+   </property>
+  </action>
+  <action name="actionCopper">
+   <property name="text">
+    <string>Copper window</string>
+   </property>
+  </action>
+  <action name="actionExec">
+   <property name="text">
+    <string>Exec window</string>
+   </property>
+  </action>
+  <action name="actionBitplane">
+   <property name="text">
+    <string>Bitplane window</string>
+   </property>
+  </action>
+  <action name="actionInsert_disk_df0">
+   <property name="text">
+    <string>Insert disk</string>
+   </property>
+  </action>
+  <action name="actionEject_disk">
+   <property name="text">
+    <string>Eject disk</string>
+   </property>
+  </action>
+  <action name="actionInsert_blank_disk">
+   <property name="text">
+    <string>Insert blank disk</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>Display</class>
    <extends>QWidget</extends>
-   <header>display.h</header>
+   <header location="global">display.h</header>
    <slots>
     <signal>signal1()</signal>
     <slot>Update()</slot>

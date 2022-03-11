@@ -21,7 +21,7 @@ void AmigaEmulation::Start()
 {
    current_function_ = &AmigaEmulation::RunStep;
 
-   if (motherboard_->Init(frame_))
+   if (motherboard_->Init(frame_, &hardware_io_))
    {
       // Create thread with emulation handling
       emulation_thread_ = std::thread(Begin, this);
@@ -178,4 +178,22 @@ void AmigaEmulation::AddBreakpoint(unsigned int new_bp)
 {
    // check existense 
    breakpoint_handler_.AddBreakpoint(new BreakPC(motherboard_, new_bp));
+}
+
+void AmigaEmulation::RemoveBreakpoint(IBreakpointItem* bp_to_remove)
+{
+   breakpoint_handler_.RemoveBreakpoint(bp_to_remove);
+}
+
+void AmigaEmulation::RemoveBreakpoint(unsigned int bp_to_remove)
+{
+   for (int i = 0; i < breakpoint_handler_.GetBreakpointNumber(); i++)
+   {
+      IBreakpointItem* bp = breakpoint_handler_.GetBreakpoint(i);
+      if (bp->IsThereBreakOnAdress(bp_to_remove))
+      {
+         breakpoint_handler_.RemoveBreakpoint(bp);
+         return;
+      }
+   }
 }

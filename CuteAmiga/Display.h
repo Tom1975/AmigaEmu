@@ -18,15 +18,16 @@ public:
     ~Display();
 
     virtual unsigned int * GetFrameBuffer(unsigned int line);
-    virtual  void VSync();
+
+    virtual void HSync();
+    virtual void VSync();
+    virtual void Add16Pixels(unsigned int*);
 
     virtual void AFrameIsReady();
     void Init();
 
     // Display
-    //virtual QPaintEngine* paintEngine() const;
     virtual void resizeEvent(QResizeEvent* event);
-    //virtual void paintEvent(QPaintEvent*);
 
     // Keyboard
     virtual void keyPressEvent(QKeyEvent * event_keyboard);
@@ -45,6 +46,14 @@ signals:
    
 
 private:
+   void OpenFiles(const QStringList& pathList);
+
+
    QPixmap pixmap_;
    QImage image_;
+
+   // Pixel/line handling
+   unsigned int index_current_line_;
+   unsigned int * current_line_;
+   unsigned int pixel_current_index_;
 };

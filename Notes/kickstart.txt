@@ -1,0 +1,451 @@
+*** Dessin kickstart :
+
+Bitplane 1 : A4BA , lg FA0 => A4BA to B45A
+Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
+
+Dessin : b5ce = 0044 au lieu de 004?? 
+=> Blit : draw line (next byte : fe8e40) 
+cbea/2015 - size : 2-b
+
+
+Dbg : 
+1er FLOOD: 25h / 45h => CEC2
+
+FC56D6: btst D1, ($18,A1) => FF a a1+18 => flag  14 (0 attendu) 
+
+=> Lors du flood : Ecriture nécessaire (non faite) sur CC1A et +
+Blits : 
+bltcon0/1     addr d   size (wh)	  From
+- 0100/0000 - e33a     	14-c8			FC5BE8
+- 0100/0000 - 10400    	14-c8           FC5BE8
+- 071a/0002 - 10278		14-c8 			FC75EA
+- 072a/0002 - 10278     14-c8			FC75EA
+- 0100/0000 - 10400     20-1			FC54CA
+- 0100/0000 - 1043e		40-3e			FC54EC
+- 073a/0002 - 10278		14-c8			FC54EC
+- 03ca/0000 - f426		1-1				FC570E
+- 03ca/0000 - f44e		1-1				FC570E
+- 03ca/0000 - f476		1-1				FC570E
+- 03ca/0000 - f426		1-1				FC570E
+- 03ca/0000 - f3fe		1-1				FC570E
+- 03ca/0000 - f3fe		1-1				FC570E
+- 03ca/0000 - f3d6		2-1				FC570E
+- 03ca/0000 - f3ae		2-1				FC570E
+- 03ca/0000 - f386		2-1				FC570E
+- 03ca/0000 - f35e		2-1				FC570E
+- 03ca/0000 - f336		2-1				FC570E
+- 03ca/0000 - f30e		2-1				FC570E
+- 03ca/0000 - f2e6		2-1				FC570E
+- 03ca/0000 - f2be		2-1				FC570E
+- 03ca/0000 - f296		2-1				FC570E
+- 03ca/0000 - f26e		2-1				FC570E
+...
+- 03ca/0000 - f1ce		7-1				FC570E
+f1fa - 5-1
+f222 5-1
+f252
+f27a
+.. (many)
+-> Blit to bitplane :
+- 0b2a/0000 - a4ba		14-c8			FC5DA0 *** bitplane 1 ! (a:10400 - b : e33a - c: a4ba - d: a4ba
+- 0bea/0000 - c3fa		14-c8			FC5DA0 *** bitplane 2 !
+==> 10c00 not correcly blit !
+
+Ecran : 0x28 byte / row;
+Rows : 0xC8
+
+Stride : 40 (28h)  egalement ?
+
+On observe : 
+30 octets lu (lorsque hc = 227... !)
+
+SYNCHRO LOGIQUE : 
+
+*** agnus & timing
+horizontal counter agnus : increment tous les ticks CCK (up)
+227 CCK / line (908 pixel/line  ~ 70ns / pixel)
+lores : 8 CCK = 16 pixels
+hires : 4 CCK = 16 pixels
+
+=> A faire :
+- Quand 16 pixels sont prets (via bitplane) => Les envoyer à l'ecran.
+Ca fera 16/32 pixels (hi/lo res).
+- Ecran : Gestion d'une ligne / ecran par agnus (hsync/vsync).
+Remplissage de cette ligne par bitplane/denise 
+
+
+Fonctionnement de l'écran :
+** Attention au test : 
+Si ve > vp, return true.
+
+
+FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
+The bits in INTENA/REQ are blitter interrupt requests, I would not use them for the purpose of waiting for the blitter to finish."
+
+=> 0xFC0B28 (InitResident)
+FC4afc (expansion.library)	: 
+FE4880 (potgo.resource)		: 
+FE4FE4 (keymap.resource)	:
+FC450C (cia.resource)		:
+FC4794 (disk.resource)		: Ok
+FE4774 (misc.resource)		: Ok 
+FC5378 (graphics.library)	: 
+( jusqu'a FCAC92 ok)
+FE502E (keyboard.device)	: Ok => everything seems ok 
+FE507A (gameport.device)	: 
+FE90EC (timer.device)		: 
+FC34CC (audio.device)		:
+FE50C6 (input.device)		:
+FE0D90 (layers.library)		: Ok => everything seems ok 
+FE510E (console.device) 	: 
+FE98E4 (trackdisk.device)	: (un décalage existe) 
+FD3F5C (intuition.library)  : 
+FC323A (alert.hook) 		: 
+FE424C (mathffp.library)	: 
+(FEB400) (workbench.task)
+(FF425A) (dos)
+FE8884 (strap.strap) 		: bloqué (init FE88D6 
+end.
+
+###
+A VERIFIER :
+LSD/LSD2/ROd/ROD2 => Flags... 
+CIA : effet CRA-TODIN ?
+###
+
+Erreur sur les affichages : 
+Addresses de bitplanes incorrectes () et incrément sans limite = error !
+DMACON fixé vers ici FCAF18
+Copper list 2 fixée ici :FC6D00
+Plus particulierement sur l'uinterrupt handler
+FC6CDC
+
+
+********************************
+STRUCTURES
+*********************
+; the 5E9A buffer  (allocated in FE8BBA ) is a big structure that containts : 
+; A3E0 is base addres
+struct{
+	ViewPort viewport; 	// 40 bytes  - A3E0
+	View view;			// 18 bytes  - A408
+	RastPort rastport;	// 100 bytes - A41A
+	TmpRas tmpras		// 8 bytes 	 - A47E
+	RasInfo rasinfo		// 12 bytes  - A486
+	Bitmap bmp	 		// 40 bytes  - A492
+	char[] b1				// 1F40 byte - A4BA
+	char[] b2				// 1F40 byte - C3FA
+	char[] b3				// 1F40 byte = E33A
+	// 12 bytes
+};
+
+A5 : offset 08: ViewPort *
+	 offset 0C: View*
+	 offset 10: RastPort *
+	 offset 14: TmpRas *
+	 offset 18: RasInfo*
+	 offset 1C: bitmap*
+	 offset 20: char*
+	 offset 24: char*
+	 offset 28: char*...
+;
+
+struct ViewPort (size : 0x28)
+{
+   struct   ViewPort *Next;
+   struct   ColorMap  *ColorMap;    /* table of colors for this viewport */
+		  /* if this is nil, MakeVPort assumes default values */
+   struct   CopList  *DspIns;	    /* user by MakeView() */
+   struct   CopList  *SprIns;	    /* used by sprite stuff */
+   struct   CopList  *ClrIns;	    /* used by sprite stuff */
+   struct   UCopList *UCopIns;	    /* User copper list */
+   WORD    DWidth,DHeight;
+   WORD    DxOffset,DyOffset;
+   UWORD    Modes;
+   UBYTE	SpritePriorities;		/* used by makevp */
+   UBYTE	ExtendedModes;
+   struct   RasInfo *RasInfo;
+};
+
+struct View (size : 0x12)
+{
+   struct ViewPort *ViewPort;
+   struct cprlist *LOFCprList;	 /* used for interlaced and noninterlaced */
+   struct cprlist *SHFCprList;	 /* only used during interlace */
+   WORD DyOffset,DxOffset;   /* for complete View positioning */
+			      /* offsets are +- adjustments to standard #s */
+   UWORD   Modes;	      /* such as INTERLACE, GENLOC */
+};
+
+struct RasInfo	/* used by callers to and InitDspC() */
+{
+   struct   RasInfo *Next;	    /* used for dualpf */
+   struct   BitMap *BitMap;
+   WORD    RxOffset,RyOffset;	   /* scroll offsets in this BitMap */
+};
+
+struct TmpRas
+{
+    BYTE *RasPtr;
+    LONG Size;
+};
+
+typedef UBYTE *PLANEPTR;
+struct BitMap (size : 40)
+{
+    UWORD   BytesPerRow;
+    UWORD   Rows;
+    UBYTE   Flags;
+    UBYTE   Depth;
+    UWORD   pad;
+    PLANEPTR Planes[8];
+};
+
+struct RastPort
+{
+    struct  Layer  *Layer;
+    struct  BitMap *BitMap;
+    UWORD          *AreaPtrn;  /* Ptr to areafill pattern */
+    struct  TmpRas *TmpRas;
+    struct  AreaInfo *AreaInfo;
+    struct  GelsInfo *GelsInfo;
+    UBYTE   Mask;              /* Write mask for this raster */
+    BYTE    FgPen;             /* Foreground pen for this raster */
+    BYTE    BgPen;             /* Background pen  */
+    BYTE    AOlPen;            /* Areafill outline pen */
+    BYTE    DrawMode;          /* Drawing mode for fill, lines, and text */
+    BYTE    AreaPtSz;          /* 2^n words for areafill pattern */
+    BYTE    linpatcnt;         /* Current line drawing pattern preshift */
+    BYTE    dummy;
+    UWORD   Flags;             /* Miscellaneous control bits */
+    UWORD   LinePtrn;          /* 16 bits for textured lines */
+    WORD    cp_x, cp_y;	       /* Current pen position */
+    UBYTE   minterms[8];
+    WORD    PenWidth;
+    WORD    PenHeight;
+    struct  TextFont *Font;    /* Current font address */
+    UBYTE   AlgoStyle;         /* The algorithmically generated style */
+    UBYTE   TxFlags;           /* Text specific flags */
+    UWORD   TxHeight;          /* Text height */
+    UWORD   TxWidth;           /* Text nominal width */
+    UWORD   TxBaseline;        /* Text baseline */
+    WORD    TxSpacing;         /* Text spacing (per character) */
+    APTR    *RP_User;
+    ULONG   longreserved[2];
+#ifndef GFX_RASTPORT_1_2
+    UWORD   wordreserved[7];   /* Used to be a node */
+    UBYTE   reserved[8];       /* For future use */
+#endif
+};
+
+
+1F12 => ID lecteurs
+unsigned int id_lecteur_0
+unsigned int id_lecteur_1
+unsigned int id_lecteur_2
+ 
+
+
+;struct Node {
+;    struct  Node *ln_Succ;	/* Pointer to next (successor) */
+;    struct  Node *ln_Pred;	/* Pointer to previous (predecessor) */
+;    UBYTE   ln_Type;
+;    BYTE    ln_Pri;		/* Priority, for sorting */
+;    char    *ln_Name;		/* ID string, null terminated */
+;};
+;struct MsgPort {
+;    struct  Node mp_Node;
+;    UBYTE   mp_Flags;
+;    UBYTE   mp_SigBit;		/* signal bit number	*/
+;    void   *mp_SigTask;		/* object to be signalled */
+;    struct  List mp_MsgList;	/* message linked list	*/
+;};
+;
+;struct Message {
+;    struct  Node mn_Node;
+;    struct  MsgPort *mn_ReplyPort;  /* message reply port */
+;    UWORD   mn_Length;		    /* total message length, in bytes */
+;				    /* (include the size of the Message */
+;				    /* structure in the length) */
+;};
+;;struct IORequest {
+;    struct  Message io_Message; (size = 14 + 4 + 2) = 20
+;    struct  Device  *io_Device;     /* device node pointer  */ 4 
+;    struct  Unit    *io_Unit;	    /* unit (driver private)*/ 4 
+;    UWORD   io_Command;	    /* device command */ 2 
+;    UBYTE   io_Flags; 1 
+;    BYTE    io_Error;		    /* error or warning num */ 1 
+;};28 bytes ( $1C)
+*********************
+********************************
+*** HISTORIQUE 
+********************************
+
+**** Dessin Kickstart
+FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?
+FC55D8: movem.w D0/D1, ($24,A1) => D0 ecrit ok, D1 shifted by 2 bytes => OK
+
+**** Blocage dans trackdisk 
+
+===> FE8B7E
+FE8C74 ok
+FCC722 ok
+FCC7F0
+FCC908
+FCC97A
+FCCA70
+FC653A
+FE8CCE
+
+A5 = 18ba
+
+FE8E42 => int a ce moment la (blitter)
+==> Crash a la suite.
+
+Crash ....
+Illegal instruction + 
+FE5CEE: jsr ($FFEE,A6)   => Go 19d8 ???
+19d8 => jmp FE4996.
+2d54 => gameport Device
+Ecrasement ? Oui, a FC797x ...
+index positioné a prealable :
+FC7500: move.w #$FF18, D3
+FC7508 => lsr.b => flag C correctement posé ?
+
+FE8CCA => FCC6BA
+
+
+
+FE8A02 => DoIO qui ne sort pas...
+IORequest 18e6. 
+mn_ReplyPort 1916
+	flags : 0
+	Sigbit : 1F
+	SigTask : 1970 (exec ?)
+Device 4694
+Unit 6038
+Command 02
+flags 81
+=> Reveille trackdisk a FEAE76
+FEAE9A: bclr #$3, ($40,A3)        08 AB 00 03 00 40 
+Le bit semble pas clear... => pas de disque ? (ou autre chose ??)
+On continue : FEAF36 ok
+FEA01C ok
+bsr FE998C => C'est lui qui Signal (FC1E48)
+FE99A2 => On recoit F0 (et nous : 3E.. ?)
+=>FE99AC: btst #2, D2 pas identique => CHNG DOIT ETRE A 0 !!!!
+FE9A08: bsr FEA4F0                 	; (Goto signal here !
+
+On ne passe pas ici : FE9F92
+
+4694 : Device node
+trackdisk.device : 
+Task cree correctement 
+FEAE50
+Recherche de disque présent. Non.
+=>FEADEE => jsr ($FFEE,A6)      return -1 OK !
+
+FC48FC : Detection des drives...
+Task : FEAE50
+###
+=> FC0F54 STOP : Ok. 
+
+###
+FE55F2: cmp.w ($72,A6), D0        B0 6E 00 72  => DIFF : 4(moi)/ 9(winuae)
+devrait avoir : 0000 0014 00FF 0000 00FD 0000 00FE 0000
+j'ai 0000-0000
+Ca se trouve ici : FE5822 => issue d'une interruption !
+quand on remonte la stack :
+FC4682
+FC461C (On y passe !)
+FC4620: move.b BFED01, D2         14 39 00 BF ED 01  => 0 au lieu de 188 ??
+*** HANDLE ICR FROM CIA !!! ***
+FE5822 (?) ($72, ...) : we should write some data here...
+stack : FC461C 
+BFED01 : lecture de 88 sur winuae 
+Appel de la procedure qui va bien => (A2, 40-70)
+(sur bit 8 = SP ?)
+===> (passe-t-on vers FE998C ??) <===
+CHGN : 0 = pas de changement ?!!!!
+
+On passe dans FE9550 
+
+FEA510 = DoIo dont on ne sort pas... OK
+***IL MANQUAIT L'UPDATE DE ICR SUR TB/TA !
+
+(    IORequest : 6096
+IORequest.io_Message.mn_Node.ln_Succ = 0 (au lieu de quelque chose)
+IORequest.io_Message.mn_Node.ln_Pred = 0 (au lieu de quelque chose)
+IORequest.io_Message.mn_Node.ln_Type = 05 (devrait etre 07)
+IORequest.io_Message.mn_ReplyPort = 60E6
+mp_SigBit = 0A
+SigTask = 6166 "trackdisk.device"
+Device : 2EDE (Timer)
+Unit : 2F08
+command : 09
+=> FE97EC, set TBLO/TBLHI a BB8
+Le timer decremente et interrupt bien !
+=> FC461C    )
+
+*** FE6C2E: add.w #$FFD6, A1          ; => CA DOIT ETRE UNE SOUSTRACTION !!
+
+
+AllocMem FC17EE : On a un pointeur null... ?? (==> voir 3e appel FD660A
+A2 : ***5010*** => On a 0000 0000 0000 0676 00FC 07DC 00FC 07DE
+     au lieu de : 0000 0000 001D 000A 0002 00FD 610A 0300
+FD66DC: add.w D0, A0              calcul qui tronque FD !!?
+*** Correction ADDA 
+
+
+=> FC2DB4 ObtainSemaphore = attente sur 4d2a
+Pq addq incorrect sur flags
+
+
+=> Pb Console.device: (FE510E)
+- RT_INIT : FE6B88 qui appelle Makelibrary
+Le MakeLibrary ne sort jamais (relative vector FC1508)
+Dans le Makelib = 
+ok jusque FE6BA2
+Command 9 pour DoIO , vers input.device
+FE6C64: jsr ($FE38,A6)            ; DoIO  => Pas de retour....
+*** PB : EOR INCORRECT !!
+
+
+FCAC92 => recuperation d'une allocation.
+
+
+(FC6D06 => Interrupt handler qui shunte la copperlist 2 ... ? normal ???
+Stack : FC07F4  bsr.s     FC0828            Reserved vector #14.
+semble ok)
+
+FCAE68 => ??
+
+Ensuite, coperlist/blitter...
+
+**********************
+Attention ! passage dans Alert( alertNum, parameters )
+FC30EC
+Appelé depuis FC3028 
+Appelé depuis FE932C 15000002 Timer Device Bad supply
+(0002 - Power supply: no 50/60 Hz ticks)=> OK
+Causé par le CIA qui latchait incorrectement l'event sur MSB plutopt que LSB...
+===> OK !
+***********************
+
+Guru meditation, pas de cause connue atm...
+La stack du guru = 
+	Wait / WaitIO / FE6C68 / ... /FE0000 / FC0680(FindNalme dans OpenDevice)
+	==> stop qui repop sur interrupt causée par le blitter (FC6CDC)	
+	=> Bricolage a FC6D04
+===> OK !
+	
+********************
+Detection du lecteur de disquette 
+FC490A => voir MTR/READY etc
+Sauvegarde de l'id du drive dans (A3)
+004940: btst #5, BFE001           			Lecture bit READY
+NE LIT PAS l'adresse BFE001... !
+===> OK !
+
+**************************
+==> asl.l #0, D0 : ASL 8 !!!

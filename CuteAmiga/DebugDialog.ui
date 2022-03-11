@@ -119,7 +119,7 @@
     <rect>
      <x>15</x>
      <y>450</y>
-     <width>441</width>
+     <width>211</width>
      <height>181</height>
     </rect>
    </property>
@@ -127,20 +127,10 @@
     <string notr="true">font: 8pt &quot;Courier New&quot;;</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>410</y>
-     <width>211</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="add_bp">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>70</x>
      <y>410</y>
      <width>51</width>
      <height>23</height>
@@ -148,6 +138,55 @@
    </property>
    <property name="text">
     <string>Add</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="remove_bp">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>410</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="clear_bp">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>410</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Clear all</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="bpAddress">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>410</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="callStack">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>440</y>
+     <width>211</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 8pt &quot;Courier New&quot;;</string>
    </property>
   </widget>
   <action name="actionTest">
