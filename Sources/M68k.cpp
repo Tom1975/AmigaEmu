@@ -2218,7 +2218,7 @@ unsigned int M68k::OpcodeAdd ()
       if (rm & 0x80000000) sr_ |= F_N;
       break;
    }
-   if ( (sm&dm&(!rm)) | ((!sm)&(!dm)&(rm)))
+   if ( (sm&dm&(~rm)) | ((~sm)&(~dm)&(rm)))
    {
       sr_ |= F_V;
    }

@@ -169,10 +169,10 @@ void AddressingMode::ComputeFlags(unsigned short& sr, unsigned int old_value, un
    if (rm) flag |= 0x8;
 
    // update flags
-   bool v = (!sm&dm& !rm) | (sm&!dm&rm);
+   bool v = (~sm&dm& ~rm) | (sm&~dm&rm);
    if (v) flag |= 0x2;
 
-   bool c = (sm&!dm|rm&!dm &sm&rm);
+   bool c = ( (sm&~dm)| (rm&~dm) | (sm&rm));
    if (c) flag |= (0x1+0x10);
 
    
