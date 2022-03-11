@@ -33,18 +33,14 @@ FCC1EE
 FCC206 => (A0) => 44/46 : pas identique !!! (f44e)
 
 a checker : 
-(FCC334)
+(FCC334) => Retour incorrect : D1 =4(2)
 (FCBE3A)
 (FCC0B2)
-blit : FC570E
-=> D0 different (54 au lieu de 41)
-=> D3 different (110e0 au lieu de 10ed)
-=> D7 different (f41a au lieu de f427)
-stack differente
+blit : FC570E Ok
 
-blitt : 14/01
-blton : 03ca/0
-d: f41a (f426)
+FC5718: subq.w #1, ($AA,A6)       	 => FLAG : 8 au lieu de 9 (pas de carry ??)
+
+FCBE3A
 
 TODO : 
 
