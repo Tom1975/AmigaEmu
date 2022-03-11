@@ -7,53 +7,46 @@ Dessin : b5ce = 0044 au lieu de 004??
 => Blit : draw line (next byte : fe8e40) 
 cbea/2015 - size : 2-b
 
-FE8D50 ok.
 
 Dbg : 
 1er FLOOD: 25h / 45h => CEC2
 
-FC6BC4 : BltBitMap ( de a4ba vers e33a
-FC75EA : lancement du blit :  blit de c3f8-> b458 vers 10278 -> F2D8
-F44E => -E2A => source = b5ce = 0044
-
-blit incorrect vers F44E (BB au lieu de B9)
-FC547A (F44E : BB au lieu de B9)
-FC54CA 
-FC54EC : 
-FCAAAE
-FCAAC8 (F44E : BB au lieu de B9)
-FCAAF6
-
-*** => FCAB4E => FCBBD4 On n'en ressort pas !!!
-(occille entre FCC14E et FCC17A)
-
-FCBC50 (F44E => 44 au lieu de 46
-FCC1CA => Return pas identique !!
-FCC1EE
-FCC206 => (A0) => 44/46 : pas identique !!! (f44e)
-
-a checker : 
-(FCC334) => Retour incorrect : D1 =4(2)
-(FCBE3A)
-(FCC0B2)
-blit : FC570E Ok
-
-FC5718: subq.w #1, ($AA,A6)       	 => FLAG : 8 au lieu de 9 (pas de carry ??)
-
-FCBE3A
-
-TODO : 
-
-
-- Check call to blitter : 
-FC5BEA
-FC75EA
-FC54CA
-FC54EC
-
-- Check what's done here : FC754E (wait blit just after)
-
-
+=> Lors du flood : Ecriture nécessaire (non faite) sur CC1A et +
+Blits : 
+bltcon0/1     addr d   size (wh)	  From
+- 0100/0000 - e33a     	14-c8
+- 0100/0000 - 10400    	14-c8           FC5BE8
+- 071a/0002 - 10278		14-c8 			FC75EA
+- 072a/0002 - 10278     14-c8			FC75EA
+- 0100/0000 - 10400     20-1			FC54CA
+- 0100/0000 - 1043e		40-3e			FC54EC
+- 073a/0002 - 10278		14-c8			FC54EC
+- 03ca/0000 - f426		1-1				FC570E
+- 03ca/0000 - f44e		1-1				FC570E
+- 03ca/0000 - f476		1-1				FC570E
+- 03ca/0000 - f426		1-1				FC570E
+- 03ca/0000 - f3fe		1-1				FC570E
+- 03ca/0000 - f3fe		1-1				FC570E
+- 03ca/0000 - f3d6		2-1				FC570E
+- 03ca/0000 - f3ae		2-1				FC570E
+- 03ca/0000 - f386		2-1				FC570E
+- 03ca/0000 - f35e		2-1				FC570E
+- 03ca/0000 - f336		2-1				FC570E
+- 03ca/0000 - f30e		2-1				FC570E
+- 03ca/0000 - f2e6		2-1				FC570E
+- 03ca/0000 - f2be		2-1				FC570E
+- 03ca/0000 - f296		2-1				FC570E
+- 03ca/0000 - f26e		2-1				FC570E
+...
+- 03ca/0000 - f1ce		7-1				FC570E
+f1fa - 5-1
+f222 5-1
+f252
+f27a
+.. (many)
+-> Blit to bitplane :
+- 0b2a/0000 - a4ba		14-c8			FC5DA0 *** bitplane 1 !
+- 0bea/0000 - c3fa		14-c8			FC5DA0 *** bitplane 2 !
 
 Ecran : 0x28 byte / row;
 Rows : 0xC8
