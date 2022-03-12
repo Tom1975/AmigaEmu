@@ -1,7 +1,17 @@
-*** Dessin kickstart :
-
 SYNCHRO LOGIQUE : 
 
+Inifinite loop : 
+
+FE8A84 -> FE8A9A => Attente d'une disquette
+Timer CIA desactivé 
+
+
+
+###
+A VERIFIER :
+LSD/LSD2/ROd/ROD2 => Flags... 
+CIA : effet CRA-TODIN ?
+###
 *** agnus & timing
 horizontal counter agnus : increment tous les ticks CCK (up)
 227 CCK / line (908 pixel/line  ~ 70ns / pixel)
@@ -19,10 +29,7 @@ Fonctionnement de l'écran :
 ** Attention au test : 
 Si ve > vp, return true.
 
-
-FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
-The bits in INTENA/REQ are blitter interrupt requests, I would not use them for the purpose of waiting for the blitter to finish."
-
+******** INIT : 
 => 0xFC0B28 (InitResident)
 FC4afc (expansion.library)	: 
 FE4880 (potgo.resource)		: 
@@ -47,20 +54,6 @@ FE424C (mathffp.library)	:
 (FF425A) (dos)
 FE8884 (strap.strap) 		: bloqué (init FE88D6 
 end.
-
-###
-A VERIFIER :
-LSD/LSD2/ROd/ROD2 => Flags... 
-CIA : effet CRA-TODIN ?
-###
-
-Erreur sur les affichages : 
-Addresses de bitplanes incorrectes () et incrément sans limite = error !
-DMACON fixé vers ici FCAF18
-Copper list 2 fixée ici :FC6D00
-Plus particulierement sur l'uinterrupt handler
-FC6CDC
-
 
 ********************************
 STRUCTURES
