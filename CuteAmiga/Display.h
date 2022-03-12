@@ -3,6 +3,7 @@
 #include <qwidget.h>
 #include <qevent.h>
 #include "Monitor.h"
+#include "IDragNDropTarget.h"
 
 namespace Ui {
 class Display;
@@ -17,6 +18,7 @@ public:
    Display(QWidget* parent);
     ~Display();
 
+    void SetDragnDropTarget(IDragNDropTarget*);
     virtual unsigned int * GetFrameBuffer(unsigned int line);
 
     virtual void HSync();
@@ -46,9 +48,8 @@ signals:
    
 
 private:
-   void OpenFiles(const QStringList& pathList);
-
-
+   
+   IDragNDropTarget* target_;
    QPixmap pixmap_;
    QImage image_;
 

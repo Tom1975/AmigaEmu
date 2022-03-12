@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
    ui->setupUi(this);
 
+   ui->display_->SetDragnDropTarget(this);
    emu_handler_ = new AmigaEmulation(ui->display_);
 
    // Menu connection
@@ -203,4 +204,20 @@ void MainWindow::Update()
       icondrive_[i].setPixmap( mb->GetDriveLed(i)?*drive_led_on_:*drive_led_off_);
    }
 
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Drag'n'Drop
+/////////////////////////////////////////////////////////////////////////////
+void MainWindow::OpenFiles(const QStringList& pathList)
+{
+   for (int i = 0; i < pathList.size() && i < 4; ++i)
+   {
+      // Load first 4 files ( df0 to df3 )
+      Motherboard* mb = emu_handler_->GetMotherboard();
+      Disk* disk = new Disk(pathList[i].toStdString());
+      mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+
+
+   }
 }

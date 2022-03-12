@@ -55,6 +55,11 @@ void Display::Init()
    pixel_current_index_ = 0;
 }
 
+void Display::SetDragnDropTarget(IDragNDropTarget* target)
+{
+   target_ = target;
+}
+
 unsigned int * Display::GetFrameBuffer(unsigned int line)
 {
    // extract framebuffer from pixmap
@@ -130,28 +135,15 @@ void Display::dropEvent(QDropEvent* event)
       QList<QUrl> urlList = mimeData->urls();
 
       // extract the local paths of the files
-      for (int i = 0; i < urlList.size() && i < 32; +i)
+      for (int i = 0; i < urlList.size() && i < 32; ++i)
       {
          pathList.append(urlList.at(i).toLocalFile());
       }
 
       // call a function to open the files
-      OpenFiles(pathList);
+      target_->OpenFiles(pathList);
    }
 
-}
-
-void Display::OpenFiles(const QStringList& pathList)
-{
-   for (int i = 0; i < pathList.size() && i < 4; +i)
-   {
-      // Load first 4 files ( df0 to df3 )
-      //    Motherboard* mb = emu_handler_->GetMotherboard();
-      // Disk* disk = new Disk(filename.toStdString());
-      // mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
-
-
-   }
 }
 
 void Display::AFrameIsReady()
