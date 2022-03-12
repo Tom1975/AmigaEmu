@@ -2,7 +2,8 @@
 
 #include <string.h>
 
-#define COLOR2RGB(col) (unsigned int)((((col>>8)&0xF) << 20) + (((col>>4)&0xF) << 12) + ((col&0xF)<<4))
+//#define COLOR2RGB(col) (unsigned int)((((col>>8)&0xF) << 20) + (((col>>4)&0xF) << 12) + ((col&0xF)<<4))
+#define COLOR2RGB(col) (unsigned int)( (((col>>8)&0xF) << 20)+(((col>>8)&0xF) << 16) + (((col>>4)&0xF) << 12)+(((col>>4)&0xF) << 8) + ((col&0xF)<<4)+((col&0xF)))
 
 
 Denise::Denise() : frame_(nullptr), hpos_counter_(0)
