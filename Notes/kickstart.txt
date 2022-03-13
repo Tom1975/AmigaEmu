@@ -3,9 +3,31 @@ SYNCHRO LOGIQUE :
 Inifinite loop : 
 
 FE8A84 -> FE8A9A => Attente d'une disquette
-Timer CIA desactivé 
+Timer CIA desactivé ?!
 
+Interrupt : FC0CD2
+=> FC12FC -> 
+FC461C
+(winuae(moi)
+A: CRA 00 CRB 08 (09) ICR e2 (2) IM 0a TA ffff (ffff) TB 0863 (0863)
+TOD 000065 (000065) ALARM 000000    CYC=93B3AA00
+B: CRA 04 CRB 84 ICR 00 IM 04 TA ffff (ffff) TB ffff (ffff)
+TOD 00008c (00009a) ALARM 000000    CLK=0
+)
+lsr.b  #1, D2          => Pas de Z !!(alors que 0 ?!)
+=> FE9726
+=> FE97CC
+=> FE977C
+FE97E2 ( clear start bit)  bclr #$0 : check Z flag ?!
+(interrupt cia ok ?)
+==> STEP 
+FEAE1C et 
+FE99F8 
+FE9A10 
+FE9A18 : 30 (E0)
 
+FE9740 : Bouclage regulier... mais pas de retour au handler ?
+Plus d'interrrupt...
 
 ###
 A VERIFIER :
