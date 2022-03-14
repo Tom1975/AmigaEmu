@@ -17,6 +17,7 @@
 #define  ALARM    0x4
 #define  SP       0x5
 #define  FLAG     0x10
+#define  IR       0x80
 
 CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF)
 {
@@ -49,6 +50,7 @@ void CIA8520::Tod()
          icr_ |= ALARM;
          if (icr_mask_ & ALARM)
          {
+            icr_ |= IR;
             motherboard_->GetPaula()->Int(8);
          }
       }
@@ -70,9 +72,12 @@ void CIA8520::Tick()
       }
       if (timer_a_ == 0xFFFF)
       {
+         if (cra_ & RUNMODE)
+            cra_ &= ~START;
          icr_ |= TA;
          if (icr_mask_ & TA)
          {
+            icr_ |= IR;
             motherboard_->GetPaula()->Int(8);
          }
          if ((crb_ & 0x40) == 0x40)
@@ -80,9 +85,13 @@ void CIA8520::Tick()
             timer_b_--;
             if (timer_b_ == 0xFFFF)
             {
+               if (crb_ & RUNMODE)
+                  crb_ &= ~START;
+
                icr_ |= TB;
                if (icr_mask_ & TB)
                {
+                  icr_ |= IR;
                   motherboard_->GetPaula()->Int(8);
                }
             }
@@ -104,9 +113,13 @@ void CIA8520::Tick()
 
       if (timer_b_ == 0xFFFF)
       {
+         if (crb_ & RUNMODE)
+            crb_ &= ~START;
+
          icr_ |= TB;
          if (icr_mask_ & TB)
          {
+            icr_ |= IR;
             motherboard_->GetPaula()->Int(8);
          }
       }
@@ -137,10 +150,15 @@ unsigned char CIA8520::In(unsigned char addr)
       return event_/*latched_alarm_ */& 0xFF;
    case 9:
       return (event_/*latched_alarm_ */ >>8) & 0xFF;
-   case 10:
+   case 0xA:
       latched_alarm_ = event_;
       return (latched_alarm_ >>16) & 0xFF;
-
+   case 0xB:
+      // Not connected
+      break;
+   case 0xC:
+      // sdr : todo
+      break;
    case 0xD:
    {
       unsigned char tmp_icr = icr_;
@@ -259,7 +277,24 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
       sdr_ = data;
       break;
    case 0xD:
-      icr_mask_ = data;
+   {
+      //icr_mask_ = data;
+      if (data & 0x80)
+         icr_mask_ |= (data & 0x7F);
+      else
+         icr_mask_ &= ((~data) & 0x7F);
+
+      // Check if INT is to be done
+      if (icr_mask_ & icr_)
+      {
+         if (!(icr_ & IR)) 
+         {
+            icr_|= 0x80;
+            motherboard_->GetPaula()->Int(8);
+         }
+      }
+   }
+      
       break;
    case 0xE:
       cra_ = data;
