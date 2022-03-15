@@ -50,11 +50,11 @@ void AddressingMode::ComputeFlagsNul(unsigned short& sr, unsigned int value, uns
    switch (size)
    {
    case 0: 
-      if (value &0xFF == 0) flag |= 0x4;
+      if ((value &0xFF) == 0) flag |= 0x4;
       if ((value >> 7) & 0x1) flag |= 0x8; 
       break;
    case 1: 
-      if (value & 0xFFFF == 0) flag |= 0x4; 
+      if ((value & 0xFFFF) == 0) flag |= 0x4; 
       if ((value >> 15) & 0x1) flag |= 0x8; break;
    case 2: 
       if (value == 0) flag |= 0x4; 
@@ -202,6 +202,11 @@ void AddressingMode::Btst(unsigned int bit_tested, unsigned short& sr)
 
 void AddressingMode::Lsd(bool right, unsigned short& sr)
 {
+   sr &= ~0x2; // V is cleared
+   if (input_ == 0)
+      sr |= 0x4;
+   else
+      sr &= ~0x4;
    if (right)
    {
       input_ = GetU16();
@@ -213,7 +218,6 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
       {
          sr &= ~(0x10 | 0x1);
       }
-
       input_ >>= 1;
    }
    else

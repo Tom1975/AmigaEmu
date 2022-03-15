@@ -1696,6 +1696,8 @@ unsigned int M68k::DecodeLsd2()
    }
 
    // Rotate
+   sr_ &= ~0x2; // V is cleared
+
    switch ((ird_>> 6) & 3)
    {
    case 0:
@@ -1725,7 +1727,11 @@ unsigned int M68k::DecodeLsd2()
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFFFF00;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) << rotat);
       }
-      
+      if ((d_[ird_ & 0x7] & 0xFF) == 0)
+         sr_ |= 0x4;
+      else
+         sr_ &= ~0x4;
+
       break;
    case 1:
       if (right)
@@ -1755,6 +1761,11 @@ unsigned int M68k::DecodeLsd2()
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFF0000;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFF) << rotat);
       }
+      if ((d_[ird_ & 0x7] & 0xFFFF) == 0)
+         sr_ |= 0x4;
+      else
+         sr_ &= ~0x4;
+
       break;
    case 2:
       if (right)
@@ -1781,6 +1792,11 @@ unsigned int M68k::DecodeLsd2()
          }
          d_[ird_ & 0x7] = (d_[ird_ & 0x7]) << rotat;
       }
+      if ((d_[ird_ & 0x7] ) == 0)
+         sr_ |= 0x4;
+      else
+         sr_ &= ~0x4;
+
       break;
    }
    Fetch();
