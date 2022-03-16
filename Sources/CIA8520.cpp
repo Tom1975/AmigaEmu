@@ -15,7 +15,7 @@
 #define  TA       0x1
 #define  TB       0x2
 #define  ALARM    0x4
-#define  SP       0x5
+#define  SP       0x8
 #define  FLAG     0x10
 #define  IR       0x80
 

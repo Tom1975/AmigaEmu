@@ -28,9 +28,26 @@ FE9A18 : 30 (E0)
 
 Message du cia timer => FE643C ?
 FE9824 => Ecriture du timer
-
 FE9740 : Bouclage regulier... mais pas de retour au handler ?
 Plus d'interrrupt...
+
+Debut : FEA01C
+FE99F4 : step
+=> Trackdisk.device = pas de reveil !
+=> ; Handle ICR register from CIA-A  FC461C: movem.l D2/A2, -(SP)     = pas d'interrupt ?!
+FC4620 : On passe bien ici avec D2 = 82 (CIA A t
+TIMER B)
+
+
+Timer : 
+***** FE9706 => On y passe !!! = ANALYSER ICI !!
+9710 : 800 =>E4(EA)
+FE9740 ok
+
+00FE977C 
+=>FE97EC
+...FE982C: move.b D0, BFE701         ; set TBLHI
+
 
 ###
 A VERIFIER :
