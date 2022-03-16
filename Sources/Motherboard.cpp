@@ -4,7 +4,7 @@
 
 #include "Disassembler68k.h"
 
-Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this), cia_b_(this), led_(false)
+Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, 8), cia_b_(this, 0x2000), led_(false)
 {
    m68k_.SetBus(&bus_);
    bus_.SetCIA(&cia_a_, &cia_b_);

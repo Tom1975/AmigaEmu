@@ -19,7 +19,7 @@
 #define  FLAG     0x10
 #define  IR       0x80
 
-CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF)
+CIA8520::CIA8520(Motherboard* motherboard, unsigned short intreq) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF), intreq_(intreq)
 {
 
    Reset();
@@ -51,7 +51,7 @@ void CIA8520::Tod()
          if (icr_mask_ & ALARM)
          {
             icr_ |= IR;
-            motherboard_->GetPaula()->Int(8);
+            motherboard_->GetPaula()->Int(intreq_);
          }
       }
    }
@@ -78,7 +78,7 @@ void CIA8520::Tick()
          if (icr_mask_ & TA)
          {
             icr_ |= IR;
-            motherboard_->GetPaula()->Int(8);
+            motherboard_->GetPaula()->Int(intreq_);
          }
          if ((crb_ & 0x40) == 0x40)
          {
@@ -92,7 +92,7 @@ void CIA8520::Tick()
                if (icr_mask_ & TB)
                {
                   icr_ |= IR;
-                  motherboard_->GetPaula()->Int(8);
+                  motherboard_->GetPaula()->Int(intreq_);
                }
             }
          }
@@ -120,7 +120,7 @@ void CIA8520::Tick()
          if (icr_mask_ & TB)
          {
             icr_ |= IR;
-            motherboard_->GetPaula()->Int(8);
+            motherboard_->GetPaula()->Int(intreq_);
          }
       }
    }
@@ -290,7 +290,7 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
          if (!(icr_ & IR)) 
          {
             icr_|= 0x80;
-            motherboard_->GetPaula()->Int(8);
+            motherboard_->GetPaula()->Int(intreq_);
          }
       }
    }

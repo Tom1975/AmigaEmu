@@ -5,7 +5,7 @@ class Motherboard;
 class CIA8520
 {
 public:
-   CIA8520(Motherboard* motherboard);
+   CIA8520(Motherboard* motherboard, unsigned short intreq);
    virtual ~CIA8520();
 
    void Reset();
@@ -47,6 +47,9 @@ protected:
    // Interruption
    unsigned char icr_;
    unsigned char icr_mask_;
+
+   // INT number
+   unsigned short intreq_;
 
    void HandleControlRegister(unsigned int timer);
    unsigned char cra_;
