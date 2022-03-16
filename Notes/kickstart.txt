@@ -27,6 +27,7 @@ FE9A10
 FE9A18 : 30 (E0)
 
 Message du cia timer => FE643C ?
+FE9824 => Ecriture du timer
 
 FE9740 : Bouclage regulier... mais pas de retour au handler ?
 Plus d'interrrupt...
