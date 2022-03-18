@@ -65,7 +65,7 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   if (address == 0xB5CE)
+   if (address == 0x60DE)
    {
       int dbg = 1;
    }
@@ -806,7 +806,7 @@ void Bus::Write16(unsigned int address, unsigned short data)
 {
    unsigned short written_value = SWAP_UINT16(data);
 
-   if (address == 0xB5CE )
+   if (address == 0x60DE)
    {
       int dbg = 1;
    }

@@ -1,0 +1,450 @@
+****************************************************************************
+*                                                                          *
+*        Amiga disk.resource version 33.18 (6 May 1986) disassembly        *
+*        this version of the resource was contained in Kickstart 1.2       *
+*                                                                          *
+*          disassembled and commented by Pavel Zima on 11 Jul 2016         *
+*                                                                          *
+*      following text supposes knowledge of 68k assembly language and      *
+*                   structures of Amiga operating system                   *
+*                                                                          *
+*   this little work was inspired by disassembly of AmigaOS 1.2 Exec by    *
+*  Markus Wandel (http://wandel.ca/homepage/execdis/exec_disassembly.txt)  *
+*                 or downloadable from Aminet (aminet.net)                 *
+*           structure and appearance is from that reason similar           *
+*                                                                          *
+****************************************************************************
+
+----------------------------------------------------------------------------
+  disk.resource functions
+----------------------------------------------------------------------------
+
+FC47D8 init code
+FC4996 GetUnit                     (-18)
+FC4A0E GiveUnit                    (-24)
+FC4A62 AllocUnit                   (-6)
+FC4A6E FreeUnit                    (-12)
+FC4A74 GetUnitID                   (-30)
+
+----------------------------------------------------------------------------
+  disk.resource base
+----------------------------------------------------------------------------
+
+       ; this is content of disk resource base structure as it is in RAM
+
+       ; standard node
+$0000  ds.l      1                 LN_SUCC
+$0004  ds.l      1                 LN_PRED
+$0008  ds.b      1                 LN_TYPE        (NT_RESOURCE)
+$0009  ds.b      1                 LN_PRI         (0)
+$000A  ds.l      1                 LN_NAME        ("disk.resource")
+
+       ; library structure
+       ; idstring is not set
+$000E  ds.b      1                 LIB_FLAGS      (6)
+$000F  ds.b      1                 LIB_pad
+$0010  ds.w      1                 LIB_NEGSIZE    (30)
+$0012  ds.w      1                 LIB_POSSIZE    ($90)
+$0014  ds.w      1                 LIB_VERSION    ($21)
+$0016  ds.w      1                 LIB_REVISION   ($12)
+$0018  ds.l      1                 LIB_IDSTRING   (0)
+$001C  ds.l      1                 LIB_SUM
+$0020  ds.w      1                 LIB_OPENCNT
+
+       ; resource variables
+$0022  ds.l      1                 DR_CURRENT     current unit structure
+$0026  ds.b      1                 DR_FLAGS       allocated units (bits 0-3)
+$0027  ds.b      1                 DR_pad         padding
+
+$0028  ds.l      1                 DR_SYSLIB      exec base
+$002C  ds.l      1                 DR_CIARESOURCE ciab.resource base
+
+$0030  ds.l      1                 DR_UNITID[0]   always 0 for df0
+$0034  ds.l      1                 DR_UNITID[1]   ID of df1
+$0038  ds.l      1                 DR_UNITID[2]   ID of df2
+$003C  ds.l      1                 DR_UNITID[3]   ID of df3
+
+       ; list header
+$0040  struct    LH                DR_WAITING     FIFO queue of waiting units
+
+       ; interrupts
+$004E  struct    Interrupt         DR_DISKBLOCK   (exec.library, DSKBLK)
+$0064  struct    Interrupt         DR_DISKSYNC    (exec.library, DSKSYNC)
+$007A  struct    Interrupt         DR_INDEX       (ciab.resource, FLG)
+
+$0090  SIZE                        ; size of the structure
+
+----------------------------------------------------------------------------
+  disk resource unit structure
+----------------------------------------------------------------------------
+
+       ; standard node
+$0000  ds.l      1                 LN_SUCC
+$0004  ds.l      1                 LN_PRED
+$0008  ds.b      1                 LN_TYPE
+$0009  ds.b      1                 LN_PRI 
+$000A  ds.l      1                 LN_NAME
+
+       ; Message
+$000E ds.l       1                 MN_REPLYPORT
+$0012 ds.w       1                 MN_LENGTH
+
+      ; Interrupts
+$0014  struct    Interrupt         DRU_DISKBLOCK  (exec.library, DSKBLK)
+$002A  struct    Interrupt         DRU_DISKSYNC   (exec.library, DSKSYNC)
+$0040  struct    Interrupt         DRU_INDEX      (ciab.resource, FLG)
+$0056  SIZE                        ; size of the structure
+
+----------------------------------------------------------------------------
+  jump to init code
+----------------------------------------------------------------------------
+
+       ; this is the disassembly of Kickstart 1.2 ROM at addresses
+       ; $FC4790 - $FC4AF3, this address range is preceded by
+       ; cia.resource and followed by expansion.library
+
+FC4790 bra.l     $FC47D8           ; jump to init routine
+
+----------------------------------------------------------------------------
+  disk.resource ROM tag
+----------------------------------------------------------------------------
+
+FC4794 4AFC                        RTC_MATCHWORD   (start of ROMTAG marker)
+FC4796 00FC4794                    RT_MATCHTAG     (pointer RTC_MATCHWORD)
+FC479A 00FC4AF4                    RT_ENDSKIP      (pointer to end of code)
+FC479E 01                          RT_FLAGS        (RTF_COLDSTART)
+FC479F 21                          RT_VERSION      (version number)
+FC47A0 08                          RT_TYPE         (NT_RESOURCE)
+FC47A1 46                          RT_PRI          (priority = 70)
+FC47A2 00FC47AE                    RT_NAME         (pointer to name)
+FC47A6 00FC47BC                    RT_IDSTRING     (pointer to ID string)
+FC47AA 00FC47D8                    RT_INIT         (execution address)
+
+       ; the priority (70) is quite high, disk.resource is the sixth initialized
+       ; resident module, just after exec.library, expansion.library,
+       ; potgo.resource, keymap.resource and cia.resource
+
+----------------------------------------------------------------------------
+  name, version
+----------------------------------------------------------------------------
+
+FC47AE "disk.resource", 00
+FC47BC "disk 33.18 (6 May 1986)", CR, LF, 00
+
+FC47D6 0000                        ; padding
+
+----------------------------------------------------------------------------
+  init routine
+----------------------------------------------------------------------------
+
+       ; as the RTF_AUTOINIT bit in RT_FLAGS is not set the InitResident calls
+       ; resource's own initialization routine below
+
+FC47D8 movem.l   D2/D3/A2/A3/A6,-(SP)
+FC47DC move.l    $000004,A6
+FC47E2 lea       $FC495C,A1        ; "ciab.resource"
+FC47E8 jsr       -$01F2(A6)        ; OpenResource
+FC47EC move.l    D0,D2
+FC47EE bne.s     $FC480A           ; resource available? => OK, continue
+FC47F0 movem.l   D7/A5/A6,-(SP)    ; no => Alert and finish
+FC47F4 move.l    #$21058020,D7
+FC47FA move.l    $0004,A6
+FC47FE jsr       -$6C(A6)          ; Alert no #$21058020
+FC4802 movem.l   (SP)+,D7/A5/A6
+FC4806 bra.l     $FC4916           ; finish
+
+FC480A lea       $FC4ADA,A0        ; vectors
+FC4810 lea       $FC496A,A1        ; structure
+FC4816 sub.l     A2,A2             ; init
+FC4818 move.l    #$90,D0           ; size
+FC481E jsr       -$54(A6)          ; MakeLibrary
+FC4822 tst.l     D0
+FC4824 bne.s     $FC4840           ; succeeded => continue
+
+FC4826 movem.l   D7/A5/A6,-(SP)
+FC482A move.l    #$21020000,D7
+FC4830 move.l    $0004,A6
+FC4834 jsr       -$6C(A6)          ; failed => Alert no #$21020000
+FC4838 movem.l   (SP)+,D7/A5/A6
+FC483C bra.l     $FC4916           ; and finish
+
+FC4840 move.l    D0,A2             ; A2 = new base
+
+FC4842 lea       $4E(A2),A1
+FC4846 move.l    #$FC4A80,$12(A1)  ; service routine into IS_CODE
+FC484E move.l    A2,$0E(A1)        ; base into IS_DATA
+FC4852 moveq     #1,D0             ; DSKBLK
+FC4854 jsr       -$A2(A6)          ; SetIntVector
+
+FC4858 lea       $64(A2),A1
+FC485C move.l    #$FC4A98,$12(A1)  ; service routine into IS_CODE
+FC4864 move.l    A2,$0E(A1)        ; base into IS_DATA
+FC4868 moveq     #$0C,D0           ; DSKSYNC
+FC486A jsr       -$A2(A6)          ; SetIntVector
+
+FC486E lea       $BFD000,A1
+FC4874 move.b    #$FF,$0100(A1)    ; CIA-B PRB value $FF
+FC487A move.b    #$FF,$0300(A1)    ; CIA-B DDRB all out
+FC4880 and.b     #$C3,$BFE201      ; CIA-A DDRA in fact only /LED and OVL out
+
+FC4888 move.w    #$4000,$DFF09A
+FC4890 addq.b    #1,$0126(A6)      ; Disable
+FC4894 move.l    D2,$2C(A2)        ; save ciab.resource base
+
+FC4898 lea       $7A(A2),A1
+FC489C move.l    A2,$0E(A1)        ; base into IS_DATA
+FC48A0 move.l    #$FC4AB0,$12(A1)  ; service routine to IS_CODE
+FC48A8 moveq     #4,D0             ; FLG interrupt (INDEX)
+FC48AA move.l    A6,-(SP)
+FC48AC move.l    D2,A6             ; ciab.resource
+FC48AE jsr       -6(A6)            ; AddICRVector
+FC48B2 move.l    (SP)+,A6
+FC48B4 moveq     #$10,D0           ; disables FLG interrupt
+FC48B6 move.l    A6,-(SP)
+FC48B8 move.l    D2,A6
+FC48BA jsr       -$12(A6)          ; AbleICR
+FC48BE move.l    (SP)+,A6
+
+FC48C0 subq.b    #1,$0126(A6)      ; Enable
+FC48C4 bge.s     $FC48CE
+FC48C6 move.w    #$C000,$DFF09A
+
+FC48CE lea       $DFF000,A0
+FC48D4 move.l    A6,$28(A2)        ; saves exec base
+FC48D8 move.w    #$4000,$24(A0)    ; DSKLEN disable DMA
+FC48DE move.w    #$8010,$96(A0)    ; DMACON disk DMA enable
+
+FC48E4 lea       $40(A2),A0        ; initializes the list header for DR_WAITING
+FC48E8 move.l    A0,(A0)
+FC48EA addq.l    #4,(A0)
+FC48EC clr.l     4(A0)
+FC48F0 move.l    A0,8(A0)
+
+       ; determines drive type for each drive, possible types are:
+
+; DRT_AMIGA      EQU $00000000     ; standard 3.5" DD Amiga disk
+; DRT_37422D2S   EQU $55555555     ; 5.25"
+; DRT_150RPM     EQU $AAAAAAAA     ; 3.5" HD drive with HD disk in
+; DRT_EMPTY      EQU $FFFFFFFF     ; empty drive
+
+       ; note that values returned by drive are negation of what is saved
+       ; by disk.resource
+
+FC48F4 move.l    #0,$30(A2)        ; we always have df0 of Amiga type
+FC48FC moveq     #2,D2
+FC48FE move.b    #$10,D3           ; SEL1
+FC4902 lea       $34(A2),A3
+
+FC4906 bsr.l     $FC491C           ; check the driveid for the other 3 units
+FC490A lsl.b     #1,D3             ; next unit
+FC490C dbra      D2,$FC4906
+FC4910 move.l    A2,A1
+FC4912 jsr       -$01E6(A6)        ; AddResource
+FC4916 movem.l   (SP)+,D2/D3/A2/A3/A6
+FC491A rts
+
+FC491C not.b     D3                ; inverts select bit
+FC491E lea       $BFD100,A0        ; CIA-B prb
+FC4924 move.b    #$7F,D0           ; prepares motor on
+FC4928 move.b    D0,(A0)
+FC492A and.b     D3,D0             ; motor on for selected drive
+FC492C move.b    D0,(A0)
+FC492E move.b    #$FF,(A0)         ; deselect drive
+FC4932 move.b    D3,(A0)           ; motor off
+FC4934 move.b    #$FF,(A0)         ; deselect drive - this resets drive shift id port
+FC4938 moveq     #$1F,D1           ; loop 32x
+FC493A moveq     #0,D0
+FC493C lsl.l     #1,D0
+FC493E move.b    D3,(A0)           ; select drive
+FC4940 btst      #5,$BFE001        ; check the /RDY bit
+FC4948 beq.s     $FC494E
+FC494A bset      #0,D0             ; if not set particular bit
+FC494E move.b    #$FF,(A0)         ; deselect drive
+FC4952 dbra      D1,$FC493C        ; process all 32 bits
+FC4956 move.l    D0,(A3)+          ; store result in DR_UNITID
+FC4958 not.b     D3                ; turn back select bit
+FC495A rts
+
+FC495C "ciab.resource", 00
+
+
+----------------------------------------------------------------------------
+  init table, 6 entries
+----------------------------------------------------------------------------
+
+       ; as used by MakeLibrary or InitStruct
+FC496A E0000008  ; offset 8, next byte $08, count 1 => LN_TYPE = NT_RESOURCE
+FC496E 0800
+FC4970 C000000A  ; offset $A, next long $FC47AE, count 1 => LN_NAME = "disk.resource"
+FC4974 00FC47AE
+FC4978 E000000E  ; offset $E, next byte $06, count 1 => LIB_FLAGS = $06
+FC497C 0600
+FC497E D0000014  ; offset $14, next word, count 1 => LIB_VERSION = $21
+FC4982 0021
+FC4984 D0000016  ; offset $16, next word, count 1 => LIB_REVISION = $12
+FC4988 0012
+FC498A C0000022  ; offset $22, next long $FFFFFFFF, count 1
+FC498E FFFFFFFF
+FC4992 00        ; end of init structure
+FC4993 00        ; padding
+FC4994 0000      ; padding
+
+----------------------------------------------------------------------------
+  lastDriver = GetUnit(unitPointer)
+      D0                   A1
+----------------------------------------------------------------------------
+
+FC4996 move.l    $0004,A0
+FC499A move.w    #$4000,$DFF09A
+FC49A2 addq.b    #1,$0126(A0)      ; Disable
+FC49A6 bset      #7,$26(A6)        ; set ACTIVE bit in DR_FLAGS
+FC49AC bne.s     $FC49BA           ; was already set? the disk is already busy
+FC49AE move.l    $22(A6),D0        ; no => put current unit structure as result
+FC49B2 move.l    A1,$22(A6)        ; set the new unit pointer to DR_CURRENT
+FC49B6 bra.l     $FC49FA           ; and finish
+FC49BA cmp.l     $22(A6),A1        ; unit already has the disk?
+FC49BE bne.s     $FC49DE           ; no => skip
+FC49C0 move.l    A1,-(SP)          ; yes => Alert
+FC49C2 move.l    SP,A1
+FC49C4 movem.l   D7/A5/A6,-(SP)
+FC49C8 move.l    #$21000001,D7
+FC49CE lea       (A1),A5
+FC49D0 move.l    $0004,A6
+FC49D4 jsr       -$6C(A6)          ; failed => Alert no #$21000001
+FC49D8 movem.l   (SP)+,D7/A5/A6
+FC49DC move.l    (SP)+,A1
+FC49DE lea       $40(A6),A0        ; DR_WAITING list head into A0
+FC49E2 lea       4(A0),A0          ; AddTail unitPointer
+FC49E6 move.l    4(A0),D0
+FC49EA move.l    A1,4(A0)
+FC49EE move.l    A0,(A1)
+FC49F0 move.l    D0,4(A1)
+FC49F4 move.l    D0,A0
+FC49F6 move.l    A1,(A0)
+FC49F8 moveq     #0,D0
+FC49FA move.l    $0004,A0
+FC49FE subq.b    #1,$0126(A0)      ; Enable
+FC4A02 bge.s     $FC4A0C
+FC4A04 move.w    #$C000,$DFF09A
+FC4A0C rts
+
+----------------------------------------------------------------------------
+   GiveUnit()
+----------------------------------------------------------------------------
+
+       ; the function does not check if the routine was get by the same task
+       ; or if it even was get
+       ; as well it does not forbid the interrupts, it must be done by the
+       ; task which called it
+
+FC4A0E move.l    $0004,A0
+FC4A12 move.w    #$4000,$DFF09A
+FC4A1A addq.b    #1,$0126(A0)      ; Disable
+
+FC4A1E move.b    #$FF,$BFD100
+FC4A26 bclr      #7,$26(A6)        ; clears ACTIVE flag in DR_FLAGS
+
+FC4A2C lea       $40(A6),A0
+FC4A30 move.l    A6,-(SP)
+FC4A32 move.l    $28(A6),A6        ; DR_SYSLIB (exec base)
+FC4A36 jsr       -$0102(A6)        ; RemHead
+FC4A3A move.l    (SP)+,A6
+
+FC4A3C move.l    $0004,A0
+FC4A40 subq.b    #1,$0126(A0)      ; Enable
+FC4A44 bge.s     $FC4A4E
+FC4A46 move.w    #$C000,$DFF09A
+
+FC4A4E tst.l     D0                ; list empty?
+FC4A50 beq.s     $FC4A60           ; yes => finish
+FC4A52 move.l    D0,A1             ; no => reply message of first next waiting unit
+FC4A54 move.l    A6,-(SP)
+FC4A56 move.l    $28(A6),A6        ; DR_SYSLIB (exec base)
+FC4A5A jsr       -$017A(A6)        ; ReplyMsg
+FC4A5E move.l    (SP)+,A6
+FC4A60 rts
+
+----------------------------------------------------------------------------
+  Success = AllocUnit(unitNum)
+    D0                  D0
+----------------------------------------------------------------------------
+
+FC4A62 move.l    D0,D1
+FC4A64 moveq     #0,D0
+FC4A66 bset      D1,$26(A6)        ; set bit ALLOC0 - ALLOC3 in DR_FLAGS
+FC4A6A seq       D0                ; sets the result (previous state)
+FC4A6C rts
+
+----------------------------------------------------------------------------
+  FreeUnit(unitNum)
+             D0
+----------------------------------------------------------------------------
+
+       ; the function does not check if the routine was get by the same task
+       ; or if it even was get
+
+FC4A6E bclr      D0,$26(A6)        ; free one of ALLOC0 - ALLOC3 bits in DR_FLAGS
+FC4A72 rts
+
+----------------------------------------------------------------------------
+  idtype = GetUnitID(unitNum)
+    D0                 D0
+----------------------------------------------------------------------------
+
+FC4A74 lea       $30(A6),A0        ; DR_UNITID
+FC4A78 lsl.l     #2,D0
+FC4A7A move.l    0(A0,D0.w),D0     ; returns unit id as set by init routine
+FC4A7E rts
+
+----------------------------------------------------------------------------
+  iterrupt code A5 = code (this routine), A1 = data (cia.resource base)
+----------------------------------------------------------------------------
+
+       ; as interrupt routine does not check if the unit is still allocated
+       ; or get all 3 serviced interrupts must be forbidden after the unit
+       ; is freed or given or the system may crash
+
+       ; interrupt 1 - DSKBLK (exec.library)
+FC4A80 move.w    #2,$DFF09C        ; sets the DSKBLK bit in INTREQ
+FC4A88 move.l    $22(A1),D0        ; get current unit from DR_CURRENT
+FC4A8C beq.s     $FC4AC0           ; none => error
+FC4A8E move.l    D0,A1
+FC4A90 movem.l   $22(A1),A1/A5     ; calls DRU_DISKBLOCK
+FC4A96 jmp       (A5)
+
+       ; interrupt 12 - DSKSYNC (exec.library)
+FC4A98 move.w    #$1000,$DFF09C    ;  sets the DSKBSYN bit in INTREQ
+FC4AA0 move.l    $22(A1),D0        ; get current unit from DR_CURRENT
+FC4AA4 beq.s     $FC4AC0           ; none => error
+FC4AA6 move.l    D0,A1
+FC4AA8 movem.l   $38(A1),A1/A5     ; calls DRU_DISKSYNC
+FC4AAE jmp       (A5)
+
+       ; interrupt 4 - FLG (ciab.resource)
+FC4AB0 move.l    $22(A1),D0        ; get current unit from DR_CURRENT
+FC4AB4 beq.s     $FC4AD8           ; none => return
+FC4AB6 move.l    D0,A1
+FC4AB8 movem.l   $4E(A1),A1/A5     ; calls DRU_INDEX
+FC4ABE jmp       (A5)
+
+FC4AC0 movem.l   D7/A5/A6,-(SP)
+FC4AC4 move.l    #$21000002,D7
+FC4ACA move.l    $0004,A6
+FC4ACE jsr       -$6C(A6)          ; failed => Alert no #$21000002
+FC4AD2 movem.l   (SP)+,D7/A5/A6
+FC4AD6 rts
+
+FC4AD8 rts
+
+----------------------------------------------------------------------------
+  offset table, 5 entries
+----------------------------------------------------------------------------
+
+       ; as used by MakeLibrary
+FC4ADA 00FC4A62
+FC4ADE 00FC4A6E
+FC4AE2 00FC4996
+FC4AE6 00FC4A0E
+FC4AEA 00FC4A74
+FC4AEE FFFFFFFF
+FC4AF2 0000                        ; padding

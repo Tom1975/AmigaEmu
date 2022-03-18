@@ -2,29 +2,29 @@ SYNCHRO LOGIQUE :
 
 Inifinite loop : 
 
+deroulement ok :
+(FEA01C (check status disk))
+3e FEAE98 = pas de 4e
+FEAF1E ok
+FEA01C ok
+FE998C ok
+FEADDC ok
+FE999A ok : F5 => BFD100
+FE99A2 : Lecture BFE001: 30(F0)
+FE99C2 ok 
+FE99FE ok
+FE9A08 ok
+FEA4F0
+FEA510 => IO 6096
+	Differentce: 
+	TR_ADDREQUEST
+	***60DE (IO + &48) : FFFFFFEC 014948E0 (00000001 000B4AA0)***
+FE9550 ok 
+
+
 FE8A84 -> FE8A9A => Attente d'une disquette
 Timer CIA desactivé ?!
 
-Interrupt : FC0CD2
-=> FC12FC -> 
-FC461C
-(winuae(moi)
-A: CRA 00 CRB 08 (09) ICR e2 (2) IM 0a TA ffff (ffff) TB 0863 (0863)
-TOD 000065 (000065) ALARM 000000    CYC=93B3AA00
-B: CRA 04 CRB 84 ICR 00 IM 04 TA ffff (ffff) TB ffff (ffff)
-TOD 00008c (00009a) ALARM 000000    CLK=0
-)
-lsr.b  #1, D2          => Pas de Z !!(alors que 0 ?!)
-=> FE9726
-=> FE97CC
-=> FE977C
-FE97E2 ( clear start bit)  bclr #$0 : check Z flag ?!
-(interrupt cia ok ?)
-==> STEP 
-FEAE1C et 
-FE99F8 
-FE9A10 
-FE9A18 : 30 (E0)
 
 Message du cia timer => FE643C ?
 FE9824 => Ecriture du timer
@@ -32,7 +32,62 @@ FE9740 : Bouclage regulier... mais pas de retour au handler ?
 Plus d'interrrupt...
 
 Debut : FEA01C
+
+***FEAE98 => GetMsg with a message. (port : 6038)
+
+Message : 60BE :
+;struct Message {
+	mn_Node {
+		ln_Succ = 00006050
+		ln_Pred = 0000604c
+		ln_Type = 0x07
+		ln_Pri = 00
+		ln_Name = FE98FE ("trackdisk.device")
+	}
+	mn_ReplyPort = 00006038
+	length = 0000
+}
+
+Posté par ReplyMsg : 
+STACK :
+(
+FE979E => CIA
+)
+
+==> Demande de timer faite par le trackdisk ???
+
+FE9984 SendIO : ioRequest : 60BE
+	struct IORequest
+	{
+		io_Message
+		{
+			mn_Node 
+			{
+				ln_Succ ; : 00006050
+				ln_Pred : 604C
+				lnType : 07
+				lnPri : 0
+				ln_Name : FE98FE ("trackdisk.device")
+			}
+			mn_ReplyPort : 6038
+			mnLength : 0
+		}
+		io_Device : 00002ede
+		io_unit : 00002f56
+		io_command 0009
+		io_flag : 0
+		io_error : 0
+	}
+FEAF28
+
+; Task trackdisk.device : Jamais reveillée !
+
 FE99F4 : step
+
+******************
+
+
+
 => Trackdisk.device = pas de reveil !
 => ; Handle ICR register from CIA-A  FC461C: movem.l D2/A2, -(SP)     = pas d'interrupt ?!
 FC4620 : On passe bien ici avec D2 = 82 (CIA A t
@@ -73,216 +128,8 @@ Fonctionnement de l'écran :
 ** Attention au test : 
 Si ve > vp, return true.
 
-******** INIT : 
-=> 0xFC0B28 (InitResident)
-FC4afc (expansion.library)	: 
-FE4880 (potgo.resource)		: 
-FE4FE4 (keymap.resource)	:
-FC450C (cia.resource)		:
-FC4794 (disk.resource)		: Ok
-FE4774 (misc.resource)		: Ok 
-FC5378 (graphics.library)	: 
-( jusqu'a FCAC92 ok)
-FE502E (keyboard.device)	: Ok => everything seems ok 
-FE507A (gameport.device)	: 
-FE90EC (timer.device)		: 
-FC34CC (audio.device)		:
-FE50C6 (input.device)		:
-FE0D90 (layers.library)		: Ok => everything seems ok 
-FE510E (console.device) 	: 
-FE98E4 (trackdisk.device)	: (un décalage existe) 
-FD3F5C (intuition.library)  : 
-FC323A (alert.hook) 		: 
-FE424C (mathffp.library)	: 
-(FEB400) (workbench.task)
-(FF425A) (dos)
-FE8884 (strap.strap) 		: bloqué (init FE88D6 
-end.
-
-********************************
-STRUCTURES
-*********************
-Timer device 2ede
-; DWORD
-; DWORD
-;08 Byte : '3'
-;09 padding
-;0A ptr to name (FE9106)
-;0E  byte (06)
-;14  word 0021
-;16  word 0036
-;18  ptr FE9114 (name & version)
-;...
-;40  word 0000 
-;...
-;4C ptr FE97EC 
-;50 ptr FE9836
-;5C byte 02
-;5D byte 1E 
-;5E ptr FE9106 (name)
-;
-;66 ptr FE9726 (handler CIA TB)
-;8E 0001
-;9A ptr FE9834
-;9E ptr FE9878
-;AA 02
-;AC ptr FE9106 (name)
-;B4 ptr FE96DA
 
 
-
-; the 5E9A buffer  (allocated in FE8BBA ) is a big structure that containts : 
-; A3E0 is base addres
-struct{
-	ViewPort viewport; 	// 40 bytes  - A3E0
-	View view;			// 18 bytes  - A408
-	RastPort rastport;	// 100 bytes - A41A
-	TmpRas tmpras		// 8 bytes 	 - A47E
-	RasInfo rasinfo		// 12 bytes  - A486
-	Bitmap bmp	 		// 40 bytes  - A492
-	char[] b1				// 1F40 byte - A4BA
-	char[] b2				// 1F40 byte - C3FA
-	char[] b3				// 1F40 byte = E33A
-	// 12 bytes
-};
-
-A5 : offset 08: ViewPort *
-	 offset 0C: View*
-	 offset 10: RastPort *
-	 offset 14: TmpRas *
-	 offset 18: RasInfo*
-	 offset 1C: bitmap*
-	 offset 20: char*
-	 offset 24: char*
-	 offset 28: char*...
-;
-
-struct ViewPort (size : 0x28)
-{
-   struct   ViewPort *Next;
-   struct   ColorMap  *ColorMap;    /* table of colors for this viewport */
-		  /* if this is nil, MakeVPort assumes default values */
-   struct   CopList  *DspIns;	    /* user by MakeView() */
-   struct   CopList  *SprIns;	    /* used by sprite stuff */
-   struct   CopList  *ClrIns;	    /* used by sprite stuff */
-   struct   UCopList *UCopIns;	    /* User copper list */
-   WORD    DWidth,DHeight;
-   WORD    DxOffset,DyOffset;
-   UWORD    Modes;
-   UBYTE	SpritePriorities;		/* used by makevp */
-   UBYTE	ExtendedModes;
-   struct   RasInfo *RasInfo;
-};
-
-struct View (size : 0x12)
-{
-   struct ViewPort *ViewPort;
-   struct cprlist *LOFCprList;	 /* used for interlaced and noninterlaced */
-   struct cprlist *SHFCprList;	 /* only used during interlace */
-   WORD DyOffset,DxOffset;   /* for complete View positioning */
-			      /* offsets are +- adjustments to standard #s */
-   UWORD   Modes;	      /* such as INTERLACE, GENLOC */
-};
-
-struct RasInfo	/* used by callers to and InitDspC() */
-{
-   struct   RasInfo *Next;	    /* used for dualpf */
-   struct   BitMap *BitMap;
-   WORD    RxOffset,RyOffset;	   /* scroll offsets in this BitMap */
-};
-
-struct TmpRas
-{
-    BYTE *RasPtr;
-    LONG Size;
-};
-
-typedef UBYTE *PLANEPTR;
-struct BitMap (size : 40)
-{
-    UWORD   BytesPerRow;
-    UWORD   Rows;
-    UBYTE   Flags;
-    UBYTE   Depth;
-    UWORD   pad;
-    PLANEPTR Planes[8];
-};
-
-struct RastPort
-{
-    struct  Layer  *Layer;
-    struct  BitMap *BitMap;
-    UWORD          *AreaPtrn;  /* Ptr to areafill pattern */
-    struct  TmpRas *TmpRas;
-    struct  AreaInfo *AreaInfo;
-    struct  GelsInfo *GelsInfo;
-    UBYTE   Mask;              /* Write mask for this raster */
-    BYTE    FgPen;             /* Foreground pen for this raster */
-    BYTE    BgPen;             /* Background pen  */
-    BYTE    AOlPen;            /* Areafill outline pen */
-    BYTE    DrawMode;          /* Drawing mode for fill, lines, and text */
-    BYTE    AreaPtSz;          /* 2^n words for areafill pattern */
-    BYTE    linpatcnt;         /* Current line drawing pattern preshift */
-    BYTE    dummy;
-    UWORD   Flags;             /* Miscellaneous control bits */
-    UWORD   LinePtrn;          /* 16 bits for textured lines */
-    WORD    cp_x, cp_y;	       /* Current pen position */
-    UBYTE   minterms[8];
-    WORD    PenWidth;
-    WORD    PenHeight;
-    struct  TextFont *Font;    /* Current font address */
-    UBYTE   AlgoStyle;         /* The algorithmically generated style */
-    UBYTE   TxFlags;           /* Text specific flags */
-    UWORD   TxHeight;          /* Text height */
-    UWORD   TxWidth;           /* Text nominal width */
-    UWORD   TxBaseline;        /* Text baseline */
-    WORD    TxSpacing;         /* Text spacing (per character) */
-    APTR    *RP_User;
-    ULONG   longreserved[2];
-#ifndef GFX_RASTPORT_1_2
-    UWORD   wordreserved[7];   /* Used to be a node */
-    UBYTE   reserved[8];       /* For future use */
-#endif
-};
-
-
-1F12 => ID lecteurs
-unsigned int id_lecteur_0
-unsigned int id_lecteur_1
-unsigned int id_lecteur_2
- 
-
-
-;struct Node {
-;    struct  Node *ln_Succ;	/* Pointer to next (successor) */
-;    struct  Node *ln_Pred;	/* Pointer to previous (predecessor) */
-;    UBYTE   ln_Type;
-;    BYTE    ln_Pri;		/* Priority, for sorting */
-;    char    *ln_Name;		/* ID string, null terminated */
-;};
-;struct MsgPort {
-;    struct  Node mp_Node;
-;    UBYTE   mp_Flags;
-;    UBYTE   mp_SigBit;		/* signal bit number	*/
-;    void   *mp_SigTask;		/* object to be signalled */
-;    struct  List mp_MsgList;	/* message linked list	*/
-;};
-;
-;struct Message {
-;    struct  Node mn_Node;
-;    struct  MsgPort *mn_ReplyPort;  /* message reply port */
-;    UWORD   mn_Length;		    /* total message length, in bytes */
-;				    /* (include the size of the Message */
-;				    /* structure in the length) */
-;};
-;;struct IORequest {
-;    struct  Message io_Message; (size = 14 + 4 + 2) = 20
-;    struct  Device  *io_Device;     /* device node pointer  */ 4 
-;    struct  Unit    *io_Unit;	    /* unit (driver private)*/ 4 
-;    UWORD   io_Command;	    /* device command */ 2 
-;    UBYTE   io_Flags; 1 
-;    BYTE    io_Error;		    /* error or warning num */ 1 
-;};28 bytes ( $1C)
 *********************
 ********************************
 *** HISTORIQUE 
