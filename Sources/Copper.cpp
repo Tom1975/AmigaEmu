@@ -131,9 +131,6 @@ void Copper::DmaDecode()
 
       if (ram_data_ != 0 || destination_address_ != 0)
       {
-         char trace[256];
-         //sprintf(trace, "COPPER %4.4X : Move %X => %X\n", counter_, ram_data_, destination_address_);
-         //OutputDebugStringA(trace);
          if (ram_data_ == 0x302 && destination_address_ == 0x100)
          {
             int dbg = 1;

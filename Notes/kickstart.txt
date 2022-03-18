@@ -40,12 +40,14 @@ TIMER B)
 
 
 Timer : 
+*****
 ***** FE9706 => On y passe !!! = ANALYSER ICI !!
 9710 : 800 =>E4(EA)
 FE9740 ok
 
-00FE977C 
-=>FE97EC
+FE97A2
+00FE977C => A3+22h => pas la meme chose !
+=>FE97EC (alors qu'on a fe9834 !)
 ...FE982C: move.b D0, BFE701         ; set TBLHI
 
 
@@ -100,6 +102,35 @@ end.
 ********************************
 STRUCTURES
 *********************
+Timer device 2ede
+; DWORD
+; DWORD
+;08 Byte : '3'
+;09 padding
+;0A ptr to name (FE9106)
+;0E  byte (06)
+;14  word 0021
+;16  word 0036
+;18  ptr FE9114 (name & version)
+;...
+;40  word 0000 
+;...
+;4C ptr FE97EC 
+;50 ptr FE9836
+;5C byte 02
+;5D byte 1E 
+;5E ptr FE9106 (name)
+;
+;66 ptr FE9726 (handler CIA TB)
+;8E 0001
+;9A ptr FE9834
+;9E ptr FE9878
+;AA 02
+;AC ptr FE9106 (name)
+;B4 ptr FE96DA
+
+
+
 ; the 5E9A buffer  (allocated in FE8BBA ) is a big structure that containts : 
 ; A3E0 is base addres
 struct{

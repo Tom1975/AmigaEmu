@@ -17,7 +17,7 @@ BreakPointHandler::BreakPointHandler()
 
 BreakPointHandler::~BreakPointHandler()
 {
-   for (int i = 0; i < breakpoint_number_; i++)
+   for (size_t i = 0; i < breakpoint_number_; i++)
    {
       delete breakpoint_list_[i];
    }
@@ -84,7 +84,7 @@ void BreakPointHandler::ToggleBreakpoint(unsigned short addr)
 
 void BreakPointHandler::Clear()
 {
-   for (int i = 0; i < breakpoint_number_; i++)
+   for (size_t i = 0; i < breakpoint_number_; i++)
    {
       delete breakpoint_list_[i];
    }

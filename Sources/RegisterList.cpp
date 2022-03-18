@@ -106,7 +106,7 @@ void RegisterList::Clear()
       temporary_ea_[offset_write_ - 1]->Increment();
    }*/
    temporary_ea_[offset_write_ - 1]->Complete();
-   for (int i = 0; i < size_of_list_; i++)
+   for (size_t i = 0; i < size_of_list_; i++)
    {
       delete register_ea_[i];
    }
