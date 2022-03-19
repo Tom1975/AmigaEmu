@@ -3,6 +3,8 @@ SYNCHRO LOGIQUE :
 Inifinite loop : 
 
 deroulement ok :
+FE8A9A
+...
 (FEA01C (check status disk))
 3e FEAE98 = pas de 4e
 FEAF1E ok
@@ -16,9 +18,16 @@ FE99FE ok
 FE9A08 ok
 FEA4F0
 FEA510 => IO 6096
+
+bp FE95CE
 	Differentce: 
 	TR_ADDREQUEST
 	***60DE (IO + &48) : FFFFFFEC 014948E0 (00000001 000B4AA0)***
+	Ecrit depuis FE95F6 ou FE95CE
+	On calcule avec (A1) => 4394 et 4398
+************
+	FE9888: addi.l #$F4240, D1        06 81 00 0F 42 40 
+*********** FLAG NOT OK !!!!!
 FE9550 ok 
 
 

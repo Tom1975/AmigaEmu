@@ -2215,6 +2215,8 @@ unsigned int M68k::OpcodeAdd ()
       rm &= 0xFF;
       break;
    case 1:
+      
+      
       rm &= 0xFFFF;
       break;
    }
@@ -2225,20 +2227,29 @@ unsigned int M68k::OpcodeAdd ()
    switch (size_)
    {
    case BYTE:
-      if (rm & 0x80) sr_ |= F_N;
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm ) sr_ |= F_N;
       break;
    case WORD:
-      if (rm & 0x8000) sr_ |= F_N;
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
       break;
    case LONG:
-      if (rm & 0x80000000) sr_ |= F_N;
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm ) sr_ |= F_N;
       break;
    }
    if ( (sm&dm&(~rm)) | ((~sm)&(~dm)&(rm)))
    {
       sr_ |= F_V;
    }
-   if ( sm&dm|rm&dm|sm&rm)
+   if ( sm&dm|(~rm)&dm|sm&(~rm))
    {
       sr_ |= F_C | F_X;
    }
