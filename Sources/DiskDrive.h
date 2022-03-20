@@ -16,6 +16,8 @@ public:
       return motor_;
    };
 
+   bool IsDiskOn() { return disk_inserted_ != nullptr; }
+
 private: 
    // Disk inserted ?
    Disk* disk_inserted_;

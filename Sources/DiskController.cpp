@@ -91,8 +91,11 @@ void DiskController::SetSTEP(bool set)
    if (set && sel_0_)
    {
       // If no disk : set chng_ to false;
+      if (disk_drive_[0].IsDiskOn())
+         chng_ = false;
+      else
       // if (no disk - todo)
-      chng_ = true;
+         chng_ = true;
    }
 }
 
