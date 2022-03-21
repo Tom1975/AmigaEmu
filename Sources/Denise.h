@@ -29,7 +29,8 @@ public:
    void StrVbl();
    void StrHor();
 
-   void TickCDAC(bool up);
+   void TickCDACUp();
+   void TickCDACDown();
    void SetBplDat(unsigned int bitplane_number, unsigned short data);
 
    // Get RGB each tick

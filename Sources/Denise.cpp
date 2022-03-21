@@ -42,28 +42,27 @@ void Denise::StrHor()
 
 ////////////////////////////////
 // Clock ticks
-void Denise::TickCDAC(bool up)
+void Denise::TickCDACUp()
 {
-   if (up)
+   hpos_counter_++;
+
+   // Pixel writer : Every 16 tick (pixels hires), write the buffer to screen
+   if (hpos_counter_ == 16)
    {
-      hpos_counter_++;
+      hpos_counter_ = 0;
 
-      // Pixel writer : Every 16 tick (pixels hires), write the buffer to screen
-      if (hpos_counter_ == 16)
-      {
-         hpos_counter_ = 0;
-
-         // Write 16 pixels to screen
-         unsigned int pixel_buffer[16];
-         GetRGB(pixel_buffer);
-         frame_->Add16Pixels(pixel_buffer);
-      }
-      // Then refresh from ready buffer.
-
-
+      // Write 16 pixels to screen
+      unsigned int pixel_buffer[16];
+      GetRGB(pixel_buffer);
+      frame_->Add16Pixels(pixel_buffer);
    }
+   // Then refresh from ready buffer.
 }
 
+void Denise::TickCDACDown()
+{
+
+}
 ////////////////////////////////
 // RGB
 void Denise::GetRGB(unsigned int * display)

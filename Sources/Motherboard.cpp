@@ -4,6 +4,11 @@
 
 #include "Disassembler68k.h"
 
+#define TickCDAC_UP denise_.TickCDACUp();
+#define TickCDAC_DOWN 
+#define Tick28Mhz_UP //agnus_.TickUp();
+#define Tick28Mhz_Down //agnus_.TickDown();
+
 Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, 8), cia_b_(this, 0x2000), led_(false)
 {
    m68k_.SetBus(&bus_);
@@ -215,7 +220,10 @@ void Motherboard::Tick7Mhz(bool up)
 void Motherboard::TickCDAC(bool up)
 {
    // Denise
-   denise_.TickCDAC(up);
+   if (up)
+      denise_.TickCDACUp();
+   else
+      denise_.TickCDACDown();
    // Gary
 }
 
@@ -245,7 +253,17 @@ void Motherboard::TickCCKQ(bool up)
 void Motherboard::TickDebug()
 {
    static bool up_tick = false;
-   Tick28Mhz(up_tick);
+
+   //Tick28Mhz(up_tick);
+   if (up_tick)
+   {
+      Tick28Mhz_UP
+   }
+   else
+   {
+      Tick28Mhz_Down
+   }
+
    up_tick = !up_tick;
    switch ((debug_count_++)&0xF)
    {
@@ -255,7 +273,7 @@ void Motherboard::TickDebug()
       break;
    case 2:
    case 10:
-      TickCDAC(true);
+      TickCDAC_UP
       
       break;
    case 4:
@@ -265,7 +283,7 @@ void Motherboard::TickDebug()
       break;
    case 6:
    case 14:
-      TickCDAC(false);
+      TickCDAC_DOWN
       break;
    case 8:
       TickCCK(true);
@@ -295,63 +313,63 @@ void Motherboard::Tick()
    // Here is 8 ticks (8 down, 8 up) of the main clock
    // 28 Mhz down
    // This is ~285ns (1 pixel clock tick)
-   Tick28Mhz(false);
+   TickCDAC_DOWN
          // CCK down
    TickCCK(false);
       // 7MHZ down
    Tick7Mhz(false);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down 
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC up
-   TickCDAC(true);
+   TickCDAC_UP
    //monitor_.Tick();
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down 
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CCKQ down
    TickCCKQ(false);
       // 7MHZ up
    Tick7Mhz(true);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC down
-   TickCDAC(false);
+   TickCDAC_DOWN
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
          // CCK up
    TickCCK(true);
       // 7MHZ down
    Tick7Mhz(false);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC up
-   TickCDAC(true);
+   TickCDAC_UP
    //monitor_.Tick();
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CCKQ up
    TickCCKQ(true);
       // 7MHZ up
    Tick7Mhz(true);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC down
-   TickCDAC(false);
+   TickCDAC_DOWN
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
 
 
    // Monitor : 28/16

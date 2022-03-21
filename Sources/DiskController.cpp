@@ -27,7 +27,7 @@ void DiskController::Reset()
    chng_ = true;
    for (int i = 0; i < 4; i++)
    {
-      disk_drive_[i].Motor(false);
+      disk_drive_[i].Reset();
    }
 }
 
@@ -83,20 +83,97 @@ void DiskController::SetMTRON(bool set)
 
 void DiskController::SetDIR(bool set)
 {
-
+   if (sel_0_) disk_drive_[0].SetDIR(set);
+   if (sel_1_) disk_drive_[1].SetDIR(set);
+   if (sel_2_) disk_drive_[2].SetDIR(set);
+   if (sel_3_) disk_drive_[3].SetDIR(set);
 }
 
 void DiskController::SetSTEP(bool set)
 {
-   if (set && sel_0_)
-   {
-      // If no disk : set chng_ to false;
-      if (disk_drive_[0].IsDiskOn())
-         chng_ = false;
-      else
-      // if (no disk - todo)
-         chng_ = true;
-   }
+   if (sel_0_) disk_drive_[0].Step();
+   if (sel_1_) disk_drive_[1].Step();
+   if (sel_2_) disk_drive_[2].Step();
+   if (sel_3_) disk_drive_[3].Step();
+}
+
+void DiskController::SetSIDE(bool set)
+{
+   if (sel_0_) disk_drive_[0].SetSIDE(set);
+   if (sel_1_) disk_drive_[1].SetSIDE(set);
+   if (sel_2_) disk_drive_[2].SetSIDE(set);
+   if (sel_3_) disk_drive_[3].SetSIDE(set);
+}
+
+
+
+// Read signals
+bool DiskController::GetCHNG()
+{
+   bool chng_sig = true;
+   // CHNG : status change when a step is sent.
+   if (sel_0_)
+      chng_sig &= disk_drive_[0].GetCHNG();
+   if (sel_1_)
+      chng_sig &= disk_drive_[1].GetCHNG();
+   if (sel_2_)
+      chng_sig &= disk_drive_[2].GetCHNG();
+   if (sel_3_)
+      chng_sig &= disk_drive_[3].GetCHNG();
+
+   return chng_sig;
+}
+
+bool DiskController::GetINDEX()
+{
+   bool index = false;
+   if (sel_0_)
+      index |= disk_drive_[0].GetINDEX();
+   if (sel_1_)
+      index |= disk_drive_[1].GetINDEX();
+   if (sel_2_)
+      index |= disk_drive_[2].GetINDEX();
+   if (sel_3_)
+      index |= disk_drive_[3].GetINDEX();
+
+   return index;
+}
+
+bool DiskController::GetTRK0()
+{
+   bool trk0 = false;
+   if (sel_0_)
+      trk0 |= disk_drive_[0].GetTRK0();
+   if (sel_1_)
+      trk0 |= disk_drive_[1].GetTRK0();
+   if (sel_2_)
+      trk0 |= disk_drive_[2].GetTRK0();
+   if (sel_3_)
+      trk0 |= disk_drive_[3].GetTRK0();
+
+   return trk0;
+}
+
+bool DiskController::GetWPROT()
+{
+   bool prot = false;
+   if (sel_0_)
+      prot |= disk_drive_[0].GetWPROT();
+   if (sel_1_)
+      prot |= disk_drive_[1].GetWPROT();
+   if (sel_2_)
+      prot |= disk_drive_[2].GetWPROT();
+   if (sel_3_)
+      prot |= disk_drive_[3].GetWPROT();
+
+   return prot;
+}
+
+bool DiskController::GetDKRD()
+{
+   //todo
+   return false;
+
 }
 
 void DiskController::SetWD(bool set)
@@ -106,48 +183,6 @@ void DiskController::SetWD(bool set)
 
 void DiskController::SetWE(bool set)
 {
-
-}
-
-void DiskController::SetSIDE(bool set)
-{
-
-}
-
-
-
-// Read signals
-bool DiskController::GetCHNG()
-{
-   // CHNG : status change when a step is sent.
-   return chng_;
-}
-
-bool DiskController::GetINDEX()
-{
-   //todo
-   return false;
-
-}
-
-bool DiskController::GetTRK0()
-{
-   //todo
-   return false;
-
-}
-
-bool DiskController::GetWPROT()
-{
-   //todo
-   return true;
-
-}
-
-bool DiskController::GetDKRD()
-{
-   //todo
-   return false;
 
 }
 
