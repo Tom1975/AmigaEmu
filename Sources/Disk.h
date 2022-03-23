@@ -40,7 +40,10 @@ public:
    bool LoadADF(unsigned char* buffer, size_t size);
    bool IsValid() { return valid_; }
 
-private: 
+   Side side_[2];
+   size_t nb_sides_;
+
+private:
    void ClearStructure();
    size_t AddCylinderFromSectorList(Track* track, unsigned char track_number, size_t nb_sectors, size_t index, unsigned char* buffer_in, size_t buffer_size);
    int AddMFMByteToTrack(unsigned char* track, unsigned int index, unsigned short mfmbyte, int size = 16, unsigned char previous_bit = 0);
@@ -49,7 +52,5 @@ private:
    template<typename T> int AddOddEven(unsigned char* track, unsigned int index, T *data, size_t nb_data);
    bool valid_;
 
-   Side side_[2];
-   size_t nb_sides_;
 
 };
