@@ -1,38 +1,38 @@
 SYNCHRO LOGIQUE : 
 
-Inifinite loop : 
-
-deroulement ok :
-FE8A9A
-...
-(FEA01C (check status disk))
-3e FEAE98 = pas de 4e
-FEAF1E ok
-FEA01C ok
-FE998C ok
-FEADDC ok
-FE999A ok : F5 => BFD100
-FE99A2 : Lecture BFE001: 30(F0)
-FE99C2 ok 
-FE99FE ok
-FE9A08 ok
-FEA4F0
-FEA510 => IO 6096
-
-bp FE95CE
-	Differentce: 
-	TR_ADDREQUEST
-	***60DE (IO + &48) : FFFFFFEC 014948E0 (00000001 000B4AA0)***
-	Ecrit depuis FE95F6 ou FE95CE
-	On calcule avec (A1) => 4394 et 4398
-************
-	FE9888: addi.l #$F4240, D1        06 81 00 0F 42 40 
-*********** FLAG NOT OK !!!!!
-FE9550 ok 
-
-
 FE8A84 -> FE8A9A => Attente d'une disquette
-Timer CIA desactivé ?!
+FE89B0 => disk detecté
+FE8A02 => CMD_READ
+
+###
+A VERIFIER :
+LSD/LSD2/ROd/ROD2 => Flags... 
+CIA : effet CRA-TODIN ?
+###
+*** agnus & timing
+horizontal counter agnus : increment tous les ticks CCK (up)
+227 CCK / line (908 pixel/line  ~ 70ns / pixel)
+lores : 8 CCK = 16 pixels
+hires : 4 CCK = 16 pixels
+
+=> A faire :
+- Quand 16 pixels sont prets (via bitplane) => Les envoyer à l'ecran.
+Ca fera 16/32 pixels (hi/lo res).
+- Ecran : Gestion d'une ligne / ecran par agnus (hsync/vsync).
+Remplissage de cette ligne par bitplane/denise 
+
+
+Fonctionnement de l'écran :
+** Attention au test : 
+Si ve > vp, return true.
+
+
+
+*********************
+********************************
+*** HISTORIQUE 
+********************************
+
 
 
 Message du cia timer => FE643C ?
@@ -114,35 +114,6 @@ FE97A2
 =>FE97EC (alors qu'on a fe9834 !)
 ...FE982C: move.b D0, BFE701         ; set TBLHI
 
-
-###
-A VERIFIER :
-LSD/LSD2/ROd/ROD2 => Flags... 
-CIA : effet CRA-TODIN ?
-###
-*** agnus & timing
-horizontal counter agnus : increment tous les ticks CCK (up)
-227 CCK / line (908 pixel/line  ~ 70ns / pixel)
-lores : 8 CCK = 16 pixels
-hires : 4 CCK = 16 pixels
-
-=> A faire :
-- Quand 16 pixels sont prets (via bitplane) => Les envoyer à l'ecran.
-Ca fera 16/32 pixels (hi/lo res).
-- Ecran : Gestion d'une ligne / ecran par agnus (hsync/vsync).
-Remplissage de cette ligne par bitplane/denise 
-
-
-Fonctionnement de l'écran :
-** Attention au test : 
-Si ve > vp, return true.
-
-
-
-*********************
-********************************
-*** HISTORIQUE 
-********************************
 
 **** Dessin Kickstart
 FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?
