@@ -2,7 +2,9 @@ SYNCHRO LOGIQUE :
 
 FE8A84 -> FE8A9A => Attente d'une disquette
 FE89B0 => disk detecté
-FE8A02 => CMD_READ
+FE8A02 => CMD_READ => FEA734
+
+FEA536 => Read command ?
 
 ###
 A VERIFIER :
