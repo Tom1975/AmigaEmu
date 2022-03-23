@@ -46,6 +46,7 @@ private:
    int AddMFMByteToTrack(unsigned char* track, unsigned int index, unsigned short mfmbyte, int size = 16, unsigned char previous_bit = 0);
    int AddByteToTrack(unsigned char* track, unsigned int index, unsigned char byte, int size = 8, unsigned char previous_bit = 0);
    int AddLongToTrackOddEven(unsigned char* track, unsigned int index, unsigned long *data, size_t nb_data);
+   template<typename T> int AddOddEven(unsigned char* track, unsigned int index, T *data, size_t nb_data);
    bool valid_;
 
    Side side_[2];

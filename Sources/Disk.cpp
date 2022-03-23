@@ -35,7 +35,7 @@ Side::~Side()
 
 void Side::Clear()
 {
-   for (int i = 0; i < nb_tracks_; i++)
+   for (size_t i = 0; i < nb_tracks_; i++)
    {
       track_[i].Clear();
    }
@@ -183,13 +183,55 @@ int Disk::AddLongToTrackOddEven(unsigned char* track, unsigned int index, unsign
    return index;
 }
 
+template<typename T> int Disk::AddOddEven(unsigned char* track, unsigned int index, T *data, size_t nb_data)
+{
+   if (track == nullptr)
+      return index + sizeof(T)*2* nb_data;
+
+   unsigned char previous_bit = 0;
+   if (index > 0)
+   {
+      previous_bit = track[index - 1];
+   }
+
+   for (int j = 0; j < 2; j++)
+   {
+      for (size_t k = 0; k < nb_data; k++)
+      {
+         for (int i = 0; i < sizeof(T)*4; i++)
+         {
+            // Get bit
+            unsigned char c = ((data[k] >> ((sizeof(T)*8-1) - (i * 2) - j)) & 0x01);
+
+            if (c == 1)
+            {
+               track[index++] = 0;
+               track[index] = 1;
+            }
+            else
+            {
+               track[index++] = (previous_bit == 0) ? 1 : 0;
+               track[index] = 0;
+            }
+
+            previous_bit = track[index++];
+         }
+      }
+   }
+   return index;
+}
+
 size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number, size_t nb_sectors, size_t index, unsigned char* buffer_in, size_t buffer_size)
 {
    track->size_ = 0x19000;
    track->bitstream_ = new unsigned char[track->size_];
 
+   // Fill track with GAP
+   AddMFMByteToTrack(track->bitstream_, 0, 0xE5E5);
+ 
    // add sectors
    size_t stream_index = 0;
+   size_t stream_in = 0;
    for (size_t s = 0; s < nb_sectors; s++)
    {
       // SYNC bits : 0xAAAAAAAA
@@ -200,16 +242,49 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
       stream_index = AddMFMByteToTrack(track->bitstream_, stream_index, 0x4489);
 
       // HEADER : 
+      size_t stream_header = stream_index;
       unsigned long header_info = 0xFF0000 | (track_number << 16) | ((s & 0xFF) << 8) | ((nb_sectors - s) & 0xFF);
-      stream_index = AddLongToTrackOddEven(track->bitstream_, stream_index, &header_info, 1);
+      stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &header_info, 1);
 
       // Label
       unsigned long label[] = { 0x0, 0x0 , 0x0 , 0x0 };
-      stream_index = AddLongToTrackOddEven(track->bitstream_, stream_index, label, 4);
+      stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, label, 4);
 
       // Checksum
+      unsigned long checksum = 0;
+
+      for (size_t i = 0; i < 10; i++) 
+      {
+         unsigned long value = 0;
+         for (int b = 0; b < 32; b++)
+         {
+            value |= (track->bitstream_[stream_header + i * 32 + b])<<b;
+         }
+         checksum ^= value;
+      }
+      stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &checksum, 1);
+
       // Data checksum
+      size_t data_checksum_index = stream_index;
+      checksum = 0;
+      stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &checksum, 1);
+
       // Data
+      stream_index = AddOddEven<unsigned char>(track->bitstream_, stream_index, &buffer_in[stream_in], 512);
+      stream_in += 512;
+
+      // Compute Data checksum
+      checksum = 0;
+      for (size_t i = 0; i < 1024/4; i++)
+      {
+         unsigned long value = 0;
+         for (int b = 0; b < 32; b++)
+         {
+            value |= (track->bitstream_[stream_header + i * 32 + b]) << b;
+         }
+         checksum ^= value;
+      }
+      AddOddEven<unsigned long>(track->bitstream_, data_checksum_index, &checksum, 1);
    }
 
    return stream_index;
