@@ -1,12 +1,20 @@
 #include "DiskDrive.h"
 
-DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false)
+#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
+
+
+DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false), logger_(nullptr)
 {
 }
 
 DiskDrive::~DiskDrive()
 {
    // Eject disk
+}
+
+void DiskDrive::Init(ILogger* log)
+{
+   logger_ = log;
 }
 
 void DiskDrive::Reset()
@@ -19,6 +27,7 @@ void DiskDrive::Reset()
 
 void DiskDrive::Eject()
 {
+
    // Set the CHNG as true
    chng_ = true;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ILogger.h"
 #include "DiskDrive.h"
 
 
@@ -10,6 +11,7 @@ public:
    DiskController();
    virtual ~DiskController();
 
+   void Init(ILogger* log);
    void Reset();
 
    // Set signals
@@ -39,6 +41,7 @@ public:
    DiskDrive* GetDiskDrive(int drive);
 
 private:
+   ILogger* logger_;
 
    ////////////////////////////////
    // Various registers

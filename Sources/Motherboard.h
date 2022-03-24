@@ -9,6 +9,7 @@
 #include "Denise.h"
 #include "Agnus.h"
 #include "DiskController.h"
+#include "ILogger.h"
 
 class HardwareIO
 {
@@ -24,7 +25,7 @@ public :
    virtual ~Motherboard();
 
    // Init and settings
-   bool Init(DisplayFrame* frame, HardwareIO* hardware);
+   bool Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger );
 
    // Access 
    M68k* GetCpu() { return &m68k_; }
@@ -98,4 +99,6 @@ protected:
    HardwareIO* hardware_;
 
    DisplayFrame* frame_;
+
+   ILogger* logger_;
 };

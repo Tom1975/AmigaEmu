@@ -4,7 +4,7 @@
 TestEngineCpu::TestEngineCpu()
 {
    motherboard_ = new Motherboard;
-   motherboard_->Init(&framebuffer_, &hardware_interface_);
+   motherboard_->Init(&framebuffer_, &hardware_interface_, nullptr);
 }
 
 TestEngineCpu::~TestEngineCpu()

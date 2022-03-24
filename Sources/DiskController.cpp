@@ -1,6 +1,8 @@
 #include "DiskController.h"
 
-DiskController::DiskController() : identification_(0xFFFFFFFF), identification_index_(0), chng_(true), sel_0_(false), sel_1_(false), sel_2_(false), sel_3_(false)
+#define LOG(...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, __VA_ARGS__);
+
+DiskController::DiskController() : identification_(0xFFFFFFFF), identification_index_(0), chng_(true), sel_0_(false), sel_1_(false), sel_2_(false), sel_3_(false), logger_(nullptr)
 {
    Reset();
 }
@@ -8,6 +10,15 @@ DiskController::DiskController() : identification_(0xFFFFFFFF), identification_i
 DiskController::~DiskController()
 {
 
+}
+
+void DiskController::Init(ILogger* log)
+{
+   logger_ = log;
+   disk_drive_[0].Init(log);
+   disk_drive_[1].Init(log);
+   disk_drive_[2].Init(log);
+   disk_drive_[3].Init(log);
 }
 
 bool DiskController::IsMotorOn(int drive)
@@ -24,6 +35,7 @@ DiskDrive* DiskController::GetDiskDrive(int drive)
 
 void DiskController::Reset()
 {
+   LOG("Reset");
    chng_ = true;
    for (int i = 0; i < 4; i++)
    {
@@ -35,8 +47,12 @@ void DiskController::SetSEL0(bool set)
 {
    if (sel_0_ != set)
    {
-      if ( sel_0_)
+      if ( sel_0_ )
+      {
+         if ( mtr_)
+            LOG(mtr_?"DF0: MOTOR ON":"DF0: MOTOR OFF");
          disk_drive_[0].Motor(mtr_);
+      }
       sel_0_ = set;
    }
 }
@@ -178,7 +194,7 @@ bool DiskController::GetDKRD()
 
 void DiskController::SetWD(bool set)
 {
-
+   LOG("DF0: WD %s", set?"ON":"OFF");
 }
 
 void DiskController::SetWE(bool set)

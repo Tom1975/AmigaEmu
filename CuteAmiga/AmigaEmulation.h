@@ -16,7 +16,7 @@ public:
    virtual void Update() = 0;
 };
 
-class AmigaEmulation : public QObject
+class AmigaEmulation : public QObject, public ILogger
 {
 public:
    AmigaEmulation(DisplayFrame* frame);
@@ -47,6 +47,9 @@ public:
    void AddBreakpoint(unsigned int new_bp);
    void RemoveBreakpoint(IBreakpointItem*  bp_to_remove);
    void RemoveBreakpoint(unsigned int bp_to_remove);
+
+   // Logger
+   virtual void Log(Severity severity, const char* msg...);
 
    // static function
    static void Begin(void* param);

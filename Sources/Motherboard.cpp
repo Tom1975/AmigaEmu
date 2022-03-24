@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <string>
 
+#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
+
 #include "Disassembler68k.h"
 
 #define TickCDAC_UP denise_.TickCDACUp();
@@ -9,7 +11,7 @@
 #define Tick28Mhz_UP //agnus_.TickUp();
 #define Tick28Mhz_Down //agnus_.TickDown();
 
-Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, 8), cia_b_(this, 0x2000), led_(false)
+Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, 8), cia_b_(this, 0x2000), led_(false), logger_(nullptr)
 {
    m68k_.SetBus(&bus_);
    bus_.SetCIA(&cia_a_, &cia_b_);
@@ -27,10 +29,12 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this,
 Motherboard::~Motherboard()
 = default;
 
-bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware)
+bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger)
 {
+   logger_ = logger;
    frame_ = frame;
    denise_.SetDisplayFrame(frame_);
+   drive_.Init(logger);
    hardware_ = hardware;
    monitor_.InitScreen(frame);
    // Load ROM

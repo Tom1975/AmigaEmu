@@ -1,5 +1,6 @@
 #pragma once
 #include "Disk.h"
+#include "ILogger.h"
 
 class DiskDrive
 {
@@ -8,6 +9,7 @@ public:
    DiskDrive();
    virtual ~DiskDrive();
 
+   void Init(ILogger* log);
    void Reset();
 
    virtual void Eject();
@@ -30,9 +32,10 @@ public:
    bool GetWPROT() { return wprot_; }
 
 private: 
+   ILogger* logger_;
+
    // Disk inserted ?
    Disk* disk_inserted_;
-
    
    // Side, track
    unsigned char side_;
@@ -44,4 +47,4 @@ private:
    bool dir_;
    bool index_;
    bool wprot_;
-}; 
+};
