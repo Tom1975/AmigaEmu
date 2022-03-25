@@ -31,6 +31,8 @@ public:
    bool GetTRK0() { return track_ == 0; }
    bool GetWPROT() { return wprot_; }
 
+   unsigned short ReadAndAdvance();
+
 private: 
    ILogger* logger_;
 
@@ -40,6 +42,9 @@ private:
    // Side, track
    unsigned char side_;
    char track_;
+
+   // Head position
+   size_t head_;
 
    // Various signals
    bool motor_;

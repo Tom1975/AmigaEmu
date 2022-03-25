@@ -52,6 +52,9 @@ private:
     ExecDialog exec_;
     BitplaneDialog bitplane_;
 
+    // Configuration
+    QString df0_path_;
+
     // Ressources
     QPixmap* led_on_;
     QPixmap* led_off_;

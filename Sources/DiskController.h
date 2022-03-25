@@ -40,6 +40,9 @@ public:
 
    DiskDrive* GetDiskDrive(int drive);
 
+   // To be redefined, once we have a rolling drive, etc.
+   unsigned short ReadNextWord();
+
 private:
    ILogger* logger_;
 

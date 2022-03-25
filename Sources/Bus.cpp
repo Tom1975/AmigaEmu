@@ -19,7 +19,8 @@ Bus::Bus(): tick_count_(0),
             denise_(nullptr),
             copper_(nullptr),
             bitplanes_(nullptr),
-            blitter_(nullptr)
+            blitter_(nullptr),
+            paula_(nullptr)
 {
    Reset();
    memory_overlay_ = true;
@@ -285,7 +286,11 @@ void Bus::TickDMA()
          break;
       // Disk DMA
       case 4:
+         dma_used = paula_->DmaDiskTick();
+         break;
       case 5:
+         dma_used = paula_->DmaDiskTick();
+         break;
       // Audio DMA
       case 6:
       case 7:
@@ -364,6 +369,15 @@ void Bus::DmaOperationMemory::DoDma ()
             break;
          case 0x006:    // VHPOS
             word_of_data = agnus_->GetVhpos();
+            break;
+         case 0x008:    // DSKDATR
+            word_of_data = paula_->GetDskDat();
+            break;
+         case 0x10:     // ADKCONR
+            word_of_data = paula_->GetAdkCon();
+            break;
+         case 0x01A:    // DSKBYTR
+            word_of_data = paula_->GetDskByte();
             break;
          case 0x01C:    // INTENAR
             word_of_data = paula_->GetIntEna();
@@ -453,6 +467,12 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
 {
    switch (addr)
    {
+      case 0x20:  // DSKPTH
+         paula_->SetDskPt(data, true);
+         break;
+      case 0x22:  // DSKPTL
+         paula_->SetDskPt(data, false);
+         break;
       case 0x24:  // DSKLEN
          paula_->SetDskLen(data);
          break;
@@ -536,6 +556,9 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          blitter_->SetBltDat(0, data);
          break;
 
+      case 0x7E:  // DSKSYNC
+         paula_->SetDskSync(data);
+         break;
       case 0x80:  // 1rst address COPPER (bit 16-18)
          agnus_->GetCopper()->Set1rstHighAddress(data);
          break;

@@ -1,9 +1,9 @@
 #include "DiskDrive.h"
 
-#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
+//#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
+#define LOG(...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, __VA_ARGS__);
 
-
-DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false), logger_(nullptr)
+DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false), logger_(nullptr), head_(0)
 {
 }
 
@@ -27,6 +27,7 @@ void DiskDrive::Reset()
 
 void DiskDrive::Eject()
 {
+   head_ = 0;
 
    // Set the CHNG as true
    chng_ = true;
@@ -71,3 +72,23 @@ void DiskDrive::SetSIDE(bool set)
 {
    side_ = set?1:0;
 }
+
+unsigned short DiskDrive::ReadAndAdvance()
+{
+   unsigned short data = 0;
+   if (disk_inserted_ != nullptr && disk_inserted_->side_[side_].track_[track_].size_ > 0)
+   {
+      for (size_t i = 0; i < 16; i++)
+      {
+         data <<= 1;
+         data |= (disk_inserted_->side_[side_].track_[track_].bitstream_[head_++] & 0x1);
+
+         if (head_ >= disk_inserted_->side_[side_].track_[track_].size_)
+            head_ = 0;
+      }
+   }
+
+   LOG("%2.2X %2.2X", data>>8, data &0xFF);
+   return data;
+}
+

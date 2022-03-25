@@ -220,4 +220,9 @@ bool DiskController::GetRDY()
 
 }
 
+unsigned short DiskController::ReadNextWord()
+{
+   // Get next word on the current drive / track, and make the head advance
+   return disk_drive_[0].ReadAndAdvance();
+}
 

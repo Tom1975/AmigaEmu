@@ -106,6 +106,12 @@ void MainWindow::SaveConfig()
       }
    }
    settings.setValue("breakpoints/number", nb_breapkoints_saved);
+
+   // Disk status (df0-df3)
+   if (df0_path_.length() > 0)
+   {
+      settings.setValue("disk/df0_path_file", df0_path_);
+   }
 }
 
 void MainWindow::LoadConfig()
@@ -125,6 +131,17 @@ void MainWindow::LoadConfig()
       pb_handler->CreateBreakpoint(str.c_str());
    }
    
+   // Disk status (df0-df3)
+   Motherboard* mb = emu_handler_->GetMotherboard();
+   if (df0_path_.length() > 0)
+   {
+      df0_path_ = settings.value("disk/df0_path_file", 0).toString();
+      Disk* disk = new Disk(df0_path_.toStdString());
+      if (disk->IsValid())
+      {
+         mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+      }
+   }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -182,7 +199,17 @@ void MainWindow::InsertDisk()
    Motherboard* mb = emu_handler_->GetMotherboard();
 
    Disk* disk = new Disk (filename.toStdString());
-   mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+   if (disk->IsValid())
+   {
+      mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+      // Update df0 config
+      df0_path_ = filename;
+   }
+   else
+   {
+      df0_path_ = "";
+      delete disk;
+   }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -216,8 +243,16 @@ void MainWindow::OpenFiles(const QStringList& pathList)
       // Load first 4 files ( df0 to df3 )
       Motherboard* mb = emu_handler_->GetMotherboard();
       Disk* disk = new Disk(pathList[i].toStdString());
-      mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
-
-
+      if (disk->IsValid())
+      {
+         mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+         // Update df0 config
+         df0_path_ = pathList[i];
+      }
+      else
+      {
+         df0_path_ = "";
+         delete disk;
+      }
    }
 }

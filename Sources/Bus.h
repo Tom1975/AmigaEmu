@@ -58,6 +58,7 @@ public:
       if (bitplanes_ != nullptr)bitplanes_->SetDmaCon(dma_control_);
       
       operation_memory.SetDMAControl(dma_control);
+      if (paula_!=nullptr) paula_->SetDMAControl(this, dma_control);
    }
 
    void SetCustomChips (Agnus* agnus, Denise* denise, Paula* paula, Bitplanes *bitplanes)
@@ -71,6 +72,7 @@ public:
       copper_->SetDmaCon(dma_control_);
       blitter_= agnus_->GetBlitter();
       blitter_->SetDmaCon(dma_control_);
+      paula_->SetDMAControl(this, dma_control_);
 
       operation_memory.InitCustomChips(paula_, agnus_, bitplanes_);
    }
