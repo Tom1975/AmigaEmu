@@ -1,16 +1,41 @@
 SYNCHRO LOGIQUE : 
 
+Track buffer : 6a5c
+*** Main thread
 FE8A84 -> FE8A9A => Attente d'une disquette
 FE89B0 => disk detecté
-FE8A02 => CMD_READ => FEA734
-
+FE8A02 => CMD_READ => FEA734  ERROR 1B !
+*** Trackdisk
 FEA536 => Read command ?
+FEA71A => End of track read : Int.
+FEAFE2 => Load and read the track
+FEA9CE
+	FEAFE2 => 
+	FEAFFC => FEAF4C 
+	FEB094 => Decodage header ok (checksum puis amiga format )
+	***FEB0B2
+FEA9EA
 
 ###
 A VERIFIER :
 LSD/LSD2/ROd/ROD2 => Flags... 
 CIA : effet CRA-TODIN ?
 ###
+*** Checksum header 
+	retour : D0 = 1b (TDERR_BadSecHdr)
+==> AAAA AAAA 4489 4489 
+==> Header : FF00000B => 11111111 00000000 00000000 00001011
+	odd  : 1x1x1x1x 0x0x0x0x 0x0x0x0x 0x0x1x1x 
+	=> 1111000000000011
+	MFM :01010101 00101010 10101010 10100101
+	=> 552A AAA5
+	even : x1x1x1x1 x0x0x0x0 x0x0x0x0 x0x0x0x1 
+	=> 1111000000000001
+	MFM :  01010101 00101010 10101010 10101001
+	=> 552A AA A9
+==> Ecriture ok.
+*** CHECKUM HEADER OK
+
 *** agnus & timing
 horizontal counter agnus : increment tous les ticks CCK (up)
 227 CCK / line (908 pixel/line  ~ 70ns / pixel)

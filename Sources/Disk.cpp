@@ -243,7 +243,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
 
       // HEADER : 
       size_t stream_header = stream_index;
-      unsigned long header_info = 0xFF0000 | (track_number << 16) | ((s & 0xFF) << 8) | ((nb_sectors - s) & 0xFF);
+      unsigned long header_info = 0xFF000000 | (track_number << 16) | ((s & 0xFF) << 8) | ((nb_sectors - s) & 0xFF);
       stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &header_info, 1);
 
       // Label
@@ -258,8 +258,10 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
          unsigned long value = 0;
          for (int b = 0; b < 32; b++)
          {
-            value |= (track->bitstream_[stream_header + i * 32 + b])<<b;
+            value <<= 1;
+            value |= (track->bitstream_[stream_header + i * 32 + b])&0x01;
          }
+         value &= 0x55555555;
          checksum ^= value;
       }
       stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &checksum, 1);
@@ -328,8 +330,6 @@ bool Disk::LoadADF(unsigned char* buffer, size_t size)
       for (size_t s = 0; s < nb_sides_; s++)
       {
          index = AddCylinderFromSectorList(&side_[s].track_[c], (c*2+s), nb_sectors, index, buffer, size);
-         side_[s].track_[c].bitstream_ = new unsigned char[512];
-         side_[s].track_[c].size_ = 512;
       }
    }
 

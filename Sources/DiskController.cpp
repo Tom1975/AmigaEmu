@@ -47,7 +47,7 @@ void DiskController::SetSEL0(bool set)
 {
    if (sel_0_ != set)
    {
-      if ( sel_0_ )
+      if (set)
       {
          if ( mtr_)
             LOG(mtr_?"DF0: MOTOR ON":"DF0: MOTOR OFF");
@@ -61,7 +61,7 @@ void DiskController::SetSEL1(bool set)
 {
    if (sel_1_ != set)
    {
-      if (sel_1_)
+      if (set)
          disk_drive_[1].Motor(mtr_);
       sel_1_ = set;
    }
@@ -71,7 +71,7 @@ void DiskController::SetSEL2(bool set)
 {
    if (sel_2_ != set)
    {
-      if (sel_2_)
+      if (set)
          disk_drive_[2].Motor(mtr_);
       sel_2_ = set;
    }
@@ -81,7 +81,7 @@ void DiskController::SetSEL3(bool set)
 {
    if (sel_3_ != set)
    {
-      if (sel_3_)
+      if (set)
          disk_drive_[3].Motor(mtr_);
       sel_3_ = set;
    }

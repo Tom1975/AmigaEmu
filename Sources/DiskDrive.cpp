@@ -88,7 +88,7 @@ unsigned short DiskDrive::ReadAndAdvance()
       }
    }
 
-   LOG("%2.2X %2.2X", data>>8, data &0xFF);
+   //LOG("%2.2X %2.2X ", (unsigned short)data>>8, (unsigned short)data &0xFF);
    return data;
 }
 
