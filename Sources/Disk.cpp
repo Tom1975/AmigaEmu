@@ -282,8 +282,10 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
          unsigned long value = 0;
          for (int b = 0; b < 32; b++)
          {
-            value |= (track->bitstream_[stream_header + i * 32 + b]) << b;
+            value <<= 1;
+            value |= (track->bitstream_[stream_header + i * 32 + b]) &0x01;
          }
+         value &= 0x55555555;
          checksum ^= value;
       }
       AddOddEven<unsigned long>(track->bitstream_, data_checksum_index, &checksum, 1);

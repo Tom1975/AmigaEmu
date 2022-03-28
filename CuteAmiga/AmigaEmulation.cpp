@@ -198,7 +198,7 @@ void AmigaEmulation::RemoveBreakpoint(unsigned int bp_to_remove)
       }
    }
 }
-
+/*
 template <typename T>
 void func(T t)
 {
@@ -212,7 +212,7 @@ void func(T t, Args... args) // recursive variadic function
 
    func(args...);
 }
-
+*/
 void AmigaEmulation::Log(Severity severity, const char* msg...)
 {
    char buffer[256];
@@ -221,7 +221,7 @@ void AmigaEmulation::Log(Severity severity, const char* msg...)
    va_start(args, msg);
    vsprintf_s(buffer, 256, msg, args);
 
-   qDebug() << msg ;
+   qDebug() << buffer;
 
    va_end(args);
 

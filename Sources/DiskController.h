@@ -54,6 +54,7 @@ private:
    bool sel_2_;
    bool sel_3_;
 
+   bool step_;
    ////////////////////////////////
    // Indentification register
    unsigned long identification_;

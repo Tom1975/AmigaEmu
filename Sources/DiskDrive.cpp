@@ -1,7 +1,7 @@
 #include "DiskDrive.h"
 
 //#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
-#define LOG(...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, __VA_ARGS__);
+#define LOG(fmt, ...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, fmt, ##__VA_ARGS__);
 
 DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false), logger_(nullptr), head_(0)
 {
@@ -61,11 +61,16 @@ void DiskDrive::Step()
    track_ += (dir_) ? 1 : -1;
    if (track_ < 0) track_ = 0;
    if (disk_inserted_ != nullptr && track_ > disk_inserted_->side_[0].nb_tracks_ && disk_inserted_->side_[0].nb_tracks_ > 0) track_ = disk_inserted_->side_[0].nb_tracks_-1;
+
+   LOG("DiskDrive : STEP to %i", track_);
 }
 
 void DiskDrive::SetDIR(bool set)
 {
-   dir_ = set;
+   if (dir_ != set)
+   {
+      dir_ = set;
+   }
 }
 
 void DiskDrive::SetSIDE(bool set)

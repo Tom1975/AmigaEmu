@@ -13,7 +13,9 @@ FEA9CE
 	FEAFE2 => 
 	FEAFFC => FEAF4C 
 	FEB094 => Decodage header ok (checksum puis amiga format )
-	***FEB0B2
+	FEB0F0 = add total length to A0
+	FEB180 = Info + checksum ok
+	
 FEA9EA
 
 ###

@@ -107,10 +107,18 @@ void DiskController::SetDIR(bool set)
 
 void DiskController::SetSTEP(bool set)
 {
-   if (sel_0_) disk_drive_[0].Step();
-   if (sel_1_) disk_drive_[1].Step();
-   if (sel_2_) disk_drive_[2].Step();
-   if (sel_3_) disk_drive_[3].Step();
+   if (step_ != set)
+   {
+      step_ = set;
+      if (step_)
+      {
+         LOG("DiskController : STEP");
+         if (sel_0_) disk_drive_[0].Step();
+         if (sel_1_) disk_drive_[1].Step();
+         if (sel_2_) disk_drive_[2].Step();
+         if (sel_3_) disk_drive_[3].Step();
+      }
+   }
 }
 
 void DiskController::SetSIDE(bool set)
