@@ -261,9 +261,9 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
             value <<= 1;
             value |= (track->bitstream_[stream_header + i * 32 + b])&0x01;
          }
-         value &= 0x55555555;
          checksum ^= value;
       }
+      checksum &= 0x55555555;
       stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &checksum, 1);
 
       // Data checksum
@@ -285,9 +285,9 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
             value <<= 1;
             value |= (track->bitstream_[stream_header + i * 32 + b]) &0x01;
          }
-         value &= 0x55555555;
          checksum ^= value;
       }
+      checksum &= 0x55555555;
       AddOddEven<unsigned long>(track->bitstream_, data_checksum_index, &checksum, 1);
    }
 
