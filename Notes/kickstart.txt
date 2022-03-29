@@ -15,14 +15,9 @@ FEA9CE
 	FEB094 => Decodage header ok (checksum puis amiga format )
 	FEB0F0 = add total length to A0
 	FEB180 = Info + checksum ok
-	FEB1A8 = Checksum Data : 55014104 OK
-	FEB1A8 => 3e secteur : Ko 50514050 / 41014511
-		50514050  = 0101 0000 0101 0001 0100 0000 0101 0000
-		41014511  = 0100 0001 0000 0001 0100 0101 0001 0001
-Load 3e secteur : 
-Checksum : base 0 		^ 0x552aa924 = 0x552aa924
-			0x552aa924	^ 0x552aaaa9 = 0x0000038d
-			0x0000038d  ^ 0x2aaaaaaa = 0x2aaaa927 ??
+	FEB1A8 = Checksum Data : 7e erreur 
+	FEB1A8 => 7e secteur : ERROR
+
 ...
 0xe9a9c793 & 0x55555555 = 41014511
 0x8000038d		105

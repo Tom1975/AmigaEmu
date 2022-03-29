@@ -272,6 +272,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
       stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &checksum, 1);
 
       // Data
+      stream_header = stream_index;
       stream_index = AddOddEven<unsigned char>(track->bitstream_, stream_index, &buffer_in[stream_in], 512);
       stream_in += 512;
 
