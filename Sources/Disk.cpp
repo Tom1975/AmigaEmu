@@ -1,5 +1,6 @@
 #include "Disk.h"
 
+#define LOG(fmt, ...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, fmt, ##__VA_ARGS__);
 
 ///////////////////////////////////////////////////////////
 // Track
@@ -45,11 +46,11 @@ void Side::Clear()
 
 ///////////////////////////////////////////////////////////
 // Disk
-Disk::Disk() : valid_(false)
+Disk::Disk() : valid_(false), logger_(nullptr)
 {
 
 }
-Disk::Disk(std::string filepath)
+Disk::Disk(std::string filepath, ILogger* logger): logger_(logger)
 {
    valid_ = LoadFile(filepath);
 
@@ -59,6 +60,12 @@ Disk::~Disk()
 {
 
 }
+
+void Disk::Init(ILogger* log)
+{
+   logger_ = log;
+}
+
 
 void Disk::ClearStructure()
 {
@@ -277,7 +284,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
 
       // Compute Data checksum
       checksum = 0;
-      for (size_t i = 0; i < 128; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
+      /*for (size_t i = 0; i < 128; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
       {
          unsigned long odd_bits = 0, even_bits = 0;
          // Odd
@@ -296,6 +303,22 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
          checksum ^= even_bits;
       }
       checksum &= 0x55555555;
+      */
+
+      for (size_t i = 0; i < 1024/4; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
+      {
+         unsigned int value = 0;
+         for (int b = 0; b < 32; b++)
+         {
+            value <<= 1;
+            value |= (track->bitstream_[stream_header + i * 32 + b]) & 0x01;
+         }
+         checksum ^= value;
+         //LOG("TRACK : %i; SECTOR : %i, dword %8.8X = %8.8X", track_number, s, value, checksum)
+      }
+      checksum &= 0x55555555;
+      
+
       AddOddEven<unsigned long>(track->bitstream_, data_checksum_index, &checksum, 1);
 
       // Check clock bit of first data bit (depending on checksum !)

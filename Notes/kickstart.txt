@@ -19,6 +19,17 @@ FEA9CE
 	FEB1A8 => 7e secteur : ERROR
 			A0 = 8418
 
+## ENCODAGE					 ## DECODAGE
+								
+								aaaaaaa4 - aaaaaaa4
+								aaaaaaa9 - d
+								2aaaaaa4 - 2aaaaaa9
+								aaaaaa54 - 800000fd
+								aaaaaaa9 - 2aaaaa54
+								44515555 - 6efbff01
+								294a9155 - 47b16e54
+
+
 ...
 FEA9EA
 

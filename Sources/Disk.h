@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "ILogger.h"
 class Track
 {
 public:
@@ -33,9 +34,10 @@ class Disk
 {
 public:
    Disk();
-   Disk(std::string filepath);
+   Disk(std::string filepath, ILogger* logger = nullptr);
    virtual ~Disk();
 
+   void Init(ILogger* log);
    bool LoadFile(std::string filepath);
    bool LoadADF(unsigned char* buffer, size_t size);
    bool IsValid() { return valid_; }
@@ -52,5 +54,5 @@ private:
    template<typename T> int AddOddEven(unsigned char* track, unsigned int index, T *data, size_t nb_data);
    bool valid_;
 
-
+   ILogger* logger_;
 };

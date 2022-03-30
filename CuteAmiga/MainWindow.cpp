@@ -242,7 +242,7 @@ void MainWindow::OpenFiles(const QStringList& pathList)
    {
       // Load first 4 files ( df0 to df3 )
       Motherboard* mb = emu_handler_->GetMotherboard();
-      Disk* disk = new Disk(pathList[i].toStdString());
+      Disk* disk = new Disk(pathList[i].toStdString(), emu_handler_);
       if (disk->IsValid())
       {
          mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);

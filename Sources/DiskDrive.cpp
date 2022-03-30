@@ -45,6 +45,7 @@ void DiskDrive::InsertDisk(Disk* disk)
    // insert a disk.
    disk_inserted_ = disk;
 
+   disk_inserted_->Init(logger_);
    // Disk protection
    // todo set wprot_
 
