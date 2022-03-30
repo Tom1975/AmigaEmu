@@ -17,10 +17,9 @@ FEA9CE
 	FEB180 = Info + checksum ok
 	FEB1A8 = Checksum Data : 7e erreur 
 	FEB1A8 => 7e secteur : ERROR
+			A0 = 8418
 
 ...
-0xe9a9c793 & 0x55555555 = 41014511
-0x8000038d		105
 FEA9EA
 
 ###

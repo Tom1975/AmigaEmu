@@ -274,22 +274,50 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
       // Data
       stream_header = stream_index;
       stream_index = AddOddEven<unsigned char>(track->bitstream_, stream_index, &buffer_in[stream_in], 512);
-      stream_in += 512;
 
       // Compute Data checksum
       checksum = 0;
-      for (size_t i = 0; i < 1024/4; i++)
+      for (size_t i = 0; i < 128; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
       {
-         unsigned long value = 0;
+         unsigned long odd_bits = 0, even_bits = 0;
+         // Odd
          for (int b = 0; b < 32; b++)
          {
-            value <<= 1;
-            value |= (track->bitstream_[stream_header + i * 32 + b]) &0x01;
+            odd_bits <<= 1;
+            odd_bits |= (track->bitstream_[stream_header + i * 32 + b]) &0x01;
          }
-         checksum ^= value;
+         // Even
+         for (int b = 0; b < 32; b++)
+         {
+            even_bits <<= 1;
+            even_bits |= (track->bitstream_[stream_header + (i+128) * 32 + b]) & 0x01;
+         }
+         checksum ^= odd_bits;
+         checksum ^= even_bits;
       }
       checksum &= 0x55555555;
       AddOddEven<unsigned long>(track->bitstream_, data_checksum_index, &checksum, 1);
+
+      // Check clock bit of first data bit (depending on checksum !)
+      if (track->bitstream_[stream_header + 1] == 1)
+      {
+         track->bitstream_[stream_header] = 1;
+      }
+      else
+      {
+         if (track->bitstream_[stream_header-1] == 0)
+         {
+            track->bitstream_[stream_header] = 1;
+         }
+         else
+         {
+            track->bitstream_[stream_header] = 0;
+         }
+      }
+         
+
+      stream_in += 512;
+
    }
 
    return stream_index;
