@@ -8,19 +8,15 @@ FE8A02 => CMD_READ => FEA734  ERROR 1B !
 *** Trackdisk
 FEA536 => Read command ?
 FEA71A => End of track read : Int.
-FEAFE2 => Load and read the track
-FEA9CE
-	FEAFE2 => 
-	FEAFFC => FEAF4C 
-	FEB094 => Decodage header ok (checksum puis amiga format )
-	FEB0F0 = add total length to A0
-	FEB180 = Info + checksum ok
-	FEB1A8 = Checksum Data : 7e erreur 
-	FEB1A8 => 7e secteur : ERROR
-			Proleme a partir de l'offset 192 du secteur 6 du track 0
-			=> que des AAAAAA
+FEAFE2 => Load and read the track => OK
+FEA7E8 => Sortie load track
 
-...
+FEA8C0 => FEACB2
+FEACDC => QBlit : 
+		Blit : bltcon0 1dd8 / bltcon1 0002
+		
+		
+
 FEA9EA
 
 ###
