@@ -3,6 +3,9 @@
 #include <cstdio>
 #include <stdarg.h>
 
+#define LOG(fmt, ...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, fmt, ##__VA_ARGS__);
+
+
 static unsigned int last_opcodes[256];
 static unsigned char op_index = 0;
 
@@ -107,7 +110,7 @@ M68k::M68k() : pc_(0), sr_(0), current_state_(0),
                   current_bus_operation_(nullptr), current_waiting_instruction_(nullptr), bus_granted_(false), 
                   next_bus_operation_(nullptr), next_waiting_instruction_(nullptr),source_alu_(nullptr),destination_alu_(nullptr),
                   irc_ready_(false), new_opcode_ (0), source_factory_(a_, d_, &pc_, &usp_, &ssp_, &sr_), destination_factory_(a_, d_, &pc_, &usp_, &ssp_, &sr_),
-                  register_list_(a_, d_, &pc_, &source_factory_, &usp_, &ssp_, &sr_), pc_alu_(&pc_), mask_(0)
+                  register_list_(a_, d_, &pc_, &source_factory_, &usp_, &ssp_, &sr_), pc_alu_(&pc_), mask_(0), logger_(nullptr)
 
 {
    memset(d_, 0, sizeof(d_));
@@ -2852,6 +2855,13 @@ unsigned int M68k::OpcodeEor()
       input = source_alu_->GetU32() ^ (destination_alu_->GetU32());
       break;
    }
+
+   /*if (pc_ == 0xFEADB2)
+   {
+      // Log D2, D0
+      LOG("dword %8.8X = %8.8X", d_[2], input);
+   }*/
+
    destination_alu_->WriteInput(input);
 
    if (input == 0) sr_ |= F_Z;

@@ -14,6 +14,7 @@ public :
    // Configuration and pin connections
    void SetBus(Bus* bus);
 
+   void InitLog(ILogger* log) {logger_ = log;}
    // Action
    void Reset();
    void Tick();
@@ -85,6 +86,9 @@ protected:
 
    // Generic bus
    Bus*              bus_;       // Bus connection
+
+   // Logger
+   ILogger*          logger_;    // Logger
 
    unsigned char     int_;    // interruption level
 

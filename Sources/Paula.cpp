@@ -57,7 +57,7 @@ bool Paula::DmaDiskTick()
       // Write to memory
       bus_->Write16(dsk_dma_pt_, dsk_dat_);
       
-      length -= 2;
+      length -= 1;
 
       dsklen_ &= 0xC000;
       dsklen_ |= length;
