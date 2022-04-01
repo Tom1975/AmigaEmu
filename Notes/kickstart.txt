@@ -10,14 +10,16 @@ FEA536 => Read command ?
 FEA71A => End of track read : Int.
 FEAFE2 => Load and read the track => OK
 FEA7E8 => Sortie load track
-
 FEA8C0 => FEACB2
-FEACDC => QBlit : 
-		Blit : bltcon0 1dd8 / bltcon1 0002
-		
-		
+FEA8D6 => Decode fait
+*** Main thread
+FE8A26 - Checksum ok
+FE8A2C => EXECUTION DU BOOT ! en 5B94 => check dos library ???
 
-FEA9EA
+FE8B00 => 
+
+
+
 
 ###
 A VERIFIER :
@@ -62,7 +64,17 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
-
+Decodage MFM:
+FEACDC => QBlit :  => Blit routine FEACF0
+		Blit : bltcon0 1dd8 / bltcon1 0002
+		FEB2CC => l/f mask + CDAT + MOD ABD
+		FEAD22=> Lancement du blit !
+Origine A =>  6C97
+Origine B =>  6E97
+C = 5555
+Destination	D => 5D87
+Operation : D8 => 1101 1000 => /ABC + A/B/C + AB/C + ABC
+*****************
 
 
 Message du cia timer => FE643C ?
