@@ -1,11 +1,11 @@
 SYNCHRO LOGIQUE : 
 
 Track buffer : 6a5c
-*** Main thread
+*** Main thread--q
 FE8A84 -> FE8A9A => Attente d'une disquette
 FE89B0 => disk detecté
 FE8A02 => CMD_READ => FEA734  ERROR 1B !
-*** Trackdisk
+*** Trackdis-qk
 FEA536 => Read command ?
 FEA71A => End of track read : Int.
 FEAFE2 => Load and read the track => OK
@@ -13,13 +13,24 @@ FEA7E8 => Sortie load track
 FEA8C0 => FEACB2
 FEA8D6 => Decode fait
 *** Main thread
-FE8A26 - Checksum ok
-FE8A2C => EXECUTION DU BOOT ! en 5B94 => check dos library ???
 
-FE8B00 => 
+FE8B00 => FE8DD0
+FE8B38 => Jmp FF4290 : workbench.task !
+FF4346 => AddLibrary 
+FF435E => ok
 
+Step en serie : (trackdisk)
 
+*** LECTURE TRACK 40 : TO CHECK !!
 
+Puis :
+
+DoIO <- FEA514 <- FEA4E2 <- FEA44A <- FEA9B6 <- FEA7E8 <- FEA062
+threads : 
+* Initial CLI : FF44B2 ..... FF4A18 <- Wait.
+* File System : FF4B6A .... FF47EC
+* Validator : FF4B6A
+* input devide : 
 
 ###
 A VERIFIER :

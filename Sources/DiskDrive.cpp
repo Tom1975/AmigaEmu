@@ -76,6 +76,9 @@ void DiskDrive::SetDIR(bool set)
 
 void DiskDrive::SetSIDE(bool set)
 {
+   if (side_ != set)
+      LOG("DiskDrive : SIDE to %s", set?1:0);
+
    side_ = set?1:0;
 }
 
@@ -94,7 +97,7 @@ unsigned short DiskDrive::ReadAndAdvance()
       }
    }
 
-   //LOG("%4.4X ", data);
+   LOG("%4.4X ", data);
    return data;
 }
 

@@ -78,6 +78,8 @@ void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_it
       QTreeWidgetItem* item = new QTreeWidgetItem;
       // Add a device
       unsigned long name_address = EXTRACT_LONG((&ram[current_list_node + 10]));
+      unsigned long current_sp = EXTRACT_LONG((&ram[current_list_node + 54]));
+      unsigned long current_pc = EXTRACT_LONG((&ram[current_list_node + 0x32]));
       char* name = (name_address >= 0xFC0000) ? (char*)&rom[name_address & 0x3FFFF] : (char*)&ram[name_address];
       if (strlen(name) > 0)
       {
@@ -89,7 +91,17 @@ void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_it
          {
             list_handler(current_list_node, item, &list_items_);
          }
+         
          item->addChild(base_address_item);
+
+         /*QTreeWidgetItem* pc_address_item = new QTreeWidgetItem;
+         pc_address_item->setText(0, QString("Current PC : %1").arg(current_pc, 6, 16));
+         item->addChild(pc_address_item);
+         */
+         QTreeWidgetItem* sp_address_item = new QTreeWidgetItem;
+         sp_address_item->setText(0, QString("Stack sp : %1").arg(current_sp, 6, 16));
+         item->addChild(sp_address_item);
+
          list_items_.push_back(base_address_item);
          root_item->addChild(item);
          list_items_.push_back(item);
