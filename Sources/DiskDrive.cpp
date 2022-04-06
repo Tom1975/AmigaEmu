@@ -56,12 +56,12 @@ void DiskDrive::Step()
    if (disk_inserted_ != nullptr)
    {
       chng_ = false;
-   }
 
-   // Move head
-   track_ += (dir_) ? 1 : -1;
-   if (track_ < 0) track_ = 0;
-   if (disk_inserted_ != nullptr && track_ > disk_inserted_->side_[0].nb_tracks_ && disk_inserted_->side_[0].nb_tracks_ > 0) track_ = disk_inserted_->side_[0].nb_tracks_-1;
+      // Move head
+      track_ += (dir_) ? 1 : -1;
+      if (track_ < 0) track_ = 0;
+      if (track_ > disk_inserted_->side_[0].nb_tracks_ && disk_inserted_->side_[0].nb_tracks_ > 0) track_ = disk_inserted_->side_[0].nb_tracks_ - 1;
+   }
 
    LOG("DiskDrive : STEP to %i", track_);
 }
@@ -71,13 +71,14 @@ void DiskDrive::SetDIR(bool set)
    if (dir_ != set)
    {
       dir_ = set;
+      LOG("DiskDrive : DIR to %i", dir_ ? 1 : 0);
    }
 }
 
 void DiskDrive::SetSIDE(bool set)
 {
-   if (side_ != set)
-      LOG("DiskDrive : SIDE to %s", set?1:0);
+   if (side_!= set ? 1:0)
+      LOG("DiskDrive : SIDE to %i", set?1:0);
 
    side_ = set?1:0;
 }

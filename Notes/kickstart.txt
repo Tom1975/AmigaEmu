@@ -14,14 +14,16 @@ FEA8C0 => FEACB2
 FEA8D6 => Decode fait
 *** Main thread
 
+FE8A2C => Execute bootcode
 FE8B00 => FE8DD0
 FE8B38 => Jmp FF4290 : workbench.task !
-FF4346 => AddLibrary 
-FF435E => ok
+FF45B2 => Ok
+Creation InitialCli
+FF4B40 
 
 Step en serie : (trackdisk)
 
-*** LECTURE TRACK 40 : TO CHECK !!
+*** LECTURE TRACK 0 x2 : TO CHECK !!
 
 Puis :
 
@@ -30,7 +32,10 @@ threads :
 * Initial CLI : FF44B2 ..... FF4A18 <- Wait.
 * File System : FF4B6A .... FF47EC
 * Validator : FF4B6A
-* input devide : 
+* input device : 
+
+
+
 
 ###
 A VERIFIER :
