@@ -19,7 +19,13 @@ FE8B00 => FE8DD0
 FE8B38 => Jmp FF4290 : workbench.task !
 FF45B2 => Ok
 Creation InitialCli
-FF4B40 
+FF4B40 Open dos library
+FF439E PutMsg ??
+
+*** FileSystem task
+FF4774 => !
+
+
 
 Step en serie : (trackdisk)
 
