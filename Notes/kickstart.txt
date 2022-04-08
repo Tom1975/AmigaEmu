@@ -17,13 +17,20 @@ FEA8D6 => Decode fait
 FE8A2C => Execute bootcode
 FE8B00 => FE8DD0
 FE8B38 => Jmp FF4290 : workbench.task !
-FF45B2 => Ok
+FF45B6 => Ok
+
 Creation InitialCli
+FF4774 : Start
+FF48D6
+FF490A => FF47C8
+FF47D6
+FF44B4
+FF49C8
+
+(not called)
 FF4B40 Open dos library
 FF439E PutMsg ??
 
-*** FileSystem task
-FF4774 => !
 
 
 

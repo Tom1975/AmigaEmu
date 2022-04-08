@@ -23133,7 +23133,7 @@ FCD60E: rts                       4E 75
 0000EE78: moveq #$0, D1             72 00 
 0000EE7A: move.w ($A,A2), D1        32 2A 00 0A 
 0000EE7E: addq.l #1, D1             52 81 
-0000EE80: Illegal                   E5 81 
+0000EE80: asr.l #2, D1
 0000EE82: move.l D1, D0             20 01 
 0000EE84: add.l D2, D0              D0 82 
 0000EE86: move.l D0, A0             20 40 
@@ -33069,13 +33069,13 @@ FD6996: move.b #$4, ($34D,A3)     17 7C 00 04 03 4D
 FD699C: moveq #$0, D3             76 00 
 FD699E: lea ($24,SP), SP          4F EF 00 24 
 FD69A2: move.l D3, D2             24 03 
-FD69A4: Illegal                   E5 82 
+FD69A4: asr.l #2, D2
 FD69A6: lea ($306,A3), A2         45 EB 03 06 
 FD69AA: move.l D3, -(SP)          2F 03 
 FD69AC: jsr 16750(PC)             4E BA FD A2 
 FD69B0: move.l D0, (0,A2D2.l)     25 80 28 00 
 FD69B4: move.l D3, D2             24 03 
-FD69B6: Illegal                   E5 82 
+FD69B6: asr.l #2, D2
 FD69B8: lea ($30E,A3), A2         45 EB 03 0E 
 FD69BC: move.l D3, -(SP)          2F 03 
 FD69BE: jsr 16796(PC)             4E BA FD D6 
@@ -36153,7 +36153,7 @@ FD6B16: "layers.library", 00, 00
 000191DA: move.l ($FFF2,A5), D0     20 2D FF F2 
 000191DE: moveq #$0, D1             72 00 
 000191E0: move.b ($FFFF,A5), D1     12 2D FF FF 
-000191E4: Illegal                   E5 81 
+000191E4: asr.l #2, D1
 000191E6: lea ($30E,A3), A0         41 EB 03 0E 
 000191EA: move.l (0,A0D1.l), A0     20 70 18 00 
 000191EE: move.w ($4,A0), D1        32 28 00 04 
@@ -60286,7 +60286,7 @@ FEB472: rts                       4E 75
 0002BB7E: bne.s 2BB42               66 C2 
 0002BB80: move.l A3, D4             28 0B 
 0002BB82: sub.l  A2, D4             98 8A 
-0002BB84: Illegal                   E4 84 
+0002BB84: asr.l #2, D4
 0002BB86: addq.l #2, D4             54 84 
 0002BB88: Illegal                   E5 84 
 0002BB8A: move.l D4, D0             20 04 
@@ -71523,7 +71523,7 @@ FF4656: lea ($5C,A1), A5          4B E9 00 5C
 FF465A: lea ($60,A5), A4          49 ED 00 60 
 FF465E: move.l A4, ($3A,A1)       23 4C 00 3A 
 FF4662: move.l A4, D4             28 0C 
-FF4664: Illegal                   E4 84 
+FF4664: asr.l #2, D4
 FF4666: move.l D4, ($34,A5)       2B 44 00 34 
 FF466A: add.l D2, A4              D9 C2 
 FF466C: move.l A4, ($3E,A1)       23 4C 00 3E 
@@ -71635,13 +71635,13 @@ FF47A0: blt.s FF479C               6D FA
 FF47A2: move.l #$FFFFFFFF, ($4,A1)23 7C FF FF FF FF 00 04 
 FF47AA: move.l D2, ($8,A1)        23 42 00 08 
 FF47AE: move.l A1, D2             24 09 
-FF47B0: Illegal                   E4 82 
+FF47B0: asr.l #2, D2
 FF47B2: move.l D2, ($30,A2)       25 42 00 30 
 FF47B6: move.l ($24,A4), D7       2E 2C 00 24 
 FF47BA: move.l D7, D6             2C 07 
-FF47BC: Illegal                   E5 86 
+FF47BC: asr.l #2, D6
 FF47BE: add.l (0,A0D6.l), D7      DE B0 68 00 
-FF47C2: Illegal                   E5 87 
+FF47C2: asr.l #2, D7
 FF47C4: lea FF47C8(PC), A6         4D FA 00 02 
 FF47C8: addq.l #4, D6             58 86 
 FF47CA: cmp.l D6, D7              BE 86 
@@ -71652,7 +71652,7 @@ FF47D6: lea FF44B4(PC), A5         4B FA FC DC
 FF47DA: lea FF44A8(PC), A6         4D FA FC CC 
 FF47DE: move.l ($A4,A2), A4       28 6A 00 A4 
 FF47E2: moveq #$20, D0            70 20 
-FF47E4: jsr (A5)                  4E 95 
+FF47E4: jsr (A5)                  	; jmp FF44B4
 FF47E6: move.l ($4,A2), A4        28 6A 00 04 
 FF47EA: moveq #$20, D0            70 20 
 FF47EC: jsr (A5)                  4E 95 
@@ -71678,9 +71678,9 @@ FF481E: lea 34826(PC), A6         4D FA 00 06
 0003482C: jsr ($FEE0,A6)            4E AE FE E0 
 00034830: rts                       4E 75 
 00034832: bra.s 347EE               60 BA 
-00034834: Illegal                   E5 82 
+00034834: asr.l #2, D2
 00034836: addq.l #1, D2             52 82 
-00034838: Illegal                   E5 81 
+00034838: asr.l #2, D1
 0003483A: move.l D1, D5             2A 01 
 0003483C: movem.l A0/A1/A5/A6, -(SP)48 E7 00 C6 
 00034840: suba.l A1, A1             93 C9 
@@ -71705,16 +71705,16 @@ FF481E: lea 34826(PC), A6         4D FA 00 06
 00034880: beq.s 34884               67 02 
 00034882: moveq #$0, D1             72 00 
 00034884: jmp (A6)                  4E D6 
-00034886: Illegal                   E5 81 
+00034886: asr.l #2, D1
 00034888: move.l D1, A3             26 41 
 0003488A: move.w D2, ($1C,A3)       37 42 00 1C 
-0003488E: Illegal                   E5 83 
+0003488E: asr.l #2, D3
 00034890: move.l D3, ($28,A3)       27 43 00 28 
 00034894: move.l D4, ($24,A3)       27 44 00 24 
 00034898: move.l ($10,A1), ($2C,A3) 27 69 00 10 00 2C 
 0003489E: jmp (A6)                  4E D6 
-000348A0: Illegal                   E5 81 
-000348A2: Illegal                   E5 82 
+000348A0: asr.l #2, D1
+000348A2: asr.l #2, D2
 000348A4: move.l D2, (A,A0D1.l)     21 82 18 0A 
 000348A8: move.l D1, (0,A0D2.l)     21 81 28 00 
 000348AC: movem.l A0/A1/A5/A6, -(SP)48 E7 00 C6 
@@ -71723,125 +71723,125 @@ FF481E: lea 34826(PC), A6         4D FA 00 06
 000348B6: jsr ($FE32,A6)            4E AE FE 32 
 000348BA: movem.l (SP)+, /A0/A1/A5/A64C DF 63 00 
 000348BE: jmp (A6)                  4E D6 
-000348C0: Illegal                   E5 81 
+000348C0: asr.l #2, D1
 000348C2: movem.l A0/A1/A5/A6, -(SP)48 E7 00 C6 
 000348C6: move.l D1, A1             22 41 
 000348C8: move.l 4, A6              2C 78 00 04 
 000348CC: jsr ($FE3E,A6)            4E AE FE 3E 
 000348D0: movem.l (SP)+, /A0/A1/A5/A64C DF 63 00 
 000348D4: jmp (A6)                  4E D6 
-000348D6: moveq #$FF, D0            70 FF 
-000348D8: Illegal                   E5 81 
-000348DA: beq.s 34908               67 2C 
-000348DC: move.l D1, A4             28 41 
-000348DE: move.l (A4)+, D1          22 1C 
-000348E0: move.l (A4), D2           24 14 
-000348E2: Illegal                   E5 82 
-000348E4: lea (FFFFFFFC,A4D2.l), A3 47 F4 28 FC 
-000348E8: move.l -(A3), D2          24 23 
-000348EA: beq.s 348D8               67 EC 
-000348EC: move.l -(A3), D3          26 23 
-000348EE: cmp.l (A2), D3            B6 92 
-000348F0: bgt.s 348FC               6E 0A 
-000348F2: add.l A4, D2              D4 8C 
-000348F4: Illegal                   E5 83 
-000348F6: move.l D2, (0,A2D3.l)     25 82 38 00 
-000348FA: bra.s 348E8               60 EC 
-000348FC: clr.l D0                  42 80 
-000348FE: move.l #$6F, D1           22 3C 00 00 00 6F 
-00034904: bra.s 3449C               60 00 FB 96 
-00034908: move.l D0, D1             22 00 
-0003490A: jmp (A6)                  4E D6 
-0003490C: moveq #$1, D2             74 01 
-0003490E: addq.l #2, D1             54 81 
-00034910: Illegal                   E5 81 
-00034912: ble.s 34938               6F 24 
-00034914: move.l D1, D0             20 01 
-00034916: move.l D2, D1             22 02 
-00034918: movem.l D0/A1/A5/A6, -(SP)48 E7 80 46 
-0003491C: move.l 4, A6              2C 78 00 04 
-00034920: jsr ($FF3A,A6)            4E AE FF 3A 
-00034924: movem.l (SP)+, D3/A1/A5/A64C DF 62 08 
-00034928: suba.l A0, A0             91 C8 
-0003492A: move.l D0, D1             22 00 
-0003492C: beq.s 34938               67 0A 
-0003492E: move.l D3, (0,A0D1.l)     21 83 18 00 
-00034932: Illegal                   E4 81 
-00034934: addq.l #1, D1             52 81 
-00034936: jmp (A6)                  4E D6 
-00034938: move.l A2, D0             20 0A 
-0003493A: tst.l  D0                 4A 80 
-0003493C: beq.s 344A4               67 00 FB 66 
-00034940: move.l #$67, D1           22 3C 00 00 00 67 
-00034946: bra.s 3449C               60 00 FB 54 
-0003494A: tst.l  D1                 4A 81 
-0003494C: beq.s 34970               67 22 
-0003494E: movem.l A1/A5/A6, -(SP)   48 E7 00 46 
-00034952: Illegal                   E5 81 
-00034954: move.l D1, A1             22 41 
-00034956: move.l -(A1), D0          20 21 
-00034958: move.l D0, D1             22 00 
-0003495A: andi.l #$FF000003, D1     02 81 FF 00 00 03 
-00034960: bne.s 34972               66 10 
-00034962: move.l 4, A6              2C 78 00 04 
-00034966: jsr ($FF2E,A6)            4E AE FF 2E 
-0003496A: movem.l (SP)+, /A1/A5/A6  4C DF 62 00 
-0003496E: suba.l A0, A0             91 C8 
-00034970: jmp (A6)                  4E D6 
-00034972: move.l #$7000005, D1      22 3C 07 00 00 05 
-00034978: lea 34BB4(PC), A4         49 FA 02 3A 
-0003497C: moveq #$C, D0             70 0C 
-0003497E: jsr (A5)                  4E 95 
-00034980: move.l D1, A3             26 41 
-00034982: add.l A3, A3              D7 CB 
-00034984: add.l A3, A3              D7 CB 
-00034986: move.l (A3), D2           24 13 
-00034988: ble.s 349C2               6F 38 
-0003498A: movem.l A0/A1/A5/A6, -(SP)48 E7 00 C6 
-0003498E: suba.l A1, A1             93 C9 
-00034990: move.l 4, A6              2C 78 00 04 
-00034994: jsr ($FEDA,A6)            4E AE FE DA 
-00034998: addi.l #$5C, D0           06 80 00 00 00 5C 
-0003499E: move.l D2, A1             22 42 
-000349A0: move.l ($4,A3), A0        20 6B 00 04 
-000349A4: move.l D0, ($4,A3)        27 40 00 04 
-000349A8: Illegal                   E5 81 
-000349AA: move.l D1, ($A,A1)        23 41 00 0A 
-000349AE: clr.l ($0,A1)             42 A9 00 00 
-000349B2: clr.l ($4,A1)             42 A9 00 04 
-000349B6: jsr ($FE92,A6)            4E AE FE 92 
-000349BA: movem.l (SP)+, /A0/A1/A5/A64C DF 63 00 
-000349BE: moveq #$1, D1             72 01 
-000349C0: jmp (A6)                  4E D6 
-000349C2: moveq #$65, D1            72 65 
-000349C4: bra.s 3449C               60 00 FA D6 
-000349C8: movem.l A1/A5/A6, -(SP)   48 E7 00 46 
-000349CC: suba.l A1, A1             93 C9 
-000349CE: move.l 4, A6              2C 78 00 04 
-000349D2: jsr ($FEDA,A6)            4E AE FE DA 
-000349D6: addi.l #$5C, D0           06 80 00 00 00 5C 
-000349DC: move.l D0, A0             20 40 
-000349DE: tst.l  ($58,A0)           4A A8 00 58 
-000349E2: beq.s 349EC               67 08 
-000349E4: move.l ($58,A0), A0       20 68 00 58 
-000349E8: jsr (A0)                  4E 90 
-000349EA: bra.s 34A04               60 18 
-000349EC: move.l D0, D7             2E 00 
-000349EE: moveq #$0, D0             70 00 
-000349F0: move.l #$100, D1          22 3C 00 00 01 00 
-000349F6: jsr ($FECE,A6)            4E AE FE CE 
-000349FA: move.l D7, A0             20 47 
-000349FC: jsr ($FE8C,A6)            4E AE FE 8C 
-00034A00: tst.l  D0                 4A 80 
-00034A02: beq.s 34A12               67 0E 
-00034A04: suba.l A0, A0             91 C8 
-00034A06: move.l (A,A0D0.l), D1     22 30 08 0A 
-00034A0A: Illegal                   E4 81 
+FF48D6: moveq #$FF, D0            70 FF 
+FF48D8: asr.l #2, D1
+FF48DA: beq.s FF4908               67 2C 
+FF48DC: move.l D1, A4             28 41 
+FF48DE: move.l (A4)+, D1          22 1C 
+FF48E0: move.l (A4), D2           24 14 
+FF48E2: asr.l #2, D2
+FF48E4: lea (FFFFFFFC,A4D2.l), A3 47 F4 28 FC 
+FF48E8: move.l -(A3), D2          24 23 
+FF48EA: beq.s FF48D8               67 EC 
+FF48EC: move.l -(A3), D3          26 23 
+FF48EE: cmp.l (A2), D3            B6 92 
+FF48F0: bgt.s FF48FC               6E 0A 
+FF48F2: add.l A4, D2              D4 8C 
+FF48F4: asr.l #2, D3
+FF48F6: move.l D2, (0,A2D3.l)     25 82 38 00 
+FF48FA: bra.s FF48E8               60 EC 
+FF48FC: clr.l D0                  42 80 
+FF48FE: move.l #$6F, D1           22 3C 00 00 00 6F 
+FF4904: bra.s FF449C               60 00 FB 96 
+FF4908: move.l D0, D1             22 00 
+FF490A: jmp (A6)                  4E D6 
+FF490C: moveq #$1, D2             74 01 
+FF490E: addq.l #2, D1             54 81 
+FF4910: asr.l #2, D1
+FF4912: ble.s FF4938               6F 24 
+FF4914: move.l D1, D0             20 01 
+FF4916: move.l D2, D1             22 02 
+FF4918: movem.l D0/A1/A5/A6, -(SP)48 E7 80 46 
+FF491C: move.l 4, A6              2C 78 00 04 
+FF4920: jsr ($FF3A,A6)            ; AllocMem
+FF4924: movem.l (SP)+, D3/A1/A5/A64C DF 62 08 
+FF4928: suba.l A0, A0             91 C8 
+FF492A: move.l D0, D1             22 00 
+FF492C: beq.s FF4938               67 0A 
+FF492E: move.l D3, (0,A0D1.l)     21 83 18 00 
+FF4932: asr.l #2, D1
+FF4934: addq.l #1, D1             52 81 
+FF4936: jmp (A6)                  4E D6 
+FF4938: move.l A2, D0             20 0A 
+FF493A: tst.l  D0                 4A 80 
+FF493C: beq.s 344A4               67 00 FB 66 
+FF4940: move.l #$67, D1           22 3C 00 00 00 67 
+FF4946: bra.s 3449C               60 00 FB 54 
+FF494A: tst.l  D1                 4A 81 
+FF494C: beq.s 34970               67 22 
+FF494E: movem.l A1/A5/A6, -(SP)   48 E7 00 46 
+FF4952: asr.l #2, D1
+FF4954: move.l D1, A1             22 41 
+FF4956: move.l -(A1), D0          20 21 
+FF4958: move.l D0, D1             22 00 
+FF495A: andi.l #$FF000003, D1     02 81 FF 00 00 03 
+FF4960: bne.s 34972               66 10 
+FF4962: move.l 4, A6              2C 78 00 04 
+FF4966: jsr ($FF2E,A6)            4E AE FF 2E 
+FF496A: movem.l (SP)+, /A1/A5/A6  4C DF 62 00 
+FF496E: suba.l A0, A0             91 C8 
+FF4970: jmp (A6)                  4E D6 
+FF4972: move.l #$7000005, D1      22 3C 07 00 00 05 
+FF4978: lea 34BB4(PC), A4         49 FA 02 3A 
+FF497C: moveq #$C, D0             70 0C 
+FF497E: jsr (A5)                  4E 95 
+FF4980: move.l D1, A3             26 41 
+FF4982: add.l A3, A3              D7 CB 
+FF4984: add.l A3, A3              D7 CB 
+FF4986: move.l (A3), D2           24 13 
+FF4988: ble.s 349C2               6F 38 
+FF498A: movem.l A0/A1/A5/A6, -(SP)48 E7 00 C6 
+FF498E: suba.l A1, A1             93 C9 
+FF4990: move.l 4, A6              2C 78 00 04 
+FF4994: jsr ($FEDA,A6)            	; FindTask
+FF4998: addi.l #$5C, D0           06 80 00 00 00 5C 
+FF499E: move.l D2, A1             22 42 
+FF49A0: move.l ($4,A3), A0        20 6B 00 04 
+FF49A4: move.l D0, ($4,A3)        27 40 00 04 
+FF49A8: asr.l #2, D1
+FF49AA: move.l D1, ($A,A1)        23 41 00 0A 
+FF49AE: clr.l ($0,A1)             42 A9 00 00 
+FF49B2: clr.l ($4,A1)             42 A9 00 04 
+FF49B6: jsr ($FE92,A6)            4E AE FE 92 
+FF49BA: movem.l (SP)+, /A0/A1/A5/A64C DF 63 00 
+FF49BE: moveq #$1, D1             72 01 
+FF49C0: jmp (A6)                  4E D6 
+FF49C2: moveq #$65, D1            72 65 
+FF49C4: bra.s 3449C               60 00 FA D6 
+FF49C8: movem.l A1/A5/A6, -(SP)   48 E7 00 46 
+FF49CC: suba.l A1, A1             93 C9 
+FF49CE: move.l 4, A6              2C 78 00 04 
+FF49D2: jsr ($FEDA,A6)            	; FindTask
+FF49D6: addi.l #$5C, D0           06 80 00 00 00 5C 
+FF49DC: move.l D0, A0             20 40 
+FF49DE: tst.l  ($58,A0)           4A A8 00 58 
+FF49E2: beq.s FF49EC               67 08 
+FF49E4: move.l ($58,A0), A0       20 68 00 58 
+FF49E8: jsr (A0)                  4E 90 
+FF49EA: bra.s FF4A04               60 18 
+FF49EC: move.l D0, D7             2E 00 
+FF49EE: moveq #$0, D0             70 00 
+FF49F0: move.l #$100, D1          22 3C 00 00 01 00 
+FF49F6: jsr ($FECE,A6)            	; SetSignal 0, 100
+FF49FA: move.l D7, A0             20 47 
+FF49FC: jsr ($FE8C,A6)            	; GetMsg
+FF4A00: tst.l  D0                 4A 80 
+FF4A02: beq.s FF4A12               67 0E 
+FF4A04: suba.l A0, A0             91 C8 
+FF4A06: move.l (A,A0D0.l), D1     22 30 08 0A 
+FF4A0A: asr.l #2, D1
 FF4A0C: movem.l (SP)+, /A1/A5/A6  4C DF 62 00 
 FF4A10: jmp (A6)                  4E D6 
 FF4A12: move.l #$100, D0          20 3C 00 00 01 00 
 FF4A18: jsr ($FEC2,A6)            	; Wait (100)
-FF4A1C: bra.s 349FA               60 DC 
+FF4A1C: bra.s FF49FA               60 DC 
 FF4A1E: movem.l A1/A5/A6, -(SP)   48 E7 00 46 
 FF4A22: move.l (10,A0D1.l), A1    22 70 18 10 
 FF4A26: move.l D2, D0             20 02 
@@ -71890,11 +71890,11 @@ FF4AA0: jsr (0,A6D7.w)            4E B6 70 00
 FF4AA4: movem.l (SP)+, /A0/A1/A5/A64C DF 63 00 
 FF4AA8: move.l D0, D1             22 00 
 FF4AAA: jmp (A6)                  4E D6 
-FF4AAC: Illegal                   E5 81 
+FF4AAC: asr.l #2, D1
 FF4AAE: add.l D2, D1              D2 82 
 FF4AB0: move.l (0,A0D1.l), D1     22 30 18 00 
 FF4AB4: jmp (A6)                  4E D6 
-FF4AB6: Illegal                   E5 81 
+FF4AB6: asr.l #2, D1
 FF4AB8: add.l D2, D1              D2 82 
 FF4ABA: move.l D3, (0,A0D1.l)     21 83 18 00 
 FF4ABE: jmp (A6)                  4E D6 
@@ -71992,10 +71992,10 @@ FF4BBC: lea 34BF4(PC), A0         41 FA 00 36
 FF4BC0: bra.s 34BC6               60 04 
 FF4BC2: lea 34C10(PC), A0         41 FA 00 4C 
 FF4BC6: move.l A0, D1             22 08 
-FF4BC8: Illegal                   E4 81 
+FF4BC8: asr.l #2, D1
 FF4BCA: lea 34C2C(PC), A0         41 FA 00 60 
 FF4BCE: move.l A0, D2             24 08 
-FF4BD0: Illegal                   E4 82 
+FF4BD0: asr.l #2, D2
 FF4BD2: lea 34C48(PC), A0         41 FA 00 74 
 FF4BD6: move.l A0, D3             26 08 
 FF4BD8: Illegal                   E4 83 
@@ -72068,20 +72068,20 @@ FF4C72: beq.s 34CDA               67 66
 FF4C74: move.l ($4,A1), D2        24 29 00 04 
 FF4C78: add.l D2, D1              D2 82 
 FF4C7A: addq.l #1, D1             52 81 
-FF4C7C: Illegal                   E5 81 
+FF4C7C: asr.l #2, D1
 FF4C7E: move.l D1, A4             28 41 
 FF4C80: movem.l A1/A2/A5/A6, -(SP)48 E7 00 66 
 FF4C84: bsr 34AC0                 61 00 FE 3A 
 FF4C88: move.l ($54,A3), -(SP)    2F 2B 00 54 
 FF4C8C: move.l SP, -(A4)          29 0F 
-FF4C8E: Illegal                   E5 82 
+FF4C8E: asr.l #2, D2
 FF4C90: move.l D2, -(A4)          29 02 
 FF4C92: move.l A4, ($54,A3)       27 4C 00 54 
 FF4C96: move.l (A1), D1           22 11 
-FF4C98: Illegal                   E5 81 
+FF4C98: asr.l #2, D1
 FF4C9A: move.l D1, A3             26 41 
 FF4C9C: move.l ($8,A1), D1        22 29 00 08 
-FF4CA0: Illegal                   E5 81 
+FF4CA0: asr.l #2, D1
 FF4CA2: move.l D1, A0             20 41 
 FF4CA4: move.l ($C,A1), D0        20 29 00 0C 
 FF4CA8: move.l A4, SP             2E 4C 
@@ -72097,7 +72097,7 @@ FF4CC4: suba.l A0, A0             91 C8
 FF4CC6: move.l D0, (A1)           22 80 
 FF4CC8: sub.l  D2, D1             92 82 
 FF4CCA: subq.l #1, D1             53 81 
-FF4CCC: Illegal                   E4 81 
+FF4CCC: asr.l #2, D1
 FF4CCE: moveq #$10, D0            70 10 
 FF4CD0: move.l ($78,A2), A4       28 6A 00 78 
 FF4CD4: jsr (A5)                  4E 95 
@@ -72222,29 +72222,29 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034E2A: lsr.l  #2, D1             E4 89 
 00034E2C: subq.l #3, D1             57 81 
 00034E2E: move.l D2, D3             26 02 
-00034E30: Illegal                   E5 83 
+00034E30: asr.l #2, D3
 00034E32: lea (4,A1D3.l), A1        43 F1 38 04 
 00034E36: movem.l D1/D2, (A1)       48 D1 00 06 
 00034E3A: move.l A4, ($FFFC,A1)     23 4C FF FC 
 00034E3E: move.l (FFFFFFF8,A0D0.l), ($FFF8,A1)23 70 08 F8 FF F8 
 00034E44: move.l (FFFFFFF4,A0D0.l), ($FFF4,A1)23 70 08 F4 FF F4 
 00034E4A: jmp (A4)                  4E D4 
-00034E4C: Illegal                   E5 81 
+00034E4C: asr.l #2, D1
 00034E4E: add.l D1, D2              D4 81 
 00034E50: clr.l D1                  42 81 
 00034E52: move.b (0,A0D2.l), D1     12 30 28 00 
 00034E56: jmp (A6)                  4E D6 
-00034E58: Illegal                   E5 81 
+00034E58: asr.l #2, D1
 00034E5A: add.l D1, D2              D4 81 
 00034E5C: move.b D3, (0,A0D2.l)     11 83 28 00 
 00034E60: jmp (A6)                  4E D6 
-00034E62: Illegal                   E5 81 
+00034E62: asr.l #2, D1
 00034E64: Illegal                   E3 82 
 00034E66: add.l D1, D2              D4 81 
 00034E68: clr.l D1                  42 81 
 00034E6A: move.w (0,A0D2.l), D1     32 30 28 00 
 00034E6E: jmp (A6)                  4E D6 
-00034E70: Illegal                   E5 81 
+00034E70: asr.l #2, D1
 00034E72: Illegal                   E3 82 
 00034E74: add.l D1, D2              D4 81 
 00034E76: move.w D3, (0,A0D2.l)     31 83 28 00 
@@ -72275,16 +72275,16 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034EB4: beq.s 34F0A               67 54 
 00034EB6: move.l D1, D2             24 01 
 00034EB8: add.l ($4,A1), D2         D4 A9 00 04 
-00034EBC: Illegal                   E5 82 
+00034EBC: asr.l #2, D2
 00034EBE: move.l D1, D0             20 01 
-00034EC0: Illegal                   E5 81 
+00034EC0: asr.l #2, D1
 00034EC2: move.l D1, A4             28 41 
 00034EC4: clr.l (A4)+               42 9C 
 00034EC6: cmp.l A4, D2              B4 8C 
 00034EC8: bge.s 34EC4               6C FA 
 00034ECA: move.l ($30,A2), D3       26 2A 00 30 
 00034ECE: move.l D3, (4,A0D1.l)     21 83 18 04 
-00034ED2: Illegal                   E5 83 
+00034ED2: asr.l #2, D3
 00034ED4: move.l (0,A0D3.l), (0,A0D1.l)21 B0 38 00 18 00 
 00034EDA: move.l D0, (0,A0D3.l)     21 80 38 00 
 00034EDE: move.l A1, (C,A0D3.l)     21 89 38 0C 
@@ -72303,15 +72303,15 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034F08: bra.s 34EF8               60 EE 
 00034F0A: jmp (A6)                  4E D6 
 00034F0C: move.l D1, D0             20 01 
-00034F0E: Illegal                   E5 81 
+00034F0E: asr.l #2, D1
 00034F10: tst.l  (4,A0D1.l)         4A B0 18 04 
 00034F14: bne.s 34F46               66 30 
 00034F16: move.l ($30,A2), D3       26 2A 00 30 
 00034F1A: move.l D3, D2             24 03 
-00034F1C: Illegal                   E5 83 
+00034F1C: asr.l #2, D3
 00034F1E: move.l (4,A0D3.l), D3     26 30 38 04 
 00034F22: bgt.s 34F1A               6E F6 
-00034F24: Illegal                   E5 82 
+00034F24: asr.l #2, D2
 00034F26: move.l D2, D3             26 02 
 00034F28: move.l (0,A0D2.l), D2     24 30 28 00 
 00034F2C: beq.s 34F46               67 18 
@@ -72327,7 +72327,7 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034F46: moveq #$0, D1             72 00 
 00034F48: bra.s 34F44               60 FA 
 00034F4A: move.l D1, D3             26 01 
-00034F4C: Illegal                   E5 83 
+00034F4C: asr.l #2, D3
 00034F4E: move.l ($30,A2), D4       28 2A 00 30 
 00034F52: move.l D4, (4,A0D3.l)     21 84 38 04 
 00034F56: Illegal                   E5 84 
@@ -72340,7 +72340,7 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034F6C: cmp.l D4, D1              B2 84 
 00034F6E: beq.s 34F82               67 12 
 00034F70: move.l D1, D3             26 01 
-00034F72: Illegal                   E5 83 
+00034F72: asr.l #2, D3
 00034F74: Illegal                   E5 84 
 00034F76: move.l (4,A0D4.l), (4,A0D3.l)21 B0 48 04 38 04 
 00034F7C: clr.l (4,A0D4.l)          42 B0 48 04 
@@ -72351,13 +72351,13 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034F8A: Illegal                   E5 84 
 00034F8C: move.l (4,A0D4.l), D3     26 30 48 04 
 00034F90: move.l D3, ($30,A2)       25 43 00 30 
-00034F94: Illegal                   E5 83 
+00034F94: asr.l #2, D3
 00034F96: clr.l (4,A0D4.l)          42 B0 48 04 
 00034F9A: move.l A1, (C,A0D4.l)     21 89 48 0C 
 00034F9E: move.l (C,A0D3.l), A1     22 70 38 0C 
 00034FA2: jmp (A6)                  4E D6 
-00034FA4: Illegal                   E5 81 
-00034FA6: Illegal                   E5 82 
+00034FA4: asr.l #2, D1
+00034FA6: asr.l #2, D2
 00034FA8: move.l D1, A3             26 41 
 00034FAA: move.l D2, A4             28 42 
 00034FAC: moveq #$2, D3             76 02 
@@ -72612,7 +72612,7 @@ FF4D52: btst #0, A2               08 0A 00 00
 0003523E: bne.s 35238               66 F8 
 00035240: subq.l #1, A3             53 8B 
 00035242: move.l D2, D1             22 02 
-00035244: Illegal                   E5 82 
+00035244: asr.l #2, D2
 00035246: move.l D2, A4             28 42 
 00035248: move.w D0, D2             34 00 
 0003524A: lea (1,A4D0.w), A4        49 F4 00 01 
@@ -72637,9 +72637,9 @@ FF4D52: btst #0, A2               08 0A 00 00
 0003527C: clr.l (A3)+               42 9B 
 0003527E: dbra.s D2, 3527C          51 CA FF FC 
 00035282: jmp (A6)                  4E D6 
-00035284: Illegal                   E5 81 
+00035284: asr.l #2, D1
 00035286: move.l D1, A3             26 41 
-00035288: Illegal                   E5 82 
+00035288: asr.l #2, D2
 0003528A: move.l D2, A4             28 42 
 0003528C: moveq #$0, D0             70 00 
 0003528E: move.b (A3), D0           10 13 
@@ -72648,16 +72648,16 @@ FF4D52: btst #0, A2               08 0A 00 00
 00035296: jmp (A6)                  4E D6 
 00035298: tst.l  D3                 4A 83 
 0003529A: bmi.s 352AA               6B 0E 
-0003529C: Illegal                   E5 81 
+0003529C: asr.l #2, D1
 0003529E: move.l D1, A3             26 41 
-000352A0: Illegal                   E5 82 
+000352A0: asr.l #2, D2
 000352A2: move.l D2, A4             28 42 
 000352A4: move.l (A3)+, (A4)+       28 DB 
 000352A6: dbra.s D3, 352A4          51 CB FF FC 
 000352AA: jmp (A6)                  4E D6 
-000352AC: Illegal                   E5 81 
+000352AC: asr.l #2, D1
 000352AE: move.l D1, A3             26 41 
-000352B0: Illegal                   E5 82 
+000352B0: asr.l #2, D2
 000352B2: move.l D2, A4             28 42 
 000352B4: moveq #$0, D0             70 00 
 000352B6: moveq #$0, D1             72 00 
@@ -72666,9 +72666,9 @@ FF4D52: btst #0, A2               08 0A 00 00
 000352BC: move.l D1, (A4)+          28 C1 
 000352BE: dbra.s D0, 352BA          51 C8 FF FA 
 000352C2: jmp (A6)                  4E D6 
-000352C4: Illegal                   E5 81 
+000352C4: asr.l #2, D1
 000352C6: move.l D1, A3             26 41 
-000352C8: Illegal                   E5 82 
+000352C8: asr.l #2, D2
 000352CA: move.l D2, A4             28 42 
 000352CC: moveq #$0, D0             70 00 
 000352CE: move.b ($3,A3), D0        10 2B 00 03 
@@ -77788,75 +77788,76 @@ FF4D52: btst #0, A2               08 0A 00 00
 00038FFE: move.? D0, D0             00 00 
 00039000: move.? D0, D0             00 00 
 00039002: move.? D6, -(A1)          03 06 
-00039004: moveq #$8, D2             74 08 
-00039006: add.l A1, D2              D4 89 
-00039008: lsr.l  #2, D2             E4 8A 
-0003900A: move.l D2, ($4,A1)        23 42 00 04 
-0003900E: moveq #$4C, D3            76 4C 
-00039010: add.l A1, D3              D6 89 
-00039012: lsr.l  #2, D3             E4 8B 
-00039014: move.l D3, ($48,A1)       23 43 00 48 
-00039018: move.l #$B8, D4           28 3C 00 00 00 B8 
-0003901E: add.l A1, D4              D8 89 
-00039020: lsr.l  #2, D4             E4 8C 
-00039022: move.l D4, ($B4,A1)       23 44 00 B4 
-00039026: move.l #$E8, D5           2A 3C 00 00 00 E8 
-0003902C: add.l A1, D5              DA 89 
-0003902E: lsr.l  #2, D5             E4 8D 
-00039030: move.l D5, ($E4,A1)       23 45 00 E4 
-00039034: clr.l ($13C,A1)           42 A9 01 3C 
-00039038: move.l #$150, D0          20 3C 00 00 01 50 
-0003903E: move.l ($38,A2), A4       28 6A 00 38 
-00039042: jsr (A5)                  4E 95 
-00039044: move.l D1, ($144,A1)      23 41 01 44 
-00039048: tst.l  (A1)               4A 91 
-0003904A: bne.s 39056               66 00 00 0A 
-0003904E: move.l ($214,A2), D1      22 2A 02 14 
-00039052: bra.s 3905E               60 00 00 0A 
-00039056: move.l (A1), D1           22 11 
-00039058: lsd.l  #2, D1             E5 89 
-0003905A: move.l (8,A0D1.l), D1     22 30 18 08 
-0003905E: move.l D1, ($148,A1)      23 41 01 48 
-00039062: move.l #$158, D0          20 3C 00 00 01 58 
-00039068: move.l ($9C,A2), A4       28 6A 00 9C 
-0003906C: jsr (A5)                  4E 95 
-0003906E: move.l D1, ($14C,A1)      23 41 01 4C 
-00039072: move.l #$154, D2          24 3C 00 00 01 54 
-00039078: add.l A1, D2              D4 89 
-0003907A: lsr.l  #2, D2             E4 8A 
-0003907C: move.l D2, ($150,A1)      23 42 01 50 
-00039080: moveq #$F, D2             74 0F 
-00039082: move.l ($150,A1), D1      22 29 01 50 
-00039086: move.l #$1A4, D0          20 3C 00 00 01 A4 
-0003908C: move.l ($FFB0,A2), A4     28 6A FF B0 
-00039090: jsr (A5)                  4E 95 
-00039092: move.l ($150,A1), D3      26 29 01 50 
-00039096: move.l ($144,A1), D2      24 29 01 44 
-0003909A: moveq #$14, D1            72 14 
-0003909C: move.l #$1A4, D0          20 3C 00 00 01 A4 
-000390A2: move.l ($1BC,A2), A4      28 6A 01 BC 
-000390A6: jsr (A5)                  4E 95 
-000390A8: move.l ($150,A1), D1      22 29 01 50 
-000390AC: lsd.l  #2, D1             E5 89 
-000390AE: move.l ($4,A1), (18,A0D1.l)21 A9 00 04 18 18 
-000390B4: move.l ($150,A1), D1      22 29 01 50 
-000390B8: lsd.l  #2, D1             E5 89 
-000390BA: move.l ($48,A1), (10,A0D1.l)21 A9 00 48 18 10 
-000390C0: move.l ($150,A1), D1      22 29 01 50 
-000390C4: lsd.l  #2, D1             E5 89 
-000390C6: move.l ($B4,A1), (24,A0D1.l)21 A9 00 B4 18 24 
-000390CC: move.l ($150,A1), D1      22 29 01 50 
-000390D0: lsd.l  #2, D1             E5 89 
-000390D2: move.l ($E4,A1), (4,A0D1.l)21 A9 00 E4 18 04 
-000390D8: move.l (A1), D1           22 11 
-000390DA: move.l #$1A4, D0          20 3C 00 00 01 A4 
-000390E0: move.l ($148,A1), A4      28 69 01 48 
-000390E4: jsr (A5)                  4E 95 
-000390E6: move.l D1, ($148,A1)      23 41 01 48 
-000390EA: tst.l  D1                 4A 81 
-000390EC: ble.s 3910A               6F 00 00 1C 
-000390F0: moveq #$0, D1             72 00 
-000390F2: move.l #$1B0, D0          20 3C 00 00 01 B0 
+
+FF9004: moveq #$8, D2             74 08 
+FF9006: add.l A1, D2              D4 89 
+FF9008: lsr.l  #2, D2             E4 8A 
+FF900A: move.l D2, ($4,A1)        23 42 00 04 
+FF900E: moveq #$4C, D3            76 4C 
+FF9010: add.l A1, D3              D6 89 
+FF9012: lsr.l  #2, D3             E4 8B 
+FF9014: move.l D3, ($48,A1)       23 43 00 48 
+FF9018: move.l #$B8, D4           28 3C 00 00 00 B8 
+FF901E: add.l A1, D4              D8 89 
+FF9020: lsr.l  #2, D4             E4 8C 
+FF9022: move.l D4, ($B4,A1)       23 44 00 B4 
+FF9026: move.l #$E8, D5           2A 3C 00 00 00 E8 
+FF902C: add.l A1, D5              DA 89 
+FF902E: lsr.l  #2, D5             E4 8D 
+FF9030: move.l D5, ($E4,A1)       23 45 00 E4 
+FF9034: clr.l ($13C,A1)           42 A9 01 3C 
+FF9038: move.l #$150, D0          20 3C 00 00 01 50 
+FF903E: move.l ($38,A2), A4       28 6A 00 38 
+FF9042: jsr (A5)                  4E 95 
+FF9044: move.l D1, ($144,A1)      23 41 01 44 
+FF9048: tst.l  (A1)               4A 91 
+FF904A: bne.s 39056               66 00 00 0A 
+FF904E: move.l ($214,A2), D1      22 2A 02 14 
+FF9052: bra.s 3905E               60 00 00 0A 
+FF9056: move.l (A1), D1           22 11 
+FF9058: lsd.l  #2, D1             E5 89 
+FF905A: move.l (8,A0D1.l), D1     22 30 18 08 
+FF905E: move.l D1, ($148,A1)      23 41 01 48 
+FF9062: move.l #$158, D0          20 3C 00 00 01 58 
+FF9068: move.l ($9C,A2), A4       28 6A 00 9C 
+FF906C: jsr (A5)                  4E 95 
+FF906E: move.l D1, ($14C,A1)      23 41 01 4C 
+FF9072: move.l #$154, D2          24 3C 00 00 01 54 
+FF9078: add.l A1, D2              D4 89 
+FF907A: lsr.l  #2, D2             E4 8A 
+FF907C: move.l D2, ($150,A1)      23 42 01 50 
+FF9080: moveq #$F, D2             74 0F 
+FF9082: move.l ($150,A1), D1      22 29 01 50 
+FF9086: move.l #$1A4, D0          20 3C 00 00 01 A4 
+FF908C: move.l ($FFB0,A2), A4     28 6A FF B0 
+FF9090: jsr (A5)                  4E 95 
+FF9092: move.l ($150,A1), D3      26 29 01 50 
+FF9096: move.l ($144,A1), D2      24 29 01 44 
+FF909A: moveq #$14, D1            72 14 
+FF909C: move.l #$1A4, D0          20 3C 00 00 01 A4 
+FF90A2: move.l ($1BC,A2), A4      28 6A 01 BC 
+FF90A6: jsr (A5)                  4E 95 
+FF90A8: move.l ($150,A1), D1      22 29 01 50 
+FF90AC: lsd.l  #2, D1             E5 89 
+FF90AE: move.l ($4,A1), (18,A0D1.l)21 A9 00 04 18 18 
+FF90B4: move.l ($150,A1), D1      22 29 01 50 
+FF90B8: lsd.l  #2, D1             E5 89 
+FF90BA: move.l ($48,A1), (10,A0D1.l)21 A9 00 48 18 10 
+FF90C0: move.l ($150,A1), D1      22 29 01 50 
+FF90C4: lsd.l  #2, D1             E5 89 
+FF90C6: move.l ($B4,A1), (24,A0D1.l)21 A9 00 B4 18 24 
+FF90CC: move.l ($150,A1), D1      22 29 01 50 
+FF90D0: lsd.l  #2, D1             E5 89 
+FF90D2: move.l ($E4,A1), (4,A0D1.l)21 A9 00 E4 18 04 
+FF90D8: move.l (A1), D1           22 11 
+FF90DA: move.l #$1A4, D0          20 3C 00 00 01 A4 
+FF90E0: move.l ($148,A1), A4      28 69 01 48 
+FF90E4: jsr (A5)                  4E 95 
+FF90E6: move.l D1, ($148,A1)      23 41 01 48 
+FF90EA: tst.l  D1                 4A 81 
+FF90EC: ble.s 3910A               6F 00 00 1C 
+FF90F0: moveq #$0, D1             72 00 
+FF90F2: move.l #$1B0, D0          20 3C 00 00 01 B0 
 000390F8: move.l ($28,A2), A4       28 6A 00 28 
 000390FC: jsr (A5)                  4E 95 
 000390FE: move.l #$1A4, D0          20 3C 00 00 01 A4 
