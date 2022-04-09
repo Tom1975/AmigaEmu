@@ -1,5 +1,35 @@
 SYNCHRO LOGIQUE : 
 
+
+TRACK LOAD :
+
+FEA7E8 -> Sortie trackload (6a98)
+			6a5c = out dma (debut)
+FEACFA -> 	Mise en place blit 	
+***	Source : A1 (639a => 00f298 au lieu de 6a5C !!
+	element depuis FEA8D2 : A1 incorrect !
+	FEA8A8 : On additionne des choses a A4... 
+	FEA892: move.b ($49,A3), D0 => D0 = 20 !!! => 6081h !
+	
+	issue de Command 2 FEA762 => D1 = (3)20 !!! 
+	FEA182 ?? (3e apres insertion disk)
+	(FEA060 appel de command 2 ( D1 = 320 !!)
+	FEA02C puis )
+	
+	FEA198: divu #$B, D0 => 370 pour d0 donne 3200050 (attendu 50) ?!!!!
+	
+	
+	63d8 : secteur en cours ?
+	6038 + 49h = secteur total ?
+		
+			 addr_a f496 - rempli de 0...
+			 addr_b f696 - rempli de 0...
+			 addr_c bab4
+			 addr_d c662
+			 32*8 =  256
+
+RETOUR track 40 : FEA7E8 
+
 Track buffer : 6a5c
 *** Main thread--q
 FE8A84 -> FE8A9A => Attente d'une disquette
@@ -14,31 +44,45 @@ FEA8C0 => FEACB2
 FEA8D6 => Decode fait
 *** Main thread
 
-FE8A2C => Execute bootcode
-FE8B00 => FE8DD0
+FE8A2C => Execute bootcode Ok
+FE8B00 => FE8DD0 ok
 FE8B38 => Jmp FF4290 : workbench.task !
-FF45B6 => Ok
+FF4346 => ok
+FF458C => ok
+FF45B6 => ok
+FF45EC => ok
+
 
 Creation InitialCli
-FF4774 : Start
-FF48D6
+FF4774 : Start ok
+FF48D6 : ok
 FF490A => FF47C8
-FF47D6
-FF44B4
-FF49C8
-
+FF47D6 : ok
+FF44B4 : ok
+FF49C8 : ok
+FF4A18 : => On sort alors qu'on devrait faire des boucles ?
+CELA DIT : boucle créé ok
 (not called)
 FF4B40 Open dos library
 FF439E PutMsg ??
 
-
-
-
 Step en serie : (trackdisk)
 
-*** LECTURE TRACK 0 x2 : TO CHECK !!
-
 Puis :
+
+TRACK 40, lecture =>
+Fin de lecture : 
+FEA580
+FEAFE2 
+	FEAF4C
+	FEB0B2...
+	FEA8D6 = pas la meme chose !!
+	destination : 6a58
+	****** ERROR 1A = not enough sectors!  TDERR_TooFewSecs	=> change track/side = reset head counter ?!
+	En sortie de FEA8D6 : not correct
+FEAF3A
+
+
 
 DoIO <- FEA514 <- FEA4E2 <- FEA44A <- FEA9B6 <- FEA7E8 <- FEA062
 threads : 

@@ -2779,7 +2779,7 @@ unsigned int M68k::OpcodeDivu()
       return true;
    }
    unsigned int result = s1 / s2;
-   unsigned short rest = s1 - (s1 / s2);
+   unsigned short rest = s1 - ((s1 / s2)*s2);
 
    if (result > 0x10000)
    {

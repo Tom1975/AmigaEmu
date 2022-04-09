@@ -238,7 +238,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
  
    // add sectors
    size_t stream_index = 0;
-   size_t stream_in = 0;
+   size_t stream_in = track_number * 11 * 512;
    for (size_t s = 0; s < nb_sectors; s++)
    {
       // SYNC bits : 0xAAAAAAAA

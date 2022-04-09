@@ -58747,7 +58747,7 @@ FEA820: move.b ($49,A3), D0       10 2B 00 49
 FEA824: sub.b  ($3,A0), D0        90 28 00 03 
 FEA828: bpl.s FEA82E               6A 04 
 FEA82A: addi.b #$B, D0            06 00 00 0B 
-FEA82E: mulu #$440, D0            C0 FC 04 40 
+FEA82E: mulu #$440, D0           	; prepare an offset to MFM 
 FEA832: lea ($680,A0), A4         49 E8 06 80 
 FEA836: add.l D0, A4              D9 C0 
 FEA838: btst #0, ($40,A3)         08 2B 00 00 00 40 
@@ -58769,15 +58769,15 @@ FEA878: lea ($40,A4), A0          41 EC 00 40
 FEA87C: move.w #$400, D1          32 3C 04 00 
 FEA880: bsr 2ADA4                 61 00 05 22 
 FEA884: lea ($38,A4), A0          41 EC 00 38 
-FEA888: bsr 2AD46                 61 00 04 BC 
-FEA88C: bra.s 2A8D6               60 00 00 48 
+FEA888: bsr FEAD46                 61 00 04 BC 
+FEA88C: bra.s FEA8D6               60 00 00 48 
 FEA890: moveq #$0, D0             70 00 
 FEA892: move.b ($49,A3), D0       10 2B 00 49 
 FEA896: sub.b  ($3,A0), D0        90 28 00 03 
-FEA89A: bpl.s 2A8A0               6A 04 
+FEA89A: bpl.s FEA8A0               6A 04 
 FEA89C: addi.b #$B, D0            06 00 00 0B 
 FEA8A0: mulu #$440, D0            C0 FC 04 40 
-FEA8A4: lea ($680,A0), A4         49 E8 06 80 
+FEA8A4: lea ($680,A0), A4         	; ptr to track MFM
 FEA8A8: add.l D0, A4              D9 C0 
 FEA8AA: btst #0, ($40,A3)         08 2B 00 00 00 40 
 FEA8B0: beq.s FEA8C4               67 12 
@@ -58864,7 +58864,7 @@ FEA9C2: tst.l  D0                 4A 80
 FEA9C4: beq.s FEA9CE               	; Read track ?
 FEA9C6: move.b D0, ($3,A2)        15 40 00 03 
 FEA9CA: bra.s FEA9F8               60 00 00 2C 
-FEA9CE: bsr FEAFE2                 61 00 06 12 
+FEA9CE: bsr FEAFE2                 	; Decode and check
 FEA9D2: move.b D0, ($3,A2)        15 40 00 03 
 FEA9D6: cmp.b #$B, D0             0C 00 00 0B 
 FEA9DA: bcs.s FEA9F8               65 1C 
@@ -59096,6 +59096,7 @@ FEACEC: unlk A2                   4E 5A
 FEACEE: rts                       4E 75 
 
 ; Blit routine
+; A1 : blit function
 FEACF0: move.l A5, -(SP)          2F 0D 
 FEACF2: move.l A1, A5             2A 49 
 FEACF4: bsr FEB2CC                 ; Mise  en forme Mod, mask, C Dar
@@ -59433,7 +59434,7 @@ FEB0AA: move.l D5, A0             20 45
 FEB0AC: move.l A2, A1             22 4A 
 FEB0AE: move.l D2, D1             22 02 
 FEB0B0: move.l D0, D4             28 00 
-FEB0B2: bsr FEB214                	; 
+FEB0B2: bsr FEB214                	; Blit to decode MFM
 FEB0B6: moveq #$0, D2             74 00 
 FEB0B8: move.b D3, D2             14 03 
 FEB0BA: subi.l #$B, D2            	; 11 sector max
@@ -59552,7 +59553,9 @@ FEB20E: lsr.w  D2, D1             E4 69
 FEB210: or.w  D1, D0              80 41 
 FEB212: rts                       4E 75 
 
-
+; Decode MFM
+;
+;
 FEB214: link A2, #$FFE2           4E 52 FF E2 
 FEB218: move.b D1, ($FFF8,A2)     15 41 FF F8 
 FEB21C: tst.l  D1                 4A 81 

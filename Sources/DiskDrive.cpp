@@ -64,6 +64,8 @@ void DiskDrive::Step()
    }
 
    LOG("DiskDrive : STEP to %i", track_);
+
+   head_ = 0;
 }
 
 void DiskDrive::SetDIR(bool set)
