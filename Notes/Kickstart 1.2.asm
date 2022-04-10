@@ -58802,10 +58802,10 @@ FEA8FE: bcc.s FEA920               64 20
 FEA900: move.l ($4E,A3), A2       24 6B 00 4E 
 FEA904: addq.b #1, ($49,A3)       52 2B 00 49 
 FEA908: cmp.b #$B, ($49,A3)       0C 2B 00 0B 00 49 
-FEA90E: blt.s 2A804               6D 00 FE F4 
+FEA90E: blt.s FEA804               6D 00 FE F4 
 FEA912: move.b #$0, ($49,A3)      17 7C 00 00 00 49 
 FEA918: addq.w #1, ($4A,A3)       52 6B 00 4A 
-FEA91C: bra.s 2A7B8               60 00 FE 9A 
+FEA91C: bra.s FEA7B8               60 00 FE 9A 
 FEA920: move.l ($44,A3), A1       22 6B 00 44 
 FEA924: bsr FEA1B0                 61 00 F8 8A 
 FEA928: bra.s FEA936               60 0C 
