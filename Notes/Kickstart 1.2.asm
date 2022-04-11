@@ -51476,25 +51476,25 @@ FE4BC6: move.l D0, ($1A,A4)       29 40 00 1A
 00024DC6: move.l D0, D2             24 00 
 00024DC8: move.l D1, D3             26 01 
 00024DCA: addq.b #1, ($127,A6)      52 2E 01 27 
-00024DCE: jsr ($FFE2,A5)            4E AD FF E2 
-00024DD2: move.l D0, D4             28 00 
-00024DD4: bne.s 24E0E               66 38 
-00024DD6: lea 24DBC(PC), A2         45 FA FF E4 
-00024DDA: lea ($17A,A6), A0         41 EE 01 7A 
-00024DDE: bsr 24E1A                 61 00 00 3A 
-00024DE2: lea 24DB6(PC), A2         45 FA FF D2 
-00024DE6: lea ($15E,A6), A0         41 EE 01 5E 
-00024DEA: bsr 24E1A                 61 00 00 2E 
-00024DEE: move.l D2, D0             20 02 
-00024DF0: move.l D3, D1             22 03 
-00024DF2: jsr ($FFE2,A5)            4E AD FF E2 
-00024DF6: move.l D0, D4             28 00 
-00024DF8: bne.s 24E0E               66 14 
-00024DFA: move.l ($114,A6), A0      20 6E 01 14 
-00024DFE: cmp.b #$D, ($8,A0)        0C 28 00 0D 00 08 
-00024E04: bne.s 24E0E               66 08 
-00024E06: move.l #$67, ($94,A0)     21 7C 00 00 00 67 00 94 
-00024E0E: jsr ($FF76,A6)            4E AE FF 76 
+FE4DCE: jsr ($FFE2,A5)            	; AllocMem
+FE4DD2: move.l D0, D4             28 00 
+FE4DD4: bne.s 24E0E               66 38 
+FE4DD6: lea 24DBC(PC), A2         45 FA FF E4 
+FE4DDA: lea ($17A,A6), A0         41 EE 01 7A 
+FE4DDE: bsr 24E1A                 61 00 00 3A 
+FE4DE2: lea 24DB6(PC), A2         45 FA FF D2 
+FE4DE6: lea ($15E,A6), A0         41 EE 01 5E 
+FE4DEA: bsr 24E1A                 61 00 00 2E 
+FE4DEE: move.l D2, D0             20 02 
+FE4DF0: move.l D3, D1             22 03 
+FE4DF2: jsr ($FFE2,A5)            	; Permit
+FE4DF6: move.l D0, D4             28 00 
+FE4DF8: bne.s 24E0E               66 14 
+FE4DFA: move.l ($114,A6), A0      20 6E 01 14 
+FE4DFE: cmp.b #$D, ($8,A0)        0C 28 00 0D 00 08 
+FE4E04: bne.s 24E0E               66 08 
+FE4E06: move.l #$67, ($94,A0)     21 7C 00 00 00 67 00 94 
+FE4E0E: jsr ($FF76,A6)            4E AE FF 76 
 00024E12: move.l D4, D0             20 04 
 00024E14: movem.l (SP)+, D2/D3/D4/A2/A34C DF 0C 1C 
 00024E18: rts                       4E 75 
@@ -71812,10 +71812,11 @@ FF49A8: asr.l #2, D1
 FF49AA: move.l D1, ($A,A1)        23 41 00 0A 
 FF49AE: clr.l ($0,A1)             42 A9 00 00 
 FF49B2: clr.l ($4,A1)             42 A9 00 04 
-FF49B6: jsr ($FE92,A6)            4E AE FE 92 
+FF49B6: jsr ($FE92,A6)            	; PutMsg
 FF49BA: movem.l (SP)+, /A0/A1/A5/A64C DF 63 00 
 FF49BE: moveq #$1, D1             72 01 
 FF49C0: jmp (A6)                  4E D6 
+
 FF49C2: moveq #$65, D1            72 65 
 FF49C4: bra.s FF449C               60 00 FA D6 
 FF49C8: movem.l A1/A5/A6, -(SP)   48 E7 00 46 
@@ -73187,8 +73188,8 @@ FF5296: jmp (A6)                  4E D6
 000358D0: move.l ($1FC,A2), A4      28 6A 01 FC 
 000358D4: jsr (A5)                  4E 95 
 000358D6: jmp (A6)                  4E D6 
-000358D8: move.l D2, ($30,A1)       23 42 00 30 
-000358DC: moveq #$38, D5            7A 38 
+FF58D8: move.l D2, ($30,A1)       23 42 00 30 
+FF58DC: moveq #$38, D5            7A 38 
 FF58DE: add.l A1, D5              DA 89 
 FF58E0: lsr.l  #2, D5             E4 8D 
 FF58E2: move.l D5, ($34,A1)       23 45 00 34 
@@ -73200,13 +73201,13 @@ FF58EE: moveq #$58, D0            70 58
 FF58F0: move.l ($A8,A2), A4       28 6A 00 A8 
 FF58F4: jsr (A5)                  4E 95 
 FF58F6: tst.l  D1                 4A 81 
-FF58F8: bne.s 3590E               66 00 00 14 
+FF58F8: bne.s FF590E               66 00 00 14 
 FF58FC: move.l #$87000003, D1     22 3C 87 00 00 03 
 FF5902: moveq #$58, D0            70 58 
 FF5904: move.l ($98,A2), A4       28 6A 00 98 
 FF5908: jsr (A5)                  4E 95 
-FF590A: bra.s 3594C               60 00 00 40 
-FF590E: bra.s 35920               60 00 00 10 
+FF590A: bra.s FF594C               60 00 00 40 
+FF590E: bra.s FF5920               60 00 00 10 
 FF5912: move.l #$87000004, D1     22 3C 87 00 00 04 
 FF5918: moveq #$58, D0            70 58 
 FF591A: move.l ($98,A2), A4       28 6A 00 98 
@@ -73922,7 +73923,7 @@ FF6190: jsr (A5)                  4E 95
 FF6192: move.l ($8,A1), D1        22 29 00 08 
 FF6196: lsd.l  #2, D1             E5 89 
 FF6198: move.l ($10,A1), (28,A0D1.l)21 A9 00 10 18 28 
-FF619E: move.l #$FFFFFF7C, D1     22 3C FF FF FF 7C 
+FF619E: move.l #$FFFFFF7C, D1     	; Forbid
 FF61A4: moveq #$20, D0            70 20 
 FF61A6: move.l ($160,A2), A4      28 6A 01 60 
 FF61AA: jsr (A5)                  4E 95 
@@ -73934,64 +73935,64 @@ FF61B8: move.l (4,A0D1.l), (0,A0D2.l)21 B0 18 04 28 00
 FF61BE: move.l ($4,A1), D1        22 29 00 04 
 FF61C2: lsd.l  #2, D1             E5 89 
 FF61C4: move.l ($8,A1), (4,A0D1.l)21 A9 00 08 18 04 
-FF61CA: move.l #$FFFFFF76, D1     22 3C FF FF FF 76 
+FF61CA: move.l #$FFFFFF76, D1     	; Permit
 FF61D0: moveq #$20, D0            70 20 
-000361D2: move.l ($160,A2), A4      28 6A 01 60 
-000361D6: jsr (A5)                  4E 95 
-000361D8: move.l ($8,A1), D1        22 29 00 08 
-000361DC: jmp (A6)                  4E D6 
-000361DE: nop
-000361E0: move.l D1, D3             26 01 
-000361E2: lsd.l  #2, D3             E5 8B 
-000361E4: move.l (20,A0D3.l), ($8,A1)23 70 38 20 00 08 
-000361EA: clr.l ($C,A1)             42 A9 00 0C 
-000361EE: moveq #$1C, D0            70 1C 
-000361F0: move.l ($164,A2), A4      28 6A 01 64 
-000361F4: jsr (A5)                  4E 95 
-000361F6: move.l D1, ($10,A1)       23 41 00 10 
-000361FA: clr.l ($14,A1)            42 A9 00 14 
-000361FE: move.l (A1), D2           24 11 
-00036200: lsd.l  #2, D2             E5 8A 
-00036202: move.l (24,A0D2.l), ($18,A1)23 70 28 24 00 18 
-00036208: move.l D2, D3             26 02 
-0003620A: move.l D2, D4             28 02 
-0003620C: move.l (28,A0D2.l), ($1C,A1)23 70 28 28 00 1C 
-00036212: move.l (18,A0D3.l), ($20,A1)23 70 38 18 00 20 
-00036218: move.l (14,A0D4.l), ($24,A1)23 70 48 14 00 24 
-0003621E: tst.l  ($8,A1)            4A A9 00 08 
-00036222: bne.s 3624A               66 00 00 26 
-00036226: move.l (10,A0D2.l), D1    22 30 28 10 
-0003622A: moveq #$34, D0            70 34 
-0003622C: move.l ($144,A2), A4      28 6A 01 44 
-00036230: jsr (A5)                  4E 95 
-00036232: move.l D1, ($8,A1)        23 41 00 08 
-00036236: tst.l  D1                 4A 81 
-00036238: bne.s 36240               66 00 00 06 
-0003623C: moveq #$0, D1             72 00 
-0003623E: jmp (A6)                  4E D6 
-00036240: move.l (A1), D1           22 11 
-00036242: lsd.l  #2, D1             E5 89 
-00036244: move.l ($8,A1), (20,A0D1.l)21 A9 00 08 18 20 
-0003624A: moveq #$FF, D1            72 FF 
-0003624C: cmp.l ($18,A1), D1        B2 A9 00 18 
-00036250: bne.s 3627A               66 00 00 28 
-00036254: move.l ($1C,A1), D2       24 29 00 1C 
-00036258: lsd.l  #2, D2             E5 8A 
-0003625A: addq.l #1, D2             52 82 
-0003625C: move.l ($24,A1), D4       28 29 00 24 
-00036260: move.l ($8,A1), D3        26 29 00 08 
-00036264: move.l D2, D1             22 02 
-00036266: move.l ($20,A1), D2       24 29 00 20 
-0003626A: moveq #$34, D0            70 34 
-0003626C: move.l ($FFB8,A2), A4     28 6A FF B8 
-00036270: jsr (A5)                  4E 95 
-00036272: move.l D1, ($C,A1)        23 41 00 0C 
-00036276: bra.s 36310               60 00 00 98 
-0003627A: moveq #$3, D1             72 03 
-0003627C: moveq #$34, D0            70 34 
-0003627E: move.l ($74,A2), A4       28 6A 00 74 
-00036282: jsr (A5)                  4E 95 
-00036284: move.l D1, ($14,A1)       23 41 00 14 
+FF61D2: move.l ($160,A2), A4      28 6A 01 60 
+FF61D6: jsr (A5)                  4E 95 
+FF61D8: move.l ($8,A1), D1        22 29 00 08 
+FF61DC: jmp (A6)                  4E D6 
+FF61DE: nop
+FF61E0: move.l D1, D3             26 01 
+FF61E2: lsd.l  #2, D3             E5 8B 
+FF61E4: move.l (20,A0D3.l), ($8,A1)23 70 38 20 00 08 
+FF61EA: clr.l ($C,A1)             42 A9 00 0C 
+FF61EE: moveq #$1C, D0            70 1C 
+FF61F0: move.l ($164,A2), A4      28 6A 01 64 
+FF61F4: jsr (A5)                  4E 95 
+FF61F6: move.l D1, ($10,A1)       23 41 00 10 
+FF61FA: clr.l ($14,A1)            42 A9 00 14 
+FF61FE: move.l (A1), D2           24 11 
+FF6200: lsd.l  #2, D2             E5 8A 
+FF6202: move.l (24,A0D2.l), ($18,A1)23 70 28 24 00 18 
+FF6208: move.l D2, D3             26 02 
+FF620A: move.l D2, D4             28 02 
+FF620C: move.l (28,A0D2.l), ($1C,A1)23 70 28 28 00 1C 
+FF6212: move.l (18,A0D3.l), ($20,A1)23 70 38 18 00 20 
+FF6218: move.l (14,A0D4.l), ($24,A1)23 70 48 14 00 24 
+FF621E: tst.l  ($8,A1)            4A A9 00 08 
+FF6222: bne.s 3624A               66 00 00 26 
+FF6226: move.l (10,A0D2.l), D1    22 30 28 10 
+FF622A: moveq #$34, D0            70 34 
+FF622C: move.l ($144,A2), A4      28 6A 01 44 
+FF6230: jsr (A5)                  4E 95 
+FF6232: move.l D1, ($8,A1)        23 41 00 08 
+FF6236: tst.l  D1                 4A 81 
+FF6238: bne.s 36240               66 00 00 06 
+FF623C: moveq #$0, D1             72 00 
+FF623E: jmp (A6)                  4E D6 
+FF6240: move.l (A1), D1           22 11 
+FF6242: lsd.l  #2, D1             E5 89 
+FF6244: move.l ($8,A1), (20,A0D1.l)21 A9 00 08 18 20 
+FF624A: moveq #$FF, D1            72 FF 
+FF624C: cmp.l ($18,A1), D1        B2 A9 00 18 
+FF6250: bne.s 3627A               66 00 00 28 
+FF6254: move.l ($1C,A1), D2       24 29 00 1C 
+FF6258: lsd.l  #2, D2             E5 8A 
+FF625A: addq.l #1, D2             52 82 
+FF625C: move.l ($24,A1), D4       28 29 00 24 
+FF6260: move.l ($8,A1), D3        26 29 00 08 
+FF6264: move.l D2, D1             22 02 
+FF6266: move.l ($20,A1), D2       24 29 00 20 
+FF626A: moveq #$34, D0            70 34 
+FF626C: move.l ($FFB8,A2), A4     28 6A FF B8 
+FF6270: jsr (A5)                  4E 95 
+FF6272: move.l D1, ($C,A1)        23 41 00 0C 
+FF6276: bra.s 36310               60 00 00 98 
+FF627A: moveq #$3, D1             72 03 
+FF627C: moveq #$34, D0            70 34 
+FF627E: move.l ($74,A2), A4       28 6A 00 74 
+FF6282: jsr (A5)                  4E 95 
+FF6284: move.l D1, ($14,A1)       23 41 00 14 
 00036288: tst.l  D1                 4A 81 
 0003628A: bne.s 36292               66 00 00 06 
 0003628E: moveq #$0, D1             72 00 
@@ -75216,59 +75217,59 @@ FF61D0: moveq #$20, D0            70 20
 000370BE: jmp (A6)                  4E D6 
 000370C0: moveq #$F, D2             74 0F 
 000370C2: move.l D2, ($4,A1)        23 42 00 04 
-000370C6: move.l D1, D3             26 01 
-000370C8: lsd.l  #2, D3             E5 8B 
-000370CA: move.l (0,A0D3.l), ($8,A1)23 70 38 00 00 08 
-000370D0: move.l ($8,A1), ($10,A1)  23 69 00 08 00 10 
-000370D6: moveq #$1, D1             72 01 
-000370D8: move.l D1, ($14,A1)       23 41 00 14 
-000370DC: cmp.l ($10,A1), D1        B2 A9 00 10 
-000370E0: bgt.s 37134               6E 00 00 52 
-000370E4: add.l (A1), D1            D2 91 
-000370E6: lsd.l  #2, D1             E5 89 
-000370E8: move.l (0,A0D1.l), ($18,A1)23 70 18 00 00 18 
-000370EE: bra.s 37126               60 00 00 36 
-000370F2: move.l ($18,A1), D1       22 29 00 18 
-000370F6: lsd.l  #2, D1             E5 89 
-000370F8: move.l ($18,A1), D2       24 29 00 18 
-000370FC: add.l (4,A0D1.l), D2      D4 B0 18 04 
-00037100: lsd.l  #2, D2             E5 8A 
-00037102: move.l (0,A0D2.l), ($1C,A1)23 70 28 00 00 1C 
-00037108: move.l ($4,A1), D2        24 29 00 04 
-0003710C: cmp.l ($1C,A1), D2        B4 A9 00 1C 
-00037110: bge.s 3711A               6C 00 00 08 
-00037114: move.l ($1C,A1), ($4,A1)  23 69 00 1C 00 04 
-0003711A: move.l ($18,A1), D1       22 29 00 18 
-0003711E: lsd.l  #2, D1             E5 89 
-00037120: move.l (0,A0D1.l), ($18,A1)23 70 18 00 00 18 
-00037126: tst.l  ($18,A1)           4A A9 00 18 
-0003712A: bne.s 370F2               66 C6 
-0003712C: moveq #$1, D1             72 01 
-0003712E: add.l ($14,A1), D1        D2 A9 00 14 
-00037132: bra.s 370D8               60 A4 
-00037134: moveq #$32, D1            72 32 
-00037136: add.l ($4,A1), D1         D2 A9 00 04 
-0003713A: moveq #$1C, D0            70 1C 
-0003713C: move.l ($74,A2), A4       28 6A 00 74 
-00037140: jsr (A5)                  4E 95 
-00037142: move.l D1, ($C,A1)        23 41 00 0C 
-00037146: tst.l  D1                 4A 81 
-00037148: bne.s 37150               66 00 00 06 
-0003714C: moveq #$0, D1             72 00 
-0003714E: jmp (A6)                  4E D6 
-00037150: moveq #$32, D1            72 32 
-00037152: add.l D1, ($C,A1)         D3 A9 00 0C 
-00037156: move.l ($C,A1), D2        24 29 00 0C 
-0003715A: lsd.l  #2, D2             E5 8A 
-0003715C: move.l ($4,A1), (0,A0D2.l)21 A9 00 04 28 00 
-00037162: move.l ($C,A1), D1        22 29 00 0C 
-00037166: jmp (A6)                  4E D6 
-00037168: move.l D3, D4             28 03 
-0003716A: move.l D2, D3             26 02 
-0003716C: move.l D1, D2             24 01 
-0003716E: move.l ($144,A2), D1      22 2A 01 44 
-00037172: moveq #$18, D0            70 18 
-00037174: lea ($EA74,A4), A4        49 EC EA 74 
+FF70C6: move.l D1, D3             26 01 
+FF70C8: lsd.l  #2, D3             E5 8B 
+FF70CA: move.l (0,A0D3.l), ($8,A1)23 70 38 00 00 08 
+FF70D0: move.l ($8,A1), ($10,A1)  23 69 00 08 00 10 
+FF70D6: moveq #$1, D1             72 01 
+FF70D8: move.l D1, ($14,A1)       23 41 00 14 
+FF70DC: cmp.l ($10,A1), D1        B2 A9 00 10 
+FF70E0: bgt.s FF7134               6E 00 00 52 
+FF70E4: add.l (A1), D1            D2 91 
+FF70E6: lsd.l  #2, D1             E5 89 
+FF70E8: move.l (0,A0D1.l), ($18,A1)23 70 18 00 00 18 
+FF70EE: bra.s FF7126               60 00 00 36 
+FF70F2: move.l ($18,A1), D1       22 29 00 18 
+FF70F6: lsd.l  #2, D1             E5 89 
+FF70F8: move.l ($18,A1), D2       24 29 00 18 
+FF70FC: add.l (4,A0D1.l), D2      D4 B0 18 04 
+FF7100: lsd.l  #2, D2             E5 8A 
+FF7102: move.l (0,A0D2.l), ($1C,A1)23 70 28 00 00 1C 
+FF7108: move.l ($4,A1), D2        24 29 00 04 
+FF710C: cmp.l ($1C,A1), D2        B4 A9 00 1C 
+FF7110: bge.s FF711A               6C 00 00 08 
+FF7114: move.l ($1C,A1), ($4,A1)  23 69 00 1C 00 04 
+FF711A: move.l ($18,A1), D1       22 29 00 18 
+FF711E: lsd.l  #2, D1             E5 89 
+FF7120: move.l (0,A0D1.l), ($18,A1)23 70 18 00 00 18 
+FF7126: tst.l  ($18,A1)           4A A9 00 18 
+FF712A: bne.s FF70F2               66 C6 
+FF712C: moveq #$1, D1             72 01 
+FF712E: add.l ($14,A1), D1        D2 A9 00 14 
+FF7132: bra.s FF70D8               60 A4 
+FF7134: moveq #$32, D1            72 32 
+FF7136: add.l ($4,A1), D1         D2 A9 00 04 
+FF713A: moveq #$1C, D0            70 1C 
+FF713C: move.l ($74,A2), A4       28 6A 00 74 
+FF7140: jsr (A5)                  4E 95 
+FF7142: move.l D1, ($C,A1)        23 41 00 0C 
+FF7146: tst.l  D1                 4A 81 
+FF7148: bne.s FF7150               66 00 00 06 
+FF714C: moveq #$0, D1             72 00 
+FF714E: jmp (A6)                  4E D6 
+FF7150: moveq #$32, D1            72 32 
+FF7152: add.l D1, ($C,A1)         D3 A9 00 0C 
+FF7156: move.l ($C,A1), D2        24 29 00 0C 
+FF715A: lsd.l  #2, D2             E5 8A 
+FF715C: move.l ($4,A1), (0,A0D2.l)21 A9 00 04 28 00 
+FF7162: move.l ($C,A1), D1        22 29 00 0C 
+FF7166: jmp (A6)                  4E D6 
+FF7168: move.l D3, D4             28 03 
+FF716A: move.l D2, D3             26 02 
+FF716C: move.l D1, D2             24 01 
+FF716E: move.l ($144,A2), D1      22 2A 01 44 
+FF7172: moveq #$18, D0            70 18 
+FF7174: lea ($EA74,A4), A4        49 EC EA 74 
 00037178: jsr (A5)                  4E 95 
 0003717A: jmp (A6)                  4E D6 
 0003717C: clr.l ($C,A1)             42 A9 00 0C 
@@ -77063,72 +77064,72 @@ FF80E0: bra.s 38028               60 00 FF 46
 0003878C: move.l ($160,A2), A4      28 6A 01 60 
 00038790: jsr (A5)                  4E 95 
 00038792: move.l D1, ($170,A2)      25 41 01 70 
-00038796: move.l ($C,A1), D2        24 29 00 0C 
-0003879A: lsd.l  #2, D2             E5 8A 
-0003879C: move.l ($1C,A1), D3       26 29 00 1C 
-000387A0: lsd.l  #2, D3             E5 8B 
-000387A2: move.l (1C,A0D2.l), (14,A0D3.l)21 B0 28 1C 38 14 
-000387A8: moveq #$0, D1             72 00 
-000387AA: move.l D1, ($2C,A1)       23 41 00 2C 
-000387AE: moveq #$3, D2             74 03 
-000387B0: cmp.l D2, D1              B2 82 
-000387B2: bgt.s 38984               6E 00 01 D0 
+FF8796: move.l ($C,A1), D2        24 29 00 0C 
+FF879A: lsd.l  #2, D2             E5 8A 
+FF879C: move.l ($1C,A1), D3       26 29 00 1C 
+FF87A0: lsd.l  #2, D3             E5 8B 
+FF87A2: move.l (1C,A0D2.l), (14,A0D3.l)21 B0 28 1C 38 14 
+FF87A8: moveq #$0, D1             72 00 
+FF87AA: move.l D1, ($2C,A1)       23 41 00 2C 
+FF87AE: moveq #$3, D2             74 03 
+FF87B0: cmp.l D2, D1              B2 82 
+FF87B2: bgt.s FF8984               6E 00 01 D0 
 000387B6: moveq #$4, D1             72 04 
 000387B8: moveq #$3C, D0            70 3C 
 000387BA: move.l ($74,A2), A4       28 6A 00 74 
 000387BE: jsr (A5)                  4E 95 
-000387C0: move.l D1, ($30,A1)       23 41 00 30 
-000387C4: move.l #$10001, D2        24 3C 00 01 00 01 
-000387CA: moveq #$3, D1             72 03 
-000387CC: moveq #$48, D0            70 48 
-000387CE: move.l ($4C,A2), A4       28 6A 00 4C 
-000387D2: jsr (A5)                  4E 95 
-000387D4: move.l D1, ($3C,A1)       23 41 00 3C 
-000387D8: move.l D1, D2             24 01 
-000387DA: lsd.l  #2, D2             E5 8A 
-000387DC: move.l ($2C,A1), (0,A0D2.l)21 A9 00 2C 28 00 
-000387E2: move.l ($3C,A1), D1       22 29 00 3C 
-000387E6: lsd.l  #2, D1             E5 89 
-000387E8: lea ($544,A4), A3         47 EC 05 44 
-000387EC: move.l A3, D2             24 0B 
-000387EE: lsr.l  #2, D2             E4 8A 
-000387F0: move.l D2, (4,A0D1.l)     21 82 18 04 
-000387F4: move.l ($3C,A1), D1       22 29 00 3C 
-000387F8: lsd.l  #2, D1             E5 89 
-000387FA: move.l ($20,A1), (8,A0D1.l)21 A9 00 20 18 08 
-00038800: move.l ($30,A1), D1       22 29 00 30 
-00038804: lsd.l  #2, D1             E5 89 
-00038806: moveq #$3, D3             76 03 
-00038808: move.l D3, (0,A0D1.l)     21 83 18 00 
-0003880C: move.l ($10,A1), D1       22 29 00 10 
-00038810: lsd.l  #2, D1             E5 89 
-00038812: move.l ($30,A1), D4       28 29 00 30 
-00038816: lsd.l  #2, D4             E5 8C 
-00038818: move.l (4,A0D1.l), (4,A0D4.l)21 B0 18 04 48 04 
-0003881E: move.l ($10,A1), D1       22 29 00 10 
-00038822: lsd.l  #2, D1             E5 89 
-00038824: move.l ($30,A1), D4       28 29 00 30 
-00038828: lsd.l  #2, D4             E5 8C 
-0003882A: move.l (8,A0D1.l), (8,A0D4.l)21 B0 18 08 48 08 
-00038830: move.l ($C,A1), D1        22 29 00 0C 
-00038834: lsd.l  #2, D1             E5 89 
-00038836: move.l ($30,A1), D4       28 29 00 30 
-0003883A: lsd.l  #2, D4             E5 8C 
-0003883C: move.l (18,A0D1.l), (C,A0D4.l)21 B0 18 18 48 0C 
-00038842: move.l ($30,A1), D1       22 29 00 30 
-00038846: moveq #$68, D0            70 68 
-00038848: move.l ($34,A2), A4       28 6A 00 34 
-0003884C: jsr (A5)                  4E 95 
-0003884E: move.l D1, ($5C,A1)       23 41 00 5C 
-00038852: lea ($558,A4), A3         47 EC 05 58 
-00038856: move.l A3, D4             28 0B 
-00038858: lsr.l  #2, D4             E4 8C 
-0003885A: moveq #$A, D3             76 0A 
-0003885C: move.l #$D2, D2           24 3C 00 00 00 D2 
-00038862: move.l ($30,A1), D1       22 29 00 30 
-00038866: moveq #$4C, D0            70 4C 
-00038868: move.l ($84,A2), A4       28 6A 00 84 
-0003886C: jsr (A5)                  4E 95 
+FF87C0: move.l D1, ($30,A1)       23 41 00 30 
+FF87C4: move.l #$10001, D2        24 3C 00 01 00 01 
+FF87CA: moveq #$3, D1             72 03 
+FF87CC: moveq #$48, D0            70 48 
+FF87CE: move.l ($4C,A2), A4       28 6A 00 4C 
+FF87D2: jsr (A5)                  4E 95 
+FF87D4: move.l D1, ($3C,A1)       23 41 00 3C 
+FF87D8: move.l D1, D2             24 01 
+FF87DA: lsd.l  #2, D2             E5 8A 
+FF87DC: move.l ($2C,A1), (0,A0D2.l)21 A9 00 2C 28 00 
+FF87E2: move.l ($3C,A1), D1       22 29 00 3C 
+FF87E6: lsd.l  #2, D1             E5 89 
+FF87E8: lea ($544,A4), A3         47 EC 05 44 
+FF87EC: move.l A3, D2             24 0B 
+FF87EE: lsr.l  #2, D2             E4 8A 
+FF87F0: move.l D2, (4,A0D1.l)     21 82 18 04 
+FF87F4: move.l ($3C,A1), D1       22 29 00 3C 
+FF87F8: lsd.l  #2, D1             E5 89 
+FF87FA: move.l ($20,A1), (8,A0D1.l)21 A9 00 20 18 08 
+FF8800: move.l ($30,A1), D1       22 29 00 30 
+FF8804: lsd.l  #2, D1             E5 89 
+FF8806: moveq #$3, D3             76 03 
+FF8808: move.l D3, (0,A0D1.l)     21 83 18 00 
+FF880C: move.l ($10,A1), D1       22 29 00 10 
+FF8810: lsd.l  #2, D1             E5 89 
+FF8812: move.l ($30,A1), D4       28 29 00 30 
+FF8816: lsd.l  #2, D4             E5 8C 
+FF8818: move.l (4,A0D1.l), (4,A0D4.l)21 B0 18 04 48 04 
+FF881E: move.l ($10,A1), D1       22 29 00 10 
+FF8822: lsd.l  #2, D1             E5 89 
+FF8824: move.l ($30,A1), D4       28 29 00 30 
+FF8828: lsd.l  #2, D4             E5 8C 
+FF882A: move.l (8,A0D1.l), (8,A0D4.l)21 B0 18 08 48 08 
+FF8830: move.l ($C,A1), D1        22 29 00 0C 
+FF8834: lsd.l  #2, D1             E5 89 
+FF8836: move.l ($30,A1), D4       28 29 00 30 
+FF883A: lsd.l  #2, D4             E5 8C 
+FF883C: move.l (18,A0D1.l), (C,A0D4.l)21 B0 18 18 48 0C 
+FF8842: move.l ($30,A1), D1       22 29 00 30 
+FF8846: moveq #$68, D0            70 68 
+FF8848: move.l ($34,A2), A4       28 6A 00 34 
+FF884C: jsr (A5)                  4E 95 
+FF884E: move.l D1, ($5C,A1)       23 41 00 5C 
+FF8852: lea ($558,A4), A3         47 EC 05 58 
+FF8856: move.l A3, D4             28 0B 
+FF8858: lsr.l  #2, D4             E4 8C 
+FF885A: moveq #$A, D3             76 0A 
+FF885C: move.l #$D2, D2           24 3C 00 00 00 D2 
+FF8862: move.l ($30,A1), D1       22 29 00 30 
+FF8866: moveq #$4C, D0            70 4C 
+FF8868: move.l ($84,A2), A4       28 6A 00 84 
+FF886C: jsr (A5)                  4E 95 
 0003886E: move.l D1, ($34,A1)       23 41 00 34 
 00038872: move.l ($3C,A1), ($64,A1) 23 69 00 3C 00 64 
 00038878: clr.l ($68,A1)            42 A9 00 68 
@@ -77209,20 +77210,20 @@ FF894C: lsr.l  #2, D1             E4 89
 FF894E: moveq #$4C, D0            70 4C 
 FF8950: lea ($630,A4), A4         49 EC 06 30 
 FF8954: jsr (A5)                  4E 95 
-00038956: move.l D1, ($38,A1)       23 41 00 38 
-0003895A: moveq #$30, D2            74 30 
-0003895C: add.l ($2C,A1), D2        D4 A9 00 2C 
-00038960: move.l D1, D3             26 01 
-00038962: lsd.l  #2, D3             E5 8B 
-00038964: move.l (28,A0D3.l), D4    28 30 38 28 
-00038968: lsd.l  #2, D4             E5 8C 
-0003896A: move.b D2, (3,A0D4.l)     11 82 48 03 
-0003896E: move.l ($38,A1), D1       22 29 00 38 
-00038972: lsd.l  #2, D1             E5 89 
-00038974: move.l ($3C,A1), (1C,A0D1.l)21 A9 00 3C 18 1C 
-0003897A: moveq #$1, D1             72 01 
-0003897C: add.l ($2C,A1), D1        D2 A9 00 2C 
-00038980: bra.s 387AA               60 00 FE 28 
+FF8956: move.l D1, ($38,A1)       23 41 00 38 
+FF895A: moveq #$30, D2            74 30 
+FF895C: add.l ($2C,A1), D2        D4 A9 00 2C 
+FF8960: move.l D1, D3             26 01 
+FF8962: lsd.l  #2, D3             E5 8B 
+FF8964: move.l (28,A0D3.l), D4    28 30 38 28 
+FF8968: lsd.l  #2, D4             E5 8C 
+FF896A: move.b D2, (3,A0D4.l)     11 82 48 03 
+FF896E: move.l ($38,A1), D1       22 29 00 38 
+FF8972: lsd.l  #2, D1             E5 89 
+FF8974: move.l ($3C,A1), (1C,A0D1.l)21 A9 00 3C 18 1C 
+FF897A: moveq #$1, D1             72 01 
+FF897C: add.l ($2C,A1), D1        D2 A9 00 2C 
+FF8980: bra.s 387AA               60 00 FE 28 
 00038984: moveq #$38, D0            70 38 
 00038986: lea ($91C,A4), A4         49 EC 09 1C 
 0003898A: jsr (A5)                  4E 95 
@@ -77479,26 +77480,26 @@ FF8954: jsr (A5)                  4E 95
 00038C3C: moveq #$1C, D0            70 1C 
 00038C3E: move.l ($154,A2), A4      28 6A 01 54 
 00038C42: jsr (A5)                  4E 95 
-00038C44: move.l D1, ($10,A1)       23 41 00 10 
-00038C48: tst.l  D1                 4A 81 
-00038C4A: bne.s 38C5C               66 00 00 10 
-00038C4E: move.l #$7010001, D1      22 3C 07 01 00 01 
-00038C54: moveq #$20, D0            70 20 
-00038C56: move.l ($98,A2), A4       28 6A 00 98 
-00038C5A: jsr (A5)                  4E 95 
-00038C5C: move.l ($10,A1), D1       22 29 00 10 
-00038C60: lsd.l  #2, D1             E5 89 
-00038C62: move.l ($8,A1), (4,A0D1.l)21 A9 00 08 18 04 
-00038C68: move.l ($10,A1), D1       22 29 00 10 
-00038C6C: lsd.l  #2, D1             E5 89 
-00038C6E: move.l ($4,A1), (8,A0D1.l)21 A9 00 04 18 08 
-00038C74: moveq #$1, D1             72 01 
-00038C76: cmp.l ($8,A1), D1         B2 A9 00 08 
-00038C7A: bne.s 38C8E               66 00 00 12 
-00038C7E: move.l ($C,A1), D1        22 29 00 0C 
-00038C82: moveq #$20, D0            70 20 
-00038C84: move.l ($1B0,A2), A4      28 6A 01 B0 
-00038C88: jsr (A5)                  4E 95 
+FF8C44: move.l D1, ($10,A1)       23 41 00 10 
+FF8C48: tst.l  D1                 4A 81 
+FF8C4A: bne.s FF8C5C               66 00 00 10 
+FF8C4E: move.l #$7010001, D1      22 3C 07 01 00 01 
+FF8C54: moveq #$20, D0            70 20 
+FF8C56: move.l ($98,A2), A4       28 6A 00 98 
+FF8C5A: jsr (A5)                  4E 95 
+FF8C5C: move.l ($10,A1), D1       22 29 00 10 
+FF8C60: lsd.l  #2, D1             E5 89 
+FF8C62: move.l ($8,A1), (4,A0D1.l)21 A9 00 08 18 04 
+FF8C68: move.l ($10,A1), D1       22 29 00 10 
+FF8C6C: lsd.l  #2, D1             E5 89 
+FF8C6E: move.l ($4,A1), (8,A0D1.l)21 A9 00 04 18 08 
+FF8C74: moveq #$1, D1             72 01 
+FF8C76: cmp.l ($8,A1), D1         B2 A9 00 08 
+FF8C7A: bne.s FF8C8E               66 00 00 12 
+FF8C7E: move.l ($C,A1), D1        22 29 00 0C 
+FF8C82: moveq #$20, D0            70 20 
+FF8C84: move.l ($1B0,A2), A4      28 6A 01 B0 
+FF8C88: jsr (A5)                  4E 95 
 FF8C8A: bra.s FF8C90               60 00 00 04 
 FF8C8E: moveq #$0, D1             72 00 
 FF8C90: move.l ($10,A1), D2       24 29 00 10 
