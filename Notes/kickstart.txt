@@ -3,30 +3,34 @@ SYNCHRO LOGIQUE :
 
 TRACK LOAD :
 
+Chargement : (bp sur FEA8D6)
+* 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0
+Taches en cours : 
+WAIT:
+- InitialCLI sp : d9e
+- File System sp : 143e
+- input.device sp : 42d8
+
+Tache reveillée : FileSystem. (bp sur FC08B8)
+2e fois - ... FFD996
+
+3e fois : READY = Initial_CLI
+Reveillée : FILE SYSTEM
+
+Puis : InitialCli
+- FF5946
+- FF4B62
+- FF4920 Allocmem
+- FF6156
+- FF5284
+
+-------
+* trackdisk.device
 FEA7E8 -> Sortie trackload (6a98)
 			6a5c = out dma (debut)
 FEACFA -> 	Mise en place blit 	
-***	Source : A1 (639a => 00f298 au lieu de 6a5C !!
-	element depuis FEA8D2 : A1 incorrect !
-	FEA8A8 : On additionne des choses a A4... 
-	FEA892: move.b ($49,A3), D0 => D0 = 20 !!! => 6081h !
-	
-	issue de Command 2 FEA762 => D1 = (3)20 !!! 
-	FEA182 ?? (3e apres insertion disk)
-	(FEA060 appel de command 2 ( D1 = 320 !!)
-	FEA02C puis )
-	
-	FEA198: divu #$B, D0 => 370 pour d0 donne 3200050 (attendu 50) ?!!!!
-	
-	
 	63d8 : secteur en cours ?
 	6038 + 49h = secteur total ?
-		
-			 addr_a f496 - rempli de 0...
-			 addr_b f696 - rempli de 0...
-			 addr_c bab4
-			 addr_d c662
-			 32*8 =  256
 
 RETOUR track 40 : FEA7E8 
 
@@ -137,6 +141,19 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
+FEACFA -> 	Mise en place blit 	
+***	Source : A1 (639a => 00f298 au lieu de 6a5C !!
+	element depuis FEA8D2 : A1 incorrect !
+	FEA8A8 : On additionne des choses a A4... 
+	FEA892: move.b ($49,A3), D0 => D0 = 20 !!! => 6081h !
+	
+	issue de Command 2 FEA762 => D1 = (3)20 !!! 
+	FEA182 ?? (3e apres insertion disk)
+	(FEA060 appel de command 2 ( D1 = 320 !!)
+	FEA02C puis )
+	
+	FEA198: divu #$B, D0 => 370 pour d0 donne 3200050 (attendu 50) ?!!!!
+
 Decodage MFM:
 FEACDC => QBlit :  => Blit routine FEACF0
 		Blit : bltcon0 1dd8 / bltcon1 0002
