@@ -71353,24 +71353,27 @@ FF443C: move.? D0, D0             00 00
 00034498: rts                       4E 75 
 
 FF449A: move.? D0, D0             00 00 
+
 FF449C: bsr FF4AC0                 61 00 06 22 
 FF44A0: move.l D1, ($38,A3)       27 41 00 38 
 FF44A4: clr.l D1                  42 81 
 FF44A6: jmp (A6)                  4E D6 
 
-FF44A8: movem.l ($FFF4,A1), /A1/A34C E9 0A 00 FF F4 
+; Execute A1 - 8; A1 = ptr(A1-12) & A4 = (A1-4)
+FF44A8: movem.l ($FFF4,A1), /A1/A3  4C E9 0A 00 FF F4 
 FF44AE: move.l ($FFFC,A1), A4     28 69 FF FC 
 FF44B2: jmp (A3)                  4E D3 
 
+; Execute A4-4.
 FF44B4: move.l (SP)+, A3          26 5F 
-FF44B6: movem.l A1/A3/A4, (FFFFFFF4,A1D0.l)48 F1 1A 00 08 F4 
+FF44B6: movem.l A1/A3/A4, (FFFFFFF4,A1D0.l)  ; A1+D0-12 => A1, A3, A4
 FF44BC: add.l D0, A1              D3 C0 
 FF44BE: movem.l D1/D2/D3/D4, (A1) 48 D1 00 1E 
 FF44C2: jmp (A4)                  4E D4 
 
-FF44C4: bra.s 344D2               60 0C 
-FF44C6: bra.s 344F2               60 2A 
-FF44C8: bra.s 34502               60 38 
+FF44C4: bra.s FF44D2               60 0C 
+FF44C6: bra.s FF44F2               60 2A 
+FF44C8: bra.s FF4502               60 38 
 FF44CA: rts                       4E 75 
 
 FF44CC: moveq #$54, D0            70 54 

@@ -18,6 +18,10 @@ Tache reveillée : FileSystem. (bp sur FC08B8)
 Reveillée : FILE SYSTEM
 
 Puis : InitialCli
+
+FF44B4 =A5 (A3 ?)
+FF44A8 =A6 (A4?)
+
 - FF5946
 - FF4B62
 - FF4920 Allocmem
