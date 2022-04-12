@@ -1942,6 +1942,7 @@ unsigned int M68k::DecodeRod2()
 
 unsigned int M68k::DecodeScc()
 {
+   conditon_ = (Condition)((ird_ & 0xF00) >> 8);
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, 0);
 
    EvalCondition();

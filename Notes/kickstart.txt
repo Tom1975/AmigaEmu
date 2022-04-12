@@ -35,6 +35,8 @@ FF44A8 =A6 (A4?)
 - FF7142
 Deuxieme File system de lancé...
 - FF58D8
+- FF58F4
+			
 
 -------
 * trackdisk.device
@@ -153,6 +155,13 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
+FF58F4: jsr (A5) / 
+	FF49B6: jsr ($FE92,A6)            	; PutMsg
+		FC1B9A  jsr       -$0144(A6)        Signal the task.
+			FC1F38  bset      #7,$0124(A6)      Set the scheduling attention flag.
+			FC1F3E  sne       D0                Save its previous state.
+***SNE = CONDITION NON EVALUEE ! CORRIGE !
+
 FEACFA -> 	Mise en place blit 	
 ***	Source : A1 (639a => 00f298 au lieu de 6a5C !!
 	element depuis FEA8D2 : A1 incorrect !
