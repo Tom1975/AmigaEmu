@@ -22,13 +22,15 @@ file( GLOB HEADERS
 	"*.h"
 )
 
+
 set ( UIS
  BitplaneDialog.ui
- mainwindow.ui
- DebugDialog.ui
- MemoryDialog.ui
  CopperDialog.ui
- ExecDialog.ui
+ DebugDialog.ui
+ DiskDialog.ui
+ ExecDialog.ui  
+ mainwindow.ui
+ MemoryDialog.ui
 )
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Sources )

@@ -7,6 +7,7 @@
 #include "CopperDialog.h"
 #include "ExecDialog.h"
 #include "BitplaneDialog.h"
+#include "DiskDialog.h"
 #include "AmigaEmulation.h"
 #include "IDragNDropTarget.h"
 
@@ -30,6 +31,7 @@ public:
     void Copper();
     void Exec();
     void Bitplane();
+    void DiskDebug();
     void SaveConfig();
     void LoadConfig();
 
@@ -51,6 +53,7 @@ private:
     CopperDialog copper_;
     ExecDialog exec_;
     BitplaneDialog bitplane_;
+    DiskDialog disk_debug_;
 
     // Configuration
     QString df0_path_;

@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
    copper_(this),
    exec_(this),
    bitplane_(this),
+   disk_debug_(this), 
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
    connect(ui->actionExec, &QAction::triggered, this, &MainWindow::Exec);
    connect(ui->actionBitplane, &QAction::triggered, this, &MainWindow::Bitplane);
+   connect(ui->actionDisk, &QAction::triggered, this, &MainWindow::DiskDebug);
    connect(ui->actionInsert_disk_df0, &QAction::triggered, this, &MainWindow::InsertDisk);
 
    connect(ui->display_, SIGNAL(Update()),
@@ -38,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
    copper_.SetEmulator(emu_handler_);
    exec_.SetEmulator(emu_handler_);
    bitplane_.SetEmulator(emu_handler_);
+   disk_debug_.SetEmulator(emu_handler_);
 
    // status bar
    led_on_ = new QPixmap(":/Images/led_on.png");
@@ -161,6 +164,7 @@ void MainWindow::Break()
    copper_.Update();
    exec_.Update();
    bitplane_.Update();
+   disk_debug_.Update();
 }
 
 void MainWindow::Copper ()
@@ -186,6 +190,13 @@ void MainWindow::Bitplane()
    bitplane_.Update();
    bitplane_.show();
 }
+
+void MainWindow::DiskDebug()
+{
+   disk_debug_.Update();
+   disk_debug_.show();
+}
+
 
 void MainWindow::InsertDisk()
 {

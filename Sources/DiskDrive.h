@@ -33,6 +33,10 @@ public:
 
    unsigned short ReadAndAdvance();
 
+
+   unsigned char GetSide() { return side_; }
+   char GetTrack() { return track_; }
+   size_t GetHeadPosition() { return head_; }
 private: 
    ILogger* logger_;
 
