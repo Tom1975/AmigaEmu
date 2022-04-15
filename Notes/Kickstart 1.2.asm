@@ -36885,27 +36885,28 @@ FD6B16: "layers.library", 00, 00
 00019B3A: movem.l ($FFD0,A5), D2/D3/D4/D5/A2/A3/A44C ED 1C 3C FF D0 
 00019B40: unlk A5                   4E 5D 
 00019B42: rts                       4E 75 
-00019B44: movem.l D2/A2/A3, -(SP)   48 E7 20 30 
-00019B48: move.l ($10,SP), A2       24 6F 00 10 
-00019B4C: move.l ($14,SP), D2       24 2F 00 14 
-00019B50: move.l A6, A3             26 4E 
-00019B52: btst #4, ($15,A2)         08 2A 00 04 00 15 
-00019B58: beq.s 19B64               67 0A 
-00019B5A: move.l A2, -(SP)          2F 0A 
-00019B5C: jsr FDC824                4E B9 00 FD C8 24 
-00019B62: bra.s 19B6C               60 08 
-00019B64: move.l A2, -(SP)          2F 0A 
-00019B66: jsr FDC7E8                4E B9 00 FD C7 E8 
-00019B6C: addq.l #4, SP             58 8F 
-00019B6E: move.l A2, -(SP)          2F 0A 
-00019B70: jsr FDD39E                4E B9 00 FD D3 9E 
-00019B76: move.l D2, -(SP)          2F 02 
-00019B78: move.l A2, -(SP)          2F 0A 
-00019B7A: jsr FD83AC                4E B9 00 FD 83 AC 
-00019B80: andi.l #$FBFF0040, ($FFFF,A3)02 AB FF FF FB FF 00 40 
-00019B88: lea ($C,SP), SP           4F EF 00 0C 
-00019B8C: movem.l (SP)+, D2/A2/A3   4C DF 0C 04 
-00019B90: rts                       4E 75 
+
+FD9B44: movem.l D2/A2/A3, -(SP)   48 E7 20 30 
+FD9B48: move.l ($10,SP), A2       24 6F 00 10 
+FD9B4C: move.l ($14,SP), D2       24 2F 00 14 
+FD9B50: move.l A6, A3             26 4E 
+FD9B52: btst #4, ($15,A2)         08 2A 00 04 00 15 
+FD9B58: beq.s FD9B64               67 0A 
+FD9B5A: move.l A2, -(SP)          2F 0A 
+FD9B5C: jsr FDC824                4E B9 00 FD C8 24 
+FD9B62: bra.s FD9B6C               60 08 
+FD9B64: move.l A2, -(SP)          2F 0A 
+FD9B66: jsr FDC7E8                4E B9 00 FD C7 E8 
+FD9B6C: addq.l #4, SP             58 8F 
+FD9B6E: move.l A2, -(SP)          2F 0A 
+FD9B70: jsr FDD39E                4E B9 00 FD D3 9E 
+FD9B76: move.l D2, -(SP)          2F 02 
+FD9B78: move.l A2, -(SP)          2F 0A 
+FD9B7A: jsr FD83AC                4E B9 00 FD 83 AC 
+FD9B80: andi.l #$FBFF0040, ($FFFF,A3)02 AB FF FF FB FF 00 40 
+FD9B88: lea ($C,SP), SP           4F EF 00 0C 
+FD9B8C: movem.l (SP)+, D2/A2/A3   4C DF 0C 04 
+FD9B90: rts                       4E 75 
 00019B92: movem.l D2/A2, -(SP)      48 E7 20 20 
 00019B96: move.l ($C,SP), A0        20 6F 00 0C 
 00019B9A: move.w ($12,SP), D2       34 2F 00 12 
@@ -55514,23 +55515,25 @@ FE6C8C: bra.s 26C76               60 E8
 00027FAE: bra.s 27F9E               60 EE 
 00027FB0: tst.w  D0                 4A 40 
 00027FB2: bpl.s 27FC8               6A 14 
-00027FB4: cmp.w #$FFE1, D0          0C 40 FF E1 
-00027FB8: bne.s 27FBE               66 04 
-00027FBA: moveq #$15, D0            70 15 
-00027FBC: bra.s 27FCE               60 10 
-00027FBE: cmp.w #$FFD1, D0          0C 40 FF D1 
-00027FC2: bne.s 27FDC               66 18 
-00027FC4: moveq #$16, D0            70 16 
-00027FC6: bra.s 27FCE               60 06 
-00027FC8: cmp.w #$14, D0            0C 40 00 14 
-00027FCC: bgt.s 27FDC               6E 0E 
-00027FCE: move.w D0, D1             32 00 
-00027FD0: lsr.w  #3, D0             E6 48 
-00027FD2: andi.w #$7, D1            02 41 00 07 
-00027FD6: lea ($122,A2), A0         41 EA 01 22 
-00027FDA: rts                       4E 75 
-00027FDC: moveq #$FF, D0            70 FF 
-00027FDE: rts                       4E 75 
+
+FD7FB4: cmp.w #$FFE1, D0          0C 40 FF E1 
+FD7FB8: bne.s FD7FBE               66 04 
+FD7FBA: moveq #$15, D0            70 15 
+FD7FBC: bra.s FD7FCE               60 10 
+FD7FBE: cmp.w #$FFD1, D0          0C 40 FF D1 
+FD7FC2: bne.s FD7FDC               66 18 
+FD7FC4: moveq #$16, D0            70 16 
+FD7FC6: bra.s FD7FCE               60 06 
+FD7FC8: cmp.w #$14, D0            0C 40 00 14 
+FD7FCC: bgt.s FD7FDC               6E 0E 
+FD7FCE: move.w D0, D1             32 00 
+FD7FD0: lsr.w  #3, D0             E6 48 
+FD7FD2: andi.w #$7, D1            02 41 00 07 
+FD7FD6: lea ($122,A2), A0         41 EA 01 22 
+FD7FDA: rts                       4E 75 
+FD27FDC: moveq #$FF, D0            70 FF 
+FD27FDE: rts                       4E 75 
+
 00027FE0: bsr 27D32                 61 00 FD 50 
 00027FE4: bmi.s 2789C               6B 00 F8 B6 
 00027FE8: bsr 27FB0                 61 C6 
