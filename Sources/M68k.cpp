@@ -3290,7 +3290,7 @@ unsigned int M68k::DecodeExt()
       }
       else
       {
-         d_[ird_ & 0x7] &= 0x00FF;
+         d_[ird_ & 0x7] &= 0xFFFF00FF;
       }
 
       //d_[ird_ & 0x7] &= 0xFFFF0000;

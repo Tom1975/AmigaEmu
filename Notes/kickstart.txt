@@ -41,8 +41,16 @@ Deuxieme File system de lancé...
 - FF8892
 - FF87B6
 - FF87D2
-- FF884
-
+- FF884C
+- FF70C0
+- FF7126
+- FF7140
+- FF884E
+- FF886C
+- FF886E
+- FF8892
+- FF88A4
+- FF87AA
 
 -------
 * trackdisk.device
@@ -161,6 +169,8 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
+ext.w D1 : DO NOT ERASE 31-16 !!!
+**************
 FF58F4: jsr (A5) / 
 	FF49B6: jsr ($FE92,A6)            	; PutMsg
 		FC1B9A  jsr       -$0144(A6)        Signal the task.

@@ -52309,7 +52309,7 @@ FE57FC: move.w D2, D3             36 02
 FE57FE: addq.w #4, D2             58 42 
 FE5800: andi.w #$7F, D2           02 42 00 7F 
 FE5804: cmp.w ($70,A6), D2        B4 6E 00 70 
-FE5808: bne.s 25816               66 0C 
+FE5808: bne.s FE5816               66 0C 
 FE580A: move.w D3, D2             34 03 
 FE580C: move.w #$7D, D0           30 3C 00 7D 
 FE5810: subq.w #4, D3             59 43 
@@ -75221,8 +75221,8 @@ FF6284: move.l D1, ($14,A1)       23 41 00 14
 000370BA: jmp (A6)                  4E D6 
 000370BC: moveq #$FF, D1            72 FF 
 000370BE: jmp (A6)                  4E D6 
-000370C0: moveq #$F, D2             74 0F 
-000370C2: move.l D2, ($4,A1)        23 42 00 04 
+FF70C0: moveq #$F, D2             74 0F 
+FF70C2: move.l D2, ($4,A1)        23 42 00 04 
 FF70C6: move.l D1, D3             26 01 
 FF70C8: lsd.l  #2, D3             E5 8B 
 FF70CA: move.l (0,A0D3.l), ($8,A1)23 70 38 00 00 08 

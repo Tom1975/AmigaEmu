@@ -95,7 +95,7 @@ void ExecDialog::AddTask(unsigned long task_adress_ptr, QTreeWidgetItem * root_i
       sp_address_item->setText(0, QString("Stack sp : %1").arg(current_sp, 6, 16));
       item->addChild(sp_address_item);
 
-      unsigned long sig_wait = EXTRACT_LONG((&ram[task_adress + 26]));
+      unsigned long sig_wait = EXTRACT_LONG((&ram[task_adress + 22]));
       QTreeWidgetItem* sp_signal_awaited= new QTreeWidgetItem;
       sp_signal_awaited->setText(0, QString("SIGNAL_WAIT : %1").arg(sig_wait, 6, 16));
       item->addChild(sp_signal_awaited);
@@ -153,12 +153,12 @@ void ExecDialog::UpdateList(unsigned long list_adress, QTreeWidgetItem * root_it
          list_items_.push_back(item);
          
          // Add specific informations
-         unsigned long sig_wait = EXTRACT_WORD((&ram[current_list_node + 22]));
+         unsigned long sig_wait = EXTRACT_LONG((&ram[current_list_node + 22]));
          QTreeWidgetItem* sp_signal_awaited = new QTreeWidgetItem;
          sp_signal_awaited->setText(0, QString("SIGNAL_WAIT : %1").arg(sig_wait, 6, 16));
          item->addChild(sp_signal_awaited);
 
-         unsigned long sig_recv = EXTRACT_LONG((&ram[current_list_node + 30]));
+         unsigned long sig_recv = EXTRACT_LONG((&ram[current_list_node + 32]));
          QTreeWidgetItem* sp_signal_received = new QTreeWidgetItem;
          sp_signal_received->setText(0, QString("SIGNAL_RECV : %1").arg(sig_recv, 6, 16));
          item->addChild(sp_signal_received);
