@@ -1,5 +1,7 @@
 SYNCHRO LOGIQUE : 
 
+Manque int clavier => FE571C;
+=>  A coder correctement !
 
 TRACK LOAD :
 

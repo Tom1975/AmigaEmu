@@ -1,5 +1,6 @@
 #include "CIA8520.h"
 #include "Motherboard.h"
+#include "Keyboard.h"
 
 #define TODIN     0x80
 #define SPMODE    0x40
@@ -19,7 +20,7 @@
 #define  FLAG     0x10
 #define  IR       0x80
 
-CIA8520::CIA8520(Motherboard* motherboard, unsigned short intreq) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF), intreq_(intreq)
+CIA8520::CIA8520(Motherboard* motherboard, Keyboard * keyboard, unsigned short intreq) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF), intreq_(intreq), keyboard_(keyboard)
 {
 
    Reset();
@@ -38,6 +39,8 @@ void CIA8520::Reset()
    sdr_ = icr_ = cra_ = crb_ = 0;
    icr_mask_ = 0;
    timer_b_latch_ = timer_a_latch_ = 0xFF;
+   sdr_shift_size_ = 0;
+   sp_ = false;
 }
 
 void CIA8520::Tod()
@@ -158,6 +161,11 @@ unsigned char CIA8520::In(unsigned char addr)
       break;
    case 0xC:
       // sdr : todo
+      if (keyboard_ != nullptr /*&& ((cra_ & 0x40) == 0x00)*/) // output mode ?
+      {
+         keyboard_->Handshake();
+      }
+      return sdr_;
       break;
    case 0xD:
    {
@@ -275,6 +283,11 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
       break;
    case 0xC:
       sdr_ = data;
+      // transmit to keyboard (if any)
+      if (keyboard_ != nullptr && ((cra_ & 0x40)==0x40)) // output mode ?
+      {
+         keyboard_->SendData(sdr_);
+      }
       break;
    case 0xD:
    {
@@ -323,5 +336,29 @@ void CIA8520::HandleControlRegister(unsigned int timer)
          timer_b_ = timer_b_latch_;
       }
       *ctrl &= ~LOAD;
+   }
+}
+
+void CIA8520::Sp(bool set)
+{
+   sp_ = set;
+}
+
+void CIA8520::Cnt(bool set)
+{
+   // Clock : add the current sp to sdr
+   sdr_ <<= 1;
+   sdr_ |= (sp_) ? 1 : 0;
+   if (++sdr_shift_size_ == 8)
+   {
+      sdr_shift_size_ = 0;
+      // Int
+      icr_ |= SP;
+      if (icr_mask_ & SP)
+      {
+         icr_ |= IR;
+         motherboard_->GetPaula()->Int(intreq_);
+      }
+      
    }
 }

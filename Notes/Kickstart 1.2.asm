@@ -52302,7 +52302,7 @@ FE57E8: move.? D4, A0             00 44
 FE57EA: move.? D0, -(A0)          01 00 
 FE57EC: move.l A6, -(SP)          2F 0E 
 FE57EE: move.l ($26,A6), A6       2C 6E 00 26 
-FE57F2: jsr ($FF88,A6)            4E AE FF 88 
+FE57F2: jsr ($FF88,A6)            	; Disable
 FE57F6: move.l (SP)+, A6          2C 5F 
 FE57F8: move.w ($72,A6), D2       34 2E 00 72 
 FE57FC: move.w D2, D3             36 02 
@@ -52320,15 +52320,15 @@ FE581E: move.w D4, (76,A6D3.w)    3D 84 30 76
 FE5822: move.w D2, ($72,A6)       3D 42 00 72 
 FE5826: move.l A6, -(SP)          2F 0E 
 FE5828: move.l ($26,A6), A6       2C 6E 00 26 
-FE582C: jsr ($FF82,A6)            4E AE FF 82 
+FE582C: jsr ($FF82,A6)            	; Enable
 FE5830: move.l (SP)+, A6          2C 5F 
 FE5832: btst #0, ($3D,A6)         08 2E 00 00 00 3D 
-FE5838: bne.s 25846               66 0C 
+FE5838: bne.s FE5846               66 0C 
 FE583A: move.l ($48,A6), A1       22 6E 00 48 
 FE583E: tst.l  (A1)               4A 91 
-FE5840: beq.s 25846               67 04 
-FE5842: bsr 255C4                 61 00 FD 80 
-FE5846: andi.b #$1, BF00BF        02 39 00 BF 00 BF EE 01 
+FE5840: beq.s FE5846               67 04 
+FE5842: bsr FE55C4                 61 00 FD 80 
+FE5846: andi.b #$BF, BFEE01        02 39 00 BF 00 BF EE 01 
 FE584E: movem.l (SP)+, D2/D3/D4/A64C DF 40 1C 
 FE5852: rts                       4E 75 
 

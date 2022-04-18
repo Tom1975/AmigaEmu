@@ -11,9 +11,10 @@
 #define Tick28Mhz_UP //agnus_.TickUp();
 #define Tick28Mhz_Down //agnus_.TickDown();
 
-Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, 8), cia_b_(this, 0x2000), led_(false), logger_(nullptr)
+Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, &keyboard_, 8), cia_b_(this, nullptr, 0x2000), led_(false), logger_(nullptr), count_Keyboard_(0)
 {
    m68k_.SetBus(&bus_);
+   keyboard_.SetCIA(&cia_a_);
    bus_.SetCIA(&cia_a_, &cia_b_);
    bus_.SetDMAControl(&dma_control_);
    bus_.SetCustomChips(&agnus_, &denise_, &paula_, &bitplanes_);
@@ -219,6 +220,13 @@ void Motherboard::Tick7Mhz(bool up)
          cia_a_.Tick();
          cia_b_.Tick();
       }
+
+      count_Keyboard_++;
+      if (count_Keyboard_ == 7*40)
+      {
+         count_Keyboard_ = 0;
+         keyboard_.Tick();
+      }      
    }
    // Denise
 }

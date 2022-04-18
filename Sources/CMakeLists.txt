@@ -14,8 +14,6 @@ set(EXTRA
 	"../Notes/DMA.txt"
    "../Notes/Kickstart 1.2.asm"
    )
-
-
 source_group("Docs" FILES ${EXTRA} )
 
 add_library(AmigaCore ${SRCS} ${HEADERS} ${EXTRA})

@@ -9,6 +9,7 @@
 #include "Denise.h"
 #include "Agnus.h"
 #include "DiskController.h"
+#include "Keyboard.h"
 #include "ILogger.h"
 
 class HardwareIO
@@ -85,6 +86,9 @@ protected:
    unsigned char count_E_;
    CIA8520 cia_a_;
    CIA8520 cia_b_;
+
+   unsigned int count_Keyboard_;
+   Keyboard keyboard_;
 
    DiskController drive_;
 

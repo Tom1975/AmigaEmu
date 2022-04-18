@@ -1,11 +1,12 @@
 #pragma once
 
 class Motherboard;
+class Keyboard;
 
 class CIA8520
 {
 public:
-   CIA8520(Motherboard* motherboard, unsigned short intreq);
+   CIA8520(Motherboard* motherboard, Keyboard * keyboard, unsigned short intreq);
    virtual ~CIA8520();
 
    void Reset();
@@ -22,8 +23,12 @@ public:
    unsigned char GetPA() { return pra_; };
    unsigned char GetPB() { return prb_; };
 
+   // sp, cnt, 
+   void Sp(bool set);
+   void Cnt(bool set);
+
    // todo
-   // sp, cnt, tod, pc, flag, irq...
+   // tod, pc, flag, irq...
 
 protected:
    // Inner values
@@ -43,7 +48,12 @@ protected:
    unsigned int alarm_;
    unsigned int latched_alarm_;
 
+   // Serial handling
    unsigned char sdr_;
+   size_t sdr_shift_size_;
+   bool sp_;
+   Keyboard* keyboard_;
+
    // Interruption
    unsigned char icr_;
    unsigned char icr_mask_;
