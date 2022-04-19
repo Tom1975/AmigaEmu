@@ -5,6 +5,8 @@ Manque int clavier => FE571C;
 
 TRACK LOAD :
 
+*** CON : FFA37A ?
+
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0
 Taches en cours : 
