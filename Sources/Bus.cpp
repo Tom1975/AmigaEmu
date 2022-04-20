@@ -66,7 +66,7 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   if (address == 0x60DE)
+   if (address == 0xA9d8)
    {
       int dbg = 1;
    }
@@ -433,6 +433,10 @@ void Bus::DmaOperationMemory::DoDma ()
          }
          // Chip ram
          // Whole word ?
+         if ((address_ == 0xA9d8 || address_ == 0xA9da ) && data_ == 0xBB4C)
+         {
+            int dgb = 1;
+         }
          if (uds_ == ACTIVE)
             ram_[address_ & 0x7FFFF] = data_ >> 8;
          if (lds_ == ACTIVE)

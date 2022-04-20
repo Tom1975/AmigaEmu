@@ -5,7 +5,16 @@ Manque int clavier => FE571C;
 
 TRACK LOAD :
 
+*** track 53, 2e PutMsg :
+A0 : bb4c (bb3c)
+=> A9d8 : bb4c (bb3c)
+Ecrit par : FF44BE : D2 = BB4C
+issue de D1 sur 
+issue de FF45F0: movem.l (SP)+, D1/A0/A1/A2/A5/A64C DF 67 02 
+
+
 *** CON : FFA37A ?
+Lancement des taches : FF4774
 
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0
