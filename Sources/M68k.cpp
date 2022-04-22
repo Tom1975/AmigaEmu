@@ -1381,7 +1381,7 @@ unsigned int M68k::OpcodeNeg()
    if (rm) sr_ |= 0x8;
 
    if (dm&rm) sr_ |= 2;
-   if (dm|rm) sr_ |= 11;
+   if (dm|rm) sr_ |= 0x11;
 
    return WriteSourceToDestination();
 }
