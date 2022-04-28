@@ -51495,10 +51495,10 @@ FE4DFA: move.l ($114,A6), A0      20 6E 01 14
 FE4DFE: cmp.b #$D, ($8,A0)        0C 28 00 0D 00 08 
 FE4E04: bne.s 24E0E               66 08 
 FE4E06: move.l #$67, ($94,A0)     21 7C 00 00 00 67 00 94 
-FE4E0E: jsr ($FF76,A6)            4E AE FF 76 
-00024E12: move.l D4, D0             20 04 
-00024E14: movem.l (SP)+, D2/D3/D4/A2/A34C DF 0C 1C 
-00024E18: rts                       4E 75 
+FE4E0E: jsr ($FF76,A6)            ; Permit 
+FE4E12: move.l D4, D0             20 04 
+FE4E14: movem.l (SP)+, D2/D3/D4/A2/A34C DF 0C 1C 
+FE4E18: rts                       4E 75 
 00024E1A: move.l (A0), D4           28 10 
 00024E1C: move.l D4, A1             22 44 
 00024E1E: move.l (A1), D4           28 11 

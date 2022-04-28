@@ -13,11 +13,61 @@ issue de D1 sur
 issue de FF45F0: movem.l (SP)+, D1/A0/A1/A2/A5/A64C DF 67 02 
 
 
+...
+
+Apres 2e 53 : 
+Interrupt FE5CC8 ?. Cause ??
+FE5D14 ??
+
+...
+
+Decalage des Ax lors de FEA8D6
+
+
 *** CON : FFA37A ?
 Lancement des taches : FF4774
 
 Chargement : (bp sur FEA8D6)
-* 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0
+* 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
+
+FEA8D6 : 
+retour Alloc (FC17EE) : 
+B5C8
+B858
+B598
+B5B0 ok
+B5F8
+B618
+B648g
+B660
+C820 ok
+B5D0
+B678
+B7D8
+B7E8
+B7F8 ok
+B800
+B870
+B8B8
+B840
+10400 ok
+B938  ok
+15400 ok
+B948 non identique : D4 0 (B938)
+B958 non identique : D4 0 (B938)
+B988 non identique : D4 b958 (B948)
+B998 non identique : D4 b958 (B948)
+B9C8 non identique : D4 b998 (B988)
+B9D8 non identique : D4 b998 (B988)
+BA08 (D2, D1, D3, D4 differents...)
+STACK :
+FE05D4
+5B0 
+5D78
+
+
+
+
 Taches en cours : 
 WAIT:
 - InitialCLI sp : d9e
