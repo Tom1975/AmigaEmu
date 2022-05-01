@@ -38,22 +38,33 @@ B598
 B5B0 ok
 B5F8
 B618
-B648g
+B648 ok*
 B660
 C820 ok
 B5D0
-B678
-B7D8
-B7E8
-B7F8 ok
-B800
-B870
-B8B8
-B840
-10400 ok
-B938  ok
-15400 ok
-B948 non identique : D4 0 (B938)
+B678 ok
+B7D8 ok*
+B7E8 ok*
+B7F8 ok*
+B800 ok*
+B870 ok*
+B8B8 ok*
+B840 ok*
+10400 ok*
+B938  ok*
+15400 ok*
+	FDA590 ok*
+	FDCE2A ok*
+	FDCE4A ok*
+		FC5AD4 ok*
+	
+	FDCE50 ok
+	*** FDCE70 ok => BP ok : first occurence mais difference dans A3/A5/A7 !!
+	FDECA0 tjrs la meme chose
+	FDCE74 idem
+	FDCEFC idem
+	
+B958(b948) non identique : D4 0 (B938)
 B958 non identique : D4 0 (B938)
 B988 non identique : D4 b958 (B948)
 B998 non identique : D4 b958 (B948)
