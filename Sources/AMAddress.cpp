@@ -40,7 +40,7 @@ void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment
          current_register_ = usp_;
       }
    }
-   
+   // Ne faire qu'apres la lecture eventuelle en mémoire !!!!
    if (increment_ == DECREMENT_PRE)
    {
       switch (operand_size_)
