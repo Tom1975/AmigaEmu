@@ -25,6 +25,8 @@ public:
    virtual unsigned int GetEffectiveAddress();
    virtual unsigned int GetSize() { return size_; }
 
+   virtual void Init();
+
    virtual bool FetchComplete();
    virtual bool ReadComplete(unsigned int& address_to_read);
    virtual void AddWord(unsigned short);

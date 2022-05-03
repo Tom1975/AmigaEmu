@@ -29,6 +29,10 @@ public:
    virtual unsigned int GetSize() = 0;
    
    //////////////////
+   // Start use
+   virtual void Init();
+
+   //////////////////
    // End of use
    virtual void Complete();
 

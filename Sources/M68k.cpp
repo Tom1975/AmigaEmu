@@ -12,12 +12,12 @@ static unsigned char op_index = 0;
 
 M68k::Func M68k::ResetList_[] = { &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr };
 
-M68k::Func M68k::Add_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAddA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::AddI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Add_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::AddI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Addq_[] = { &M68k::DecodeAddq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AndiToCcr_[] = { &M68k::DecodeAndiToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Asd2_[] = { &M68k::DecodeAsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -38,7 +38,7 @@ M68k::Func M68k::DBcc_[] = { &M68k::InitWait, &M68k::Wait2Ticks, &M68k::DecodeDB
 M68k::Func M68k::Divs_[] = { &M68k::DecodeDivu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivs, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Divu_[] = { &M68k::DecodeDivu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivu, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Eor_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Eori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Eori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::EoriToCcr_[] = { &M68k::DecodeEoriToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::EoriSr_[] = { &M68k::DecodeEoriSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Exg_[] = { &M68k::DecodeExg, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -49,7 +49,7 @@ M68k::Func M68k::Lea_[] = { &M68k::DecodeLea, &M68k::SourceFetch, &M68k::OpcodeL
 M68k::Func M68k::Link_[] = { &M68k::DecodeLink, &M68k::OperandFetch, &M68k::DecodeLink2, &M68k::OpcodeLink, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Lsd_[] = { &M68k::DecodeLsd, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeLsd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Lsd2_[] = { &M68k::DecodeLsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Move_[] = { &M68k::DecodeMove, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::OpcodeMove, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Move_[] = { &M68k::DecodeMove, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch/*, &M68k::DestinationInit */ , &M68k::OpcodeMove, &M68k::CpuFetch, &M68k::OperandFinished, nullptr};
 M68k::Func M68k::MoveFromSr_[] = { &M68k::DecodeMoveFromSr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::DestinationFetch, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,  
@@ -62,7 +62,7 @@ M68k::Func M68k::Neg_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::De
 M68k::Func M68k::Nop_[] = { &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Not_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNot, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Or_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Ori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Ori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::OriSr_[] = { &M68k::DecodeOriSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::OriToCcr_[] = { &M68k::DecodeOriToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Pea_[] = { &M68k::DecodePea, &M68k::DestinationFetch, &M68k::OpcodePea, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -75,7 +75,7 @@ M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::CpuFetch, &M68k::OperandFin
 M68k::Func M68k::Stop_[] = { &M68k::DecodeStop, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeStop, &M68k::OpcodeStop2, nullptr };
 M68k::Func M68k::Sub_[] = { &M68k::DecodeSub, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::SubA_[] = { &M68k::DecodeSubA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 //M68k::Func M68k::Subq_L_Dn_An_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Subq_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::SubX_[] = { &M68k::DecodeSubX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -916,6 +916,12 @@ unsigned int M68k::DestinationFetch()
       current_function_ = &M68k::FetchDestination;
       return false;
    }
+   return true;
+}
+
+unsigned int M68k::DestinationInit()
+{
+   destination_alu_->Init();
    return true;
 }
 

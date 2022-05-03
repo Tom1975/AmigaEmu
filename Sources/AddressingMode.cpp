@@ -16,6 +16,11 @@ void AddressingMode::Complete()
    
 }
 
+void AddressingMode::Init()
+{
+
+}
+
 bool AddressingMode::WriteInput(unsigned int value)
 {
    input_ = value;
