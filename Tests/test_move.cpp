@@ -224,3 +224,22 @@ TEST(Cpu68k_MOVEM, CPU_MOVEM_L_AN_POST_D) //
 //    (xxx).L
 //    (d16.PC)
 //    (d8.PC.Xn)
+
+// move.l ($2C,SP), -(SP)  
+TEST(Cpu68k_MOVE, CPU_MOVE_L_D16AN_DEC_AN)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataUsp(0xD234);
+   test_engine.Get68k()->SetSr(0x0);
+   unsigned char opcode[] = { 0x02, 0x7C, 0xDF, 0xFF, 0x2F, 0x2F, 0x00, 0x2C }; // // and.w #DFFF, SR; move.l ($2C,SP), -(SP)  2F 2F 00 2C 
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0xD2, 512 * 1024);
+   ram[0xD260] = 0x00;
+   ram[0xD261] = 0x11;
+   ram[0xD262] = 0x22;
+   ram[0xD263] = 0x33;
+   test_engine.RunOpcode(opcode, sizeof(opcode), 2);
+
+   ASSERT_EQ(test_engine.Get68k()->GetDataUsp(), 0xD230);   // Check SP
+   ASSERT_EQ(memcmp(&ram[0xD230], &ram[0xD260], 4), 0);              // Check stack
+}
