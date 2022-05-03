@@ -156,6 +156,7 @@ protected:
    unsigned int CpuFetchInit();
    unsigned int SourceFetch();
    unsigned int SourceRead();
+   unsigned int SourceInit();
    unsigned int DestinationInit();
    unsigned int DestinationFetch();
    unsigned int DestinationRead();

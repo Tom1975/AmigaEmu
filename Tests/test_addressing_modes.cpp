@@ -87,6 +87,7 @@ TEST(Cpu68k, Addressing_Address)
    // .b
    data_register_array[0] = 0x12345678;
    data_register.Init(0, AddressingMode::Byte);
+   data_register.Init();
    // Check effective address
    ASSERT_EQ(data_register.FetchComplete(), true) << "Register Fetch incorrect";
    ASSERT_EQ(data_register.GetEffectiveAddress(), 0x12345678) << "Register effective address incorrect";
@@ -114,6 +115,7 @@ TEST(Cpu68k, Addressing_Address)
    // Effective addressing test 
    data_register_array[0] = 0x12345678;
    data_register.Init(0, AddressingMode::Word);
+   data_register.Init();
    // Check effective address
    ASSERT_EQ(data_register.FetchComplete(), true) << "Register Fetch incorrect";
    ASSERT_EQ(data_register.GetEffectiveAddress(), 0x12345678) << "Register effective address incorrect";
@@ -138,6 +140,7 @@ TEST(Cpu68k, Addressing_Address)
    // Effective addressing test 
    data_register_array[0] = 0x12345678;
    data_register.Init(0, AddressingMode::Long);
+   data_register.Init();
    // Check effective address
    ASSERT_EQ(data_register.FetchComplete(), true) << "Register Fetch incorrect";
    ASSERT_EQ(data_register.GetEffectiveAddress(), 0x12345678) << "Register effective address incorrect";

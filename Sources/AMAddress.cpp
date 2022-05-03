@@ -40,7 +40,7 @@ void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment
          current_register_ = usp_;
       }
    }
-   Init();
+   //Init();
 }
 
 void AMAddress::Init()
