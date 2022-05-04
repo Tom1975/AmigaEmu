@@ -41,6 +41,9 @@ void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment
       }
    }
    //Init();
+   address_to_write_ = *current_register_;
+   address_to_read_ = *current_register_;
+   offset_ = 0;
 }
 
 void AMAddress::Init()
