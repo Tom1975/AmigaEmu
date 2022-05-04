@@ -100,7 +100,7 @@ unsigned short DiskDrive::ReadAndAdvance()
       }
    }
 
-   LOG("%4.4X ", data);
+   //LOG("%4.4X ", data);
    return data;
 }
 
