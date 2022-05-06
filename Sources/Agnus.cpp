@@ -104,7 +104,7 @@ void Agnus::TickCCK(bool up)
    }
 }
 
-bool Agnus::WithinWindow()
+bool Agnus::WithinWindow(bool& bitplane_fetch_)
 {
    unsigned short hstart = diwstrt_ & 0x7F;
    unsigned short vstart = (diwstrt_ >> 8);
@@ -113,8 +113,11 @@ bool Agnus::WithinWindow()
    unsigned short vstop = diwstop_ >> 8;
    if ((vstop & 0x80) == 0) vstop |= 0x100;
 
-   return ((line_counter_ > vstart) && line_counter_  <= vstop
-      && horizontal_counter_ > hstart && horizontal_counter_ <= hstop
-      && horizontal_counter_ >= (ddfstrt_-8 ) && horizontal_counter_ <= (ddfstop_ ));
-
+   if ((line_counter_ > vstart) && line_counter_ <= vstop
+      && horizontal_counter_ > hstart && horizontal_counter_ <= hstop);
+   {
+      // 8 = for hires; 0 : for low res...
+      return horizontal_counter_ >= (ddfstrt_  ) && horizontal_counter_ <= (ddfstop_+8);
+   }
+   return false;
 }

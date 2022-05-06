@@ -2,7 +2,7 @@
 #include "Motherboard.h"
 
 
-Bitplanes::Bitplanes()
+Bitplanes::Bitplanes() : bitplane_fetch_(false)
 {
    Reset();
 }
@@ -15,6 +15,7 @@ Bitplanes::~Bitplanes()
 void Bitplanes::Reset()
 {
    in_windows_ = false;
+   bitplane_fetch_ = false;
 }
 
 //////////////////////////////////////////////
@@ -47,11 +48,16 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
    {
       // Check : Bitplane is on, and position is winthin the display window
       int bitplane = -1;
-      if (motherboard_->GetAgnus()->WithinWindow() && nb_bitplanes_ > 0)
+      
+      //if ((dmatick & 0x7) == 1|| ((bplcon0_ & 0x8000) && (dmatick & 0x7)==4) )
+      if(!bitplane_fetch_)
+         bitplane_fetch_ =motherboard_->GetAgnus()->WithinWindow(bitplane_fetch_);
+
+      if (nb_bitplanes_ > 0 && bitplane_fetch_)
       {
-         if (in_windows_ == false && (dmatick & 0x7) == 1)
+         /*if (in_windows_ == false && (dmatick & 0x7) == 1)
             in_windows_ = true;
-         if (in_windows_)
+         if (in_windows_)*/
          {
             switch (dmatick & 0x7)
             {
@@ -85,6 +91,8 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
                else if (nb_bitplanes_ >= 1 && (bplcon0_ & 0x8000))
                {
                   bitplane = 0;
+                  // Fetch end
+                  bitplane_fetch_ = false;
                }
 
                break;
@@ -120,6 +128,8 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
                if (nb_bitplanes_ >= 1)
                {
                   bitplane = 0;
+                  // Fetch end
+                  bitplane_fetch_ = false;
                }
                break;
             default: return false;

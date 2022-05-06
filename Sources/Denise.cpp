@@ -70,7 +70,7 @@ void Denise::GetRGB(unsigned int * display)
    //todo : handle priority (sprites, dual playfield, etc)
 
    // Todo : get proper number of bit, scaled.
-   if ((bitplanes_->bplcon0_ & 0x8000) == 0)
+   //if ((bitplanes_->bplcon0_ & 0x8000) == 0)
    {
       // low res
       for (int i = 0; i < 16; )
@@ -85,10 +85,11 @@ void Denise::GetRGB(unsigned int * display)
          memcpy(used_display_, display_, 16*sizeof(int));
       }
    }
+   /*
    else
    {
       memcpy(display, display_, sizeof(display_));
-   }
+   }*/
    //memcpy(display, display_, sizeof(display_));
 
    

@@ -1,211 +1,9 @@
 SYNCHRO LOGIQUE : 
 
-Manque int clavier => FE571C;
-=>  A coder correctement !
-
-TRACK LOAD :
-
-*** track 53, 2e PutMsg :
-A0 : bb4c (bb3c)
-=> A9d8 : bb4c (bb3c)
-Ecrit par : FF44BE : D2 = BB4C
-issue de D1 sur 
-issue de FF45F0: movem.l (SP)+, D1/A0/A1/A2/A5/A64C DF 67 02 
-
-
-...
-
-Apres 2e 53 : 
-Interrupt FE5CC8 ?. Cause ??
-FE5D14 ??
-
-...
-
-Decalage des Ax lors de FEA8D6
-
-
-*** CON : FFA37A ?
-Lancement des taches : FF4774
+Affichage Workbench : 
 
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
-
-FEA8D6 : 
-retour Alloc (FC17EE) : 
-B5C8
-B858
-B598
-B5B0 ok
-B5F8
-B618
-B648 ok*
-B660
-C820 ok
-B5D0
-B678 ok
-B7D8 ok*
-B7E8 ok*
-B7F8 ok*
-B800 ok*
-B870 ok*
-B8B8 ok*
-B840 ok*
-10400 ok*
-B938  ok*
-15400 ok*
-	FDA590 ok*
-	FDCE2A ok*
-	FDCE4A ok*
-		FC5AD4 ok*
-	FDCE50 ok*
-	FDCE70 ok*
-		FDC866 ok*
-		FDC880 ok*
-		FDC89A ok*
-		FDC8BA ok*
-		
-	******** FDECB2: move.l ($2C,SP), -(SP)    lire SP avant de decrementer !!!!
-		 on lit d25c au lieu de d260 ! lire avant le -sp)
-		 SP avant = d234 + 2c = d260 (valeur correcte)
-		 ==> AMAddress.cpp ligne 44 : pas lors de l'init !!!
-		 
-	*** FDCE70 ok => BP ok : first occurence mais difference dans A3/A5/A7 !!
-	FDECA0 tjrs la meme chose
-	FDCE74 idem
-	FDCEFC idem
-	
-B958(b948) non identique : D4 0 (B938)
-B958 non identique : D4 0 (B938)
-B988 non identique : D4 b958 (B948)
-B998 non identique : D4 b958 (B948)
-B9C8 non identique : D4 b998 (B988)
-B9D8 non identique : D4 b998 (B988)
-BA08 (D2, D1, D3, D4 differents...)
-STACK :
-FE05D4
-5B0 
-5D78
-
-
-
-
-Taches en cours : 
-WAIT:
-- InitialCLI sp : d9e
-- File System sp : 143e
-- input.device sp : 42d8
-
-Tache reveillée : FileSystem. (bp sur FC08B8)
-2e fois - ... FFD996
-
-3e fois : READY = Initial_CLI
-Reveillée : FILE SYSTEM
-
-Puis : InitialCli
-
-FF44B4 =A5 (A3 ?)
-FF44A8 =A6 (A4?)
-
-- FF5946
-- FF4B62
-- FF4920 Allocmem
-- FF6156
-- FF5284
-- FF87B0
-- FF4924
-- FF884C
-- FF7126
-- FF712C 
-- FF7142
-Deuxieme File system de lancé...
-- FF58D8
-- FF58F4
-- FF8892
-- FF87B6
-- FF87D2
-- FF884C
-- FF70C0
-- FF7126
-- FF7140
-- FF884E
-- FF886C
-- FF886E
-- FF8892
-- FF88A4
-- FF87AA
-
--------
-* trackdisk.device
-FEA7E8 -> Sortie trackload (6a98)
-			6a5c = out dma (debut)
-FEACFA -> 	Mise en place blit 	
-	63d8 : secteur en cours ?
-	6038 + 49h = secteur total ?
-
-RETOUR track 40 : FEA7E8 
-
-Track buffer : 6a5c
-*** Main thread--q
-FE8A84 -> FE8A9A => Attente d'une disquette
-FE89B0 => disk detecté
-FE8A02 => CMD_READ => FEA734  ERROR 1B !
-*** Trackdis-qk
-FEA536 => Read command ?
-FEA71A => End of track read : Int.
-FEAFE2 => Load and read the track => OK
-FEA7E8 => Sortie load track
-FEA8C0 => FEACB2
-FEA8D6 => Decode fait
-*** Main thread
-
-FE8A2C => Execute bootcode Ok
-FE8B00 => FE8DD0 ok
-FE8B38 => Jmp FF4290 : workbench.task !
-FF4346 => ok
-FF458C => ok
-FF45B6 => ok
-FF45EC => ok
-
-
-Creation InitialCli
-FF4774 : Start ok
-FF48D6 : ok
-FF490A => FF47C8
-FF47D6 : ok
-FF44B4 : ok
-FF49C8 : ok
-FF4A18 : => On sort alors qu'on devrait faire des boucles ?
-CELA DIT : boucle créé ok
-(not called)
-FF4B40 Open dos library
-FF439E PutMsg ??
-
-Step en serie : (trackdisk)
-
-Puis :
-
-TRACK 40, lecture =>
-Fin de lecture : 
-FEA580
-FEAFE2 
-	FEAF4C
-	FEB0B2...
-	FEA8D6 = pas la meme chose !!
-	destination : 6a58
-	****** ERROR 1A = not enough sectors!  TDERR_TooFewSecs	=> change track/side = reset head counter ?!
-	En sortie de FEA8D6 : not correct
-FEAF3A
-
-
-
-DoIO <- FEA514 <- FEA4E2 <- FEA44A <- FEA9B6 <- FEA7E8 <- FEA062
-threads : 
-* Initial CLI : FF44B2 ..... FF4A18 <- Wait.
-* File System : FF4B6A .... FF47EC
-* Validator : FF4B6A
-* input device : 
-
-
 
 
 ###
@@ -251,6 +49,13 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
+		
+******** FDECB2: move.l ($2C,SP), -(SP)    lire SP avant de decrementer !!!!
+	 on lit d25c au lieu de d260 ! lire avant le -sp)
+	 SP avant = d234 + 2c = d260 (valeur correcte)
+	 ==> AMAddress.cpp ligne 44 : pas lors de l'init !!!
+
+
 ext.w D1 : DO NOT ERASE 31-16 !!!
 **************
 FF58F4: jsr (A5) / 

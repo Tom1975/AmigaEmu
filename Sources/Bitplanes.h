@@ -57,4 +57,7 @@ protected:
    // Usefull precomputed datas
    int nb_bitplanes_;
    DMAControl* dmacon_;
+
+   // Bitplane fetch ?
+   bool bitplane_fetch_;
 };
