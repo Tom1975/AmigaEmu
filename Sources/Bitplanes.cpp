@@ -2,7 +2,7 @@
 #include "Motherboard.h"
 
 
-Bitplanes::Bitplanes() : bitplane_fetch_(false)
+Bitplanes::Bitplanes() : bitplane_fetch_(false), bitplane_fetch_count_(0)
 {
    Reset();
 }
@@ -16,6 +16,7 @@ void Bitplanes::Reset()
 {
    in_windows_ = false;
    bitplane_fetch_ = false;
+   bitplane_fetch_count_ = 0;
 }
 
 //////////////////////////////////////////////
@@ -50,8 +51,12 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
       int bitplane = -1;
       
       //if ((dmatick & 0x7) == 1|| ((bplcon0_ & 0x8000) && (dmatick & 0x7)==4) )
-      if(!bitplane_fetch_)
-         bitplane_fetch_ =motherboard_->GetAgnus()->WithinWindow(bitplane_fetch_);
+      if (!bitplane_fetch_)
+      {
+         bitplane_fetch_ = motherboard_->GetAgnus()->WithinWindow(bplcon0_ & 0x8000);
+         bitplane_fetch_count_ = 0;
+      }
+         
 
       if (nb_bitplanes_ > 0 && bitplane_fetch_)
       {
@@ -59,7 +64,7 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
             in_windows_ = true;
          if (in_windows_)*/
          {
-            switch (dmatick & 0x7)
+            switch (bitplane_fetch_count_++ & 0x7)
             {
             case 1:        // 4 lowres - 2 hires
                if (nb_bitplanes_ >= 4 && (bplcon0_ & 0x8000) == 0)

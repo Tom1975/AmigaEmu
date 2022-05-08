@@ -136,6 +136,42 @@ struct BitMap (size : 40)
     PLANEPTR Planes[8];
 };
 
+struct Rectangle
+{
+    WORD   MinX,MinY;
+    WORD   MaxX,MaxY;
+};
+
+struct Layer
+{
+    struct  Layer *front,*back;
+    struct  ClipRect	*ClipRect;  /* read by roms to find first cliprect */
+    struct  RastPort	*rp;
+    struct  Rectangle	bounds;
+    UBYTE   reserved[4];
+    UWORD   priority;		    /* system use only */
+    UWORD   Flags;		    /* obscured ?, Virtual BitMap? */
+    struct  BitMap *SuperBitMap;
+    struct  ClipRect *SuperClipRect; /* super bitmap cliprects if VBitMap != 0*/
+				  /* else damage cliprect list for refresh */
+    APTR    Window;		  /* reserved for user interface use */
+    WORD   Scroll_X,Scroll_Y;
+30h struct  ClipRect *cr,*cr2,*crnew;	/* used by dedice */
+3ch struct  ClipRect *SuperSaveClipRects; /* preallocated cr's */
+40h struct  ClipRect *_cliprects;	/* system use during refresh */
+44h struct  Layer_Info	*LayerInfo;	/* points to head of the list */
+48h struct  SignalSemaphore Lock    
+    struct  Hook *BackFill;
+    ULONG   reserved1;
+    struct  Region *ClipRegion;
+    struct  Region *saveClipRects;	/* used to back out when in trouble*/
+    WORD    Width,Height;		/* system use */
+    UBYTE   reserved2[18];
+    /* this must stay here */
+    struct  Region  *DamageList;    /* list of rectangles to refresh
+				       through */
+};
+
 struct RastPort
 {
     struct  Layer  *Layer;
