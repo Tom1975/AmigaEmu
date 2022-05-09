@@ -113,7 +113,7 @@ bool Agnus::WithinWindow(bool hires, bool& fetch)
    unsigned short vstop = diwstop_ >> 8;
    if ((vstop & 0x80) == 0) vstop |= 0x100;
 
-   if (((line_counter_ > vstart) && line_counter_ <= vstop && !vblank_
+   if (((line_counter_ > vstart) && line_counter_ <= vstop && line_counter_ > 0x2C
       /*&& horizontal_counter_ > (diwstrt_ & 0x7F) && horizontal_counter_ <= hstop*/))
    {
       // Fetch.
