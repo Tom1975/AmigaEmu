@@ -49,11 +49,10 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
    {
       // Check : Bitplane is on, and position is winthin the display window
       int bitplane = -1;
-      
-      //if ((dmatick & 0x7) == 1|| ((bplcon0_ & 0x8000) && (dmatick & 0x7)==4) )
+      bool display = true;
       if (!bitplane_fetch_)
       {
-         bitplane_fetch_ = motherboard_->GetAgnus()->WithinWindow(bplcon0_ & 0x8000);
+         display = motherboard_->GetAgnus()->WithinWindow(bplcon0_ & 0x8000, bitplane_fetch_);
          bitplane_fetch_count_ = 0;
       }
          
@@ -145,8 +144,10 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
                return false;
             }
 
-
-            motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
+            if ( display)
+               motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
+            else
+               motherboard_->GetDenise()->DisplayWordBkg();
             bplxpt_[bitplane] += 2;
          }
       }

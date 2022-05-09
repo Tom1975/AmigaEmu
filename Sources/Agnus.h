@@ -57,7 +57,7 @@ public:
    Copper* GetCopper() { return &copper_; }
    Blitter* GetBlitter() { return &blitter_; }
 
-   bool WithinWindow( bool hires);
+   bool WithinWindow( bool hires, bool& fetch);
 
 protected:
 
