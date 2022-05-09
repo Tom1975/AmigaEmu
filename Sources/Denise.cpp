@@ -47,7 +47,7 @@ void Denise::TickCDACUp()
    hpos_counter_++;
 
    // Pixel writer : Every 16 tick (pixels hires), write the buffer to screen
-   if (hpos_counter_ == 16)
+   if (hpos_counter_ == 8)
    {
       hpos_counter_ = 0;
 
@@ -70,13 +70,13 @@ void Denise::GetRGB(unsigned int * display)
    //todo : handle priority (sprites, dual playfield, etc)
 
    // Todo : get proper number of bit, scaled.
-   //if ((bitplanes_->bplcon0_ & 0x8000) == 0)
+   if ((bitplanes_->bplcon0_ & 0x8000) == 0)
    {
       // low res
       for (int i = 0; i < 16; )
       {
          display[i++] = used_display_[pixel_counter_];
-         //display[i++] = used_display_[pixel_counter_];
+         display[i++] = used_display_[pixel_counter_];
          pixel_counter_++;
       }
       if (pixel_counter_ == 16)
@@ -85,11 +85,11 @@ void Denise::GetRGB(unsigned int * display)
          memcpy(used_display_, display_, 16*sizeof(int));
       }
    }
-   /*
+   
    else
    {
       memcpy(display, display_, sizeof(display_));
-   }*/
+   }
    //memcpy(display, display_, sizeof(display_));
 
    

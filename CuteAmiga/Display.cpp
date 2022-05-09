@@ -86,7 +86,8 @@ void Display::VSync()
 void Display::HSync()
 {
    pixel_current_index_ = 0;
-   current_line_ = GetFrameBuffer(index_current_line_++);
+   current_line_ = GetFrameBuffer(index_current_line_);
+   index_current_line_ += 2;
    
 }
 
