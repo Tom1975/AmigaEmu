@@ -56,5 +56,6 @@ private:
    // Pixel/line handling
    unsigned int index_current_line_;
    unsigned int * current_line_;
+   unsigned int * next_line_;
    unsigned int pixel_current_index_;
 };

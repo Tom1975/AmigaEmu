@@ -51,7 +51,8 @@ void Display::Init()
    setUpdatesEnabled(true);
 
    index_current_line_ = 0;
-   current_line_ = GetFrameBuffer(index_current_line_);
+   current_line_ = GetFrameBuffer(index_current_line_++);
+   next_line_ = GetFrameBuffer(index_current_line_++);
    pixel_current_index_ = 0;
 }
 
@@ -79,16 +80,17 @@ void Display::VSync()
    AFrameIsReady();
 
    index_current_line_ = 0;
-   current_line_ = GetFrameBuffer(index_current_line_);
+   current_line_ = GetFrameBuffer(index_current_line_++);
+   next_line_ = GetFrameBuffer(index_current_line_++);
    pixel_current_index_ = 0;
 }
 
 void Display::HSync()
 {
    pixel_current_index_ = 0;
-   current_line_ = GetFrameBuffer(index_current_line_);
-   index_current_line_ += 2;
-   
+   memcpy(next_line_, current_line_, 1024 * sizeof(unsigned int));
+   current_line_ = GetFrameBuffer(index_current_line_++);
+   next_line_ = GetFrameBuffer(index_current_line_++);   
 }
 
 void Display::Add16Pixels(unsigned int* pixels)
