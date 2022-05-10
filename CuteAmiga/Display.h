@@ -4,6 +4,7 @@
 #include <qevent.h>
 #include "Monitor.h"
 #include "IDragNDropTarget.h"
+#include "HardwareInterface.h"
 
 namespace Ui {
 class Display;
@@ -19,6 +20,7 @@ public:
     ~Display();
 
     void SetDragnDropTarget(IDragNDropTarget*);
+    void SetHardwareIO(HardwareInterface * hardware_io);
     virtual unsigned int * GetFrameBuffer(unsigned int line);
 
     virtual void HSync();
@@ -34,6 +36,10 @@ public:
     // Keyboard
     virtual void keyPressEvent(QKeyEvent * event_keyboard);
     void keyReleaseEvent(QKeyEvent *event_keyboard);
+
+    // Mouse
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
 
     // Drag'n'drop
     void dragEnterEvent(QDragEnterEvent *event);
@@ -52,6 +58,8 @@ private:
    IDragNDropTarget* target_;
    QPixmap pixmap_;
    QImage image_;
+
+   HardwareInterface * hardware_io_;
 
    // Pixel/line handling
    unsigned int index_current_line_;

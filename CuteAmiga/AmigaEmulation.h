@@ -33,7 +33,9 @@ public:
    Motherboard* GetMotherboard() { return motherboard_; }
    M68k* GetCpu() {return motherboard_->GetCpu(); }
    Copper* GetCopper() { return motherboard_->GetAgnus()->GetCopper(); }
-
+   HardwareInterface * GetHardwareIO() {
+      return &hardware_io_;
+   }
    // Main functions
    void Reset();
    void Break();

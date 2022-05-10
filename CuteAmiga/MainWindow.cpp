@@ -19,7 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
    ui->setupUi(this);
 
    ui->display_->SetDragnDropTarget(this);
+   
    emu_handler_ = new AmigaEmulation(ui->display_);
+
+   ui->display_->SetHardwareIO(emu_handler_->GetHardwareIO());
 
    // Menu connection
    connect(ui->actionReset, &QAction::triggered, emu_handler_, &AmigaEmulation::Reset);

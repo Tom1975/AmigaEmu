@@ -21,7 +21,7 @@ Display::Display(QWidget* parent) :
 }
 
 Display::Display(QWidget* parent, const QPoint& position, const QSize& size, unsigned int frame_time) :
-   QWidget(parent)
+   QWidget(parent), hardware_io_(nullptr)
 {
    setAttribute(Qt::WA_PaintOnScreen);
    setAttribute(Qt::WA_OpaquePaintEvent);
@@ -59,6 +59,11 @@ void Display::Init()
 void Display::SetDragnDropTarget(IDragNDropTarget* target)
 {
    target_ = target;
+}
+
+void Display::SetHardwareIO(HardwareInterface * hardware_io)
+{
+   hardware_io_ = hardware_io;
 }
 
 unsigned int * Display::GetFrameBuffer(unsigned int line)
@@ -116,6 +121,38 @@ void Display::keyPressEvent(QKeyEvent * event_keyboard)
 ///////////////////////////////////////////////////////////////////////////
 void Display::keyReleaseEvent(QKeyEvent *event_keyboard)
 {
+}
+
+///////////////////////////////////////////////////////////////////////////
+void Display::mousePressEvent(QMouseEvent* event)
+{
+   
+   if (event->button() == Qt::LeftButton)
+   {
+      hardware_io_->MouseClick(0, true);
+      // Capture the window
+   }
+   else
+   {
+      hardware_io_->MouseClick(1, true);
+      // Capture the window
+
+   }
+}
+
+void Display::mouseReleaseEvent(QMouseEvent* event)
+{
+   if (event->button() == Qt::LeftButton)
+   {
+      hardware_io_->MouseClick(0, false);
+      // Capture the window
+   }
+   else
+   {
+      hardware_io_->MouseClick(1, false);
+      // Capture the window
+
+   }
 }
 
 ///////////////////////////////////////////////////////////////////////////
