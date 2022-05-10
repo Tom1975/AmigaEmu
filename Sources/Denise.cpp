@@ -6,7 +6,7 @@
 #define COLOR2RGB(col) (unsigned int)( (((col>>8)&0xF) << 20)+(((col>>8)&0xF) << 16) + (((col>>4)&0xF) << 12)+(((col>>4)&0xF) << 8) + ((col&0xF)<<4)+((col&0xF)))
 
 
-Denise::Denise() : frame_(nullptr), hpos_counter_(0)
+Denise::Denise() : frame_(nullptr), hpos_counter_(0), current_line_(0)
 {
    Reset();
 }
@@ -21,6 +21,7 @@ void Denise::Reset()
    memset(color_, 0, sizeof(color_));
    pixel_counter_ = 0;
    hpos_counter_ = 0;
+   current_line_ = 0;
 }
 
 ////////////////////////////////
@@ -33,11 +34,13 @@ void Denise::StrEqu()
 void Denise::StrVbl()
 {
    hpos_counter_ = 0;
+   current_line_ = 0;
 }
 
 void Denise::StrHor()
 {
    hpos_counter_ = 0;
+   current_line_++;
 }
 
 ////////////////////////////////
@@ -164,4 +167,12 @@ void Denise::DisplayWordBkg()
 void Denise::SetColor(unsigned int colornumber, unsigned short data)
 {
    color_[colornumber & 0x1F] = data;
+}
+
+bool Denise::DmaSprite(unsigned char sprite_index)
+{
+   // Update Mask / line from sprite position
+
+
+   return false;
 }

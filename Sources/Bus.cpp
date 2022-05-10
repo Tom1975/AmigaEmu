@@ -298,19 +298,24 @@ void Bus::TickDMA()
       case 9:
       // Sprite DMA
       case 10:
-      case 11:
+         dma_used = denise_->DmaSprite(0);
          break;
+      case 11:
       case 12:
       case 13:
       case 14:
       case 15:
       case 16:
       case 17:
+         // Check if bitplane has not a high priority - todo
+         dma_used = denise_->DmaSprite(odd_counter_ - 11);
+         break;
       case 18:
       case 19:
       case 20:
       case 21:
       case 22:
+         break;
       default:
       // Bitplanes (1, 2, 3, 4 for low res, 1, 2 for high res)
          break;

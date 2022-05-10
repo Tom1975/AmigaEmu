@@ -38,7 +38,7 @@ public:
    void SetData(unsigned int bitplane_number, unsigned short data);
    void SetColor(unsigned int colornumber, unsigned short data);
 
-
+   bool DmaSprite(unsigned char sprite_index);
 
    unsigned short bplxdat_[6];   // 6 Bitplanes registers
    int nb_bitplanes_;
@@ -48,6 +48,9 @@ public:
 
 protected:
    
+   // 
+   unsigned int current_line_;
+
    unsigned char pixel_counter_;
    unsigned short color_[32];
    unsigned int display_[16];
@@ -60,4 +63,21 @@ protected:
    // Register link
    unsigned short* diwstrt_;
    unsigned short* diwstop_;
+
+   // Sprite line computation
+   unsigned short SpriteLine_[64];
+   unsigned short SpriteMask_[64];
+
+   // Sprite inner data
+   class Sprite
+   {
+   public:
+      unsigned int ptr_;
+      unsigned short vpos_;
+      unsigned short hpos_;
+
+   };
+
+   Sprite sprites_[8];
+
 };

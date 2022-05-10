@@ -96,6 +96,8 @@ void Motherboard::VSync()
    cia_a_.Tod();
    //agnus_.GetCopper()->VerticalRetraceBegin();
 
+   denise_.StrVbl();
+
    // Int VBlank
    paula_.Int(0x20);
 }
