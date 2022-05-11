@@ -2869,6 +2869,7 @@ unsigned int M68k::OpcodeEor()
 
    destination_alu_->WriteInput(input);
 
+   sr_ &= 0xFFF0;
    if (input == 0) sr_ |= F_Z;
    switch (operand_size_)
    {
