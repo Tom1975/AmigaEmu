@@ -38,6 +38,15 @@ public:
    void SetData(unsigned int bitplane_number, unsigned short data);
    void SetColor(unsigned int colornumber, unsigned short data);
 
+   //////////////////////////////////////////////
+   // Sprite
+   void SetSpriteCtl(size_t index, unsigned short data);
+   void SetSpritePos(size_t index, unsigned short data);
+   void SetSpritePth(size_t index, unsigned short data);
+   void SetSpritePtl(size_t index, unsigned short data);
+   void SetSpriteDatA(size_t index, unsigned short data);
+   void SetSpriteDatB(size_t index, unsigned short data);
+
    bool DmaSprite(unsigned char sprite_index);
 
    unsigned short bplxdat_[6];   // 6 Bitplanes registers
@@ -72,10 +81,18 @@ protected:
    class Sprite
    {
    public:
-      unsigned int ptr_;
-      unsigned short vpos_;
-      unsigned short hpos_;
 
+      void Reset();
+
+      bool enabled_;
+      unsigned int ptr_;
+      unsigned short svpos_;
+      unsigned short shpos_;
+      unsigned short evpos_;
+      bool attached_;
+
+      unsigned short datA_;
+      unsigned short datB_;
    };
 
    Sprite sprites_[8];

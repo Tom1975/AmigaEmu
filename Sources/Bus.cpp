@@ -699,58 +699,151 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x118: //BPL5DAT
       case 0x11A: //BPL6DAT
          denise_->SetData(((addr & 0x1FF) - 0x110) >> 1, data);
-         // todo
          break;
       case 0x120: // Sprites
+         denise_->SetSpritePth(0, data);
+         break;
       case 0x122: // Sprites
+         denise_->SetSpritePtl(0, data);
+         break;
       case 0x124: // Sprites
+         denise_->SetSpritePth(1, data);
+         break;
       case 0x126: // Sprites
+         denise_->SetSpritePtl(1, data);
+         break;
       case 0x128: // Sprites
+         denise_->SetSpritePth(2, data);
+         break;
       case 0x12A: // Sprites
+         denise_->SetSpritePtl(2, data);
+         break;
       case 0x12C: // Sprites
+         denise_->SetSpritePth(3, data);
+         break;
       case 0x12E: // Sprites
+         denise_->SetSpritePtl(3, data);
+         break;
       case 0x130: // Sprites
+         denise_->SetSpritePth(4, data);
+         break;
       case 0x132: // Sprites
+         denise_->SetSpritePtl(4, data);
+         break;
       case 0x134: // Sprites
+         denise_->SetSpritePth(5, data);
+         break;
       case 0x136: // Sprites
+         denise_->SetSpritePtl(5, data);
+         break;
       case 0x138: // Sprites
+         denise_->SetSpritePth(6, data);
+         break;
       case 0x13A: // Sprites
+         denise_->SetSpritePtl(6, data);
+         break;
       case 0x13C: // Sprites
+         denise_->SetSpritePth(7, data);
+         break;
       case 0x13E: // Sprites
-
+         denise_->SetSpritePtl(7, data);
+         break;
       case 0x140: // Sprites
+         denise_->SetSpritePos(0, data); 
+         break;
       case 0x142: // Sprites
+         denise_->SetSpriteCtl(0, data);
+         break;
       case 0x144: // Sprites
+         denise_->SetSpriteDatA(0, data);
+         break;
       case 0x146: // Sprites
+         denise_->SetSpriteDatB(0, data);
+         break;
       case 0x148: // Sprites
+         denise_->SetSpritePos(1, data);
+         break;
       case 0x14A: // Sprites
+         denise_->SetSpriteCtl(1, data);
+         break;
       case 0x14C: // Sprites
+         denise_->SetSpriteDatA(1, data);
+         break;
       case 0x14E: // Sprites
+         denise_->SetSpriteDatB(1, data);
+         break;
       case 0x150: // Sprites
+         denise_->SetSpritePos(2, data);
+         break;
       case 0x152: // Sprites
+         denise_->SetSpriteCtl(2, data);
+         break;
       case 0x154: // Sprites
+         denise_->SetSpriteDatA(2, data);
+         break;
       case 0x156: // Sprites
+         denise_->SetSpriteDatB(2, data);
+         break;
       case 0x158: // Sprites
+         denise_->SetSpritePos(3, data);
+         break;
       case 0x15A: // Sprites
+         denise_->SetSpriteCtl(3, data);
+         break;
       case 0x15C: // Sprites
+         denise_->SetSpriteDatA(3, data);
+         break;
       case 0x15E: // Sprites
+         denise_->SetSpriteDatB(3, data);
+         break;
       case 0x160: // Sprites
+         denise_->SetSpritePos(4, data);
+         break;
       case 0x162: // Sprites
+         denise_->SetSpriteCtl(4, data);
+         break;
       case 0x164: // Sprites
+         denise_->SetSpriteDatA(4, data);
+         break;
       case 0x166: // Sprites
+         denise_->SetSpriteDatB(4, data);
+         break;
       case 0x168: // Sprites
+         denise_->SetSpritePos(5, data);
+         break;
       case 0x16A: // Sprites
+         denise_->SetSpriteCtl(5, data);
+         break;
       case 0x16C: // Sprites
+         denise_->SetSpriteDatA(5, data);
+         break;
       case 0x16E: // Sprites
+         denise_->SetSpriteDatB(5, data);
+         break;
       case 0x170: // Sprites
+         denise_->SetSpritePos(6, data);
+         break;
       case 0x172: // Sprites
+         denise_->SetSpriteCtl(6, data);
+         break;
       case 0x174: // Sprites
+         denise_->SetSpriteDatA(6, data);
+         break;
       case 0x176: // Sprites
+         denise_->SetSpriteDatB(6, data);
+         break;
       case 0x178: // Sprites
+         denise_->SetSpritePos(7, data);
+         break;
       case 0x17A: // Sprites
+         denise_->SetSpriteCtl(7, data);
+         break;
       case 0x17C: // Sprites
+         denise_->SetSpriteDatA(7, data);
+         break;
       case 0x17E: // Sprites
-         // todo
+         denise_->SetSpriteDatB(7, data);
+         break;
          break;
       case 0x180: // Color registers
       case 0x182:
@@ -768,7 +861,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x19A:
       case 0x19C:
       case 0x19E:
-      case 0x1A0: // Color registers
+      case 0x1A0:
       case 0x1A2:
       case 0x1A4:
       case 0x1A6:

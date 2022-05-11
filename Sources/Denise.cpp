@@ -9,6 +9,10 @@
 Denise::Denise() : frame_(nullptr), hpos_counter_(0), current_line_(0)
 {
    Reset();
+   for (size_t i = 0; i < 8; i++)
+   {
+      sprites_[i].Reset();
+   }
 }
 
 Denise::~Denise()
@@ -40,6 +44,8 @@ void Denise::StrVbl()
 void Denise::StrHor()
 {
    hpos_counter_ = 0;
+   memset(SpriteLine_, 0, sizeof(SpriteLine_));
+   memset(SpriteMask_, 0, sizeof(SpriteMask_));
    current_line_++;
 }
 
@@ -172,7 +178,60 @@ void Denise::SetColor(unsigned int colornumber, unsigned short data)
 bool Denise::DmaSprite(unsigned char sprite_index)
 {
    // Update Mask / line from sprite position
-
+   // Prepare DatA and DatB
 
    return false;
+}
+
+void Denise::SetSpriteCtl(size_t index, unsigned short data)
+{
+   sprites_[index].attached_ = (data & 0x80) ? true : false;
+   sprites_[index].evpos_ = ((data >> 8) & 0xFF) | ((data & 0x2) << 8);
+   sprites_[index].shpos_ &= 0x1FE;
+   sprites_[index].shpos_ |= (data & 0x1);
+   sprites_[index].svpos_ &= 0xFF;
+   sprites_[index].svpos_ |= (data & 0x4) << 8;
+
+   sprites_[index].enabled_ = false;
+}
+
+void Denise::SetSpritePos(size_t index, unsigned short data)
+{
+   sprites_[index].shpos_ &= 0x1;
+   sprites_[index].shpos_ |= (data&0xFF)<<1;
+
+   sprites_[index].svpos_ &= 0x100;
+   sprites_[index].svpos_ |= ((data & 0xFF)>>8);
+}
+
+void Denise::SetSpritePth(size_t index, unsigned short data)
+{
+   sprites_[index].ptr_ &= 0x07FFF;
+   sprites_[index].ptr_ |= (data & 0x7) << 15;
+}
+
+void Denise::SetSpritePtl(size_t index, unsigned short data)
+{
+   sprites_[index].ptr_ &= 0x38000;
+   sprites_[index].ptr_ |= (data & 0x7FFF);
+}
+
+void Denise::SetSpriteDatA(size_t index, unsigned short data)
+{
+   sprites_[index].datA_ = data;
+   sprites_[index].enabled_ = true;
+}
+
+void Denise::SetSpriteDatB(size_t index, unsigned short data)
+{
+   sprites_[index].datB_ = data;
+}
+
+void Denise::Sprite::Reset()
+{
+   ptr_ = 0;
+   svpos_ = 0;
+   shpos_ = 0;
+   evpos_ = 0;
+   attached_ = false;
 }
