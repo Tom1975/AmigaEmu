@@ -25,3 +25,8 @@ void HardwareInterface::MouseClick(int button, bool down)
 {
    port_1_button_[button] = down;
 }
+
+void HardwareInterface::KeyAction(int key, bool pressed)
+{
+   // Add key to current key pressed
+}

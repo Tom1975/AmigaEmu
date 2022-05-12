@@ -13,6 +13,7 @@ public:
 
    // API
    void MouseClick(int button, bool down);
+   void KeyAction(int key, bool pressed);
 
 protected:
    bool port_1_button_[3];
