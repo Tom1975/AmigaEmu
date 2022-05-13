@@ -308,7 +308,8 @@ void Bus::TickDMA()
       case 16:
       case 17:
          // Check if bitplane has not a high priority - todo
-         dma_used = denise_->DmaSprite(odd_counter_ - 11);
+         //if ((odd_counter_ << 2) < first_dma_bitplane)
+            dma_used = denise_->DmaSprite(odd_counter_ - 11);
          break;
       case 18:
       case 19:
@@ -329,7 +330,7 @@ void Bus::TickDMA()
       // Bitplane read can begin here
       if (!bitplanes_->DmaTick(tick_count_))
       // Copper
-      if ( !copper_->DmaTick())
+      if (!copper_->DmaTick())
       // Blitter
       if (!blitter_->DmaTick())
       // 68000 

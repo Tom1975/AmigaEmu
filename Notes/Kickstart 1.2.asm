@@ -72304,27 +72304,27 @@ FF4D52: btst #0, A2               08 0A 00 00
 00034EC2: move.l D1, A4             28 41 
 00034EC4: clr.l (A4)+               42 9C 
 00034EC6: cmp.l A4, D2              B4 8C 
-00034EC8: bge.s 34EC4               6C FA 
-00034ECA: move.l ($30,A2), D3       26 2A 00 30 
-00034ECE: move.l D3, (4,A0D1.l)     21 83 18 04 
-00034ED2: asr.l #2, D3
-00034ED4: move.l (0,A0D3.l), (0,A0D1.l)21 B0 38 00 18 00 
-00034EDA: move.l D0, (0,A0D3.l)     21 80 38 00 
-00034EDE: move.l A1, (C,A0D3.l)     21 89 38 0C 
-00034EE2: move.l (A1), (10,A0D1.l)  21 91 18 10 
-00034EE6: subi.l #$A0, D2           04 82 00 00 00 A0 
-00034EEC: move.l D2, (8,A0D1.l)     21 82 18 08 
-00034EF0: move.l D0, ($30,A2)       25 40 00 30 
-00034EF4: move.l D1, A1             22 41 
-00034EF6: move.l D0, D1             22 00 
-00034EF8: moveq #$20, D0            70 20 
-00034EFA: move.l ($68,A2), A4       28 6A 00 68 
-00034EFE: jsr (A5)                  4E 95 
-00034F00: move.l ($10,A1), A4       28 69 00 10 
-00034F04: moveq #$20, D0            70 20 
-00034F06: jsr (A5)                  4E 95 
-00034F08: bra.s 34EF8               60 EE 
-00034F0A: jmp (A6)                  4E D6 
+FF4EC8: bge.s 34EC4               6C FA 
+FF4ECA: move.l ($30,A2), D3       26 2A 00 30 
+FF4ECE: move.l D3, (4,A0D1.l)     21 83 18 04 
+FF4ED2: asr.l #2, D3
+FF4ED4: move.l (0,A0D3.l), (0,A0D1.l)21 B0 38 00 18 00 
+FF4EDA: move.l D0, (0,A0D3.l)     21 80 38 00 
+FF4EDE: move.l A1, (C,A0D3.l)     21 89 38 0C 
+FF4EE2: move.l (A1), (10,A0D1.l)  21 91 18 10 
+FF4EE6: subi.l #$A0, D2           04 82 00 00 00 A0 
+FF4EEC: move.l D2, (8,A0D1.l)     21 82 18 08 
+FF4EF0: move.l D0, ($30,A2)       25 40 00 30 
+FF4EF4: move.l D1, A1             22 41 
+FF4EF6: move.l D0, D1             22 00 
+FF4EF8: moveq #$20, D0            70 20 
+FF4EFA: move.l ($68,A2), A4       28 6A 00 68 
+FF4EFE: jsr (A5)                  4E 95 
+FF4F00: move.l ($10,A1), A4       28 69 00 10 
+FF4F04: moveq #$20, D0            70 20 
+FF4F06: jsr (A5)                  4E 95 
+FF4F08: bra.s 34EF8               60 EE 
+FF4F0A: jmp (A6)                  4E D6 
 00034F0C: move.l D1, D0             20 01 
 00034F0E: asr.l #2, D1
 00034F10: tst.l  (4,A0D1.l)         4A B0 18 04 
