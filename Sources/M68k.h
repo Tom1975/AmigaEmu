@@ -305,6 +305,7 @@ protected:
    unsigned int DecodeReset();
    unsigned int DecodeRod();
    unsigned int DecodeRod2();
+   unsigned int DecodeRoxd2();
    unsigned int DecodeRte();
    unsigned int DecodeRts();
    unsigned int DecodeScc();
@@ -372,6 +373,7 @@ protected:
    unsigned int OpcodePea();
    unsigned int OpcodeReset();
    unsigned int OpcodeRod();
+   unsigned int OpcodeRodXd();
    unsigned int OpcodeRte();
    unsigned int OpcodeRte2();
    unsigned int OpcodeRts();

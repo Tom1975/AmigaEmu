@@ -242,6 +242,54 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
    written_input_ = 1;
 }
 
+void AddressingMode::Roxd(bool right, unsigned short& sr)
+{
+   unsigned char x = (sr & 0x10);
+   input_ = GetU16();
+   /*if (input_ == 0)
+   {
+      sr &= ~(0x2 | 0x8 | 0x1);
+      sr |= 0x4;
+   }
+   else */if (right)
+   {
+      if (input_ & 0x1)
+      {
+         sr &= ~(0x10 | 0x2 | 0x8 | 0x1 | 0x4);
+         sr |= 0x1 | 0x8;
+         sr |= 0x10;
+         input_ >>= 1;
+         input_ |= (x==1)?0x8000:0;
+      }
+      else
+      {
+         sr &= ~(0x8 | 0x2 | 0x1|0x10 | 0x4);
+         input_ >>= 1;
+         input_ |= (x == 1) ? 0x8000 : 0;
+      }
+   }
+   else
+   {
+      if (input_ & 0x800)
+      {
+         sr &= ~(0x2 | 0x8 | 0x1 | 0x4);
+         sr |= 0x1|0x10;
+         input_ <<= 1;
+         input_ |= (x == 1)?1:0;
+      }
+      else
+      {
+         sr &= ~(0x2 | 0x8 | 0x1|0x10|0x4);
+         input_ <<= 1;
+         input_ |= (x == 1) ? 1 : 0;
+      }
+      if (input_ & 0x800) sr |= 0x8;
+   }
+   if (input_ == 0)
+      sr |= 0x4;
+   written_input_ = 1;
+
+}
 
 void AddressingMode::Rod(bool right, unsigned short& sr)
 {

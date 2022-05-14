@@ -2,7 +2,11 @@
 
 HardwareInterface::HardwareInterface()
 {
-
+   for (int i = 0; i < 3; i++)
+   {
+      port_1_button_[i] = false;
+      port_2_button_[i] = false;
+   }
 }
 
 HardwareInterface::~HardwareInterface()
