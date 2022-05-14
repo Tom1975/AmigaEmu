@@ -290,6 +290,7 @@ protected:
    unsigned int DecodeMove();
    unsigned int DecodeMoveFromSr();
    unsigned int DecodeMoveToSr();
+   unsigned int DecodeMoveCcr();
    unsigned int DecodeMovem();
    unsigned int DecodeMovembis();
    unsigned int OpcodeMovemWrite();
@@ -360,6 +361,8 @@ protected:
    unsigned int OpcodeMove();
    unsigned int OpcodeMoveFromSr();
    unsigned int OpcodeMoveToSr();
+   unsigned int OpcodeMoveFromCcr();
+   unsigned int OpcodeMoveToCcr();
    unsigned int OpcodeMovem();
    unsigned int OpcodeMovem2();
    unsigned int OpcodeMoveUsp();
@@ -433,6 +436,7 @@ protected:
    static Func Lsd2_[];
    static Func Move_[];
    static Func MoveFromSr_[];
+   static Func MoveFromCcr_[];
    static Func MoveToCcr_[];
    static Func MoveToSr_[];
    static Func Movem_[];

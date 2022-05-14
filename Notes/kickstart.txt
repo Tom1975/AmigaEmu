@@ -1,4 +1,4 @@
-Chargement Workbench : 
+## Chargement Workbench : 
 - On tombe sur un opcode foireux car on va vers 00 !!
 3e step 62.
 FF4FA2 -> FF44a8 -> Jmp 0
@@ -11,6 +11,12 @@ Chercher fonction Text - -$003C (-60) => FFC4
 
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
+
+## Chargement battle squadron.
+Crash :
+70100 -> Deja ni'mporte quoi sur D0
+70102
+60000
 
 
 ###

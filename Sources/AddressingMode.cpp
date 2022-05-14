@@ -208,10 +208,6 @@ void AddressingMode::Btst(unsigned int bit_tested, unsigned short& sr)
 void AddressingMode::Lsd(bool right, unsigned short& sr)
 {
    sr &= ~0x2; // V is cleared
-   if (input_ == 0)
-      sr |= 0x4;
-   else
-      sr &= ~0x4;
    if (right)
    {
       input_ = GetU16();
@@ -239,6 +235,16 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
 
       input_ <<= 1;
    }
+   if (input_ | 0x8000)
+      sr |= 0x8;
+   else
+      sr &= ~0x8;
+
+   if (input_ == 0)
+      sr |= 0x4;
+   else
+      sr &= ~0x4;
+
    written_input_ = 1;
 }
 

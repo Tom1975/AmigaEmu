@@ -52,6 +52,8 @@ M68k::Func M68k::Lsd2_[] = { &M68k::DecodeLsd2, &M68k::CpuFetch, &M68k::OperandF
 M68k::Func M68k::Move_[] = { &M68k::DecodeMove, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::OpcodeMove, &M68k::CpuFetch, &M68k::OperandFinished, nullptr};
 M68k::Func M68k::MoveFromSr_[] = { &M68k::DecodeMoveFromSr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::DestinationFetch, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::MoveFromCcr_[] = { &M68k::DecodeMoveCcr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::MoveToCcr_[] = { &M68k::DecodeMoveCcr, &M68k::DestinationFetch, &M68k::OpcodeMoveToCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,
                               &M68k::OpcodeMovemWrite, &M68k::WriteSourceToDestinationSimple, &M68k::OpcodeMovem2, &M68k::CpuFetch, nullptr }; // loop
 M68k::Func M68k::Moveq_[] = { &M68k::DecodeMoveq, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -91,7 +93,6 @@ M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::Not
 // TO IMPLEMENT & DISASSEMBLE
 M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::MoveToCcr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Negx_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
@@ -256,6 +257,7 @@ void M68k::InitOpcodes()
    AddCommand(0xFFC0, 0x4840, Pea_);
    AddCommand(0xFFC0, 0x40C0, MoveFromSr_);
    AddCommand(0xFFC0, 0x46C0, MoveToSr_);
+   AddCommand(0xFFC0, 0x42C0, MoveFromCcr_);
    AddCommand(0xFFC0, 0x44C0, MoveToCcr_);
    AddCommand(0xFFC0, 0x4800, Nbcd_);
    AddCommand(0xFFC0, 0x4AC0, Tas_);
@@ -1117,8 +1119,15 @@ unsigned int M68k::OpcodeMove()
 
 unsigned int M68k::DecodeMoveFromSr()
 {
-   operand_size_ = WORD;
-   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+   if (sr_ & 0x2000)
+   {
+      operand_size_ = WORD;
+      destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+   }
+   else
+   {
+      return TRAP(8);
+   }
    return true;
 }
 
@@ -1131,7 +1140,7 @@ unsigned int M68k::OpcodeMoveFromSr()
 
 unsigned int M68k::DecodeMoveToSr()
 {
-   if ( sr_ & 0x2000)
+   if (sr_ & 0x2000)
    {
       operand_size_ = WORD;
       destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
@@ -1148,6 +1157,30 @@ unsigned int M68k::OpcodeMoveToSr()
    sr_ = destination_alu_->GetU16();
    Fetch();
    return true;
+}
+
+unsigned int M68k::DecodeMoveCcr()
+{
+   operand_size_ = WORD;
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+
+   return true;
+}
+
+unsigned int M68k::OpcodeMoveFromCcr()
+{
+   destination_alu_->WriteInput(sr_ & 0x1F);
+   return WriteSourceToDestination();
+   return true;
+}
+
+unsigned int M68k::OpcodeMoveToCcr()
+{
+   sr_ &= ~(0x1F);
+   sr_ = destination_alu_->GetU16() & 0x1F;
+   Fetch();
+   return true;
+
 }
 
 unsigned int M68k::DecodeMovem ()
@@ -1454,7 +1487,7 @@ unsigned int M68k::DecodeOriSr()
 
 unsigned int M68k::DecodeOriToCcr()
 {
-   sr_ |= (irc_&0xFF);
+   sr_ |= (irc_ & 0xFF);
 
    Fetch();
    return true;
@@ -1692,7 +1725,6 @@ unsigned int M68k::DecodeLsd2()
    bool right = ((ird_>> 8) & 0x1) == 0;
    unsigned int rotat = (ird_ >> 9) & 0x7;
    
-
    if (((ird_ >> 5) & 0x1) == 1)
    {
       rotat = d_[rotat]&0x3F;
@@ -1704,13 +1736,12 @@ unsigned int M68k::DecodeLsd2()
 
    // Rotate
    sr_ &= ~0x2; // V is cleared
-
-   switch ((ird_>> 6) & 3)
+   unsigned char x = 0;
+   if (rotat != 0)
    {
-   case 0:
       if (right)
       {
-         if (d_[ird_ & 0x7] & 0x1)
+         if (((d_[ird_ & 0x7] & 0xFF) >> (rotat - 1))&0x1)
          {
             sr_ |= F_X | F_C;
          }
@@ -1718,12 +1749,23 @@ unsigned int M68k::DecodeLsd2()
          {
             sr_ &= ~(F_X | F_C);
          }
+      }
+   }
+   else
+   {
+      sr_ &= ~(F_C);
+   }
+   switch ((ird_>> 6) & 3)
+   {
+   case 0:
+      if (right)
+      {
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFFFF00;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFF) >> rotat);
       }
       else
       {
-         if (d_[ird_ & 0x7] & 0x80)
+         if ((d_[ird_ & 0x7] << (rotat-1)) & 0x80)
          {
             sr_ |= F_X | F_C;
          }
@@ -1738,26 +1780,23 @@ unsigned int M68k::DecodeLsd2()
          sr_ |= 0x4;
       else
          sr_ &= ~0x4;
+      
+      if ((d_[ird_ & 0x7] & 0x80) )
+         sr_ |= 0x8;
+      else
+         sr_ &= ~0x8;
 
       break;
    case 1:
       if (right)
       {
-         if (d_[ird_ & 0x7] & 0x1)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFF0000;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFF) >> rotat);
          
       }
       else
       {
-         if (d_[ird_ & 0x7] & 0x8000)
+         if ((d_[ird_ & 0x7] << (rotat - 1)) & 0x8000)
          {
             sr_ |= F_X | F_C;
          }
@@ -1768,6 +1807,11 @@ unsigned int M68k::DecodeLsd2()
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFF0000;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFF) << rotat);
       }
+      if ((d_[ird_ & 0x7] & 0x8000))
+         sr_ |= 0x8;
+      else
+         sr_ &= ~0x8;
+
       if ((d_[ird_ & 0x7] & 0xFFFF) == 0)
          sr_ |= 0x4;
       else
@@ -1777,19 +1821,11 @@ unsigned int M68k::DecodeLsd2()
    case 2:
       if (right)
       {
-         if (d_[ird_ & 0x7] & 0x1)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
          d_[ird_ & 0x7] = (d_[ird_ & 0x7] ) >> rotat;
       }
       else
       {
-         if (d_[ird_ & 0x7] & 0x80000000)
+         if ((d_[ird_ & 0x7] << (rotat - 1)) & 0x80000000)
          {
             sr_ |= F_X | F_C;
          }
@@ -1799,6 +1835,11 @@ unsigned int M68k::DecodeLsd2()
          }
          d_[ird_ & 0x7] = (d_[ird_ & 0x7]) << rotat;
       }
+      if ((d_[ird_ & 0x7] & 0x80000000))
+         sr_ |= 0x8;
+      else
+         sr_ &= ~0x8;
+
       if ((d_[ird_ & 0x7] ) == 0)
          sr_ |= 0x4;
       else
@@ -1939,7 +1980,7 @@ unsigned int M68k::DecodeRod2()
             unsigned int out_of_pos = d_[ird_ & 0x7] & (mask << (32 - rotat));
             out_of_pos >>= (32 - rotat);
 
-            d_[ird_ & 0x7] |= shifted_bits | out_of_pos;
+            d_[ird_ & 0x7] = shifted_bits | out_of_pos;
             if (d_[ird_ & 0x7] & 0x01)
                sr_ |= F_N | F_C;
          }
@@ -1968,6 +2009,10 @@ unsigned int M68k::DecodeRoxd2()
 
    sr_ &= ~(F_V | F_N | F_C | F_Z|F_X);
 
+   if (rotat != 0 && x)
+   {
+      sr_ |= F_C;
+   }
    unsigned char last_x = 0;
    // Rotate
    switch ((ird_ >> 6) & 3)
@@ -1982,37 +2027,39 @@ unsigned int M68k::DecodeRoxd2()
          if (rotat != 0)
          {
             last_x = ((d_[ird_ & 0x7] & 0xFF) >> (rotat & 0x7) - 1) & 0x1;
-            if (last_x) sr_ |= F_X;
+            if (last_x) sr_ |= F_X|F_C;
          }
 
          unsigned char shifted_bits = (d_[ird_ & 0x7] & 0xFF) >> rotat;
          unsigned char out_of_pos = d_[ird_ & 0x7] & mask;
-         out_of_pos <<= (9 - rotat);
+         if (rotat > 1)
+            out_of_pos <<= (9 - rotat);
+         else
+            out_of_pos = 0;
 
          d_[ird_ & 0x7] &= 0xFFFFFF00;
-         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x<<(rotat-1));
-         if (d_[ird_ & 0x7] & 0x80)
-            sr_ |= F_N | F_C;
-         
-         
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x ? 0x80 : 0);
       }
       else
       {
          if (rotat != 0)
          {
             last_x = ((d_[ird_ & 0x7] & 0xFF) << (rotat & 0x7) - 1) & 0x80;
-            if (last_x) sr_ |= F_X;
+            if (last_x) sr_ |= F_X | F_C;
          }
 
          unsigned char shifted_bits = (d_[ird_ & 0x7] & 0xFF) << rotat;
          unsigned char out_of_pos = d_[ird_ & 0x7] & (mask << (8 - rotat));
-         out_of_pos >>= (9 - rotat);
+         if (rotat > 1)
+            out_of_pos >>= (9 - rotat);
+         else
+            out_of_pos = 0;
 
          d_[ird_ & 0x7] &= 0xFFFFFF00;
-         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x << (rotat - 1));
-         if (d_[ird_ & 0x7] & 0x01)
-            sr_ |= F_N | F_C;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | x;
       }
+      if (d_[ird_ & 0x7] & 0x80)
+         sr_ |= F_N;
       if ((d_[ird_ & 0x7] & 0xFF) == 0)
       {
          sr_ |= F_Z;
@@ -2030,34 +2077,38 @@ unsigned int M68k::DecodeRoxd2()
          if (rotat != 0)
          {
             last_x = ((d_[ird_ & 0x7] & 0xFFFF) >> (rotat & 0xF) - 1) & 0x1;
-            if (last_x) sr_ |= F_X;
+            if (last_x) sr_ |= F_X | F_C;
          }
          unsigned short shifted_bits = (d_[ird_ & 0x7] & 0xFFFF) >> rotat;
          unsigned short out_of_pos = d_[ird_ & 0x7] & mask;
-         out_of_pos <<= (17 - rotat);
+         if (rotat > 1)
+            out_of_pos <<= (17 - rotat);
+         else
+            out_of_pos = 0;
 
          d_[ird_ & 0x7] &= 0xFFFF0000;
-         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x << (rotat - 1));
-         if (d_[ird_ & 0x7] & 0x8000)
-            sr_ |= F_N | F_C;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x ?0x8000:0);
       }
       else
       {
          if (rotat != 0)
          {
             last_x = ((d_[ird_ & 0x7] & 0xFFFF) << (rotat & 0xF) - 1) & 0x8000;
-            if (last_x) sr_ |= F_X;
+            if (last_x) sr_ |= F_X | F_C;
          }
 
          unsigned short shifted_bits = (d_[ird_ & 0x7] & 0xFFFF) << rotat;
          unsigned short out_of_pos = d_[ird_ & 0x7] & (mask << (16 - rotat));
-         out_of_pos >>= (17 - rotat);
+         if (rotat > 1)
+            out_of_pos >>= (17 - rotat);
+         else
+            out_of_pos = 0;
 
          d_[ird_ & 0x7] &= 0xFFFF0000;
-         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x << (rotat - 1));
-         if (d_[ird_ & 0x7] & 0x01)
-            sr_ |= F_N | F_C;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | x ;
       }
+      if (d_[ird_ & 0x7] & 0x8000)
+         sr_ |= F_N;
       if ((d_[ird_ & 0x7] & 0xFFFF) == 0)
       {
          sr_ |= F_Z;
@@ -2074,33 +2125,38 @@ unsigned int M68k::DecodeRoxd2()
          if (rotat != 0)
          {
             last_x = ((d_[ird_ & 0x7] ) >> (rotat & 0x1F) - 1) & 0x1;
-            if (last_x) sr_ |= F_X;
+            if (last_x) sr_ |= F_X | F_C;
          }
 
          unsigned int shifted_bits = d_[ird_ & 0x7] >> rotat;
          unsigned int out_of_pos = d_[ird_ & 0x7] & mask;
-         out_of_pos <<= (33 - rotat);
+         if (rotat > 1)
+            out_of_pos <<= (33 - rotat);
+         else
+            out_of_pos = 0;
 
-         d_[ird_ & 0x7] = shifted_bits | out_of_pos | (x << (rotat - 1));
-         if (d_[ird_ & 0x7] & 0x80000000)
-            sr_ |= F_N | F_C;
+         d_[ird_ & 0x7] = shifted_bits | out_of_pos | (x?0x80000000:0);
       }
       else
       {
          if (rotat != 0)
          {
             last_x = ((d_[ird_ & 0x7]) << (rotat & 0x1F) - 1) & 0x80000000;
-            if (last_x) sr_ |= F_X;
+            if (last_x) sr_ |= F_X | F_C;
          }
 
          unsigned int shifted_bits = d_[ird_ & 0x7] << rotat;
          unsigned int out_of_pos = d_[ird_ & 0x7] & (mask << (32 - rotat));
-         out_of_pos >>= (33 - rotat);
+         if (rotat > 1)
+            out_of_pos >>= (33 - rotat);
+         else
+            out_of_pos = 0;
 
-         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x << (rotat - 1));
-         if (d_[ird_ & 0x7] & 0x01)
-            sr_ |= F_N | F_C;
+
+         d_[ird_ & 0x7] = shifted_bits | out_of_pos |x ;
       }
+      if (d_[ird_ & 0x7] & 0x80000000)
+         sr_ |= F_N;
       if (d_[ird_ & 0x7] == 0)
       {
          sr_ |= F_Z;
@@ -2541,7 +2597,7 @@ unsigned int M68k::OpcodeAnd()
 
 unsigned int M68k::DecodeAndiToCcr()
 {
-   sr_ &= (irc_ & 0xFF);
+   sr_ &= 0xFF00|(irc_ & 0xFF);
 
    Fetch();
    return true;
@@ -3406,7 +3462,7 @@ unsigned int M68k::DecodeEoriSr()
 
 unsigned int M68k::DecodeEoriToCcr()
 {
-   sr_ ^= (irc_ & 0xFF);
+   sr_ ^=  (irc_ & 0xFF);
 
    Fetch();
    return true;
