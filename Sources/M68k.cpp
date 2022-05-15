@@ -2009,10 +2009,10 @@ unsigned int M68k::DecodeRoxd2()
 
    sr_ &= ~(F_V | F_N | F_C | F_Z|F_X);
 
-   if (rotat != 0 && x)
+   /*if (rotat != 0 && x)
    {
       sr_ |= F_C;
-   }
+   }*/
    unsigned char last_x = 0;
    // Rotate
    switch ((ird_ >> 6) & 3)
