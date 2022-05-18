@@ -127,18 +127,27 @@ TEST(Cpu68k, CPU_SUBQ)
 
 ///////////////////////////////////////////////////////////////////////////////////
 // ROXL
-TEST(Cpu68k, CPU_ROXL)
+bool TestRoxl(unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
 {
    TestEngineCpu test_engine;
-   // Test move
+   // Test ROXL
 
-   // .L 
-   //    Dn | 8(1 / 0)  0(0 / 0) |               |               np       nn
-   unsigned char opcode[] = { 0x53, 0x80 }; // subq.l #1, D0
-   test_engine.Get68k()->SetDataRegister(0, 0x20000);
-   test_engine.RunOpcode(opcode, sizeof(opcode), 1);  // This should be tested by CPU_MOVE test.
+   unsigned char opcode[] = { 0xE3, 0x92 }; // roxl.l #1, D2
+   test_engine.Get68k()->SetDataRegister(2, reg_in);    // 
+   test_engine.Get68k()->SetDataSr(sr_in);             // Set X flag
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
 
-   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(0), 0x1FFFF); // Check if source = $20000   
-   test_engine.Get68k()->GetSr();// Check flags : Z, C
-   ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000D8); // Check pc 
+   bool result = test_engine.Get68k()->GetDataRegister(2) == reg_out;
+   result &= (test_engine.Get68k()->GetDataSr()&0xFF) == sr_out;
+
+   return result;
+}
+TEST(Cpu68k, CPU_ROXL_D)
+{
+   // roxl.l #1, D2 ( E3, 92 )
+   ASSERT_EQ(TestRoxl(0x20000, 0x10, 0x40001, 0), true);
+   ASSERT_EQ(TestRoxl(0x20000, 0x00, 0x40000, 0), true);
+   ASSERT_EQ(TestRoxl(0x80000000, 0x00, 0x00000, 0x15), true);
+   ASSERT_EQ(TestRoxl(0x80000000, 0x10, 0x00001, 0x11), true);
+   ASSERT_EQ(TestRoxl(0x84000000, 0x10, 0x08000001, 0x11), true);
 }

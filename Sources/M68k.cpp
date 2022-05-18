@@ -2093,7 +2093,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = ((d_[ird_ & 0x7] & 0xFFFF) << (rotat & 0xF) - 1) & 0x8000;
+            last_x = (((d_[ird_ & 0x7] & 0xFFFF) << (rotat & 0xF) - 1) & 0x8000) == 0x8000;
             if (last_x) sr_ |= F_X | F_C;
          }
 
@@ -2141,7 +2141,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = ((d_[ird_ & 0x7]) << (rotat & 0x1F) - 1) & 0x80000000;
+            last_x = (((d_[ird_ & 0x7]) << (rotat & 0x1F) - 1) & 0x80000000) == 0x80000000;
             if (last_x) sr_ |= F_X | F_C;
          }
 
