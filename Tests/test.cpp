@@ -127,36 +127,27 @@ TEST(Cpu68k, CPU_SUBQ)
 
 ///////////////////////////////////////////////////////////////////////////////////
 // ROXL
-bool TestOpcodeWord(unsigned char opcode[2], unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
+
+TEST(Cpu68k, CPU_ROXL_D)
 {
    TestEngineCpu test_engine;
 
-   test_engine.Get68k()->SetDataRegister(2, reg_in);    // 
-   test_engine.Get68k()->SetDataSr(sr_in);             // Set X flag
-   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
-
-   bool result = test_engine.Get68k()->GetDataRegister(2) == reg_out;
-   result &= (test_engine.Get68k()->GetDataSr()&0xFF) == sr_out;
-
-   return result;
-}
-TEST(Cpu68k, CPU_ROXL_D)
-{
    unsigned char opcode[] = { 0xE3, 0x92 }; // roxl.l #1, D2
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x20000, 0x10, 0x40001, 0), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x20000, 0x00, 0x40000, 0), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x80000000, 0x00, 0x00000, 0x15), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x80000000, 0x10, 0x00001, 0x11), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x84000000, 0x10, 0x08000001, 0x11), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0xC0000000, 0x10, 0x80000001, 0x19), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x20000, 0x10, 0x40001, 0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x20000, 0x00, 0x40000, 0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x80000000, 0x00, 0x00000, 0x15), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x80000000, 0x10, 0x00001, 0x11), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x84000000, 0x10, 0x08000001, 0x11), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0xC0000000, 0x10, 0x80000001, 0x19), true);
 }
 
 TEST(Cpu68k, CPU_ROXR_D)
 {
+   TestEngineCpu test_engine;
    unsigned char opcode[] = { 0xE2, 0x92 }; // roxr.l #1, D2
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x20000, 0x10, 0x80010000, 0x08), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x20000, 0x00, 0x00010000, 0), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x1, 0x00, 0x00000, 0x15), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 1, 0x10, 0x80000000, 0x19), true);
-   ASSERT_EQ(TestOpcodeWord(opcode, 0x84000001, 0x10, 0xC2000000, 0x19), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x20000, 0x10, 0x80010000, 0x08), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x20000, 0x00, 0x00010000, 0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x1, 0x00, 0x00000, 0x15), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 1, 0x10, 0x80000000, 0x19), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x84000001, 0x10, 0xC2000000, 0x19), true);
 }

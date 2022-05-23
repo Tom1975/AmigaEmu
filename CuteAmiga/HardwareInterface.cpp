@@ -23,6 +23,7 @@ unsigned char HardwareInterface::GetJoystick(unsigned int port_number)
    case 1:
       return port_2_button_[0] ? 0 : 1;
    }
+   return 0;
 }
 
 void HardwareInterface::MouseClick(int button, bool down)

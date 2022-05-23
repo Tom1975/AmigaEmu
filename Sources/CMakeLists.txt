@@ -17,6 +17,7 @@ set(EXTRA
 source_group("Docs" FILES ${EXTRA} )
 
 add_library(AmigaCore ${SRCS} ${HEADERS} ${EXTRA})
+target_compile_features(AmigaCore PRIVATE cxx_std_17)
 
 set(CompilerFlags
         CMAKE_CXX_FLAGS

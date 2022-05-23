@@ -254,7 +254,7 @@ void DebugDialog::UpdateDebug()
 
       offset = disassembler_.Disassemble(emu_handler_->GetMotherboard(), offset, str_asm);
       str_asm = addr + str_asm;
-      int size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
+      size_t size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
       if (size_tab > 0)
       {
          str_asm.append(size_tab, ' ' );

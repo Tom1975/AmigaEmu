@@ -67,6 +67,9 @@ public:
    unsigned int RunOpcode(unsigned char* buffer_to_run, unsigned int size_of_buffer, unsigned int tick);
    unsigned int RunMoreOpcode(unsigned int tick);
 
+   bool TestOpcodeWordD2(unsigned char opcode[2], unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out);
+   bool TestOpcodeWordD1_D2(unsigned char opcode[2], unsigned int reg_in, unsigned int reg_in2, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out);
+
 protected:
    Motherboard * motherboard_;
    MOCFramebuffer framebuffer_;

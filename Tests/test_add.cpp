@@ -54,3 +54,17 @@ TEST(Cpu68k, CPU_ADDQ_B_IM__D16_AN)
    ASSERT_EQ( memcmp( &ram[0x226], buffer_expected, sizeof(buffer_expected)), 0);
    ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000DA); // Check : pc = 6
 }
+
+// ADDX Register, L
+TEST(Cpu68k, CPU_ADDX_L_D )
+{
+   TestEngineCpu test_engine;
+
+   unsigned char opcode[] = { 0xD5, 0x81 }; // addx.l     D1, D2
+   ASSERT_EQ(test_engine.TestOpcodeWordD1_D2(opcode, 0x100, 0x100, 0, 0x200, 0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD1_D2(opcode, 0x100, 0x100, 0x4, 0x200, 0x0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD1_D2(opcode, 0x100, 0x100, 0x10, 0x201, 0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD1_D2(opcode, 0x40000000, 0xC0000000, 0x10, 0x01, 0x11), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD1_D2(opcode, 0, 0, 0, 0, 0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD1_D2(opcode, 0, 0, 0x4, 0, 0x4), true);
+}

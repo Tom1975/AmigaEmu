@@ -16,6 +16,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFF00, 0x0200, &Disassembler68k::AndiOpcode_);
    AddCommand(0xFF00, 0x0000, &Disassembler68k::OriOpcode_);
    AddCommand(0xFF00, 0x0A00, &Disassembler68k::EoriOpcode_);
+   AddCommand(0xF130, 0xD100, &Disassembler68k::AddXOpcode_);
    AddCommand(0xF0C0, 0xD0C0, &Disassembler68k::AddAOpcode_);
    AddCommand(0xFF00, 0x0600, &Disassembler68k::AddIOpcode_);
    AddCommand(0xF100, 0x5000, &Disassembler68k::AddQOpcode_);
@@ -317,6 +318,21 @@ unsigned int Disassembler68k::AddAOpcode_(Motherboard* motherboard, unsigned sho
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size +1, str_opcode);
    str_asm += str_opcode + ", " + address_[(opcode >> 9) & 0x7];
 
+   return pc;
+}
+
+unsigned int Disassembler68k::AddXOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   unsigned int size = (opcode >> 6) & 0x3;
+   str_asm = "addX.";
+   str_asm += size2_[size];
+
+   unsigned char m = (opcode & 8) ? 4 : 0;
+   pc += DisassembleAddressingMode(motherboard, pc, m, (opcode ) & 0x7, size, str_opcode);
+   str_asm += str_opcode + ", ";
+   pc += DisassembleAddressingMode(motherboard, pc, m, (opcode >> 9) & 0x7, size, str_opcode);
+   str_asm += str_opcode;
    return pc;
 }
 

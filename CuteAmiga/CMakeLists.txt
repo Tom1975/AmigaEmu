@@ -58,6 +58,8 @@ qt5_add_resources(QRCS resources.qrc)
 
 add_executable (CuteAmiga WIN32 ${SRCS} ${HEADERS} ${UI_HEADERS} ${UIS} ${QRCS})
 
+target_compile_features(CuteAmiga PRIVATE cxx_std_17)
+
 target_link_libraries(CuteAmiga ${Qt5Widgets_LIBRARIES} Qt5::Core Qt5::Widgets 
 						AmigaCore
 						)

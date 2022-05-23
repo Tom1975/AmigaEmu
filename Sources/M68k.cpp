@@ -17,6 +17,7 @@ M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceR
 M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AddI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Addq_[] = { &M68k::DecodeAddq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::AddX_[] = { &M68k::DecodeAddX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AndiToCcr_[] = { &M68k::DecodeAndiToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -102,12 +103,11 @@ M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Chk_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::AddX_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Asd_[] = { &M68k::NotImplemented, nullptr };
 
 
 M68k::M68k() : pc_(0), sr_(0), current_state_(0),
-                  current_phase_(STATE_FETCH), 
+                  current_phase_(Phase::STATE_FETCH), 
                   current_bus_operation_(nullptr), current_waiting_instruction_(nullptr), bus_granted_(false), 
                   next_bus_operation_(nullptr), next_waiting_instruction_(nullptr),source_alu_(nullptr),destination_alu_(nullptr),
                   irc_ready_(false), new_opcode_ (0), source_factory_(a_, d_, &pc_, &usp_, &ssp_, &sr_), destination_factory_(a_, d_, &pc_, &usp_, &ssp_, &sr_),
@@ -1092,7 +1092,7 @@ unsigned int M68k::OpcodeMove()
       }
    }
 
-   current_phase_ = STATE_EXECUTE;
+   current_phase_ = Phase::STATE_EXECUTE;
    if (destination_alu_->WriteInput(source_alu_))
    {
       if (!destination_alu_->WriteComplete())
@@ -2026,7 +2026,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = ((d_[ird_ & 0x7] & 0xFF) >> (rotat & 0x7) - 1) & 0x1;
+            last_x = ((d_[ird_ & 0x7] & 0xFF) >> ((rotat & 0x7) - 1)) & 0x1;
             if (last_x) sr_ |= F_X|F_C;
          }
 
@@ -2044,7 +2044,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = ((d_[ird_ & 0x7] & 0xFF) << (rotat & 0x7) - 1) & 0x80;
+            last_x = ((d_[ird_ & 0x7] & 0xFF) << ((rotat & 0x7) - 1)) & 0x80;
             if (last_x) sr_ |= F_X | F_C;
          }
 
@@ -2076,7 +2076,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = ((d_[ird_ & 0x7] & 0xFFFF) >> (rotat & 0xF) - 1) & 0x1;
+            last_x = ((d_[ird_ & 0x7] & 0xFFFF) >> ((rotat & 0xF) - 1)) & 0x1;
             if (last_x) sr_ |= F_X | F_C;
          }
          unsigned short shifted_bits = (d_[ird_ & 0x7] & 0xFFFF) >> rotat;
@@ -2093,7 +2093,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = (((d_[ird_ & 0x7] & 0xFFFF) << (rotat & 0xF) - 1) & 0x8000) == 0x8000;
+            last_x = (((d_[ird_ & 0x7] & 0xFFFF) << ((rotat & 0xF) - 1)) & 0x8000) == 0x8000;
             if (last_x) sr_ |= F_X | F_C;
          }
 
@@ -2124,7 +2124,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = ((d_[ird_ & 0x7] ) >> (rotat & 0x1F) - 1) & 0x1;
+            last_x = ((d_[ird_ & 0x7] ) >> ((rotat & 0x1F) - 1)) & 0x1;
             if (last_x) sr_ |= F_X | F_C;
          }
 
@@ -2141,7 +2141,7 @@ unsigned int M68k::DecodeRoxd2()
       {
          if (rotat != 0)
          {
-            last_x = (((d_[ird_ & 0x7]) << (rotat & 0x1F) - 1) & 0x80000000) == 0x80000000;
+            last_x = (((d_[ird_ & 0x7]) << ((rotat & 0x1F) - 1)) & 0x80000000) == 0x80000000;
             if (last_x) sr_ |= F_X | F_C;
          }
 
@@ -2551,6 +2551,115 @@ unsigned int M68k::OpcodeAddq()
    return true;
 }
 
+unsigned int M68k::DecodeAddX()
+{
+   // Depending of sense :
+   size_ = ((ird_ >> 6) & 0x3);
+
+   // -(an) / D
+   if (ird_ & 8)
+   {
+      // Memory
+      source_alu_ = source_factory_.InitAlu(4, (ird_) & 0x7, size_);
+      destination_alu_ = destination_factory_.InitAlu(4, (ird_ >> 9) & 0x7, size_);
+   }
+   else
+   {
+      // Register
+      source_alu_ = source_factory_.InitAlu(0, (ird_) & 0x7, size_);
+      destination_alu_ = destination_factory_.InitAlu(0, (ird_ >> 9) & 0x7, size_);
+   }
+
+   return true;
+}
+
+unsigned int M68k::OpcodeAddX()
+{
+   unsigned int sm, dm, rm = 0;
+   switch (destination_alu_->GetSize())
+   {
+   case 0:
+      dm = destination_alu_->GetU8();
+      break;
+   case 1:
+      dm = destination_alu_->GetU16();
+      break;
+   case 2:
+      dm = destination_alu_->GetU32();
+      break;
+   }
+
+   switch (source_alu_->GetSize())
+   {
+   case 0:
+      sm = source_alu_->GetU8();
+      break;
+   case 1:
+      sm = source_alu_->GetU16();
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      break;
+   }
+   rm = sm + dm + ((sr_ &0x10)?1:0);
+   switch (size_)
+   {
+   case 0:
+      rm &= 0xFF;
+      break;
+   case 1:
+      rm &= 0xFFFF;
+      break;
+   }
+   destination_alu_->WriteInput(rm);
+
+   sr_ &= 0xFFE4;
+   if (rm != 0) sr_ &= ~F_Z;
+   switch (size_)
+   {
+   case BYTE:
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm) sr_ |= F_N;
+      break;
+   case WORD:
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
+      break;
+   case LONG:
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm) sr_ |= F_N;
+      break;
+   }
+   if ((sm & dm & (~rm)) | ((~sm) & (~dm) & (rm)))
+   {
+      sr_ |= F_V;
+   }
+   if (sm & dm | (~rm) & dm | sm & (~rm))
+   {
+      sr_ |= F_C | F_X;
+   }
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
+   Fetch();
+   return true;
+}
+
 unsigned int M68k::OpcodeAnd()
 {
    unsigned int rm = 0, dm = 0, sm = 0;
@@ -2858,12 +2967,12 @@ unsigned int M68k::OpcodeBcc()
       {
          // ir_ should value something
          displacement_ = (short)irc_;
-         current_phase_ = STATE_DECODE;
+         current_phase_ = Phase::STATE_DECODE;
       }
       else
       {
          size_ = 0;
-         current_phase_ = STATE_EXECUTE;
+         current_phase_ = Phase::STATE_EXECUTE;
       }
       // PC is updated 
       pc_ = pc_ -2 + displacement_;

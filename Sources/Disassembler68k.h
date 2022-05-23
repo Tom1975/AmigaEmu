@@ -30,6 +30,7 @@ protected:
    unsigned int AddAOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int AddIOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int AddQOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
+   unsigned int AddXOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int AndOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int AndiOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int AndiToCcrOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);

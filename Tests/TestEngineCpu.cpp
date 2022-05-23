@@ -52,3 +52,28 @@ unsigned int TestEngineCpu::RunMoreOpcode(unsigned int tick)
    }
    return count;
 }
+
+bool TestEngineCpu::TestOpcodeWordD2(unsigned char opcode[2], unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
+{
+   Get68k()->SetDataRegister(2, reg_in);    // 
+   Get68k()->SetDataSr(sr_in);             // Set X flag
+   RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = Get68k()->GetDataRegister(2) == reg_out;
+   result &= (Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}
+
+bool TestEngineCpu::TestOpcodeWordD1_D2(unsigned char opcode[2], unsigned int reg_in, unsigned int reg_in2 , unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
+{
+   Get68k()->SetDataRegister(1, reg_in);    // 
+   Get68k()->SetDataRegister(2, reg_in2);    // 
+   Get68k()->SetDataSr(sr_in);             // Set X flag
+   RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = Get68k()->GetDataRegister(2) == reg_out;
+   result &= (Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}

@@ -94,7 +94,7 @@ protected:
 
    //////////////////////////////////////////////////
    // Internal functions
-   enum
+   enum class Phase
    {
       STATE_FETCH,
       STATE_DECODE,
@@ -262,6 +262,7 @@ protected:
    unsigned int DecodeAdd();
    unsigned int DecodeAddA();
    unsigned int DecodeAddq();
+   unsigned int DecodeAddX();
    unsigned int DecodeAndToSr();
    unsigned int DecodeAndiToCcr();
    unsigned int DecodeAsd2();
@@ -334,6 +335,7 @@ protected:
    unsigned int OpcodeAdd();
    unsigned int OpcodeAddA();
    unsigned int OpcodeAddq();
+   unsigned int OpcodeAddX();
    unsigned int OpcodeAnd();
    unsigned int OpcodeBcc();
    unsigned int OpcodeBchg();
