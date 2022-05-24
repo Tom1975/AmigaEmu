@@ -18,6 +18,17 @@ Crash :
 70102
 60000
 
+## Chargement Shadow of the beast : Guru
+
+5bac : OK !
+5B88 ok	
+5bbc ok
+5BC4 ok
+5BD6 CMP.B (A2)+, D1 => PAS D'INCREMENT d'A2 !!!
+
+5ce4...
+5BD6 : A1 a430 (10450) ; A5 a3e0(10400)
+
 
 ###
 A VERIFIER :

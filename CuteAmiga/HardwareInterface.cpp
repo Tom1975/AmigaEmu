@@ -15,7 +15,7 @@ HardwareInterface::~HardwareInterface()
 
 unsigned char HardwareInterface::GetJoystick(unsigned int port_number)
 {
-
+ 
    switch (port_number)
    {
    case 0:

@@ -254,15 +254,15 @@ void DebugDialog::UpdateDebug()
 
       offset = disassembler_.Disassemble(emu_handler_->GetMotherboard(), offset, str_asm);
       str_asm = addr + str_asm;
-      size_t size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
+      int size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
       if (size_tab > 0)
       {
          str_asm.append(size_tab, ' ' );
       }
-      for (unsigned int i = offset_old; i < offset; i++)
+      for (unsigned int j = offset_old; j < offset; j++)
       {
          char b[4];
-         sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(i));
+         sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(j));
          str_asm += b;
       }
       item->setText(str_asm.c_str());
