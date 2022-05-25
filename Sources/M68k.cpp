@@ -2689,7 +2689,7 @@ unsigned int M68k::OpcodeAnd()
       break;
    }
    rm = sm & dm;
-   sr_ &= 0xFFE0;
+   sr_ &= 0xFFF0;
    if (rm == 0) sr_ |= F_Z;
    switch (size_)
    {

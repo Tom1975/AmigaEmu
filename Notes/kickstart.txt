@@ -21,14 +21,13 @@ Crash :
 ## Chargement Shadow of the beast : Guru
 
 5bac : OK !
-5B88 ok	
+5B88 ok
 5bbc ok
 5BC4 ok
 5BD6 ok (pas de pb sur cmp)
-5BDC : erreur !
+5BFA ok
+5c0C : 5c0C (test potgor) => not Z !
 
-5ce4...
-5BD6 : A1 a430 (10450) ; A5 a3e0(10400)
 
 
 ###
