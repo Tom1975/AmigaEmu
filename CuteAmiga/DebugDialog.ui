@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
+     <y>70</y>
      <width>451</width>
-     <height>371</height>
+     <height>331</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -187,6 +187,29 @@
    </property>
    <property name="styleSheet">
     <string notr="true">font: 8pt &quot;Courier New&quot;;</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="dasm_address">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>171</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_top_address">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>40</y>
+     <width>101</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Set Top Address</string>
    </property>
   </widget>
   <action name="actionTest">
