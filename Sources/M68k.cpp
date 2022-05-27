@@ -5,6 +5,10 @@
 
 #define LOG(fmt, ...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, fmt, ##__VA_ARGS__);
 
+unsigned int MaskSign[4] = { 0x80, 0x8000, 0x80000000, 0 };
+unsigned int MaskZero[4] = { 0xFF, 0xFFFF, 0xFFFFFFFF, 0 };
+unsigned int SizeSizeNbBits[4] = { 8, 16, 32, 0};
+
 
 static unsigned int last_opcodes[256];
 static unsigned char op_index = 0;
@@ -2746,197 +2750,84 @@ unsigned int M68k::DecodeAsd2()
       if (rotat == 0)rotat = 8;
    }
 
-   // Rotate
-   switch ((ird_ >> 6) & 3)
+   unsigned int mask, signbit;
+
+   mask = MaskZero[((ird_ >> 6) & 3)];
+   signbit = MaskSign[((ird_ >> 6) & 3)];
+
+   // If 0
+   if (rotat == 0)
    {
-   case 0:
-      if (right)
-      {
-         if (rotat > 0)
-         {
-            if (d_[ird_ & 0x7] & 0x1 << (rotat - 1))
-            {
-               sr_ |= F_X | F_C;
-            }
-            else
-            {
-               sr_ &= ~(F_X | F_C);
-            }
-         }
-         else
-            sr_ &= ~(F_X | F_C);
-
-         sr_ &= ~(F_V);
-
-         unsigned long tmp = 0;
-         if (d_[ird_ & 0x7] & 0x80)
-         {
-            tmp = (0xFF << (8 - rotat)) & 0xFF;
-         }
-         tmp |= (d_[ird_ & 0x7] & 0xFFFFFF00);
-
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFF) >> rotat);
-
-         /*unsigned char tmp = d_[ird_ & 0x7] & 0xFFFFFF80;
-
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) >> rotat);*/
-      }
-      else
-      {
-         if (d_[ird_ & 0x7] & 0x80)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
-         // If sign changed : F_V
-         bool v = false;
-         unsigned int sign = d_[ird_ & 0x7] & 0x80;
-         for (unsigned int i = 0; (i < rotat) && (v == false); i++)
-         {
-            if (((d_[ird_ & 0x7] & (0x80 >> i)) != 0 && sign == 0) ||
-               ((d_[ird_ & 0x7] & (0x80 >> i)) == 0 && sign != 0))
-               v = true;
-         }
-         if (v)
-         {
-            sr_ |= F_V;
-         }
-         else
-         {
-            sr_ &= ~F_V;
-         }
-
-         unsigned char tmp = d_[ird_ & 0x7] & 0xFFFFFF00;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) << rotat);
-      }
-      if (d_[ird_ & 0x7] == 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
-      if (d_[ird_ & 0x7] & 0x80) sr_ |= F_N; else sr_ &= ~(F_N);
-
-      break;
-   case 1:
-      if (right)
-      {
-         if (rotat > 0)
-         {
-            if (d_[ird_ & 0x7] & 0x1 << (rotat - 1))
-            {
-               sr_ |= F_X | F_C;
-            }
-            else
-            {
-               sr_ &= ~(F_X | F_C);
-            }
-         }
-         else
-            sr_ &= ~(F_X | F_C);
-
-         sr_ &= ~(F_V);
-
-         unsigned long tmp = 0;
-         if (d_[ird_ & 0x7] & 0x8000)
-         {
-            tmp = (0xFFFF << (16 - rotat) )& 0xFFFF;
-         }
-         tmp |= d_[ird_ & 0x7] & 0xFFFF0000;
-         
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFF) >> rotat);
-      }
-      else
-      {
-         if (d_[ird_ & 0x7] & 0x8000)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
-         // If sign changed : F_V
-         bool v = false;
-         unsigned int sign = d_[ird_ & 0x7] & 0x8000;
-         for (unsigned int i = 0; (i < rotat) && (v == false); i++)
-         {
-            if (((d_[ird_ & 0x7] & (0x8000 >> i)) != 0 && sign == 0) ||
-               ((d_[ird_ & 0x7] & (0x8000 >> i)) == 0 && sign != 0))
-               v = true;
-         }
-         if (v)
-         {
-            sr_ |= F_V;
-         }
-         else
-         {
-            sr_ &= ~F_V;
-         }
-         unsigned short tmp = d_[ird_ & 0x7] & 0xFFFF0000;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFF) << rotat);
-      }
-      if (d_[ird_ & 0x7] == 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
-      if (d_[ird_ & 0x7] & 0x8000) sr_ |= F_N; else sr_ &= ~(F_N);
-      break;
-   case 2:
-      if (right)
-      {
-         if (rotat > 0)
-         {
-            if (d_[ird_ & 0x7] & 0x1 << (rotat - 1))
-            {
-               sr_ |= F_X | F_C;
-            }
-            else
-            {
-               sr_ &= ~(F_X | F_C);
-            }
-         }
-         else
-            sr_ &= ~(F_X | F_C);
-
-         sr_ &= ~(F_V);
-         unsigned long tmp = 0;
-         if (d_[ird_ & 0x7] & 0x80000000)
-         {
-            tmp = 0xFFFFFFFF << (32- rotat);
-         }
-
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFFFFFF) >> rotat);
-      }
-      else
-      {
-         if (d_[ird_ & 0x7] & 0x80000000)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
-         // If sign changed : F_V
-         bool v = false;
-         unsigned int sign = d_[ird_ & 0x7] & 0x80000000;
-         for (unsigned int i = 0; i < rotat && v == false; i++)
-         {
-            if (((d_[ird_ & 0x7] & (0x80000000>> i)) != 0 && sign == 0) ||
-               ((d_[ird_ & 0x7] & (0x80000000 >> i)) == 0 && sign != 0))
-               v = true;
-         }
-         if (v)
-         {
-            sr_ |= F_V;
-         }
-         else
-         {
-            sr_ &= ~F_V;
-         }
-         d_[ird_ & 0x7] = (d_[ird_ & 0x7]) << rotat;
-      }
-      if (d_[ird_ & 0x7] == 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
-      if (d_[ird_ & 0x7] & 0x80000000) sr_ |= F_N; else sr_ &= ~(F_N);
-
-      break;
+      sr_ &= ~(F_C);
    }
+   else
+   {
+      // X, C : 
+      // X Set according to the last bit shifted out of the operand; unaffected for a shift count of zero.
+      // Set according to the last bit shifted out of the operand; cleared for a shift count of zero.
+      // V — Set if the most significant bit is changed at any time during the shift operation; Cleared otherwise
+      if (right)
+      {
+         unsigned int sign = d_[ird_ & 0x7] & signbit;
+         unsigned long tmp = 0;
+         if (rotat >= SizeSizeNbBits[((ird_ >> 6) & 3)])
+         {
+            if (sign) sr_ |= F_X | F_C; else sr_ &= ~(F_X | F_C);
+            if (d_[ird_ & 0x7] & signbit)
+            {
+               tmp = mask;
+            }
+            tmp |= (d_[ird_ & 0x7] & (~mask));
+            d_[ird_ & 0x7] = tmp ;
+         }
+         else
+         {
+            if (d_[ird_ & 0x7] & (0x1 << (rotat - 1))) sr_ |= F_X | F_C; else sr_ &= ~(F_X | F_C);
+            if (d_[ird_ & 0x7] & signbit)
+            {
+               //tmp = (mask << (8 - rotat)) & mask;
+               tmp = (mask << (SizeSizeNbBits[((ird_ >> 6) & 3)] - rotat)) & mask;
+            }
+            tmp |= (d_[ird_ & 0x7] & (~mask));
+            d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & mask) >> rotat);
+         }
+         sr_ &= ~F_V; // Never change
+
+      }
+      else
+      {
+         
+         if (rotat > SizeSizeNbBits[((ird_ >> 6) & 3)])
+         {
+            sr_ &= ~(F_X | F_C);
+            unsigned int sign = d_[ird_ & 0x7] & signbit;
+            if (sign) sr_ |= F_V; else sr_ &= ~F_V;
+            unsigned int tmp = d_[ird_ & 0x7] & (~mask);
+            d_[ird_ & 0x7] = tmp ;
+         }
+         else
+         {
+            if (d_[ird_ & 0x7] & (signbit >> (rotat - 1))) sr_ |= F_X | F_C; else sr_ &= ~(F_X | F_C);
+            // get the whole bitfield shifted out. If it's not only '1' or '0', then set the flag
+            bool v = false;
+            unsigned int sign = d_[ird_ & 0x7] & signbit;
+            for (unsigned int i = 1; (i <= rotat) && (v == false); i++)
+            {
+               if (((d_[ird_ & 0x7] & (signbit >> i)) != 0 && sign == 0) ||
+                  ((d_[ird_ & 0x7] & (signbit >> i)) == 0 && sign != 0))
+                  v = true;
+            }
+            if (v) sr_ |= F_V; else sr_ &= ~F_V;
+            unsigned int tmp = d_[ird_ & 0x7] & (~mask);
+            d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] << rotat)& mask);
+         }
+
+      }
+   }
+
+   // Flags Z, N
+   if ((d_[ird_ & 0x7] & mask )== 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
+   if (d_[ird_ & 0x7] & signbit) sr_ |= F_N; else sr_ &= ~(F_N);
    Fetch();
    return true;
 }

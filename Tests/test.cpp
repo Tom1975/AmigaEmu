@@ -151,3 +151,218 @@ TEST(Cpu68k, CPU_ROXR_D)
    ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 1, 0x10, 0x80000000, 0x19), true);
    ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x84000001, 0x10, 0xC2000000, 0x19), true);
 }
+
+
+bool TestOpcodeWordAsr(unsigned char opcode[2], unsigned int reg_1_in, unsigned int reg_0_in, unsigned short sr_in, unsigned int reg_1_out, unsigned int reg_0_out, unsigned short sr_out)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataRegister(1, reg_1_in);    // 
+   test_engine.Get68k()->SetDataRegister(0, reg_0_in);    // 
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = test_engine.Get68k()->GetDataRegister(1) == reg_1_out;
+   result &= test_engine.Get68k()->GetDataRegister(0) == reg_0_out;
+   result &= (test_engine.Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// ASR
+TEST(Cpu68k, CPU_ASR_B_D)
+{
+   unsigned char opcode[] = { 0xE2, 0x20 }; // asr.b D1, D0
+
+   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x1FF, 0x11, 0, 0x1FF, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x17F, 0x11, 0, 0x17F, 0x10), true);   // Rotate 0, not N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x100, 0x11, 0, 0x100, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x1FF, 0x01, 1, 0x1FF, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x1FE, 0x01, 1, 0x1FF, 0x08), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x17F, 0x01, 1, 0x13F, 0x11), true);   // Rotate 1, do not sign bit
+
+   // Rotate 2
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x1FF, 0x01, 2, 0x1FF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x17F, 0x01, 2, 0x11F, 0x11), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x103, 0x01, 2, 0x100, 0x15), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x101, 0x01, 2, 0x100, 0x04), true);   // 
+
+   // Rotate 63
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x1FF, 0x01, 63, 0x1FF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x17F, 0x01, 63, 0x100, 0x04), true);   // 
+
+   // Rotate 64
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x1FF, 0x11, 64, 0x1FF, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x17F, 0x11, 64, 0x17F, 0x10), true);   // Rotate 0, not N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x100, 0x11, 64, 0x100, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 65 = 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x1FF, 0x01, 65, 0x1FF, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x1FE, 0x01, 65, 0x1FF, 0x08), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x17F, 0x01, 65, 0x13F, 0x11), true);   // Rotate 1, do not sign bit
+}
+
+// ASL
+TEST(Cpu68k, CPU_ASL_B_D)
+{
+   unsigned char opcode[] = { 0xE3, 0x20 }; // asl.b D1, D0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x1FF, 0x11, 0, 0x1FF, 0x18), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x17F, 0x11, 0, 0x17F, 0x10), true);   // Rotate 0, not N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x100, 0x11, 0, 0x100, 0x14), true);   // Rotate 0, Z
+
+ // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x1FF, 0x01, 1, 0x1FE, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x17F, 0x01, 1, 0x1FE, 0x0A), true);   // Rotate 1
+
+   // Rotate 2
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x1FF, 0x01, 2, 0x1FC, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x17F, 0x01, 2, 0x1FC, 0x1B), true);   // Rotate 1
+
+   // Rotate 63
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x1FF, 0x01, 63, 0x100, 0x6), true);   // 
+
+   // Rotate 64
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x1FF, 0x11, 64, 0x1FF, 0x18), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x17F, 0x11, 64, 0x17F, 0x10), true);   // Rotate 0, not N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x100, 0x11, 64, 0x100, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 65 = 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x1FF, 0x01, 65, 0x1FE, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x17F, 0x01, 65, 0x1FE, 0x0A), true);   // Rotate 1
+}
+
+TEST(Cpu68k, CPU_ASR_W_D)
+{
+   unsigned char opcode[] = { 0xE2, 0x60 }; // asr.w D1, D0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x1FF, 0x11, 0, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x817F, 0x11, 0, 0x817F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x10000, 0x19, 0, 0x10000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x1FFFF, 0x01, 1, 0x1FFFF, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x1FFFE, 0x01, 1, 0x1FFFF, 0x08), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x17FFF, 0x01, 1, 0x13FFF, 0x11), true);   // Rotate 1, do not sign bit
+
+   // Rotate 2
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x1FFFF, 0x01, 2, 0x1FFFF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x17FFF, 0x01, 2, 0x11FFF, 0x11), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x10003, 0x01, 2, 0x10000, 0x15), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x10001, 0x01, 2, 0x10000, 0x04), true);   // 
+
+   // Rotate 63
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x1FFFF, 0x01, 63, 0x1FFFF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x17FFF, 0x01, 63, 0x10000, 0x04), true);   // 
+
+   // Rotate 64
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x1FF, 0x11, 64, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x817F, 0x11, 64, 0x817F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x10000, 0x19, 64, 0x10000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 65 = 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x1FFFF, 0x01, 65, 0x1FFFF, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x1FFFE, 0x01, 65, 0x1FFFF, 0x08), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x17FFF, 0x01, 65, 0x13FFF, 0x11), true);   // Rotate 1, do not sign bit
+}
+
+// ASL
+TEST(Cpu68k, CPU_ASL_W_D)
+{
+   unsigned char opcode[] = { 0xE3, 0x60 }; // asl.w D1, D0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x1FF, 0x11, 0, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x817F, 0x11, 0, 0x817F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x10000, 0x19, 0, 0x10000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x1FFFF, 0x01, 1, 0x1FFFE, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x17FFF, 0x01, 1, 0x1FFFE, 0x0A), true);   // Rotate 1
+
+   // Rotate 2
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x1FFFF, 0x01, 2, 0x1FFFC, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x17FFF, 0x01, 2, 0x1FFFC, 0x1B), true);   // Rotate 1
+
+   // Rotate 63
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x1FFFF, 0x01, 63, 0x10000, 0x6), true);   // 
+
+   // Rotate 64
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x1FF, 0x11, 64, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x817F, 0x11, 64, 0x817F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x10000, 0x19, 64, 0x10000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 65
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x1FFFF, 0x01, 65, 0x1FFFE, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x17FFF, 0x01, 65, 0x1FFFE, 0x0A), true);   // Rotate 1
+}
+
+TEST(Cpu68k, CPU_ASR_L_D)
+{
+   unsigned char opcode[] = { 0xE2, 0xA0 }; // asr.l D1, D0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x1FF, 0x11, 0, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x8000017F, 0x11, 0, 0x8000017F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x00000000, 0x19, 0, 0x00000000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0xFFFFFFFF, 0x01, 1, 0xFFFFFFFF, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0xFFFFFFFE, 0x01, 1, 0xFFFFFFFF, 0x08), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x7FFFFFFF, 0x01, 1, 0x3FFFFFFF, 0x11), true);   // Rotate 1, do not sign bit
+
+   // Rotate 2
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0xFFFFFFFF, 0x01, 2, 0xFFFFFFFF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x7FFFFFFF, 0x01, 2, 0x1FFFFFFF, 0x11), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x0003, 0x01, 2, 0x0000, 0x15), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x0001, 0x01, 2, 0x0000, 0x04), true);   // 
+
+   // Rotate 4
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 4, 0xFFF80000, 0x01, 4, 0xFFFF8000, 0x08), true);   // 
+
+   // Rotate 32
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 32, 0xFFFF1234, 0x01, 32, 0xFFFFFFFF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 32, 0x7FFF1234, 0x01, 32, 0x0, 0x4), true);   // 
+
+   // Rotate 63
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0xFFFFFFFF, 0x01, 63, 0xFFFFFFFF, 0x19), true);   // 
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0x7FFFFFFF, 0x01, 63, 0x0000, 0x04), true);   // 
+
+   // Rotate 64
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x1FF, 0x11, 64, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x8000017F, 0x11, 64, 0x8000017F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x00000000, 0x19, 64, 0x00000000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 65
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0xFFFFFFFF, 0x01, 65, 0xFFFFFFFF, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0xFFFFFFFE, 0x01, 65, 0xFFFFFFFF, 0x08), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x7FFFFFFF, 0x01, 65, 0x3FFFFFFF, 0x11), true);   // Rotate 1, do not sign bit
+
+
+}
+
+// ASL
+TEST(Cpu68k, CPU_ASL_L_D)
+{
+   unsigned char opcode[] = { 0xE3, 0xA0 }; // asl.l D1, D0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x1FF, 0x11, 0, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x8000017F, 0x11, 0, 0x8000017F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 0, 0x0000, 0x19, 0, 0x0000, 0x14), true);   // Rotate 0, Z
+
+ // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0xFFFFFFFF, 0x01, 1, 0xFFFFFFFE, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 1, 0x7FFFFFFF, 0x01, 1, 0xFFFFFFFE, 0x0A), true);   // Rotate 1
+
+   // Rotate 2
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0xFFFFFFFF, 0x01, 2, 0xFFFFFFFC, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 2, 0x7FFFFFFF, 0x01, 2, 0xFFFFFFFC, 0x1B), true);   // Rotate 1
+
+   // Rotate 63
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 63, 0xFFFFFFFF, 0x01, 63, 0x0000, 0x6), true);   // 
+
+   // Rotate 64
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x1FF, 0x11, 64, 0x1FF, 0x10), true);   // Rotate 0
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x8000017F, 0x11, 64, 0x8000017F, 0x18), true);   // Rotate 0, N
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 64, 0x0000, 0x19, 64, 0x0000, 0x14), true);   // Rotate 0, Z
+
+   // Rotate 65
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0xFFFFFFFF, 0x01, 65, 0xFFFFFFFE, 0x19), true);   // Rotate 1
+   ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x7FFFFFFF, 0x01, 65, 0xFFFFFFFE, 0x0A), true);   // Rotate 1
+}

@@ -5,7 +5,7 @@
 
 
 Display::Display(QWidget* parent) :
-   QWidget(parent), pixmap_(1024, 1024), image_(1024, 1024, QImage::Format_RGB32)
+   QWidget(parent), pixmap_(1024, 1024), image_(1024, 1024, QImage::Format_RGB32), hardware_io_(nullptr)
 {
    setAttribute(Qt::WA_PaintOnScreen);
    setAttribute(Qt::WA_OpaquePaintEvent);
@@ -117,14 +117,16 @@ void Display::paintEvent(QPaintEvent*)
 void Display::keyPressEvent(QKeyEvent * event_keyboard)
 {
    // todo : add key 
-   hardware_io_->KeyAction(0, true);
+   if (hardware_io_ != nullptr)
+      hardware_io_->KeyAction(0, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 void Display::keyReleaseEvent(QKeyEvent *event_keyboard)
 {
    // todo : add key 
-   hardware_io_->KeyAction(0, false);
+   if (hardware_io_ != nullptr)
+      hardware_io_->KeyAction(0, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -133,12 +135,14 @@ void Display::mousePressEvent(QMouseEvent* event)
    
    if (event->button() == Qt::LeftButton)
    {
-      hardware_io_->MouseClick(0, true);
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(0, true);
       // Capture the window
    }
    else
    {
-      hardware_io_->MouseClick(1, true);
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(1, true);
       // Capture the window
 
    }
@@ -148,12 +152,14 @@ void Display::mouseReleaseEvent(QMouseEvent* event)
 {
    if (event->button() == Qt::LeftButton)
    {
-      hardware_io_->MouseClick(0, false);
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(0, false);
       // Capture the window
    }
    else
    {
-      hardware_io_->MouseClick(1, false);
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(1, false);
       // Capture the window
 
    }

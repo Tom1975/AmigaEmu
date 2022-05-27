@@ -12,6 +12,11 @@ Chercher fonction Text - -$003C (-60) => FFC4
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
 
+## TEST SHROTS2
+70090 asr d1,d0 => Clear X
+
+## LOTUS : Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
+
 ## Chargement battle squadron.
 Crash :
 70100 -> Deja ni'mporte quoi sur D0
