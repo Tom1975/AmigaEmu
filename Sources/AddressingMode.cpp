@@ -43,7 +43,7 @@ void AddressingMode::ComputeFlagsSub(unsigned short& sr, unsigned int sm, unsign
    // V
    if ((~sm)&dm&(~rm) | sm & (~dm)&rm) flag |= 0x2;
    // C-X
-   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x9;
+   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x11;
 
    sr = flag;
 }

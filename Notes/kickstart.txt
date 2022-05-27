@@ -15,7 +15,8 @@ Chargement : (bp sur FEA8D6)
 ## TEST SHROTS2
 70090 asr d1,d0 => Clear X
 
-## LOTUS : Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
+## LOTUS : 
+1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 
 ## Chargement battle squadron.
 Crash :
@@ -78,6 +79,12 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
+
+*** Fix SUB flags
+FC559C  sub.w  D0, D2  => SR = 9(19 ) !!
+FC5682: sub.w  D0, D1  => SR = 18 (08) !!
+
+
 00FC7FF8 => -60 : Text
 00FC7F26 => -66 : FC7F26
 
