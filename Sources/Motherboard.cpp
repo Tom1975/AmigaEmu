@@ -92,7 +92,7 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logge
 void Motherboard::VSync()
 {
    // *** HACK : Add sprites here. TODO : remove and make it correct !
-   if ((dma_control_.dmacon_ & 0x240) == 0x240)
+   if ((dma_control_.dmacon_ & 0x220) == 0x220)
       denise_.DrawSprites();
 
    frame_->VSync();
