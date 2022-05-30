@@ -23,7 +23,7 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this,
    paula_.SetIntPin(m68k_.GetIntPin());
    paula_.SetDiskController(&drive_);
    agnus_.Init(this);
-   denise_.Init(&bitplanes_, &agnus_.diwstrt_, &agnus_.diwstop_);
+   denise_.Init(this , &bitplanes_, &agnus_.diwstrt_, &agnus_.diwstop_);
 
    monitor_.InitLines(agnus_.GetVsync(), agnus_.GetHsync(), &denise_);
 }
@@ -91,6 +91,10 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logge
 
 void Motherboard::VSync()
 {
+   // *** HACK : Add sprites here. TODO : remove and make it correct !
+   if ((dma_control_.dmacon_ & 0x240) == 0x240)
+      denise_.DrawSprites();
+
    frame_->VSync();
    // CIA-A TOD
    cia_a_.Tod();

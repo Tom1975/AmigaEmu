@@ -2,6 +2,8 @@
 #include "Bitplanes.h"
 #include "DisplayFrame.h"
 
+class Motherboard;
+
 class Denise
 {
 public:
@@ -9,8 +11,9 @@ public:
    virtual ~Denise();
 
    // Init
-   void Init(Bitplanes* bitplanes, unsigned short * diwstrt, unsigned short * diwstop )
+   void Init(Motherboard* motherboard, Bitplanes* bitplanes, unsigned short * diwstrt, unsigned short * diwstop )
    {
+      motherboard_ = motherboard;
       bitplanes_ = bitplanes;
       diwstrt_ = diwstrt;
       diwstop_ = diwstop;
@@ -55,6 +58,9 @@ public:
    void DisplayWord();
    void DisplayWordBkg();
 
+   // HACK !
+   void DrawSprites();
+
 protected:
    
    // 
@@ -67,6 +73,7 @@ protected:
 
    DisplayFrame* frame_;
    Bitplanes * bitplanes_;
+   Motherboard* motherboard_;
    int hpos_counter_;
 
    // Register link
@@ -86,9 +93,9 @@ protected:
 
       bool enabled_;
       unsigned int ptr_;
-      unsigned short svpos_;
-      unsigned short shpos_;
-      unsigned short evpos_;
+      unsigned short svpos_;  // start vertical pos
+      unsigned short shpos_;  // start horizontal pos
+      unsigned short evpos_;  // end vertical pos
       bool attached_;
 
       unsigned short datA_;
