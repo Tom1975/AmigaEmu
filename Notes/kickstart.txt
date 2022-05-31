@@ -6,6 +6,8 @@ move.l (C,A0D3.l), A1  ==> A1 <= A0+D3 + #C
 FFF4, A1 => A1, A3
 jmp(A3)
 
+*** Plantage vers FED2C0 ??
+
 Chercher fonction Text - -$003C (-60) => FFC4
 => Affichage ok dans la structure Bitmap B730 !
 

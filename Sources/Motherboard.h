@@ -35,7 +35,7 @@ public :
    Denise* GetDenise() { return &denise_; }
    Paula* GetPaula() { return &paula_; }
    DiskController* GetDiskController() { return &drive_; }
-
+   ILogger* GetLogger() { return logger_; }
    Bitplanes * GetBitplanes() { return &bitplanes_; }
 
    unsigned char* GetRom () { return rom_; }

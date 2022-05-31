@@ -4,6 +4,8 @@
 #include "Copper.h"
 #include "Motherboard.h"
 
+#define LOGGER_COPPER
+
 Copper::Copper() : current_state_(NONE), counter_(0xFFFFFFFF), address_1_(0xFFFFFFFF)
 {
    
@@ -26,11 +28,27 @@ void Copper::VerticalRetraceBegin()
 bool Copper::Compare()
 {
    // BFD
-   if (bfd_ && ((dmacon_->dmacon_&0x4000)== 0x4000)) return false;
-   if ((motherboard_->GetAgnus()->GetVerticalPos() & ve_) > vp_) return true;
+   bool compare_result = false;
 
-   return ((motherboard_->GetAgnus()->GetHorizontalPos() & he_) >= hp_
-      && (motherboard_->GetAgnus()->GetVerticalPos() & ve_) >= vp_);
+   if (bfd_ && ((dmacon_->dmacon_&0x4000)== 0x4000)) compare_result = false;
+   else
+   if ((motherboard_->GetAgnus()->GetVerticalPos() & ve_) > vp_) compare_result =true;
+   else 
+      compare_result = ((motherboard_->GetAgnus()->GetHorizontalPos() & he_) >= hp_
+         && (motherboard_->GetAgnus()->GetVerticalPos() & ve_) >= vp_);
+
+#ifdef LOGGER_COPPER
+   if (compare_result)
+   {
+      Agnus* agnus = motherboard_->GetAgnus();
+      motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT TRUE; Vetical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+         agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+      );
+   }
+
+#endif
+
+   return compare_result;
 }
 
 // Handle a DMA copper. If nothing is done (wait, or DMACON disable copper), return false.
@@ -108,6 +126,13 @@ void Copper::DmaDecode()
          hp_ = (instr_1 & 0xFE) << 2;
          he_ = (instr_2 & 0xFE) << 2;
          bfd_ = instr_2 >> 15;
+
+         Agnus* agnus = motherboard_->GetAgnus();
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT BEGING; Vetical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+            agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+         );
+
+
          if (Compare() == false)
          {
             current_state_ = WAIT;
