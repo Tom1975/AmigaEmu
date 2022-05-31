@@ -26,6 +26,13 @@ unsigned char HardwareInterface::GetJoystick(unsigned int port_number)
    return 0;
 }
 
+void HardwareInterface::SetMouvePos(int x, int y)
+{
+   // Mouse position
+   x_ = x;
+   y_ = y;
+}
+
 void HardwareInterface::MouseClick(int button, bool down)
 {
    port_1_button_[button] = down;

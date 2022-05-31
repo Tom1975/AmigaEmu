@@ -15,6 +15,8 @@ Display::Display(QWidget* parent) :
    setAcceptDrops(true);
    Init();
 
+   setMouseTracking(true);
+
    //connect(this, SIGNAL(SendRepaint(QPaintEvent*)), parent, SLOT(paintEvent(QPaintEvent*)));
    //connect(this, SIGNAL(VSync()), this, SLOT(Update()), Qt::QueuedConnection);
    connect(this, SIGNAL(Update()), this, SLOT(ForceRefresh()), Qt::QueuedConnection);
@@ -130,6 +132,15 @@ void Display::keyReleaseEvent(QKeyEvent *event_keyboard)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+void Display::mouseMoveEvent(QMouseEvent* eventMove)
+{
+   // Send mouse coordinate to hardware_io
+   if (hardware_io_ != nullptr)
+   {
+      hardware_io_->SetMouvePos(eventMove->x(), eventMove->y());
+   }
+}
+
 void Display::mousePressEvent(QMouseEvent* event)
 {
    

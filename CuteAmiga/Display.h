@@ -38,6 +38,7 @@ public:
     void keyReleaseEvent(QKeyEvent *event_keyboard);
 
     // Mouse
+    virtual void mouseMoveEvent(QMouseEvent* eventMove);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
 

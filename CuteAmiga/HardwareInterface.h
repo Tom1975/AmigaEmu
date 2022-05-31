@@ -12,10 +12,15 @@ public:
    virtual unsigned char GetJoystick(unsigned int port_number);
 
    // API
+   void SetMouvePos(int x, int y);
    void MouseClick(int button, bool down);
    void KeyAction(int key, bool pressed);
 
 protected:
    bool port_1_button_[3];
    bool port_2_button_[3];
+
+   // Mouse position
+   int x_; 
+   int y_;
 };
