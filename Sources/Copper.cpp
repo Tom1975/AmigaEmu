@@ -41,7 +41,7 @@ bool Copper::Compare()
    if (compare_result)
    {
       Agnus* agnus = motherboard_->GetAgnus();
-      motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT TRUE; Vetical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+      motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT TRUE; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
          agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
       );
    }
@@ -54,8 +54,17 @@ bool Copper::Compare()
 // Handle a DMA copper. If nothing is done (wait, or DMACON disable copper), return false.
 bool Copper::DmaTick()
 {
+   static bool dmaon = false;
    if ((dmacon_->dmacon_ & 0x280) == 0x280)
    {
+      if (!dmaon)
+      {
+         dmaon = true;
+         Agnus* agnus = motherboard_->GetAgnus();
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA ON !; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+            agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+         );
+      }
       // todo : remove when understanding fully what's going on !
       /*if (counter_ == 0xFFFFFFFF)
          VerticalRetraceBegin();*/
@@ -93,7 +102,16 @@ bool Copper::DmaTick()
    else
    {
       // DMA COPPER not used : reset to NONE ?
+      if (dmaon)
+      {
+         dmaon = false;
+         Agnus* agnus = motherboard_->GetAgnus();
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA ON !; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+            agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+         );
+      }
    }
+
    return false;
 }
 
@@ -128,7 +146,7 @@ void Copper::DmaDecode()
          bfd_ = instr_2 >> 15;
 
          Agnus* agnus = motherboard_->GetAgnus();
-         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT BEGING; Vetical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT BEGING; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
             agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
          );
 
