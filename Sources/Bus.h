@@ -27,6 +27,8 @@ public:
       rom_ = rom;
    }
 
+   void InitLog(ILogger* log) { logger_ = log; }
+
    void Reset();
 
    void Tick();         // Handle main bus access
@@ -218,6 +220,9 @@ protected:
 
    // todo : for test, but should be replaced by hardware for RAM/ROM selection
    bool memory_overlay_;
+
+   // Logger
+   ILogger* logger_;    // Logger
 
    CIA8520* cia_a_;
    CIA8520* cia_b_;

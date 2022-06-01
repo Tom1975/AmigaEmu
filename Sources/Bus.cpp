@@ -324,27 +324,46 @@ void Bus::TickDMA()
       
 
    }
+   static int count_dma_true = 0;
+   static int count_dma_bitmap = 0;
    if (dma_used == false)
    {
+      if (count_dma_true > 50)
+      {
+         logger_->Log(ILogger::Severity::SEV_DEBUG, "count_dma_true %i", count_dma_true);
+      }
+      count_dma_true = 0;
+
       // EVEN (or value not used) : Only Copper, Blitter and 68000 (and Bitplanes eventually) are available on this 
       // Bitplane read can begin here
       if (!bitplanes_->DmaTick(tick_count_))
-      // Copper
-      if (!copper_->DmaTick())
-      // Blitter
-      if (!blitter_->DmaTick())
-      // 68000 
-      if (agnus_bus_required_)
       {
-         
-         operation_memory.address_ = address_;
-         operation_memory.data_ = data_;
-         operation_memory.current_operation_ = current_operation_;
-         operation_memory.lds_ = lds_;
-         operation_memory.uds_ = uds_;
-         operation_memory.operation_complete_ = false;
-         pending_ = &operation_memory;
-         agnus_bus_required_ = false;
+         count_dma_bitmap = 0;
+         // Copper
+         if (!copper_->DmaTick())
+            // Blitter
+            if (!blitter_->DmaTick())
+               // 68000 
+               if (agnus_bus_required_)
+               {
+
+                  operation_memory.address_ = address_;
+                  operation_memory.data_ = data_;
+                  operation_memory.current_operation_ = current_operation_;
+                  operation_memory.lds_ = lds_;
+                  operation_memory.uds_ = uds_;
+                  operation_memory.operation_complete_ = false;
+                  pending_ = &operation_memory;
+                  agnus_bus_required_ = false;
+               }
+      }
+      else
+      {
+         if (++count_dma_bitmap > 50)
+         {
+            logger_->Log(ILogger::Severity::SEV_DEBUG, "count_dma_bitmap > 50");
+            count_dma_bitmap = 0;
+         }
       }
       // End of line ? 
       // refresh odd_counter_
@@ -352,6 +371,10 @@ void Bus::TickDMA()
       {
          odd_counter_ = 0;
       }
+   }
+   else
+   {
+      count_dma_true++;
    }
    tick_count_++;
 }

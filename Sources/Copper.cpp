@@ -4,7 +4,7 @@
 #include "Copper.h"
 #include "Motherboard.h"
 
-#define LOGGER_COPPER
+//#define LOGGER_COPPER
 
 Copper::Copper() : current_state_(NONE), counter_(0xFFFFFFFF), address_1_(0xFFFFFFFF)
 {
@@ -23,6 +23,10 @@ void Copper::VerticalRetraceBegin()
    counter_ = address_1_;
    current_state_ = NONE;
 
+   Agnus* agnus = motherboard_->GetAgnus();
+   motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER VerticalRetraceBegin; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+      agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_);
+
 }
 
 bool Copper::Compare()
@@ -30,7 +34,7 @@ bool Copper::Compare()
    // BFD
    bool compare_result = false;
 
-   if (bfd_ && ((dmacon_->dmacon_&0x4000)== 0x4000)) compare_result = false;
+   if (bfd_ == 0 && ((dmacon_->dmacon_&0x4000)== 0x4000)) compare_result = false;
    else
    if ((motherboard_->GetAgnus()->GetVerticalPos() & ve_) > vp_) compare_result =true;
    else 
@@ -41,8 +45,8 @@ bool Copper::Compare()
    if (compare_result)
    {
       Agnus* agnus = motherboard_->GetAgnus();
-      motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT TRUE; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
-         agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+      motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT TRUE; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+         agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
       );
    }
 
@@ -61,8 +65,8 @@ bool Copper::DmaTick()
       {
          dmaon = true;
          Agnus* agnus = motherboard_->GetAgnus();
-         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA ON !; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
-            agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA ON !; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+            agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
          );
       }
       // todo : remove when understanding fully what's going on !
@@ -106,8 +110,8 @@ bool Copper::DmaTick()
       {
          dmaon = false;
          Agnus* agnus = motherboard_->GetAgnus();
-         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA ON !; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
-            agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA OFF !; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+            agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
          );
       }
    }
@@ -146,8 +150,8 @@ void Copper::DmaDecode()
          bfd_ = instr_2 >> 15;
 
          Agnus* agnus = motherboard_->GetAgnus();
-         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT BEGING; Vertical pos Agnus = %i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
-            agnus->GetVerticalPos(), vp_, ve_, hp_, he_, bfd_
+         motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT BEGIN; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+            agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
          );
 
 
@@ -224,12 +228,18 @@ void Copper::SetJmp1(unsigned short data)
 {
    // Transfert COP1LC to counter
    counter_ = address_1_;
+   Agnus* agnus = motherboard_->GetAgnus();
+   motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER SetJmp1 %X; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+      agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_);
 }
 
 void Copper::SetJmp2(unsigned short data)
 {
    // Transfert COP2LC to counter
    counter_ = address_2_;
+   Agnus* agnus = motherboard_->GetAgnus();
+   motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER SetJmp2 %X; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
+      agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_);
 }
 
 void Copper::SetCopIns(unsigned short data)
