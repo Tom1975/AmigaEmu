@@ -24,9 +24,10 @@ void Copper::VerticalRetraceBegin()
    current_state_ = NONE;
 
    Agnus* agnus = motherboard_->GetAgnus();
+#ifdef LOGGER_COPPER
    motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER VerticalRetraceBegin; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
       agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_);
-
+#endif
 }
 
 bool Copper::Compare()
@@ -64,10 +65,12 @@ bool Copper::DmaTick()
       if (!dmaon)
       {
          dmaon = true;
+#ifdef LOGGER_COPPER
          Agnus* agnus = motherboard_->GetAgnus();
          motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA ON !; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
             agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
          );
+#endif
       }
       // todo : remove when understanding fully what's going on !
       /*if (counter_ == 0xFFFFFFFF)
@@ -109,10 +112,12 @@ bool Copper::DmaTick()
       if (dmaon)
       {
          dmaon = false;
+#ifdef LOGGER_COPPER
          Agnus* agnus = motherboard_->GetAgnus();
          motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* DMA OFF !; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
             agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
          );
+#endif
       }
    }
 
@@ -149,11 +154,12 @@ void Copper::DmaDecode()
          he_ = (instr_2 & 0xFE) << 2;
          bfd_ = instr_2 >> 15;
 
+#ifdef LOGGER_COPPER
          Agnus* agnus = motherboard_->GetAgnus();
          motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER WAIT BEGIN; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
             agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_
          );
-
+#endif
 
          if (Compare() == false)
          {
@@ -228,18 +234,23 @@ void Copper::SetJmp1(unsigned short data)
 {
    // Transfert COP1LC to counter
    counter_ = address_1_;
+#ifdef LOGGER_COPPER
    Agnus* agnus = motherboard_->GetAgnus();
    motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER SetJmp1 %X; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
       agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_);
+#endif
+
 }
 
 void Copper::SetJmp2(unsigned short data)
 {
    // Transfert COP2LC to counter
    counter_ = address_2_;
+#ifdef LOGGER_COPPER
    Agnus* agnus = motherboard_->GetAgnus();
    motherboard_->GetLogger()->Log(ILogger::Severity::SEV_DEBUG, "* COPPER SetJmp2 %X; Agnus y= %i - x=%i; vp=%i; ve=%i; hp=%i; he=%i; bfd = %i",
       agnus->GetVerticalPos(), agnus->GetHorizontalPos(), vp_, ve_, hp_, he_, bfd_);
+#endif
 }
 
 void Copper::SetCopIns(unsigned short data)

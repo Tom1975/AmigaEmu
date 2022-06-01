@@ -324,21 +324,12 @@ void Bus::TickDMA()
       
 
    }
-   static int count_dma_true = 0;
-   static int count_dma_bitmap = 0;
    if (dma_used == false)
    {
-      if (count_dma_true > 50)
-      {
-         logger_->Log(ILogger::Severity::SEV_DEBUG, "count_dma_true %i", count_dma_true);
-      }
-      count_dma_true = 0;
-
       // EVEN (or value not used) : Only Copper, Blitter and 68000 (and Bitplanes eventually) are available on this 
       // Bitplane read can begin here
       if (!bitplanes_->DmaTick(tick_count_))
       {
-         count_dma_bitmap = 0;
          // Copper
          if (!copper_->DmaTick())
             // Blitter
@@ -359,11 +350,6 @@ void Bus::TickDMA()
       }
       else
       {
-         if (++count_dma_bitmap > 50)
-         {
-            logger_->Log(ILogger::Severity::SEV_DEBUG, "count_dma_bitmap > 50");
-            count_dma_bitmap = 0;
-         }
       }
       // End of line ? 
       // refresh odd_counter_
@@ -374,7 +360,6 @@ void Bus::TickDMA()
    }
    else
    {
-      count_dma_true++;
    }
    tick_count_++;
 }
