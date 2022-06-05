@@ -13,6 +13,8 @@ set(EXTRA
    TODO.txt
 	"../Notes/DMA.txt"
    "../Notes/Kickstart 1.2.asm"
+   "../Notes/kickstart.txt"
+   "../Notes/Structures.txt"
    )
 source_group("Docs" FILES ${EXTRA} )
 
