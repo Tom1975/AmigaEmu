@@ -20,11 +20,20 @@ Chargement : (bp sur FEA8D6)
 ## LOTUS : 
 1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 
-## Chargement battle squadron.
-Crash :
-70100 -> Deja ni'mporte quoi sur D0
-70102
-60000
+## Chargement battle squadron. Battle Squadron (1989)(Innerprise)[cr TIC][t Freestyle]
+3c000 : Ok
+3c004 : Ok	
+3c008 : ok (D0 derive de VPOS donc ca semble ok)
+3c00C : ok
+3c014 : (sortie : ko)
+	3c1fc : ok
+********	3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
+
+3c220 : D4 incorrect (FFFFFFFE (15018c)
+		D5 incorrect 480b ( a888)
+		D6 FFFF0140 (ffff0041)
+		
+
 
 ## Chargement Shadow of the beast : Guru
 

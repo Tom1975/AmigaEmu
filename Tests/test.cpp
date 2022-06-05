@@ -366,3 +366,26 @@ TEST(Cpu68k, CPU_ASL_L_D)
    ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0xFFFFFFFF, 0x01, 65, 0xFFFFFFFE, 0x19), true);   // Rotate 1
    ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x7FFFFFFF, 0x01, 65, 0xFFFFFFFE, 0x0A), true);   // Rotate 1
 }
+
+
+bool TestOpcodeWordDiv(unsigned char opcode[2], unsigned int reg_6_in, unsigned int reg_4_in, unsigned short sr_in, unsigned int reg_4_out, unsigned short sr_out)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataRegister(6, reg_6_in);    // 
+   test_engine.Get68k()->SetDataRegister(4, reg_4_in);    // 
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = test_engine.Get68k()->GetDataRegister(4) == reg_4_out;
+   result &= (test_engine.Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}
+
+// DIVS
+TEST(Cpu68k, CPU_DIVS_W_D_D)
+{
+   unsigned char opcode[] = { 0x89, 0xC6 }; // divs.w d6, d4
+   ASSERT_EQ(TestOpcodeWordDiv(opcode, 0x1d9, 0x8271, 0x0, 0xFE3CFFBD, 0x8), true);   // divs 1d9, 8271 = ffbd, rest FE3C
+
+}

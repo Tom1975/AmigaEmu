@@ -278,6 +278,7 @@ protected:
    unsigned int DecodeCmpm();
    unsigned int DecodeDBcc();
    unsigned int DecodeDivu();
+   unsigned int DecodeDivs();
    unsigned int DecodeEoriToCcr();
    unsigned int DecodeEoriSr();
    unsigned int DecodeExg();

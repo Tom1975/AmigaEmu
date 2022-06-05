@@ -40,7 +40,7 @@ M68k::Func M68k::CmpD_[] = { &M68k::DecodeCmpD, &M68k::SourceFetch, &M68k::Sourc
 M68k::Func M68k::CmpI_[] = { &M68k::DecodeCmpI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeCmpI, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::DBcc_[] = { &M68k::InitWait, &M68k::Wait2Ticks, &M68k::DecodeDBcc, &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr,
                               &M68k::Wait2Ticks, &M68k::OpcodeDBcc, &M68k::CpuFetchInit, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Divs_[] = { &M68k::DecodeDivu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivs, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Divs_[] = { &M68k::DecodeDivs, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivs, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Divu_[] = { &M68k::DecodeDivu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivu, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Eor_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Eori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -2996,7 +2996,16 @@ unsigned int M68k::OpcodeDBcc()
 unsigned int M68k::DecodeDivu()
 {
    // Decode , M, Xn
-   size_ = 1;  //16 bits source
+   size_ = 1;  //16 bits destination
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+
+   return true;
+}
+
+unsigned int M68k::DecodeDivs()
+{
+   // Decode , M, Xn
+   size_ = 2;  //32 bits destination
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
 
    return true;
@@ -3016,18 +3025,18 @@ unsigned int M68k::OpcodeDivu()
    unsigned int result = s1 / s2;
    unsigned short rest = s1 - ((s1 / s2)*s2);
 
-   if (result > 0x10000)
+   if (result >= 0x10000)
    {
       // Nothing to do
    }
    else
    {
-      d_[(ird_ >> 9) & 0x7] = (rest<<16)|result;
+      d_[(ird_ >> 9) & 0x7] = (rest<<16)|(result & 0xFFFF);
    }
    
 
    sr_ &= 0xFFF0;
-   if (((int)result) < 0) sr_ |= F_N;
+   if (result & 0x8000)sr_ |= F_N;
    if (result == 0) sr_ |= F_Z;
 
    // Wait for xxx cycle :
@@ -3041,35 +3050,30 @@ unsigned int M68k::OpcodeDivu()
 unsigned int M68k::OpcodeDivs()
 {
    // Do it and adjust the flags
-   int s1 = destination_alu_->GetU32();
+   short s1 = destination_alu_->GetU16();
    short s2 = d_[(ird_ >> 9) & 0x7];
 
-   if (s2 == 0)
+   if (s1 == 0)
    {
       TRAP(5);
       return true;
    }
-   int result = s1 / s2;
-   short rest = s1 - (s1 / s2);
+   short result = s2 / s1;
+   short rest = s2 - result*s1;
 
-   if (result > 0x10000)
+   sr_ &= 0xFFF0;
+   if (result & 0x8000) sr_ |= F_N;
+   if (result == 0) sr_ |= F_Z;
+
+
+   if (result >= 0x10000)
    {
-      // Nothing to do
+      sr_ |= F_V;
    }
    else
    {
-      d_[(ird_ >> 9) & 0x7] = (rest << 16) | result;
+      d_[(ird_ >> 9) & 0x7] = (rest << 16) | (result&0xFFFF);
    }
-
-
-   sr_ &= 0xFFF0;
-   if (((int)result) < 0) sr_ |= F_N;
-   if (result == 0) sr_ |= F_Z;
-
-   // Wait for xxx cycle :
-   // todo
-
-   // Fetch x1
    Fetch();
    return true;
 }
