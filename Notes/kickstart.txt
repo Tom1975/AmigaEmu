@@ -37,6 +37,7 @@ Chargement : (bp sur FEA8D6)
 ... 
 7f056 ok (?)
 100 ok
+15A : EORI 2700, SR => ??  
 
 ## Chargement Shadow of the beast : Guru
 
