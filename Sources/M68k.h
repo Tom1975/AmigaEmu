@@ -374,6 +374,7 @@ protected:
    unsigned int OpcodeMulu();
    unsigned int OpcodeMuls();
    unsigned int OpcodeNeg();
+   unsigned int OpcodeNegX();
    unsigned int OpcodeNot();
    unsigned int OpcodeNop();
    unsigned int OpcodeOr();

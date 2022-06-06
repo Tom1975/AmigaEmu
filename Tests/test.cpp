@@ -109,6 +109,19 @@ TEST(Cpu68k, CPU_NOT_REG)
 
 ///////////////////////////////////////////////////////////////////////////////////
 // SUBQ
+bool TestOpcodeSubQ(unsigned char opcode[2], unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataRegister(0, reg_in);    // 
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = test_engine.Get68k()->GetDataRegister(0) == reg_out;
+   result &= (test_engine.Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}
+
 TEST(Cpu68k, CPU_SUBQ)
 {
    TestEngineCpu test_engine;
@@ -117,12 +130,11 @@ TEST(Cpu68k, CPU_SUBQ)
    // .L 
    //    Dn | 8(1 / 0)  0(0 / 0) |               |               np       nn
    unsigned char opcode[] = { 0x53, 0x80 }; // subq.l #1, D0
-   test_engine.Get68k()->SetDataRegister(0, 0x20000);
-   test_engine.RunOpcode(opcode, sizeof(opcode), 1);  // This should be tested by CPU_MOVE test.
+   ASSERT_EQ(TestOpcodeSubQ(opcode, 0x20000, 0x00, 0x1FFFF, 0x00), true);
 
-   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(0), 0x1FFFF); // Check if source = $20000   
-   test_engine.Get68k()->GetSr();// Check flags : Z, C
-   ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x000000D8); // Check pc 
+   // .b
+   unsigned char opcode_b[] = { 0x53, 0x00 }; // subq.b #1, D0
+   ASSERT_EQ(TestOpcodeSubQ(opcode_b, 0x00, 0x00, 0xFF, 0x19), true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

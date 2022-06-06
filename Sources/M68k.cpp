@@ -66,6 +66,7 @@ M68k::Func M68k::MoveUsp_[] = { &M68k::OpcodeMoveUsp, &M68k::CpuFetch, &M68k::Op
 M68k::Func M68k::Muls_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMuls, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Mulu_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMulu, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Neg_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNeg, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Negx_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNegX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Nop_[] = { &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Not_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNot, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Or_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -99,7 +100,6 @@ M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::Not
 // TO IMPLEMENT & DISASSEMBLE
 M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Negx_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Trapv_[] = { &M68k::NotImplemented, nullptr };
@@ -1413,7 +1413,7 @@ unsigned int M68k::OpcodeNeg()
       break;
    }
    
-   sr_ &= 0xFFFE;
+   sr_ &= 0xFFE0;
    if (rm == 0) sr_ |= 0x4;
    rm &= mask;
    dm &= mask;
@@ -1424,6 +1424,46 @@ unsigned int M68k::OpcodeNeg()
 
    return WriteSourceToDestination();
 }
+
+unsigned int M68k::OpcodeNegX()
+{
+   // NOT
+   unsigned int dm, rm, mask;
+   unsigned char x = (sr_ & 0x10)?1:0;
+   switch (size_)
+   {
+   case 0:
+      mask = 0x80;
+      dm = destination_alu_->GetU8();
+      rm = (char)(0 - (char)dm - x);
+      destination_alu_->WriteInput(rm);
+      break;
+   case 1:
+      mask = 0x8000;
+      dm = destination_alu_->GetU16();
+      rm = (short)(0 - (short)dm - x);
+      destination_alu_->WriteInput(rm);
+      break;
+   case 2:
+      mask = 0x80000000;
+      dm = destination_alu_->GetU32();
+      rm = 0 - (int)dm - x;
+      destination_alu_->WriteInput(rm);
+      break;
+   }
+
+   sr_ &= 0xFFE4;
+   if (rm != 0) sr_ &= ~0x4;
+   rm &= mask;
+   dm &= mask;
+   if (rm) sr_ |= 0x8;
+
+   if (dm&rm) sr_ |= 2;
+   if (dm | rm) sr_ |= 0x11;
+
+   return WriteSourceToDestination();
+}
+
 
 unsigned int M68k::OpcodeNot()
 {

@@ -25,15 +25,18 @@ Chargement : (bp sur FEA8D6)
 3c004 : Ok	
 3c008 : ok (D0 derive de VPOS donc ca semble ok)
 3c00C : ok
-3c014 : (sortie : ko)
-	3c1fc : ok
-********	3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
+3c014 : ok
 
-3c220 : D4 incorrect (FFFFFFFE (15018c)
+	3c220 : D4 incorrect (FFFFFFFE (15018c)
 		D5 incorrect 480b ( a888)
 		D6 FFFF0140 (ffff0041)
-		
+	3c1e6 ok
+3c018 : ko (tout est different ?)
 
+3c062 : Clic souris ! !! warning sur executions ???
+... 
+7f056 ok (?)
+100 ok
 
 ## Chargement Shadow of the beast : Guru
 
@@ -90,6 +93,9 @@ Si ve > vp, return true.
 ********************************
 *** HISTORIQUE 
 ********************************
+*** Battle Squadron
+3c1E4 : Subq.b #♦1, D2 = FFFFFFFF(000000FF)
+3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
 
 *** Fix SUB flags
 FC559C  sub.w  D0, D2  => SR = 9(19 ) !!

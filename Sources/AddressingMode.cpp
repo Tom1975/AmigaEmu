@@ -250,7 +250,7 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
 
 void AddressingMode::Roxd(bool right, unsigned short& sr)
 {
-   unsigned char x = (sr & 0x10);
+   unsigned char x = ((sr & 0x10)?1:0);
    input_ = GetU16();
    /*if (input_ == 0)
    {

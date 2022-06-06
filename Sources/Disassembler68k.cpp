@@ -13,6 +13,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF000, 0xD000, &Disassembler68k::AddOpcode_);
    AddCommand(0xF000, 0xC000, &Disassembler68k::AndOpcode_);
    AddCommand(0xFF00, 0x4400, &Disassembler68k::NegOpcode);
+   AddCommand(0xFF00, 0x4000, &Disassembler68k::NegxOpcode);
    AddCommand(0xFF00, 0x0200, &Disassembler68k::AndiOpcode_);
    AddCommand(0xFF00, 0x0000, &Disassembler68k::OriOpcode_);
    AddCommand(0xFF00, 0x0A00, &Disassembler68k::EoriOpcode_);
@@ -682,6 +683,17 @@ unsigned int Disassembler68k::NegOpcode(Motherboard* motherboard, unsigned short
    return pc;
 }
 
+unsigned int Disassembler68k::NegxOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   unsigned int size = (opcode >> 6) & 0x3;
+   if (size == 3) size = 1;
+   str_asm = "negx." + (size2_[size]) + " ";
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   str_asm += str_opcode;
+
+   return pc;
+}
 unsigned int Disassembler68k::NopOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    str_asm = "nop";

@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //   .L :            |                 |               |
 //     Dn | 4(1 / 0)         |               |               np
-TEST(Cpu68k, CPU_MOVE_L_Dn_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_Dn_Dn)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetDataRegister(0, 0x123456);
@@ -36,7 +36,7 @@ TEST(Cpu68k, CPU_MOVE_L_Dn_Dn)
 }
 
 //     An | 4(1 / 0)         |               |               np
-TEST(Cpu68k, CPU_MOVE_L_An_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_An_Dn)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetAddressRegister(0, 0x123456);
@@ -47,7 +47,7 @@ TEST(Cpu68k, CPU_MOVE_L_An_Dn)
 }
 
 //     (An) | 12(3 / 0) | nR nr | np
-TEST(Cpu68k, CPU_MOVE_L_pAn_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_pAn_Dn)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetAddressRegister(0, 0x023456);
@@ -67,7 +67,7 @@ TEST(Cpu68k, CPU_MOVE_L_pAn_Dn)
 //     (xxx).L | 20(5 / 0) | np np nR nr | np
          
 //     #<data>       | 12(3/0)         |   np np       |               np		      
-TEST(Cpu68k, CPU_MOVE_L_IMMEDIATE_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_IMMEDIATE_Dn)
 {
    TestEngineCpu test_engine;
    unsigned char opcode[] = { 0x20, 0x3C, 0x00, 0x02, 0x00, 0x00 }; // move.l #$020000, D0
@@ -90,7 +90,7 @@ TEST(Cpu68k, CPU_MOVE_L_IMMEDIATE_Dn)
 //(xxx).W | 24(5 / 1) | np    nr | np    nw np np
 //(xxx).L | 28(6 / 1) | np np    nr | np    nw np np
 //#<data>       | 20(4/1)         |      np       |   np np    nw np		      
-TEST(Cpu68k, CPU_MOVE_B_Dn_AbsoluteL)
+TEST(Cpu68k_MOVE, CPU_MOVE_B_Dn_AbsoluteL)
 {
    TestEngineCpu test_engine;
    unsigned char opcode[] = { 0x13, 0xFC, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00 }; // move.b  #3, $10000
