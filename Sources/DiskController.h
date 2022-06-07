@@ -15,6 +15,8 @@ public:
    void Reset();
 
    // Set signals
+   void SetCmd(unsigned char data, unsigned char mask);
+
    void SetSEL0(bool set);
    void SetSEL1(bool set);
    void SetSEL2(bool set);

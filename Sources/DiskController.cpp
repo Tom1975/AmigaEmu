@@ -43,14 +43,33 @@ void DiskController::Reset()
    }
 }
 
+void DiskController::SetCmd(unsigned char data, unsigned char mask)
+{
+   if (mask & 0x80)
+      SetMTRON((data & 0x80) == 0x00);
+   if (mask & 0x40)
+      SetSEL3((data & 0x40) == 0x00);
+   if (mask & 0x20)
+      SetSEL2((data & 0x20) == 0x00);
+   if (mask & 0x10)
+      SetSEL1((data & 0x10) == 0x00);
+   if (mask & 0x08)
+      SetSEL0((data & 0x08) == 0x00);
+   if (mask & 0x04)
+      SetSIDE((data & 0x04) == 0x00);
+   if (mask & 0x02)
+      SetDIR((data & 0x02) == 0x00);
+   if (mask & 0x01)
+      SetSTEP((data & 0x01) == 0x00);
+}
+
 void DiskController::SetSEL0(bool set)
 {
    if (sel_0_ != set)
    {
       if (set)
       {
-         if ( mtr_)
-            LOG(mtr_?"DF0: MOTOR ON":"DF0: MOTOR OFF");
+         LOG(mtr_ ? "DF0: MOTOR ON" : "DF0: MOTOR OFF");
          disk_drive_[0].Motor(mtr_);
       }
       sel_0_ = set;
