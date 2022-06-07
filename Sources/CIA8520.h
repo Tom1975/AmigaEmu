@@ -29,6 +29,7 @@ public:
 
    // todo
    // tod, pc, flag, irq...
+   void Flag(bool set);
 
 protected:
    // Inner values
@@ -52,6 +53,7 @@ protected:
    unsigned char sdr_;
    size_t sdr_shift_size_;
    bool sp_;
+   bool flag_;
    Keyboard* keyboard_;
 
    // Interruption

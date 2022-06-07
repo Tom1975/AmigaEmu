@@ -3,7 +3,8 @@
 //#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
 #define LOG(fmt, ...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, fmt, ##__VA_ARGS__);
 
-DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false), logger_(nullptr), head_(0)
+DiskDrive::DiskDrive() : disk_inserted_(nullptr), motor_(false), chng_(true), dir_(true), side_(0), track_(0), index_(false), wprot_(false), logger_(nullptr), head_(0),
+cia_(nullptr)
 {
 }
 
@@ -12,8 +13,9 @@ DiskDrive::~DiskDrive()
    // Eject disk
 }
 
-void DiskDrive::Init(ILogger* log)
+void DiskDrive::Init(ILogger* log, CIA8520* cia)
 {
+   cia_ = cia;
    logger_ = log;
 }
 
@@ -96,7 +98,20 @@ unsigned short DiskDrive::ReadAndAdvance()
          data |= (disk_inserted_->side_[side_].track_[track_].bitstream_[head_++] & 0x1);
 
          if (head_ >= disk_inserted_->side_[side_].track_[track_].size_)
+         {
             head_ = 0;
+            index_ = true;
+            // set FLAG from CIA
+            if (cia_ != nullptr)
+            {
+               cia_->Flag(true);
+            }
+         }
+         else
+         {
+            cia_->Flag(false);
+            index_ = false;
+         }
       }
    }
 

@@ -36,7 +36,7 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logge
    logger_ = logger;
    frame_ = frame;
    denise_.SetDisplayFrame(frame_);
-   drive_.Init(logger);
+   drive_.Init(logger, &cia_b_);
    m68k_.InitLog(logger);
    bus_.InitLog(logger_);
    hardware_ = hardware;

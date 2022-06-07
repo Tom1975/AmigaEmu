@@ -41,6 +41,7 @@ void CIA8520::Reset()
    timer_b_latch_ = timer_a_latch_ = 0xFF;
    sdr_shift_size_ = 0;
    sp_ = false;
+   flag_ = false;
 }
 
 void CIA8520::Tod()
@@ -342,6 +343,21 @@ void CIA8520::HandleControlRegister(unsigned int timer)
 void CIA8520::Sp(bool set)
 {
    sp_ = set;
+}
+
+void CIA8520::Flag(bool set)
+{
+   flag_ = set;
+   if (flag_)
+   {
+      icr_ |= ALARM;
+      if (icr_mask_ & ALARM)
+      {
+         icr_ |= FLAG;
+         motherboard_->GetPaula()->Int(intreq_);
+      }
+   }
+
 }
 
 void CIA8520::Cnt(bool set)

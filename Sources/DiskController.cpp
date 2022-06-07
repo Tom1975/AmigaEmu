@@ -3,6 +3,7 @@
 #define LOG(...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, __VA_ARGS__);
 
 DiskController::DiskController() : identification_(0xFFFFFFFF), identification_index_(0), chng_(true), sel_0_(false), sel_1_(false), sel_2_(false), sel_3_(false), logger_(nullptr)
+, cia_(nullptr)
 {
    Reset();
 }
@@ -12,13 +13,14 @@ DiskController::~DiskController()
 
 }
 
-void DiskController::Init(ILogger* log)
+void DiskController::Init(ILogger* log, CIA8520* cia)
 {
+   cia_ = cia;
    logger_ = log;
-   disk_drive_[0].Init(log);
-   disk_drive_[1].Init(log);
-   disk_drive_[2].Init(log);
-   disk_drive_[3].Init(log);
+   disk_drive_[0].Init(log, cia_);
+   disk_drive_[1].Init(log, cia_);
+   disk_drive_[2].Init(log, cia_);
+   disk_drive_[3].Init(log, cia_);
 }
 
 bool DiskController::IsMotorOn(int drive)

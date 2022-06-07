@@ -2,7 +2,7 @@
 
 #include "ILogger.h"
 #include "DiskDrive.h"
-
+#include "CIA8520.h"
 
 class DiskController
 {
@@ -11,7 +11,7 @@ public:
    DiskController();
    virtual ~DiskController();
 
-   void Init(ILogger* log);
+   void Init(ILogger* log, CIA8520* cia);
    void Reset();
 
    // Set signals
@@ -47,7 +47,7 @@ public:
 
 private:
    ILogger* logger_;
-
+   CIA8520* cia_;
    ////////////////////////////////
    // Various registers
    bool mtr_;

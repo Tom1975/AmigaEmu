@@ -1,6 +1,7 @@
 #pragma once
 #include "Disk.h"
 #include "ILogger.h"
+#include "CIA8520.h"
 
 class DiskDrive
 {
@@ -9,7 +10,7 @@ public:
    DiskDrive();
    virtual ~DiskDrive();
 
-   void Init(ILogger* log);
+   void Init(ILogger* log, CIA8520* cia);
    void Reset();
 
    virtual void Eject();
@@ -39,7 +40,7 @@ public:
    size_t GetHeadPosition() { return head_; }
 private: 
    ILogger* logger_;
-
+   CIA8520* cia_;
    // Disk inserted ?
    Disk* disk_inserted_;
    
