@@ -293,6 +293,7 @@ protected:
    unsigned int DecodeMoveFromSr();
    unsigned int DecodeMoveToSr();
    unsigned int DecodeMoveCcr();
+   unsigned int DecodeMoveToCcr();
    unsigned int DecodeMovem();
    unsigned int DecodeMovembis();
    unsigned int OpcodeMovemWrite();

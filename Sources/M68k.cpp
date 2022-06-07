@@ -56,9 +56,9 @@ M68k::Func M68k::Lsd_[] = { &M68k::DecodeLsd, &M68k::DestinationFetch, &M68k::De
 M68k::Func M68k::Lsd2_[] = { &M68k::DecodeLsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Move_[] = { &M68k::DecodeMove, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::OpcodeMove, &M68k::CpuFetch, &M68k::OperandFinished, nullptr};
 M68k::Func M68k::MoveFromSr_[] = { &M68k::DecodeMoveFromSr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::DestinationFetch, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveFromCcr_[] = { &M68k::DecodeMoveCcr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::MoveToCcr_[] = { &M68k::DecodeMoveCcr, &M68k::DestinationFetch, &M68k::OpcodeMoveToCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::MoveToCcr_[] = { &M68k::DecodeMoveToCcr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeMoveToCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,
                               &M68k::OpcodeMovemWrite, &M68k::WriteSourceToDestinationSimple, &M68k::OpcodeMovem2, &M68k::CpuFetch, nullptr }; // loop
 M68k::Func M68k::Moveq_[] = { &M68k::DecodeMoveq, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -1147,7 +1147,7 @@ unsigned int M68k::DecodeMoveToSr()
    if (sr_ & 0x2000)
    {
       operand_size_ = WORD;
-      destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+      source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
    }
    else
    {
@@ -1158,7 +1158,7 @@ unsigned int M68k::DecodeMoveToSr()
 
 unsigned int M68k::OpcodeMoveToSr()
 {
-   sr_ = destination_alu_->GetU16();
+   sr_ = source_alu_->GetU16();
    Fetch();
    return true;
 }
@@ -1167,6 +1167,14 @@ unsigned int M68k::DecodeMoveCcr()
 {
    operand_size_ = WORD;
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+
+   return true;
+}
+
+unsigned int M68k::DecodeMoveToCcr()
+{
+   operand_size_ = WORD;
+   source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
 
    return true;
 }
@@ -1341,12 +1349,15 @@ unsigned int M68k::OpcodeMuls()
    short s1 = destination_alu_->GetU16();
    short s2 = d_[(ird_ >> 9) & 0x7];
 
-   int result = s1 * s2;
+   int result = (int)s1 * (int)s2;
    d_[(ird_ >> 9) & 0x7] = (unsigned int)result;
 
    sr_ &= 0xFFF0;
    if (result < 0) sr_ |= F_N;
    if (result == 0) sr_ |= F_Z;
+
+   // Overflow  : never with 16x16=32
+
 
    // Wait for xxx cycle :
    // todo

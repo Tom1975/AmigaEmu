@@ -82,7 +82,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFFFF, 0x007C, &Disassembler68k::OriSrOpcode);
    AddCommand(0xFFFF, 0x003C, &Disassembler68k::OriToCcrOpcode);
    AddCommand(0xFFFF, 0x0A3C, &Disassembler68k::EoriToCcrOpcode);
-   AddCommand(0xFFFF, 0x007C, &Disassembler68k::EoriSrOpcode);
+   AddCommand(0xFFFF, 0x0A7C, &Disassembler68k::EoriSrOpcode);
    AddCommand(0xFFFF, 0x023C, &Disassembler68k::AndiToCcrOpcode);
    AddCommand(0xFFFF, 0x4AFC, &Disassembler68k::IllegalOpcode);
    

@@ -39,6 +39,8 @@ Chargement : (bp sur FEA8D6)
 100 ok
 15A : EORI 2700, SR => ??  
 
+*** 1A2 MOVE 12a, SR => Ne va pas lire 12a ???
+
 ## Chargement Shadow of the beast : Guru
 
 5bac : OK !
