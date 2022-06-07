@@ -350,10 +350,10 @@ void CIA8520::Flag(bool set)
    flag_ = set;
    if (flag_)
    {
-      icr_ |= ALARM;
-      if (icr_mask_ & ALARM)
+      icr_ |= FLAG;
+      if (icr_mask_ & FLAG)
       {
-         icr_ |= FLAG;
+         icr_ |= IR;
          motherboard_->GetPaula()->Int(intreq_);
       }
    }
