@@ -17,7 +17,8 @@ set(CompilerFlags
         )
 
 set(SRCS
-	test.cpp
+	test_68k.cpp
+	test_bus.cpp
 	test_add.cpp
 	test_addressing_modes.cpp
 	test_cmp.cpp

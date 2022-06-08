@@ -16,7 +16,21 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 // CMP
-TEST(Cpu68k, CmpI)
+TEST(DISABLED_Cpu68k, CPU_CMP)
+{
+   // TODO
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// CMPA
+TEST(DISABLED_Cpu68k, CPU_CMPA)
+{
+   // TODO
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// CMPI
+TEST(Cpu68k, CPU_CMPI)
 {
    unsigned int data_register_array[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
    unsigned int pc = 0;
@@ -38,7 +52,7 @@ TEST(Cpu68k, CmpI)
    ASSERT_EQ(sr, 0x0); //  !N, !Z, !V, !C
 }
 
-TEST(Cpu68k, Cmp_b_An_p_D) // CMP.B (A2)+, D1
+TEST(Cpu68k, CPU_CMP_b_An_p_D) // CMP.B (A2)+, D1
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetAddressRegister(2, 0x200);
@@ -56,3 +70,11 @@ TEST(Cpu68k, Cmp_b_An_p_D) // CMP.B (A2)+, D1
    ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(2), 0x201);
    ASSERT_EQ(test_engine.Get68k()->GetDataSr(), 0x2004);
 }
+
+///////////////////////////////////////////////////////////////////////////////////
+// CMPM
+TEST(DISABLED_Cpu68k, CPU_CMPM)
+{
+   // TODO
+}
+

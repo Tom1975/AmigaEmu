@@ -1265,7 +1265,7 @@ unsigned int Disassembler68k::CmpOpcode_(Motherboard* motherboard, unsigned shor
 {
    std::stringstream sstream;
    std::string str_opcode;
-   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, (opcode >> 6) & 0x3, str_opcode);
    sstream << "cmp." << size2_[(opcode>>6)&0x3] << str_opcode << ", " << data_[(opcode >> 9) & 0x7] ;
    str_asm = sstream.str();
    return pc;

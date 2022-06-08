@@ -1189,7 +1189,7 @@ unsigned int M68k::OpcodeMoveFromCcr()
 unsigned int M68k::OpcodeMoveToCcr()
 {
    sr_ &= ~(0x1F);
-   sr_ = destination_alu_->GetU16() & 0x1F;
+   sr_ = source_alu_->GetU16() & 0x1F;
    Fetch();
    return true;
 

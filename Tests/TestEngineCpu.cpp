@@ -12,7 +12,7 @@ TestEngineCpu::~TestEngineCpu()
    delete motherboard_;
 }
 
-unsigned int TestEngineCpu::RunOpcode(unsigned char* buffer_to_run, unsigned int size_of_buffer, unsigned int tick)
+unsigned int TestEngineCpu::RunOpcode(const unsigned char* buffer_to_run, unsigned int size_of_buffer, unsigned int tick)
 {
    unsigned char boot[] = { 0x11, 0x11, 0x4E, 0xF9, 0x00, 0x00, 0x00, 0xD2 };
    M68k * m68k = Get68k();
@@ -53,7 +53,7 @@ unsigned int TestEngineCpu::RunMoreOpcode(unsigned int tick)
    return count;
 }
 
-bool TestEngineCpu::TestOpcodeWordD2(unsigned char opcode[2], unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
+bool TestEngineCpu::TestOpcodeWordD2(const unsigned char opcode[2], unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
 {
    Get68k()->SetDataRegister(2, reg_in);    // 
    Get68k()->SetDataSr(sr_in);             // Set X flag
@@ -65,7 +65,7 @@ bool TestEngineCpu::TestOpcodeWordD2(unsigned char opcode[2], unsigned int reg_i
    return result;
 }
 
-bool TestEngineCpu::TestOpcodeWordD1_D2(unsigned char opcode[2], unsigned int reg_in, unsigned int reg_in2 , unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
+bool TestEngineCpu::TestOpcodeWordD1_D2(const unsigned char opcode[2], unsigned int reg_in, unsigned int reg_in2 , unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
 {
    Get68k()->SetDataRegister(1, reg_in);    // 
    Get68k()->SetDataRegister(2, reg_in2);    // 

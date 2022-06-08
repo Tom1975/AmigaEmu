@@ -97,7 +97,7 @@ Si ve > vp, return true.
 *** HISTORIQUE 
 ********************************
 *** Battle Squadron
-3c1E4 : Subq.b #♦1, D2 = FFFFFFFF(000000FF)
+3c1E4 : Subq.b #$1, D2 = FFFFFFFF(000000FF)
 3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
 
 *** Fix SUB flags
