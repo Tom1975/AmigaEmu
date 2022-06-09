@@ -238,13 +238,51 @@ void AMAddress::Add(AddressingMode* source, unsigned short& sr)
 
 void AMAddress::Sub(AddressingMode* source, unsigned short& sr)
 {
-   // todo
-   //input_ = this->GetU32() + source->GetU32();
+   unsigned int sm, dm, rm;
+   sm = 0;
+   dm = result_;
+
+   unsigned int old_value = result_;
+   unsigned int mask = 0;
+   unsigned int data;
+   switch (source->GetSize())
+   {
+   case Byte:
+      sm = (unsigned char)source->GetU8();
+      rm = (unsigned char)dm - (unsigned char)sm;
+      break;
+   case Word:
+      sm = (unsigned short)source->GetU16();
+      rm = (unsigned short)dm - (unsigned short)sm;
+      break;
+   case 2:
+      written_input_ = 2;
+      sm = source->GetU32();
+      rm = dm - sm;
+      break;
+   }
+   input_ = rm;
+   address_to_write_ = *current_register_;
+
+   // flags 
+   ComputeFlagsSub(sr, sm, dm, rm, size_);
 }
 
 void AMAddress::Not(unsigned short& sr)
 {
-   // todo
+   switch (size_)
+   {
+   case Byte:
+      input_ = ~(GetU8());
+      break;
+   case Word:
+      input_ = ~(GetU16());
+      break;
+   case Long:
+      input_ = ~(GetU32());
+      break;
+   }
+   // todo : addflags
    //input_ = ~(this->GetU32());
    //ComputeFlagsNul(sr, input_, size_);
 }

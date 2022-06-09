@@ -6,6 +6,7 @@
 -----------
 TO FIX : 
 -----------
+Add SUB ADD tests. (lots of flags seems to be missing)
 
 -----------
 EXECUTE OK : 

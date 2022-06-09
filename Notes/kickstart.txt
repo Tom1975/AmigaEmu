@@ -1,16 +1,6 @@
 ## Chargement Workbench : 
-- On tombe sur un opcode foireux car on va vers 00 !!
-3e step 62.
-FF4FA2 -> FF44a8 -> Jmp 0
-move.l (C,A0D3.l), A1  ==> A1 <= A0+D3 + #C
-FFF4, A1 => A1, A3
-jmp(A3)
-Cherche dos.library Open => -0x1E
+1ba62 : not.b (A0)+ => no effect !
 
-*** Plantage vers FED2C0 ??
-
-Chercher fonction Text - -$003C (-60) => FFC4
-=> Affichage ok dans la structure Bitmap B730 !
 
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
@@ -33,13 +23,14 @@ Chargement : (bp sur FEA8D6)
 		D6 FFFF0140 (ffff0041)
 	3c1e6 ok
 3c018 : ko (tout est different ?)
+*** 3C212 = subi.w #$4, (A4)+ => subi pas codé pour address ! ajouter des tests !
+
 
 3c062 : Clic souris ! !! warning sur executions ???
 ... 
 7f056 ok (?)
 100 ok
 15A : EORI 2700, SR => ??  
-
 *** 1A2 MOVE 12a, SR => Ne va pas lire 12a ???
 
 ## Chargement Shadow of the beast : Guru
