@@ -10,7 +10,7 @@ public:
    virtual ~Disassembler68k();
 
    unsigned int Disassemble(Motherboard* motherboard, unsigned int offset, std::string& str_asm);
-
+   void DisassembleArrayOfcode(Motherboard* mobo, unsigned int base_address, unsigned int size, std::string& out_text);
 
 protected:
    typedef unsigned int (Disassembler68k::*OpcodeDasm)(Motherboard*, unsigned short opcode, unsigned int pc, std::string& str_asm);

@@ -7,6 +7,7 @@
 
 #include <QDir>
 #include <QMenuBar>
+#include <QDebug>
 
 DebugDialog::DebugDialog(QWidget *parent) :
    QDialog(parent),
@@ -100,6 +101,13 @@ void DebugDialog::on_set_top_address_clicked()
       {
          // Set disassembly
          UpdateDisassembly(addr);
+
+         // Write it on the log window
+         std::string out_txt;
+         disassembler_.DisassembleArrayOfcode(emu_handler_->GetMotherboard(), addr, 512, out_txt);
+         // Log it !
+         qDebug() << out_txt.c_str();
+
       }
    }
 }
@@ -186,7 +194,6 @@ void DebugDialog::on_clear_bp_clicked()
 void DebugDialog::UpdateDebug()
 {
    unsigned int offset, offset_old;
-   char addr[16];
 
    // Update parent window
    this->parentWidget()->repaint();

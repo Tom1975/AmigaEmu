@@ -1440,3 +1440,39 @@ unsigned int Disassembler68k::DisassembleDefault(Motherboard* motherboard, unsig
    str_asm = "Illegal";
    return pc;
 }
+
+void Disassembler68k::DisassembleArrayOfcode(Motherboard* mobo, unsigned int base_address, unsigned int size, std::string& out_text)
+{
+   std::string str_asm;
+   char addr[16];
+   unsigned int offset, offset_old;
+   offset = offset_old = base_address;
+   unsigned int end_offset = base_address + size;
+
+   while (offset < end_offset)
+   {
+#define ASM_SIZE 26
+#define ADD_SIZE 10
+
+      sprintf(addr, "%8.8X: ", offset);
+
+      offset = Disassemble(mobo, offset, str_asm);
+      str_asm = addr + str_asm;
+      int size_tab = (ADD_SIZE + ASM_SIZE) - str_asm.size();
+      if (size_tab > 0)
+      {
+         str_asm.append(size_tab, ' ');
+      }
+      for (int i = offset_old; i < offset; i++)
+      {
+         char b[4];
+         sprintf(b, "%2.2X ", mobo->GetBus()->Read8(i));
+         str_asm += b;
+      }
+      str_asm += "\n";
+      //
+      out_text += str_asm;
+      //fwrite(str_asm.c_str(), str_asm.size(), 1, fw);
+      offset_old = offset;
+   }
+}

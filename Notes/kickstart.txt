@@ -5,6 +5,7 @@ FF4FA2 -> FF44a8 -> Jmp 0
 move.l (C,A0D3.l), A1  ==> A1 <= A0+D3 + #C
 FFF4, A1 => A1, A3
 jmp(A3)
+Cherche dos.library Open => -0x1E
 
 *** Plantage vers FED2C0 ??
 
