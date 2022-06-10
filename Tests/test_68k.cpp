@@ -684,9 +684,23 @@ TEST(DISABLED_Cpu68k, CPU_SUBA)
 
 ///////////////////////////////////////////////////////////////////////////////////
 // SUBI 
-TEST(DISABLED_Cpu68k, CPU_SUBI)
+TEST(Cpu68k, CPU_SUBI)
 {
-   // TODO
+   TestEngineCpu test_engine;
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x0F, 512 * 1024);
+
+   unsigned char opcode[] = { 0x04, 0x5C, 0x00, 0x04 }; // subi.w #$4, (A4)+ - 04 5C       // 0101 1110
+   ram[0x200] = 0x10;
+   ram[0x201] = 0x20;
+   test_engine.Get68k()->SetAddressRegister(4, 0x200);    // 
+
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   // Check : 
+   ASSERT_EQ(ram[0x200], 0x10);
+   ASSERT_EQ(ram[0x201], 0x1C);
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(4), 0x202);
+   
 }
 
 //1/////////////////////////////////////////////////////////////////////////////////
