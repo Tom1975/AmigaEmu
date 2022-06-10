@@ -141,20 +141,58 @@ void Denise::DisplayWord()
    {
       unsigned char color = 0;
 
-      // only bitplane 0
-      for (int j = 0; j < nb_bitplanes_; j++)
+      if (bitplanes_->bplcon0_ & 0x400)
       {
-         color |= ((bplxdat_[j] >> (15 - i)) & 0x1) ? (1 << j) : 0;
-
-         /*if (bplxdat_[j] & (1 << i))
+         // dual playfield
+         unsigned char color_1 = 0;
+         unsigned char color_2 = 0;
+         for (int j = 0; j < nb_bitplanes_; j++)
          {
-            color |= (1 << j);
-         }*/
-         //color |= ((bplxdat_[j] & (1 << i))?(1 << j):0;
-      }
+            if (j & 1)
+            {
+               color_2 |= ((bplxdat_[j] >> (15 - i)) & 0x1) ? (1 << (j/2)) : 0;
+            }
+            else
+            {
+               color_1 |= ((bplxdat_[j] >> (15 - i)) & 0x1) ? (1 << (j/2)) : 0;
+            }
+         }
+         // Compute color from bitplanes
+         if (bitplanes_->bplcon2_ & 0x40)
+         {
+            // 2 before 1
+            if (color_2 != 0)
+            {
+               display_[i] = COLOR2RGB(color_[color_2+8]);
+            }
+            else
+            {
+               display_[i] = COLOR2RGB(color_[color_1]);
+            }
+         }
+         else
+         {
+            // 1 before 2
+            if (color_1 != 0)
+            {
+               display_[i] = COLOR2RGB(color_[color_1 ]);
+            }
+            else
+            {
+               display_[i] = COLOR2RGB(color_[color_2 + 8]);
+            }
 
-      // Convert color to RGB
-      display_[i] = COLOR2RGB(color_[color]);
+         }
+      }
+      else
+      {
+         for (int j = 0; j < nb_bitplanes_; j++)
+         {
+            color |= ((bplxdat_[j] >> (15 - i)) & 0x1) ? (1 << j) : 0;
+         }
+         // Convert color to RGB
+         display_[i] = COLOR2RGB(color_[color]);
+      }
    }
 }
 
