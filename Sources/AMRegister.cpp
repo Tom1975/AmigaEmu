@@ -227,11 +227,11 @@ void AMRegister::Sub(AddressingMode* source, unsigned short& sr)
       {
          sm = source->GetU16();
          dm = GetU16();
-         rm = (short)dm - (short)sm;
+         rm = ((short)dm - (short)sm) & 0xFFFF;
       }
       else
       {
-         rm = (short)dm - (short)source->GetU16();
+         rm = dm - (short)source->GetU16();
       }
       break;
    case 2:

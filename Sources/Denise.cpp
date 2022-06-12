@@ -157,31 +157,38 @@ void Denise::DisplayWord()
                color_1 |= ((bplxdat_[j] >> (15 - i)) & 0x1) ? (1 << (j/2)) : 0;
             }
          }
-         // Compute color from bitplanes
-         if (bitplanes_->bplcon2_ & 0x40)
+         if (color_2 == 0 && color_1 == 0)
          {
-            // 2 before 1
-            if (color_2 != 0)
-            {
-               display_[i] = COLOR2RGB(color_[color_2+8]);
-            }
-            else
-            {
-               display_[i] = COLOR2RGB(color_[color_1]);
-            }
+            display_[i] = COLOR2RGB(color_[0]); // ??
          }
          else
          {
-            // 1 before 2
-            if (color_1 != 0)
+            // Compute color from bitplanes
+            if (bitplanes_->bplcon2_ & 0x40)
             {
-               display_[i] = COLOR2RGB(color_[color_1 ]);
+               // 2 before 1
+               if (color_2 != 0)
+               {
+                  display_[i] = COLOR2RGB(color_[color_2 + 8]);
+               }
+               else
+               {
+                  display_[i] = COLOR2RGB(color_[color_1]);
+               }
             }
             else
             {
-               display_[i] = COLOR2RGB(color_[color_2 + 8]);
-            }
+               // 1 before 2
+               if (color_1 != 0)
+               {
+                  display_[i] = COLOR2RGB(color_[color_1]);
+               }
+               else
+               {
+                  display_[i] = COLOR2RGB(color_[color_2 + 8]);
+               }
 
+            }
          }
       }
       else
