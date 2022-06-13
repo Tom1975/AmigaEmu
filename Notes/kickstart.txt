@@ -12,19 +12,8 @@ Chargement : (bp sur FEA8D6)
 1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 
 ## Chargement battle squadron. Battle Squadron (1989)(Innerprise)[cr TIC][t Freestyle]
-3c000 : Ok
-3c004 : Ok	
-3c008 : ok (D0 derive de VPOS donc ca semble ok)
-3c00C : ok
-3c014 : ok
-
-	3c220 : D4 incorrect (FFFFFFFE (15018c)
-		D5 incorrect 480b ( a888)
-		D6 FFFF0140 (ffff0041)
-	3c1e6 ok
-3c018 : ko (tout est different ?)
 *** 3C212 = subi.w #$4, (A4)+ => subi pas codé pour address ! ajouter des tests !
-
+*** 3C018: addi.w #$C3DA, 30003      06 79 00 03 00 03 C3 DA  => 0000 0110 0111 1001 => ADDI.w #$03, 3c3dA
 
 3c062 : Clic souris ! !! warning sur executions ???
 ... 

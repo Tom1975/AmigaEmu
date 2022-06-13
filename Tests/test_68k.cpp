@@ -677,9 +677,31 @@ TEST(DISABLED_Cpu68k, CPU_SUB)
 
 ///////////////////////////////////////////////////////////////////////////////////
 // SUBA
-TEST(DISABLED_Cpu68k, CPU_SUBA)
+bool TestOpcodeSub(unsigned char *opcode, size_t size_of_opcode, unsigned int reg_in, unsigned short sr_in, unsigned int reg_out, unsigned short sr_out)
 {
-   // TODO
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetAddressRegister(4, reg_in);    // 
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.RunOpcode(opcode, size_of_opcode, 1);
+
+   bool result = test_engine.Get68k()->GetAddressRegister(4) == reg_out;
+   result &= (test_engine.Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}
+TEST(Cpu68k, CPU_SUBA)
+{
+   // .w
+   unsigned char opcodew[] = { 0x98, 0xFC, 0x00, 0x04 }; // suba.w #$4, A4            98 FC 00 04
+   ASSERT_EQ(TestOpcodeSub(opcodew, sizeof(opcodew), 0x8, 0x00, 0x4, 0x0), true);
+   ASSERT_EQ(TestOpcodeSub(opcodew, sizeof(opcodew), 0x2, 0x00, 0xFFFFFFFE, 0x0), true);
+   ASSERT_EQ(TestOpcodeSub(opcodew, sizeof(opcodew), 0xFF08, 0x00, 0xFF04, 0x0), true);
+   ASSERT_EQ(TestOpcodeSub(opcodew, sizeof(opcodew), 0x1234FF08, 0x00, 0x1234FF04, 0x0), true);
+   ASSERT_EQ(TestOpcodeSub(opcodew, sizeof(opcodew), 0x1234FF08, 0x00, 0x1234FF04, 0x0), true);
+
+   unsigned char opcodew_2[] = { 0x98, 0xFC, 0xFF, 0xF4 }; // suba.w #$FFF4, A4            98 FC FF F4 -12
+   ASSERT_EQ(TestOpcodeSub(opcodew_2, sizeof(opcodew_2), 0x8, 0x00, 0x14, 0x0), true);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
