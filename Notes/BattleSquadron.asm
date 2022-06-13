@@ -7,17 +7,17 @@
    3C000: bsr 3C082                 	; call Init function
    3C004: bsr 3C1A6                 	; call Init starfield
    3C008: bsr 3C2CC                    ; Write title : "TIC / FREESTYLE"
-   3C00C: move.w #$0, 3C3DA         33 FC 00 00 00 03 C3 DA 
+   3C00C: move.w #$0, 3C3DA         
 main_loop:
    3C014: bsr 3C1FC                    ; Display starfield
-   3C018: addi.w #$C3DA, 30003      06 79 00 03 00 03 C3 DA  => 0000 0110 0111 1001 => ADDI.w #$03, 3c3dA
-   3C020: lea DFF000, A5            4B F9 00 DF F0 00 
-   3C026: bsr 3C3DC                 61 00 03 B4 
-   3C02A: bsr 3C512                 61 00 04 E6 
-   3C02E: bsr 3C552                 61 00 05 22 
-   3C032: bsr 3C532                 61 00 04 FE 
-   3C036: bsr 3C486                 61 00 04 4E 
-   3C03A: bsr 3C4C8                 61 00 04 8C 
+   3C018: addi.w #$03, 3C3DA           ; increment something (?)
+   3C020: lea DFF000, A5               
+   3C026: bsr 3C3DC                    61 00 03 B4 
+   3C02A: bsr 3C512                    61 00 04 E6 
+   3C02E: bsr 3C552                    61 00 05 22 
+   3C032: bsr 3C532                    61 00 04 FE 
+   3C036: bsr 3C486                    61 00 04 4E 
+   3C03A: bsr 3C4C8                    61 00 04 8C 
    3C03E: btst #6, BFE001           	; check left mousebutton
    3C046: beq.s 3C062               	
    3C04A: move.w DFF012, D0         	; check POT0
@@ -303,8 +303,9 @@ mouse_not_equal:
    0003C3D4: moveq #$79, D1            72 79 
    0003C3D6: bset #$1DFE, D0           00 C0 1D FE 
 
-   0003C3DA: bset #$47F9, ($3,A2)      00 EA 
+   0003C3DA: 00 EA ; Kind of a counter 
 
+   ; 
    0003C3DC: lea 3C80E, A3             47 F9 00 03 C8 0E 
    0003C3E2: lea 3C814, A2             45 F9 00 03 C8 14 
    0003C3E8: lea DFF000, A5            4B F9 00 DF F0 00 
@@ -320,7 +321,7 @@ mouse_not_equal:
    0003C416: andi.w #$1FE, ($0,A2)     02 6A 01 FE 00 00 
    0003C41C: cmp.w #$0, 3C482          0C 79 00 00 00 03 C4 82 
    0003C424: bne.s 3C44A               66 24 
-   0003C426: addi.w #$C81A, 3E80003    06 79 03 E8 00 03 C8 1A 
+   0003C426: addi.w #$3E8, 3C81A       06 79 03 E8 00 03 C8 1A 
    0003C42E: cmp.w #$6000, 3C81A       0C 79 60 00 00 03 C8 1A 
    0003C436: ble.s 3C480               6F 48 
    0003C438: move.w #$46, 3C484        33 FC 00 46 00 03 C4 84 
@@ -332,7 +333,7 @@ mouse_not_equal:
    0003C45A: bne.s 3C480               66 24 
    0003C45C: move.w #$2, 3C482         33 FC 00 02 00 03 C4 82 
    0003C464: bra.s 3C480               60 1A 
-   0003C466: subi.w #$C81A, 3E80003    04 79 03 E8 00 03 C8 1A 
+   0003C466: subi.w #$03E8, 3C81A      04 79 03 E8 00 03 C8 1A 
    0003C46E: bpl.s 3C480               6A 10 
    0003C470: move.w #$0, 3C81A         33 FC 00 00 00 03 C8 1A 
    0003C478: move.w #$0, 3C482         33 FC 00 00 00 03 C4 82 
@@ -601,7 +602,8 @@ mouse_not_equal:
    0003C806: move.? (A6), ($156,A0)    01 56 01 56 
    0003C80A: move.? (A4)+, ($63,A0)    01 5C 00 63 
    0003C80E: ori.b #$80, (A6)+         00 1E 01 80 
-   0003C812: btst D0, (48,A0D0.w)      01 30 00 48 
+   0003C812: 01 30 
+   0003C814: 00 48 
    0003C816: ori.b #$0, D0             00 00 00 00 
    0003C81A: bclr D5, 41F9             0B B8 41 F9 
    0003C81E: ori.b #$20, D4            00 04 16 20 
