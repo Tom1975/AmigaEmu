@@ -16,7 +16,7 @@ main_loop:
    3C02A: bsr 3C512                    61 00 04 E6 
    3C02E: bsr 3C552                    61 00 05 22 
    3C032: bsr 3C532                    61 00 04 FE 
-   3C036: bsr 3C486                    61 00 04 4E 
+   3C036: bsr 3C486                    ; Erase a part of bitplane 1 (seems to be the scrolltext ?)
    3C03A: bsr 3C4C8                    61 00 04 8C 
    3C03E: btst #6, BFE001           	; check left mousebutton
    3C046: beq.s 3C062               	
@@ -120,6 +120,7 @@ mouse_not_equal:
    3C1D0: dbra.s D1, 3C1B6          51 C9 FF E4 
    3C1D4: rts                       4E 75 
 
+; 
    3C1D6: mulu #$30, D1             C2 FC 00 30 
    3C1DA: move.w D0, D2             34 00 
    3C1DC: asr.w  #3, D2             E6 42 
@@ -341,22 +342,25 @@ mouse_not_equal:
 
    0003C482: 00 02 00 00               ; variable
 
+; Erase part of the screen
    0003C486: lea DFF000, A5            4B F9 00 DF F0 00 
-   0003C48C: move.l DFF004, D0         20 39 00 DF F0 04 
-   0003C492: andi.l #$1FF00, D0        02 80 00 01 FF 00 
-   0003C498: cmp.l #$B000, D0          B0 BC 00 00 B0 00 
-   0003C49E: bne.s 3C48C               66 EC 
-   0003C4A0: btst #E, ($2,A5)          08 2D 00 0E 00 02 
-   0003C4A6: bne.s 3C4A0               66 F8 
-   0003C4A8: move.l #$1000000, ($40,A5)2B 7C 01 00 00 00 00 40 
-   0003C4B0: lea 419E0, A0             41 F9 00 04 19 E0 
-   0003C4B6: move.l A0, ($54,A5)       2B 48 00 54 
-   0003C4BA: move.w #$0, ($66,A5)      3B 7C 00 00 00 66 
-   0003C4C0: move.w #$1AE4, ($58,A5)   3B 7C 1A E4 00 58 
-   0003C4C6: rts                       4E 75 
+   0003C48C: move.l DFF004, D0         ; VPOSR
+   0003C492: andi.l #$1FF00, D0        ; keep vertical value
+   0003C498: cmp.l #$B000, D0          ; Wait for line B0 (176)
+   0003C49E: bne.s 3C48C               
+   0003C4A0: btst #E, ($2,A5)          ; Test bit BBUSY
+   0003C4A6: bne.s 3C4A0               ; wait for it to be freed
+   0003C4A8: move.l #$1000000, ($40,A5); BLTCON0 = 1; blton0 = USEC
+   0003C4B0: lea 419E0, A0             ; Value somewhere in bitplane 1
+   0003C4B6: move.l A0, ($54,A5)       ; destination pointer
+   0003C4BA: move.w #$0, ($66,A5)      ; bltmod
+   0003C4C0: move.w #$1AE4, ($58,A5)   ; bltsize (1ae4)
+   0003C4C6: rts                       
 
+;
    0003C4C8: lea 3C76C, A2             45 F9 00 03 C7 6C 
    0003C4CE: lea 3DCAC, A3             47 F9 00 03 DC AC 
+@loop_begining:
    0003C4D4: move.w (A2)+, D4          38 1A 
    0003C4D6: cmp.w #$63, D4            0C 44 00 63 
    0003C4DA: beq.s 3C510               67 34 
@@ -374,7 +378,7 @@ mouse_not_equal:
    0003C502: cmp.w D1, D3              B6 41 
    0003C504: beq.s 3C50C               67 06 
    0003C506: jsr 3C81C                 4E B9 00 03 C8 1C 
-   0003C50C: bra.s 3C4D4               60 00 FF C6 
+   0003C50C: bra.s 3C4D4               ; return to @loop_begining
    0003C510: rts                       4E 75 
 
    0003C512: lea 3C602, A3             47 F9 00 03 C6 02 
@@ -405,6 +409,7 @@ mouse_not_equal:
    0003C568: cmp.w #$63, (A4)          0C 54 00 63 
    0003C56C: bne.s 3C564               66 F6 
    0003C56E: rts                       4E 75 
+
    0003C570: move.w ($0,A4), D0        30 2C 00 00 
    0003C574: move.w ($2,A4), D1        32 2C 00 02 
    0003C578: move.w ($4,A4), D2        34 2C 00 04 
@@ -423,6 +428,7 @@ mouse_not_equal:
    0003C59A: move.w D1, ($2,A4)        39 41 00 02 
    0003C59E: move.w D2, ($4,A4)        39 42 00 04 
    0003C5A2: rts                       4E 75 
+
    0003C5A4: lea ($0,A4), A1           43 EC 00 00 
    0003C5A8: lea ($2,A4), A2           45 EC 00 02 
    0003C5AC: move.w ($4,A5), D0        30 2D 00 04 
@@ -436,6 +442,7 @@ mouse_not_equal:
    0003C5C8: move.w ($2,A5), D0        30 2D 00 02 
    0003C5CC: bsr 3C5D0                 61 02 
    0003C5CE: rts                       4E 75 
+
    0003C5D0: move.w (7E,A6D0.w), D1    32 36 00 7E 
    0003C5D4: move.w (FFFFFFFE,A6D0.w), D234 36 00 FE 
    0003C5D8: move.w (A1), D3           36 11 
@@ -460,8 +467,10 @@ mouse_not_equal:
    0003C5FC: move.w D3, (A1)           32 83 
    0003C5FE: move.w D6, (A2)           34 86 
    0003C600: rts                       4E 75 
+
    0003C602: Illegal                   FF 4C 
    0003C604: Illegal                   FF E2 
+
    0003C606: ori.b #$4C, D0            00 00 FF 4C 
    0003C60A: ori.b #$0, (A6)+          00 1E 00 00 
    0003C60E: Illegal                   FF 6A 
@@ -605,8 +614,12 @@ mouse_not_equal:
    0003C812: 01 30 
    0003C814: 00 48 
    0003C816: ori.b #$0, D0             00 00 00 00 
-   0003C81A: bclr D5, 41F9             0B B8 41 F9 
-   0003C81E: ori.b #$20, D4            00 04 16 20 
+   0003C81A: bclr D5, 41F9             0B B8 
+   
+
+; Draw something like a 3D line ??
+; input : D0, D1, D2, D3
+   0003C81C: lea 41620, A0             ; A0 = bitplane 0
    0003C822: lea DFF000, A5            4B F9 00 DF F0 00 
    0003C828: move.w #$30, A1           32 7C 00 30 
    0003C82C: move.l A1, D4             28 09 
@@ -659,6 +672,7 @@ mouse_not_equal:
    0003C8B4: addq.w #2, D3             54 43 
    0003C8B6: move.w D3, ($58,A5)       3B 43 00 58 
    0003C8BA: rts                       4E 75 
+
    0003C8BC: btst D0, (A1)             01 11 
    0003C8BE: btst D4, (A5)             09 15 
    0003C8C0: btst D2, (A1)+            05 19 
@@ -776,9 +790,41 @@ mouse_not_equal:
    0003C9D2: ror.b  #5, D6             EA 1E 
    0003C9D4: lsl.b  #3, D0             E7 08 
    0003C9D6: lsl.?  (FFFFFFE7,A5A6.w)  E3 F5 E0 E7 
+   0003C9DA: add.l (A5)+, A6           DD DD 
+   0003C9DC: add.w (A0)+, A5           DA D8 
+   0003C9DE: add.l (A2)+, A3           D7 DA 
+   0003C9E0: add.w -(A1), A2           D4 E1 
+   0003C9E2: add.l ($CF05,SP), A0      D1 EF CF 05 
+   0003C9E6: and.b -(A2), D6           CC 22 
+   0003C9E8: exg D4, D6                C9 46 
+   0003C9EA: and.w (FFFFFFAA,A4A4.w), D3C6 74 C3 AA 
+   0003C9EE: mulu ($BE32,A1), D0       C0 E9 BE 32 
+   0003C9F2: eor.l  D5, D6             BB 86 
+   0003C9F4: cmpa.w -(A4), A4          B8 E4 
+   0003C9F6: cmp.w A4, D3              B6 4C 
+   0003C9F8: cmpa.l D1, A1             B3 C1 
+   0003C9FA: eor.w  D0, D1             B1 41 
+   0003C9FC: Illegal                   AE CD 
+   0003C9FE: Illegal                   AC 65 
+   0003CA00: Illegal                   AA 0B 
+   0003CA02: Illegal                   A7 BE 
+   0003CA04: Illegal                   A5 7E 
+   0003CA06: Illegal                   A3 4C 
+   0003CA08: Illegal                   A1 29 
+   0003CA0A: sub.b  D7, (A4)           9F 14 
+   0003CA0C: subx.b  -(A6), -(D6)      9D 0E 
+   0003CA0E: sub.b  D5, (A0)+          9B 18 
+   0003CA10: sub.b  D4, (5A,A1A1.w)    99 31 97 5A 
+   0003CA14: sub.l  D2, (A3)           95 93 
+   0003CA16: suba.l (A4)+, A1          93 DC 
+   0003CA18: sub.b  (FFFFFFA1,A6A1.w), D192 36 90 A1 
+
 
 
 
    0003CEA0 : "TIC / FREESTYLE", 00
    0003CEB0 : (to add : Scrooltext)
+
+
+
 
