@@ -16,8 +16,8 @@ main_loop:
    3C02A: bsr 3C512                    ; copy list of points 
    3C02E: bsr 3C552                    61 00 05 22 
    3C032: bsr 3C532                    61 00 04 FE 
-   3C036: bsr 3C486                    61 00 04 4E 
-   3C03A: bsr 3C4C8                    ; draw lines
+   3C036: bsr 3C486                    ; Erase a part of bitplane 1 (seems to be the scrolltext ?)
+   3C03A: bsr 3C4C8                    61 00 04 8C 
    3C03E: btst #6, BFE001           	; check left mousebutton
    3C046: beq.s 3C062               	
    3C04A: move.w DFF012, D0         	; check POT0
@@ -120,6 +120,7 @@ mouse_not_equal:
    3C1D0: dbra.s D1, 3C1B6          51 C9 FF E4 
    3C1D4: rts                       4E 75 
 
+; 
    3C1D6: mulu #$30, D1             C2 FC 00 30 
    3C1DA: move.w D0, D2             34 00 
    3C1DC: asr.w  #3, D2             E6 42 
@@ -341,23 +342,25 @@ mouse_not_equal:
 
    0003C482: 00 02 00 00               ; variable
 
+; Erase part of the screen
    0003C486: lea DFF000, A5            4B F9 00 DF F0 00 
-   0003C48C: move.l DFF004, D0         20 39 00 DF F0 04 
-   0003C492: andi.l #$1FF00, D0        02 80 00 01 FF 00 
-   0003C498: cmp.l #$B000, D0          B0 BC 00 00 B0 00 
-   0003C49E: bne.s 3C48C               66 EC 
-   0003C4A0: btst #E, ($2,A5)          08 2D 00 0E 00 02 
-   0003C4A6: bne.s 3C4A0               66 F8 
-   0003C4A8: move.l #$1000000, ($40,A5)2B 7C 01 00 00 00 00 40 
-   0003C4B0: lea 419E0, A0             41 F9 00 04 19 E0 
-   0003C4B6: move.l A0, ($54,A5)       2B 48 00 54 
-   0003C4BA: move.w #$0, ($66,A5)      3B 7C 00 00 00 66 
-   0003C4C0: move.w #$1AE4, ($58,A5)   3B 7C 1A E4 00 58 
-   0003C4C6: rts                       4E 75 
+   0003C48C: move.l DFF004, D0         ; VPOSR
+   0003C492: andi.l #$1FF00, D0        ; keep vertical value
+   0003C498: cmp.l #$B000, D0          ; Wait for line B0 (176)
+   0003C49E: bne.s 3C48C               
+   0003C4A0: btst #E, ($2,A5)          ; Test bit BBUSY
+   0003C4A6: bne.s 3C4A0               ; wait for it to be freed
+   0003C4A8: move.l #$1000000, ($40,A5); BLTCON0 = 1; blton0 = USEC
+   0003C4B0: lea 419E0, A0             ; Value somewhere in bitplane 1
+   0003C4B6: move.l A0, ($54,A5)       ; destination pointer
+   0003C4BA: move.w #$0, ($66,A5)      ; bltmod
+   0003C4C0: move.w #$1AE4, ($58,A5)   ; bltsize (1ae4)
+   0003C4C6: rts                       
 
-; Draw a list of lines
+;
    0003C4C8: lea 3C76C, A2             45 F9 00 03 C7 6C 
    0003C4CE: lea 3DCAC, A3             47 F9 00 03 DC AC 
+@loop_begining:
    0003C4D4: move.w (A2)+, D4          38 1A 
    0003C4D6: cmp.w #$63, D4            0C 44 00 63 
    0003C4DA: beq.s 3C510               67 34 
@@ -374,8 +377,8 @@ mouse_not_equal:
    0003C500: bne.s 3C506               66 04 
    0003C502: cmp.w D1, D3              B6 41 
    0003C504: beq.s 3C50C               67 06 
-   0003C506: jsr 3C81C                 draw line
-   0003C50C: bra.s 3C4D4               60 00 FF C6 
+   0003C506: jsr 3C81C                 4E B9 00 03 C8 1C 
+   0003C50C: bra.s 3C4D4               ; return to @loop_begining
    0003C510: rts                       4E 75 
 
 ; copy list of points
@@ -476,6 +479,7 @@ mouse_not_equal:
 
    0003C602: Illegal                   FF 4C 
    0003C604: Illegal                   FF E2 
+
    0003C606: ori.b #$4C, D0            00 00 FF 4C 
    0003C60A: ori.b #$0, (A6)+          00 1E 00 00 
    0003C60E: Illegal                   FF 6A 
@@ -676,6 +680,7 @@ mouse_not_equal:
    0003C8B6: move.w D3, ($58,A5)       3B 43 00 58 
    0003C8BA: rts                       4E 75 
 
+
    0003C8BC: 01 11 09 15 
    0003C8C0: btst D2, (A1)+            05 19 
    0003C8C2: btst D6, (A5)+            0D 1D 
@@ -794,9 +799,41 @@ mouse_not_equal:
    0003C9D2: ror.b  #5, D6             EA 1E 
    0003C9D4: lsl.b  #3, D0             E7 08 
    0003C9D6: lsl.?  (FFFFFFE7,A5A6.w)  E3 F5 E0 E7 
+   0003C9DA: add.l (A5)+, A6           DD DD 
+   0003C9DC: add.w (A0)+, A5           DA D8 
+   0003C9DE: add.l (A2)+, A3           D7 DA 
+   0003C9E0: add.w -(A1), A2           D4 E1 
+   0003C9E2: add.l ($CF05,SP), A0      D1 EF CF 05 
+   0003C9E6: and.b -(A2), D6           CC 22 
+   0003C9E8: exg D4, D6                C9 46 
+   0003C9EA: and.w (FFFFFFAA,A4A4.w), D3C6 74 C3 AA 
+   0003C9EE: mulu ($BE32,A1), D0       C0 E9 BE 32 
+   0003C9F2: eor.l  D5, D6             BB 86 
+   0003C9F4: cmpa.w -(A4), A4          B8 E4 
+   0003C9F6: cmp.w A4, D3              B6 4C 
+   0003C9F8: cmpa.l D1, A1             B3 C1 
+   0003C9FA: eor.w  D0, D1             B1 41 
+   0003C9FC: Illegal                   AE CD 
+   0003C9FE: Illegal                   AC 65 
+   0003CA00: Illegal                   AA 0B 
+   0003CA02: Illegal                   A7 BE 
+   0003CA04: Illegal                   A5 7E 
+   0003CA06: Illegal                   A3 4C 
+   0003CA08: Illegal                   A1 29 
+   0003CA0A: sub.b  D7, (A4)           9F 14 
+   0003CA0C: subx.b  -(A6), -(D6)      9D 0E 
+   0003CA0E: sub.b  D5, (A0)+          9B 18 
+   0003CA10: sub.b  D4, (5A,A1A1.w)    99 31 97 5A 
+   0003CA14: sub.l  D2, (A3)           95 93 
+   0003CA16: suba.l (A4)+, A1          93 DC 
+   0003CA18: sub.b  (FFFFFFA1,A6A1.w), D192 36 90 A1 
+
 
 
 
    0003CEA0 : "TIC / FREESTYLE", 00
    0003CEB0 : (to add : Scrooltext)
+
+
+
 
