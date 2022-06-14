@@ -223,8 +223,15 @@ unsigned int Disassembler68k::DisassembleAddressingMode (Motherboard* motherboar
       unsigned int reg_num = (disp >> 12) & 0x7;
       unsigned int s = (disp >> 11) & 1;
       int index = (char)(disp & 0xFF);
+      if (index < 0)
+      {
+         sstream << "(" << std::uppercase <<"-$" << std::hex << (-1 * index) << "," << std::hex << address_[xn] << (M ? "A" : "D") << reg_num << (s ? ".l" : ".w") << ")";
+      }
+      else
+      {
+         sstream << "(" << std::uppercase << "$" << std::hex << index << "," <<  address_[xn] << (M ? "A" : "D") << reg_num << (s ? ".l" : ".w") << ")";
+      }
       
-      sstream << "(" << std::hex << std::uppercase << index << "," << address_[xn] << (M?"A":"D") << reg_num << (s ? ".l" : ".w") <<")";
       str = sstream.str();
       break;
    }

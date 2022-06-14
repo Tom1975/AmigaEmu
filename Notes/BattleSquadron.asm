@@ -13,11 +13,11 @@ main_loop:
    3C018: addi.w #$03, 3C3DA           ; increment something (?)
    3C020: lea DFF000, A5               
    3C026: bsr 3C3DC                    61 00 03 B4 
-   3C02A: bsr 3C512                    61 00 04 E6 
+   3C02A: bsr 3C512                    ; copy list of points 
    3C02E: bsr 3C552                    61 00 05 22 
    3C032: bsr 3C532                    61 00 04 FE 
    3C036: bsr 3C486                    61 00 04 4E 
-   3C03A: bsr 3C4C8                    61 00 04 8C 
+   3C03A: bsr 3C4C8                    ; draw lines
    3C03E: btst #6, BFE001           	; check left mousebutton
    3C046: beq.s 3C062               	
    3C04A: move.w DFF012, D0         	; check POT0
@@ -355,6 +355,7 @@ mouse_not_equal:
    0003C4C0: move.w #$1AE4, ($58,A5)   3B 7C 1A E4 00 58 
    0003C4C6: rts                       4E 75 
 
+; Draw a list of lines
    0003C4C8: lea 3C76C, A2             45 F9 00 03 C7 6C 
    0003C4CE: lea 3DCAC, A3             47 F9 00 03 DC AC 
    0003C4D4: move.w (A2)+, D4          38 1A 
@@ -373,10 +374,11 @@ mouse_not_equal:
    0003C500: bne.s 3C506               66 04 
    0003C502: cmp.w D1, D3              B6 41 
    0003C504: beq.s 3C50C               67 06 
-   0003C506: jsr 3C81C                 4E B9 00 03 C8 1C 
+   0003C506: jsr 3C81C                 draw line
    0003C50C: bra.s 3C4D4               60 00 FF C6 
    0003C510: rts                       4E 75 
 
+; copy list of points
    0003C512: lea 3C602, A3             47 F9 00 03 C6 02 
    0003C518: lea 3DCAC, A4             49 F9 00 03 DC AC 
    0003C51E: cmp.w #$63, (A3)          0C 53 00 63 
@@ -405,6 +407,7 @@ mouse_not_equal:
    0003C568: cmp.w #$63, (A4)          0C 54 00 63 
    0003C56C: bne.s 3C564               66 F6 
    0003C56E: rts                       4E 75 
+
    0003C570: move.w ($0,A4), D0        30 2C 00 00 
    0003C574: move.w ($2,A4), D1        32 2C 00 02 
    0003C578: move.w ($4,A4), D2        34 2C 00 04 
@@ -423,6 +426,9 @@ mouse_not_equal:
    0003C59A: move.w D1, ($2,A4)        39 41 00 02 
    0003C59E: move.w D2, ($4,A4)        39 42 00 04 
    0003C5A2: rts                       4E 75 
+
+; 
+; A4:   A5:   A6 : 
    0003C5A4: lea ($0,A4), A1           43 EC 00 00 
    0003C5A8: lea ($2,A4), A2           45 EC 00 02 
    0003C5AC: move.w ($4,A5), D0        30 2D 00 04 
@@ -436,8 +442,14 @@ mouse_not_equal:
    0003C5C8: move.w ($2,A5), D0        30 2D 00 02 
    0003C5CC: bsr 3C5D0                 61 02 
    0003C5CE: rts                       4E 75 
+
+   ;
+   ; A1 : address of ...
+   ; A2 : address of ...
+   ; A6 : 
+   ; D0 : 
    0003C5D0: move.w (7E,A6D0.w), D1    32 36 00 7E 
-   0003C5D4: move.w (FFFFFFFE,A6D0.w), D234 36 00 FE 
+   0003C5D4: move.w (-$2,A6D0.w), D2   D2 34 36 00 FE 
    0003C5D8: move.w (A1), D3           36 11 
    0003C5DA: move.w (A2), D4           38 12 
    0003C5DA: move.w (A2), D4           38 12 
@@ -460,6 +472,8 @@ mouse_not_equal:
    0003C5FC: move.w D3, (A1)           32 83 
    0003C5FE: move.w D6, (A2)           34 86 
    0003C600: rts                       4E 75 
+
+
    0003C602: Illegal                   FF 4C 
    0003C604: Illegal                   FF E2 
    0003C606: ori.b #$4C, D0            00 00 FF 4C 
@@ -601,12 +615,14 @@ mouse_not_equal:
    0003C802: move.? (A0), ($150,A0)    01 50 01 50 
    0003C806: move.? (A6), ($156,A0)    01 56 01 56 
    0003C80A: move.? (A4)+, ($63,A0)    01 5C 00 63 
-   0003C80E: ori.b #$80, (A6)+         00 1E 01 80 
-   0003C812: 01 30 
-   0003C814: 00 48 
-   0003C816: ori.b #$0, D0             00 00 00 00 
-   0003C81A: bclr D5, 41F9             0B B8 41 F9 
-   0003C81E: ori.b #$20, D4            00 04 16 20 
+
+   0003C80E: 00 1E 01 80 01 30 
+   0003C814: 00 48 00 00 00 00 0B B8 
+ 
+; Draw a line ?
+;  D0, D1 : first point
+;  D2, D3 : second point
+   0003C81C lea 41620, A0              ; A0 set to bitplane 0
    0003C822: lea DFF000, A5            4B F9 00 DF F0 00 
    0003C828: move.w #$30, A1           32 7C 00 30 
    0003C82C: move.l A1, D4             28 09 
@@ -659,11 +675,13 @@ mouse_not_equal:
    0003C8B4: addq.w #2, D3             54 43 
    0003C8B6: move.w D3, ($58,A5)       3B 43 00 58 
    0003C8BA: rts                       4E 75 
-   0003C8BC: btst D0, (A1)             01 11 
-   0003C8BE: btst D4, (A5)             09 15 
+
+   0003C8BC: 01 11 09 15 
    0003C8C0: btst D2, (A1)+            05 19 
    0003C8C2: btst D6, (A5)+            0D 1D 
-   0003C8C4: ori.b #$24, D0            00 00 03 24 
+   0003C8C4: ori.b #$24, D0            00 00 
+
+   0003C8C6: 03 24 
    0003C8C8: addi.w #$96A, D7          06 47 09 6A 
    0003C8CC: cmp.l #$FAB12C8, A3       0C 8B 0F AB 12 C8 
    0003C8D2: move.b -(A2), 3E1CC(PC)   15 E2 18 F8 
