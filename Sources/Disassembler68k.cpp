@@ -1081,7 +1081,7 @@ unsigned int Disassembler68k::MulsOpcode_(Motherboard* motherboard, unsigned sho
 {
    std::stringstream sstream;
    std::string str_opcode;
-   sstream << "muls ";
+   sstream << "muls.w ";
 
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 1, str_opcode);
    sstream << std::hex << std::uppercase  << str_opcode << ", " << data_[(opcode >> 9) & 0x7];
@@ -1094,7 +1094,7 @@ unsigned int Disassembler68k::MuluOpcode_(Motherboard* motherboard, unsigned sho
 {
    std::stringstream sstream;
    std::string str_opcode;
-   sstream << "mulu ";
+   sstream << "mulu.w ";
 
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 1, str_opcode);
    sstream << std::hex << std::uppercase << str_opcode << ", " << data_[(opcode >> 9) & 0x7];
