@@ -84,15 +84,17 @@ mouse_not_equal:
    3C148: ori.b #$D0, D3            00 03 B0 D0 
    3C14C: ori.b #$6C, D0            00 00 00 6C 
    3C150: rts                       4E 75 
+
+;
    3C152: jsr 16208                 4E B9 00 01 62 08 
    3C158: ori.b #$6C, D0            00 00 00 6C 
    3C15C: jsr 304AC                 4E B9 00 03 04 AC 
    3C162: move.l 3C3D6, A6          2C 79 00 03 C3 D6 
    3C168: move.l ($26,A6), DFF080   23 EE 00 26 00 DF F0 80 
    3C170: move.l 4, A6              2C 78 00 04 
-   3C174: jsr ($FF76,A6)            4E AE FF 76 
+   3C174: jsr ($FF76,A6)            ; Permit
    3C178: move.l 3C3D6, A1          22 79 00 03 C3 D6 
-   3C17E: jsr ($FE62,A6)            4E AE FE 62 
+   3C17E: jsr ($FE62,A6)            ; CloseLibrary
    3C182: move.w #$8020, DFF096     33 FC 80 20 00 DF F0 96 
    3C18A: rts                       4E 75 
    3C18C: movem.l D0/D1/D2/D3/D4/D5/D6/D7/A0/A1/A2/A3/A4/A5/A6, -(SP)48 E7 FF FE 
@@ -302,6 +304,7 @@ mouse_not_equal:
    0003C3CE: move.l ($6962,A4), SP     2E 6C 69 62 
    0003C3D2: moveq #$61, D1            72 61 
    0003C3D4: moveq #$79, D1            72 79 
+
    0003C3D6: bset #$1DFE, D0           00 C0 1D FE 
 
    0003C3DA: 00 EA ; Kind of a counter 

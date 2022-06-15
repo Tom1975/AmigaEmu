@@ -488,16 +488,33 @@ TEST(DISABLED_Cpu68k, CPU_LSR)
 
 //////////////////////////////////////////////////////////////////////////////////
 // MULS
-TEST(DISABLED_Cpu68k, CPU_MULS)
+bool TestOpcodeMul(unsigned char* opcode, size_t size_of_opcode, unsigned int reg_in_2, unsigned int reg_in_5, unsigned short sr_in, unsigned int reg_out_5, unsigned short sr_out)
 {
-   // TODO
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataRegister(2, reg_in_2);    // 
+   test_engine.Get68k()->SetDataRegister(5, reg_in_5);    // 
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.RunOpcode(opcode, size_of_opcode, 1);
+
+   bool result = test_engine.Get68k()->GetDataRegister(5) == reg_out_5;
+   result &= (test_engine.Get68k()->GetDataSr() & 0xFF) == sr_out;
+
+   return result;
+}
+TEST(Cpu68k, CPU_MULS)
+{
+   unsigned char opcode[] = { 0xCB, 0xC2 }; // muls.w d2,d5 // CB C2 
+   ASSERT_EQ(TestOpcodeMul (opcode, sizeof(opcode), 0x30, 0x50, 0, 0x30*0x50, 0), true);
+   ASSERT_EQ(TestOpcodeMul(opcode, sizeof(opcode), 0x30, (unsigned short) -0x50, 0, -0x30 * 0x50, 0x8), true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 // MULU
-TEST(DISABLED_Cpu68k, CPU_MULU)
+TEST(Cpu68k, CPU_MULU)
 {
-   // TODO
+   unsigned char opcode[] = { 0xCA, 0xC2 }; // mulu.w D2, D5               
+   ASSERT_EQ(TestOpcodeMul(opcode, sizeof(opcode), 0x30, 0x50, 0, 0x30 * 0x50, 0), true);
+   ASSERT_EQ(TestOpcodeMul(opcode, sizeof(opcode), 0x30, 0xFFB0, 0, 0x30 * 0xFFB0, 0x00), true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
