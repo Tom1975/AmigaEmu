@@ -12,8 +12,6 @@ Chargement : (bp sur FEA8D6)
 1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 
 ## Chargement battle squadron. Battle Squadron (1989)(Innerprise)[cr TIC][t Freestyle]
-*** 3C212 = subi.w #$4, (A4)+ => subi pas codé pour address ! ajouter des tests !
-*** 3C018: addi.w #$C3DA, 30003      06 79 00 03 00 03 C3 DA  => 0000 0110 0111 1001 => ADDI.w #$03, 3c3dA
 
 3c062 : Clic souris ! !! warning sur executions ???
 ... 
@@ -23,6 +21,8 @@ Chargement : (bp sur FEA8D6)
 *** 1A2 MOVE 12a, SR => Ne va pas lire 12a ???
 
 0003C5D0 => Calcul 3D ??
+**** 3C570 => Zoom ???
+0003C426: addi.w #$3E8, 3C81A       06 79 03 E8 00 03 C8 1A  => Increment du zoom, ca marche ?
 
 ## Chargement Shadow of the beast : Guru
 
@@ -82,6 +82,8 @@ Si ve > vp, return true.
 *** Battle Squadron
 3c1E4 : Subq.b #$1, D2 = FFFFFFFF(000000FF)
 3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
+3C212 = subi.w #$4, (A4)+ => subi pas codé pour address ! ajouter des tests !
+3C018: addi.w #$C3DA, 30003      06 79 00 03 00 03 C3 DA  => 0000 0110 0111 1001 => ADDI.w #$03, 3c3dA
 
 *** Fix SUB flags
 FC559C  sub.w  D0, D2  => SR = 9(19 ) !!

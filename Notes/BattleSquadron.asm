@@ -343,7 +343,7 @@ mouse_not_equal:
    0003C478: move.w #$0, 3C482         33 FC 00 00 00 03 C4 82 
    0003C480: rts                       4E 75 
 
-   0003C482: 00 02 00 00               ; variable
+   0003C482: 00 02 00 00               ; variable : seems to be the direction of the zoom ?
 
 ; Erase part of the screen
    0003C486: lea DFF000, A5            4B F9 00 DF F0 00 
@@ -395,6 +395,7 @@ mouse_not_equal:
    0003C52C: move.w #$63, (A4)         38 BC 00 63 
    0003C530: rts                       4E 75 
 
+; 
    0003C532: lea 3DCAC, A4             49 F9 00 03 DC AC 
    0003C538: lea 3C8C6, A6             4D F9 00 03 C8 C6 
    0003C53E: lea 3C80E, A5             4B F9 00 03 C8 0E 
@@ -414,6 +415,7 @@ mouse_not_equal:
    0003C56C: bne.s 3C564               66 F6 
    0003C56E: rts                       4E 75 
 
+; Zoom ?
    0003C570: move.w ($0,A4), D0        30 2C 00 00 
    0003C574: move.w ($2,A4), D1        32 2C 00 02 
    0003C578: move.w ($4,A4), D2        34 2C 00 04 
@@ -433,8 +435,10 @@ mouse_not_equal:
    0003C59E: move.w D2, ($4,A4)        39 42 00 04 
    0003C5A2: rts                       4E 75 
 
-; 
-; A4:   A5:   A6 : 
+; Rotation of 3D figure
+; A4: address of tree values( coordinates ?)
+; A5: value matrix
+; A6 : 
    0003C5A4: lea ($0,A4), A1           43 EC 00 00 
    0003C5A8: lea ($2,A4), A2           45 EC 00 02 
    0003C5AC: move.w ($4,A5), D0        30 2D 00 04 
@@ -449,25 +453,21 @@ mouse_not_equal:
    0003C5CC: bsr 3C5D0                 61 02 
    0003C5CE: rts                       4E 75 
 
+   ; a bit of math : 3D rotation
    ;
-   ; A1 : address of ...
-   ; A2 : address of ...
-   ; A6 : 
-   ; D0 : 
-   0003C5D0: move.w (7E,A6D0.w), D1    32 36 00 7E 
-   0003C5D4: move.w (-$2,A6D0.w), D2   D2 34 36 00 FE 
+   0003C5D0: move.w (7E,A6D0.w), D1    ; read tmp1
+   0003C5D4: move.w (-$2,A6D0.w), D2   ;read tmp2
    0003C5D8: move.w (A1), D3           36 11 
-   0003C5DA: move.w (A2), D4           38 12 
    0003C5DA: move.w (A2), D4           38 12 
    0003C5DC: move.w D3, D5             3A 03 
    0003C5DE: move.w D4, D6             3C 04 
-   0003C5E0: muls D1, D3               C7 C1 
-   0003C5E2: muls D2, D4               C9 C2 
-   0003C5E4: add.l D3, D3              D6 83 
-   0003C5E6: add.l D4, D4              D8 84 
-   0003C5E8: swap  D3                  48 43 
-   0003C5EA: swap  D4                  48 44 
-   0003C5EC: add.w D4, D3              D6 44 
+   0003C5E0: muls D1, D3               ; tmp1 * x
+   0003C5E2: muls D2, D4               ; tmp2 * y
+   0003C5E4: add.l D3, D3              ; result of (tmp1 * x)*2
+   0003C5E6: add.l D4, D4              ; result of (tmp2 * y) * 2
+   0003C5E8: swap  D3                  ; keep high word
+   0003C5EA: swap  D4                  ; keep high word
+   0003C5EC: add.w D4, D3              ; add them
    0003C5EE: muls D2, D5               CB C2 
    0003C5F0: muls D1, D6               CD C1 
    0003C5F2: add.l D5, D5              DA 85 
