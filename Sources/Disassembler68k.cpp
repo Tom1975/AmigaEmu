@@ -860,7 +860,7 @@ unsigned int Disassembler68k::SubIOpcode_(Motherboard* motherboard, unsigned sho
    unsigned int size = (opcode >> 6) & 3;
    if (size == 3) size = 1;
    sstream << size2_[size] << "#$";
-   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
+
    sstream << std::hex << std::uppercase;
    switch (size)
    {
@@ -877,7 +877,8 @@ unsigned int Disassembler68k::SubIOpcode_(Motherboard* motherboard, unsigned sho
       pc += 4;
       break;
    }
-   
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
+
    sstream << ", " << str_opcode;
    str_asm = sstream.str();
    return pc;

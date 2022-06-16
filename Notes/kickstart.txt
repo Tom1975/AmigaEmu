@@ -8,6 +8,8 @@ Chargement : (bp sur FEA8D6)
 ## TEST SHROTS2
 70090 asr d1,d0 => Clear X
 
+## HYBRIS : 
+
 ## LOTUS : 
 1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 

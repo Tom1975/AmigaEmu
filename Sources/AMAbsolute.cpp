@@ -166,7 +166,7 @@ void AMAbsolute::Subq(unsigned char data, unsigned char size, unsigned short& sr
 
 void AMAbsolute::Add(AddressingMode* source, unsigned short& sr)
 {
-   input_ = this->GetU32() + source->GetU32();
+   WriteInput(this->GetU32() + source->GetU32());
 }
 
 void AMAbsolute::Lsd(bool right, unsigned short& sr)
@@ -204,7 +204,7 @@ void AMAbsolute::Lsd(bool right, unsigned short& sr)
 void AMAbsolute::Sub(AddressingMode* source, unsigned short& sr)
 {
    // todo
-   unsigned int result = this->GetU32() - source->GetU32();
+   WriteInput( this->GetU32() - source->GetU32());
 }
 
 void AMAbsolute::Or(AddressingMode* source, unsigned short& sr)
