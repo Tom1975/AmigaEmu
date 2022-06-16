@@ -5,6 +5,7 @@ class Motherboard;
 
 #include <vector>
 #include <string>
+#include <mutex>
 
 class IBreakpoint
 {
@@ -99,6 +100,8 @@ public:
 
 protected:
 
+   // access data mutex
+   std::mutex bp_mutex;
 
    // Breakpoints data
    Motherboard* motherboard_;
