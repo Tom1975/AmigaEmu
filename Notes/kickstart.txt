@@ -36,7 +36,7 @@ Chargement : (bp sur FEA8D6)
 5BFA ok
 5c0C : 5c0C (test potgor) => not Z !
 
-
+*** FC1162  move      USP,SP            Load user stack pointer. =>> SSP devrait être positionné ici (mais ça fait planter le début du kickstart...)
 
 ###
 A VERIFIER :

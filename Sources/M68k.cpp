@@ -84,11 +84,11 @@ M68k::Func M68k::RtsOpcode_[] = { &M68k::DecodeRts, &M68k::SourceRead, &M68k::Op
 M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Stop_[] = { &M68k::DecodeStop, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeStop, &M68k::OpcodeStop2, nullptr };
 M68k::Func M68k::Sub_[] = { &M68k::DecodeSub, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubA_[] = { &M68k::DecodeSubA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubA_[] = { &M68k::DecodeSubA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSubA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubI, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 //M68k::Func M68k::Subq_L_Dn_An_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Subq_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubX_[] = { &M68k::DecodeSubX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubX_[] = { &M68k::DecodeSubX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSubX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Swap_[] = { &M68k::DecodeSwap, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Trap_[] = { &M68k::DecodeTrap, nullptr };
 M68k::Func M68k::Tst_[] = { &M68k::DecodeTst, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeTst, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -1319,7 +1319,13 @@ unsigned int M68k::OpcodeMoveUsp()
    {
       if (ird_ & 0x8)
       {
-         a_[ird_ & 0x7] = usp_;
+         if ((ird_ & 0x7) != 7)
+         {
+            a_[ird_ & 0x7] = usp_;
+         }
+         else
+            ssp_ = a_[ird_ & 0x7] = usp_;
+         
       }
       else
       {
@@ -2341,11 +2347,155 @@ unsigned int M68k::DecodeSwap()
 }
 
 
-unsigned int M68k::OpcodeSub()
+unsigned int M68k::OpcodeSubA()
 {
    destination_alu_->Sub(source_alu_, sr_);
 
    return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeSub()
+{
+   //destination_alu_->Sub(source_alu_, sr_);
+   return OpcodeSubI();
+   //return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeSubI()
+{
+   unsigned int sm, dm, rm;
+   sm = 0;
+   dm = 0;
+
+   unsigned int mask = 0;
+   unsigned int data;
+   switch (size_)
+   {
+   case 0:
+      sm = (unsigned char)source_alu_->GetU8();
+      dm = (unsigned char)destination_alu_->GetU8();
+      rm = (unsigned char)dm - (unsigned char)sm;
+      break;
+   case 1:
+      sm = (unsigned short)source_alu_->GetU16();
+      dm = (unsigned short)destination_alu_->GetU16();
+      rm = (unsigned short)dm - (unsigned short)sm;
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      dm = destination_alu_->GetU32();
+      rm = dm - sm;
+      break;
+   }
+
+   destination_alu_->WriteInput(rm);
+
+   unsigned short flag = sr_ & 0xFFF0;
+
+   // Z
+   if (rm == 0) flag |= 0x4;
+
+   rm &= MaskSign[size_];
+   dm &= MaskSign[size_];
+   sm &= MaskSign[size_];
+
+   // N
+   if (rm) flag |= 0x8;
+   // V
+   if ((~sm) & dm & (~rm) | sm & (~dm) & rm) flag |= 0x2;
+   // C-X
+   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x11;
+
+   sr_ = flag;
+
+   return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeSubX()
+{
+   unsigned int sm, dm, rm = 0;
+   switch (destination_alu_->GetSize())
+   {
+   case 0:
+      dm = destination_alu_->GetU8();
+      break;
+   case 1:
+      dm = destination_alu_->GetU16();
+      break;
+   case 2:
+      dm = destination_alu_->GetU32();
+      break;
+   }
+
+   switch (source_alu_->GetSize())
+   {
+   case 0:
+      sm = source_alu_->GetU8();
+      break;
+   case 1:
+      sm = source_alu_->GetU16();
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      break;
+   }
+   rm = sm - (dm + ((sr_ & 0x10) ? 1 : 0));
+   switch (size_)
+   {
+   case 0:
+      rm &= 0xFF;
+      break;
+   case 1:
+      rm &= 0xFFFF;
+      break;
+   }
+   destination_alu_->WriteInput(rm);
+
+   sr_ &= 0xFFE4;
+   if (rm != 0) sr_ &= ~F_Z;
+   switch (size_)
+   {
+   case BYTE:
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm) sr_ |= F_N;
+      break;
+   case WORD:
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
+      break;
+   case LONG:
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm) sr_ |= F_N;
+      break;
+   }
+   if ((sm & dm & (~rm)) | ((~sm) & (~dm) & (rm)))
+   {
+      sr_ |= F_V;
+   }
+   if (sm & dm | (~rm) & dm | sm & (~rm))
+   {
+      sr_ |= F_C | F_X;
+   }
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
+   Fetch();
+   return true;
 }
 
 unsigned int M68k::DecodeSubq()

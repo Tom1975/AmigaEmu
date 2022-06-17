@@ -389,7 +389,10 @@ protected:
    unsigned int OpcodeStop();
    unsigned int OpcodeStop2();
    unsigned int OpcodeSub();
+   unsigned int OpcodeSubA();
+   unsigned int OpcodeSubI();
    unsigned int OpcodeSubq();
+   unsigned int OpcodeSubX();
    unsigned int OpcodeTst();
    unsigned int OpcodeUnlk();
 
