@@ -161,7 +161,31 @@ unsigned short AMAbsolute::WriteNextWord(unsigned int& address_to_write)
 // Do somme math !
 void AMAbsolute::Subq(unsigned char data, unsigned char size, unsigned short& sr)
 {
+   unsigned int new_value;
+   unsigned int old_value;
+   unsigned int mask;
+   switch (size_)
+   {
+   case Byte:
+      old_value = GetU8();
+      mask = 0xFF;
+      break;
+   case Word:
+      old_value = GetU16();
+      mask = 0xFFFF;
+      break;
+   case Long:
+      old_value = GetU32();
+      mask = 0xFFFFFFFF;
+      break;
+   }
+   
+   new_value = (old_value - data) & mask;
+
+   ComputeFlags(sr, old_value, new_value, data);
+
    // Nothing to do here
+   WriteInput(new_value);
 }
 
 void AMAbsolute::Add(AddressingMode* source, unsigned short& sr)

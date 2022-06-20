@@ -1,3 +1,4 @@
+## ## ## ## ## 
 ## Chargement Workbench : 
 1ba62 : not.b (A0)+ => no effect !
 
@@ -5,27 +6,30 @@
 Chargement : (bp sur FEA8D6)
 * 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
 
+## ## ## ## ## 
 ## TEST SHROTS2
 70090 asr d1,d0 => Clear X
 
+## ## ## ## ## 
 ## HYBRIS : 
 
+## ## ## ## ## 
 ## LOTUS : 
 1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 
-## Chargement battle squadron. Battle Squadron (1989)(Innerprise)[cr TIC][t Freestyle]
+
+## ## ## ## ## 
+## Battle Squadron (1989)(Innerprise)[cr TIC][t Freestyle]
 
 3c062 : Clic souris ! !! warning sur executions ???
 ... 
 7f056 ok (?)
 100 ok
 15A : EORI 2700, SR => ??  
-*** 1A2 MOVE 12a, SR => Ne va pas lire 12a ???
 
-0003C5D0 => Calcul 3D ??
-**** 3C570 => Zoom ???
-0003C426: addi.w #$3E8, 3C81A       06 79 03 E8 00 03 C8 1A  => Increment du zoom, ca marche ?
+0003C454: subq.w #1, 3C484          53 79 00 03 C4 84  => Pas de sub + flags incorrects => A TESTER
 
+## ## ## ## ## 
 ## Chargement Shadow of the beast : Guru
 
 5bac : OK !
@@ -82,6 +86,8 @@ Si ve > vp, return true.
 *** HISTORIQUE 
 ********************************
 *** Battle Squadron
+*** 1A2 MOVE 12a, SR => Ne va pas lire 12a ???
+0003C426: addi.w #$3E8, 3C81A       06 79 03 E8 00 03 C8 1A  => Increment du zoom, ca marche ?
 3c1E4 : Subq.b #$1, D2 = FFFFFFFF(000000FF)
 3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
 3C212 = subi.w #$4, (A4)+ => subi pas codé pour address ! ajouter des tests !
