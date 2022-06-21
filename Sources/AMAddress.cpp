@@ -305,13 +305,27 @@ void AMAddress::Or(AddressingMode* source, unsigned short& sr)
 
 void AMAddress::Subq(unsigned char data, unsigned char size, unsigned short& sr)
 {
-   unsigned int new_value;
-   unsigned int old_value;
+   unsigned int old_value = result_;
 
-   old_value = *current_register_;
-   *current_register_ -= data;
-   new_value = *current_register_;
+   switch (size_)
+   {
+   case Byte:
+      written_input_ = 1;
+      result_ -= data;
+      break;
+   case Word:
+      written_input_ = 1;
+      result_ -= data;
+      break;
+   case 2:
+      written_input_ = 2;
+      result_ -= data;
+      break;
+   }
+   input_ = result_;
 
-   ComputeFlags(sr, old_value, new_value, data);
+   address_to_write_ = *current_register_;
+
+   ComputeFlags(sr, old_value, result_, data);
 }
 
