@@ -2,7 +2,7 @@
 #include "Motherboard.h"
 
 
-Bitplanes::Bitplanes()
+Bitplanes::Bitplanes() : bitplane_fetch_(false), bitplane_fetch_count_(0)
 {
    Reset();
 }
@@ -15,6 +15,8 @@ Bitplanes::~Bitplanes()
 void Bitplanes::Reset()
 {
    in_windows_ = false;
+   bitplane_fetch_ = false;
+   bitplane_fetch_count_ = 0;
 }
 
 //////////////////////////////////////////////
@@ -47,13 +49,21 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
    {
       // Check : Bitplane is on, and position is winthin the display window
       int bitplane = -1;
-      if (motherboard_->GetAgnus()->WithinWindow() && nb_bitplanes_ > 0)
+      bool display = true;
+      if (!bitplane_fetch_)
       {
-         if (in_windows_ == false && (dmatick & 0x7) == 1)
+         display = motherboard_->GetAgnus()->WithinWindow(bplcon0_ & 0x8000, bitplane_fetch_);
+         bitplane_fetch_count_ = 0;
+      }
+         
+
+      if (nb_bitplanes_ > 0 && bitplane_fetch_)
+      {
+         /*if (in_windows_ == false && (dmatick & 0x7) == 1)
             in_windows_ = true;
-         if (in_windows_)
+         if (in_windows_)*/
          {
-            switch (dmatick & 0x7)
+            switch (bitplane_fetch_count_++ & 0x7)
             {
             case 1:        // 4 lowres - 2 hires
                if (nb_bitplanes_ >= 4 && (bplcon0_ & 0x8000) == 0)
@@ -85,6 +95,8 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
                else if (nb_bitplanes_ >= 1 && (bplcon0_ & 0x8000))
                {
                   bitplane = 0;
+                  // Fetch end
+                  bitplane_fetch_ = false;
                }
 
                break;
@@ -120,6 +132,8 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
                if (nb_bitplanes_ >= 1)
                {
                   bitplane = 0;
+                  // Fetch end
+                  bitplane_fetch_ = false;
                }
                break;
             default: return false;
@@ -130,8 +144,10 @@ bool Bitplanes::DmaTick(unsigned int dmatick)
                return false;
             }
 
-
-            motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
+            if ( display)
+               motherboard_->GetDenise()->SetBplDat(bitplane, motherboard_->Read16(bplxpt_[bitplane]));
+            else
+               motherboard_->GetDenise()->DisplayWordBkg();
             bplxpt_[bitplane] += 2;
          }
       }

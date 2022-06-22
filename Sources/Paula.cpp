@@ -1,4 +1,5 @@
 #include "Paula.h"
+#include "Bus.h"
 
 // Interrupt bits definition
 #define SETCLR 0x8000
@@ -18,7 +19,7 @@
 #define DSKBLK 0x0002
 #define TBE    0x0001
 
-Paula::Paula() : interrupt_pin_(nullptr)
+Paula::Paula() : interrupt_pin_(nullptr), dsk_byte_(0)
 {
    Reset();
 }
@@ -35,11 +36,89 @@ void Paula::Reset()
 }
 
 
+void Paula::SetDiskController(DiskController* disk_controller)
+{
+   disk_controller_ = disk_controller;
+}
+
+////////////////////////////////
+// DMA Disk
+bool Paula::DmaDiskTick()
+{
+   // If dma, do it
+   if (dsk_byte_ & 0x4000)
+   {
+      // Read next word to data
+      unsigned short length = dsklen_ & 0x3FFF;
+
+      // Read from disk
+      dsk_dat_ = disk_controller_->ReadNextWord();
+
+      // Write to memory
+      bus_->Write16(dsk_dma_pt_, dsk_dat_);
+      
+      length -= 1;
+
+      dsklen_ &= 0xC000;
+      dsklen_ |= length;
+
+      dsk_dma_pt_+= 2;
+
+      if (length == 0)
+      {
+         // End of DMA : 
+         dsk_byte_ &= ~0x4000;
+
+         // int;
+         Int(0x2);
+
+         // set various data
+
+      }
+      return true;
+   }
+
+   return false;
+}
+
 ////////////////////////////////
 // Disk
+void Paula::SetDskPt(unsigned short data, bool msb)
+{
+   if (msb)
+   {
+      dsk_dma_pt_ &= 0xFFFF;
+      dsk_dma_pt_ |= (data<<16);
+   }
+   else
+   {
+      dsk_dma_pt_ &= 0xFFFF0000;
+      dsk_dma_pt_ |= data ;
+   }
+}
+
 void Paula::SetDskLen(unsigned short dsklen)
 {
+   // Check for DMA start
+   if (dsklen_&dsklen & 0x8000)
+   {
+      // Double length setting : DMA can start
+      if ((dma_control_->dmacon_ & 0x210) == 0x210)
+      {
+         // Start DMA !
+         dsk_byte_ |= 0x4000;
+      }
+   }
    dsklen_ = dsklen;
+}
+
+void Paula::SetAdkCon(unsigned short set)
+{
+   if (set & 0x8000)
+      adkcon_ |= (set & 0x1FFF);
+   else
+      adkcon_ &= ((~set) & 0x1FFF);
+   
 }
 
 ////////////////////////////////
@@ -172,3 +251,4 @@ void Paula::CheckInt()
    }
 
 }
+

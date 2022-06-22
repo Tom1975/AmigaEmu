@@ -13,9 +13,11 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF000, 0xD000, &Disassembler68k::AddOpcode_);
    AddCommand(0xF000, 0xC000, &Disassembler68k::AndOpcode_);
    AddCommand(0xFF00, 0x4400, &Disassembler68k::NegOpcode);
+   AddCommand(0xFF00, 0x4000, &Disassembler68k::NegxOpcode);
    AddCommand(0xFF00, 0x0200, &Disassembler68k::AndiOpcode_);
    AddCommand(0xFF00, 0x0000, &Disassembler68k::OriOpcode_);
    AddCommand(0xFF00, 0x0A00, &Disassembler68k::EoriOpcode_);
+   AddCommand(0xF130, 0xD100, &Disassembler68k::AddXOpcode_);
    AddCommand(0xF0C0, 0xD0C0, &Disassembler68k::AddAOpcode_);
    AddCommand(0xFF00, 0x0600, &Disassembler68k::AddIOpcode_);
    AddCommand(0xF100, 0x5000, &Disassembler68k::AddQOpcode_);
@@ -80,7 +82,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFFFF, 0x007C, &Disassembler68k::OriSrOpcode);
    AddCommand(0xFFFF, 0x003C, &Disassembler68k::OriToCcrOpcode);
    AddCommand(0xFFFF, 0x0A3C, &Disassembler68k::EoriToCcrOpcode);
-   AddCommand(0xFFFF, 0x007C, &Disassembler68k::EoriSrOpcode);
+   AddCommand(0xFFFF, 0x0A7C, &Disassembler68k::EoriSrOpcode);
    AddCommand(0xFFFF, 0x023C, &Disassembler68k::AndiToCcrOpcode);
    AddCommand(0xFFFF, 0x4AFC, &Disassembler68k::IllegalOpcode);
    
@@ -221,8 +223,15 @@ unsigned int Disassembler68k::DisassembleAddressingMode (Motherboard* motherboar
       unsigned int reg_num = (disp >> 12) & 0x7;
       unsigned int s = (disp >> 11) & 1;
       int index = (char)(disp & 0xFF);
+      if (index < 0)
+      {
+         sstream << "(" << std::uppercase <<"-$" << std::hex << (-1 * index) << "," << std::hex << address_[xn] << (M ? "A" : "D") << reg_num << (s ? ".l" : ".w") << ")";
+      }
+      else
+      {
+         sstream << "(" << std::uppercase << "$" << std::hex << index << "," <<  address_[xn] << (M ? "A" : "D") << reg_num << (s ? ".l" : ".w") << ")";
+      }
       
-      sstream << "(" << std::hex << std::uppercase << index << "," << address_[xn] << (M?"A":"D") << reg_num << (s ? ".l" : ".w") <<")";
       str = sstream.str();
       break;
    }
@@ -320,14 +329,30 @@ unsigned int Disassembler68k::AddAOpcode_(Motherboard* motherboard, unsigned sho
    return pc;
 }
 
+unsigned int Disassembler68k::AddXOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   unsigned int size = (opcode >> 6) & 0x3;
+   str_asm = "addX.";
+   str_asm += size2_[size];
+
+   unsigned char m = (opcode & 8) ? 4 : 0;
+   pc += DisassembleAddressingMode(motherboard, pc, m, (opcode ) & 0x7, size, str_opcode);
+   str_asm += str_opcode + ", ";
+   pc += DisassembleAddressingMode(motherboard, pc, m, (opcode >> 9) & 0x7, size, str_opcode);
+   str_asm += str_opcode;
+   return pc;
+}
+
 unsigned int Disassembler68k::AddIOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    std::string str_opcode;
    std::stringstream sstream;
    sstream << "addi.";
    unsigned int size = (opcode >> 6) & 3;
+   if (size == 3) size = 1;
+
    sstream << size2_[size] << "#$";
-   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
    sstream << std::hex << std::uppercase;
    switch (size)
    {
@@ -344,6 +369,7 @@ unsigned int Disassembler68k::AddIOpcode_(Motherboard* motherboard, unsigned sho
       pc += 4;
       break;
    }
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
 
    sstream << ", " << str_opcode;
    str_asm = sstream.str();
@@ -666,6 +692,17 @@ unsigned int Disassembler68k::NegOpcode(Motherboard* motherboard, unsigned short
    return pc;
 }
 
+unsigned int Disassembler68k::NegxOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   unsigned int size = (opcode >> 6) & 0x3;
+   if (size == 3) size = 1;
+   str_asm = "negx." + (size2_[size]) + " ";
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   str_asm += str_opcode;
+
+   return pc;
+}
 unsigned int Disassembler68k::NopOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    str_asm = "nop";
@@ -821,8 +858,9 @@ unsigned int Disassembler68k::SubIOpcode_(Motherboard* motherboard, unsigned sho
    std::stringstream sstream;
    sstream << "subi.";
    unsigned int size = (opcode >> 6) & 3;
+   if (size == 3) size = 1;
    sstream << size2_[size] << "#$";
-   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
+
    sstream << std::hex << std::uppercase;
    switch (size)
    {
@@ -839,7 +877,8 @@ unsigned int Disassembler68k::SubIOpcode_(Motherboard* motherboard, unsigned sho
       pc += 4;
       break;
    }
-   
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
+
    sstream << ", " << str_opcode;
    str_asm = sstream.str();
    return pc;
@@ -1046,7 +1085,7 @@ unsigned int Disassembler68k::MulsOpcode_(Motherboard* motherboard, unsigned sho
 {
    std::stringstream sstream;
    std::string str_opcode;
-   sstream << "muls ";
+   sstream << "muls.w ";
 
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 1, str_opcode);
    sstream << std::hex << std::uppercase  << str_opcode << ", " << data_[(opcode >> 9) & 0x7];
@@ -1059,7 +1098,7 @@ unsigned int Disassembler68k::MuluOpcode_(Motherboard* motherboard, unsigned sho
 {
    std::stringstream sstream;
    std::string str_opcode;
-   sstream << "mulu ";
+   sstream << "mulu.w ";
 
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 1, str_opcode);
    sstream << std::hex << std::uppercase << str_opcode << ", " << data_[(opcode >> 9) & 0x7];
@@ -1237,7 +1276,7 @@ unsigned int Disassembler68k::CmpOpcode_(Motherboard* motherboard, unsigned shor
 {
    std::stringstream sstream;
    std::string str_opcode;
-   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, (opcode >> 6) & 0x3, str_opcode);
    sstream << "cmp." << size2_[(opcode>>6)&0x3] << str_opcode << ", " << data_[(opcode >> 9) & 0x7] ;
    str_asm = sstream.str();
    return pc;
@@ -1411,4 +1450,40 @@ unsigned int Disassembler68k::DisassembleDefault(Motherboard* motherboard, unsig
 {
    str_asm = "Illegal";
    return pc;
+}
+
+void Disassembler68k::DisassembleArrayOfcode(Motherboard* mobo, unsigned int base_address, unsigned int size, std::string& out_text)
+{
+   std::string str_asm;
+   char addr[16];
+   unsigned int offset, offset_old;
+   offset = offset_old = base_address;
+   unsigned int end_offset = base_address + size;
+
+   while (offset < end_offset)
+   {
+#define ASM_SIZE 26
+#define ADD_SIZE 10
+
+      sprintf(addr, "%8.8X: ", offset);
+
+      offset = Disassemble(mobo, offset, str_asm);
+      str_asm = addr + str_asm;
+      int size_tab = (ADD_SIZE + ASM_SIZE) - str_asm.size();
+      if (size_tab > 0)
+      {
+         str_asm.append(size_tab, ' ');
+      }
+      for (int i = offset_old; i < offset; i++)
+      {
+         char b[4];
+         sprintf(b, "%2.2X ", mobo->GetBus()->Read8(i));
+         str_asm += b;
+      }
+      str_asm += "\n";
+      //
+      out_text += str_asm;
+      //fwrite(str_asm.c_str(), str_asm.size(), 1, fw);
+      offset_old = offset;
+   }
 }

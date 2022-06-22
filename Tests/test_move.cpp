@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //   .L :            |                 |               |
 //     Dn | 4(1 / 0)         |               |               np
-TEST(Cpu68k, CPU_MOVE_L_Dn_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_Dn_Dn)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetDataRegister(0, 0x123456);
@@ -36,7 +36,7 @@ TEST(Cpu68k, CPU_MOVE_L_Dn_Dn)
 }
 
 //     An | 4(1 / 0)         |               |               np
-TEST(Cpu68k, CPU_MOVE_L_An_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_An_Dn)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetAddressRegister(0, 0x123456);
@@ -47,7 +47,7 @@ TEST(Cpu68k, CPU_MOVE_L_An_Dn)
 }
 
 //     (An) | 12(3 / 0) | nR nr | np
-TEST(Cpu68k, CPU_MOVE_L_pAn_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_pAn_Dn)
 {
    TestEngineCpu test_engine;
    test_engine.Get68k()->SetAddressRegister(0, 0x023456);
@@ -67,7 +67,7 @@ TEST(Cpu68k, CPU_MOVE_L_pAn_Dn)
 //     (xxx).L | 20(5 / 0) | np np nR nr | np
          
 //     #<data>       | 12(3/0)         |   np np       |               np		      
-TEST(Cpu68k, CPU_MOVE_L_IMMEDIATE_Dn)
+TEST(Cpu68k_MOVE, CPU_MOVE_L_IMMEDIATE_Dn)
 {
    TestEngineCpu test_engine;
    unsigned char opcode[] = { 0x20, 0x3C, 0x00, 0x02, 0x00, 0x00 }; // move.l #$020000, D0
@@ -90,7 +90,7 @@ TEST(Cpu68k, CPU_MOVE_L_IMMEDIATE_Dn)
 //(xxx).W | 24(5 / 1) | np    nr | np    nw np np
 //(xxx).L | 28(6 / 1) | np np    nr | np    nw np np
 //#<data>       | 20(4/1)         |      np       |   np np    nw np		      
-TEST(Cpu68k, CPU_MOVE_B_Dn_AbsoluteL)
+TEST(Cpu68k_MOVE, CPU_MOVE_B_Dn_AbsoluteL)
 {
    TestEngineCpu test_engine;
    unsigned char opcode[] = { 0x13, 0xFC, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00 }; // move.b  #3, $10000
@@ -224,3 +224,114 @@ TEST(Cpu68k_MOVEM, CPU_MOVEM_L_AN_POST_D) //
 //    (xxx).L
 //    (d16.PC)
 //    (d8.PC.Xn)
+
+// move.l ($2C,SP), -(SP)  
+TEST(Cpu68k_MOVE, CPU_MOVE_L_D16AN_DEC_AN)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataUsp(0xD234);
+   test_engine.Get68k()->SetSr(0x0);
+   unsigned char opcode[] = { 0x02, 0x7C, 0xDF, 0xFF, 0x2F, 0x2F, 0x00, 0x2C }; // // and.w #DFFF, SR; move.l ($2C,SP), -(SP)  2F 2F 00 2C 
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0xD2, 512 * 1024);
+   ram[0xD260] = 0x00;
+   ram[0xD261] = 0x11;
+   ram[0xD262] = 0x22;
+   ram[0xD263] = 0x33;
+   test_engine.RunOpcode(opcode, sizeof(opcode), 2);
+
+   ASSERT_EQ(test_engine.Get68k()->GetDataUsp(), 0xD230);   // Check SP
+   ASSERT_EQ(memcmp(&ram[0xD230], &ram[0xD260], 4), 0);              // Check stack
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MOVEA
+TEST(DISABLED_Cpu68k_MOVE, CPU_MOVEA)
+{
+   // TODO
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MOVEP
+TEST(DISABLED_Cpu68k_MOVE, CPU_MOVEP)
+{
+   // TODO
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// MOVEQ
+TEST(DISABLED_Cpu68k_MOVE, CPU_MOVEQ)
+{
+   // TODO
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MOVE USP
+TEST(DISABLED_Cpu68k_MOVE, CPU_MOVE_USP)
+{
+   // TODO
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MOVE from SR
+bool TestOpcodeWord_A2_(const unsigned char opcode[2], unsigned short value, unsigned short value_out, unsigned short sr_in, unsigned short sr_out)
+{
+   TestEngineCpu test_engine;
+   // Memory
+   unsigned char* ram = test_engine.GetBus()->GetRam();
+   memset(&ram[0x100], 0xFF, 0x200);
+   ram[0x200] = value >> 8;
+   ram[0x201] = value & 0xFF;
+
+   test_engine.Get68k()->SetAddressRegister(2, 0x200);
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = (test_engine.Get68k()->GetDataSr() & 0xFF) == sr_out;
+   unsigned short res = (ram[0x200] << 8) | (ram[0x201]);
+   result &= (res == value_out);
+
+   return result;
+}
+TEST(Cpu68k_MOVE, CPU_MOVE_FROM_SR)
+{
+   // Move from SR 
+   TestEngineCpu test_engine;
+   unsigned char opcode[] = { 0x40, 0xC2 }; // Move SR, D0
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x55555555, 0x271F, 0x5555271F, 0x1F), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0, 0x271F, 0x271F, 0x1F), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0, 0xFFFF, 0xA71F, 0xFF), true);
+
+   unsigned char opcode2[] = { 0x40, 0xD2 }; // Move SR, (A2)
+   ASSERT_EQ(TestOpcodeWord_A2_(opcode2, 0x5555, 0x271F, 0x271F, 0x1F), true);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MOVE to SR
+TEST(Cpu68k_MOVE, CPU_MOVE_TO_SR)
+{
+   TestEngineCpu test_engine;
+   unsigned char opcode[] = { 0x46, 0xC2 }; // Move D0, SR
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x55555555, 0x271F, 0x55555555, 0x55), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0, 0x271F, 0, 0x0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x14, 0x0, 0x14, 0x14), true);
+
+   unsigned char opcode2[] = { 0x46, 0xD2 }; // Move (A2), SR
+   ASSERT_EQ(TestOpcodeWord_A2_(opcode2, 0x271F, 0x271F, 0x00, 0x1F), true);
+   ASSERT_EQ(TestOpcodeWord_A2_(opcode2, 0x0004, 0x0004, 0x00, 0x04), true);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MOVE to CCR
+TEST(Cpu68k_MOVE, CPU_MOVE_TO_CCR)
+{
+   TestEngineCpu test_engine;
+   unsigned char opcode[] = { 0x44, 0xC2 }; // Move D0, SR
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x55555555, 0x271F, 0x55555555, 0x15), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0, 0x271F, 0, 0x0), true);
+   ASSERT_EQ(test_engine.TestOpcodeWordD2(opcode, 0x14, 0x0, 0x14, 0x14), true);
+
+   unsigned char opcode2[] = { 0x44, 0xD2 }; // Move (A2), SR
+   ASSERT_EQ(TestOpcodeWord_A2_(opcode2, 0x271F, 0x271F, 0x00, 0x1F), true);
+   ASSERT_EQ(TestOpcodeWord_A2_(opcode2, 0x0004, 0x0004, 0x00, 0x04), true);
+}

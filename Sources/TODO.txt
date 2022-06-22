@@ -6,26 +6,28 @@
 -----------
 TO FIX : 
 -----------
-Deadlock somewhere (waiting for a dma to finish, but nothing is on stage...)
+Add SUB ADD tests. (lots of flags seems to be missing)
 
 -----------
 EXECUTE OK : 
 ------------
-Interrupt handler (vertical blanking) : FC12FC
-=> FC6CDC  (a comprendre)
 
 -----------
 TODO : 
 ------------
-- Handle interruption / Exceptions
-- COPPER
-- BLITTER
-- DMA 
 
 
 -----------
 FIXED 
 -----------
+Interrupt handler (vertical blanking) : FC12FC
+=> FC6CDC  (a comprendre)
+- Handle interruption / Exceptions
+- COPPER
+- BLITTER
+- DMA 
+*** Deadlock somewhere (waiting for a dma to finish, but nothing is on stage...)
+
 *** FC125C  movem.l   D2/D3/A2/A3,-(SP)
 => Predecrement d'un coup de trop (sur AMAddress : a l'init, suivi de chaque transfert)
 Il faut trouver une solution generique de pre/post increment (valable pour movem & pour move)

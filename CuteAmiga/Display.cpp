@@ -5,7 +5,7 @@
 
 
 Display::Display(QWidget* parent) :
-   QWidget(parent), pixmap_(1024, 1024), image_(1024, 1024, QImage::Format_RGB32)
+   QWidget(parent), pixmap_(1024, 1024), image_(1024, 1024, QImage::Format_RGB32), hardware_io_(nullptr)
 {
    setAttribute(Qt::WA_PaintOnScreen);
    setAttribute(Qt::WA_OpaquePaintEvent);
@@ -15,13 +15,15 @@ Display::Display(QWidget* parent) :
    setAcceptDrops(true);
    Init();
 
+   setMouseTracking(true);
+
    //connect(this, SIGNAL(SendRepaint(QPaintEvent*)), parent, SLOT(paintEvent(QPaintEvent*)));
    //connect(this, SIGNAL(VSync()), this, SLOT(Update()), Qt::QueuedConnection);
    connect(this, SIGNAL(Update()), this, SLOT(ForceRefresh()), Qt::QueuedConnection);
 }
 
 Display::Display(QWidget* parent, const QPoint& position, const QSize& size, unsigned int frame_time) :
-   QWidget(parent)
+   QWidget(parent), hardware_io_(nullptr)
 {
    setAttribute(Qt::WA_PaintOnScreen);
    setAttribute(Qt::WA_OpaquePaintEvent);
@@ -51,8 +53,19 @@ void Display::Init()
    setUpdatesEnabled(true);
 
    index_current_line_ = 0;
-   current_line_ = GetFrameBuffer(index_current_line_);
+   current_line_ = GetFrameBuffer(index_current_line_++);
+   next_line_ = GetFrameBuffer(index_current_line_++);
    pixel_current_index_ = 0;
+}
+
+void Display::SetDragnDropTarget(IDragNDropTarget* target)
+{
+   target_ = target;
+}
+
+void Display::SetHardwareIO(HardwareInterface * hardware_io)
+{
+   hardware_io_ = hardware_io;
 }
 
 unsigned int * Display::GetFrameBuffer(unsigned int line)
@@ -74,15 +87,17 @@ void Display::VSync()
    AFrameIsReady();
 
    index_current_line_ = 0;
-   current_line_ = GetFrameBuffer(index_current_line_);
+   current_line_ = GetFrameBuffer(index_current_line_++);
+   next_line_ = GetFrameBuffer(index_current_line_++);
    pixel_current_index_ = 0;
 }
 
 void Display::HSync()
 {
    pixel_current_index_ = 0;
+   memcpy(next_line_, current_line_, 1024 * sizeof(unsigned int));
    current_line_ = GetFrameBuffer(index_current_line_++);
-   
+   next_line_ = GetFrameBuffer(index_current_line_++);   
 }
 
 void Display::Add16Pixels(unsigned int* pixels)
@@ -103,11 +118,62 @@ void Display::paintEvent(QPaintEvent*)
 ///////////////////////////////////////////////////////////////////////////
 void Display::keyPressEvent(QKeyEvent * event_keyboard)
 {
+   // todo : add key 
+   if (hardware_io_ != nullptr)
+      hardware_io_->KeyAction(0, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 void Display::keyReleaseEvent(QKeyEvent *event_keyboard)
 {
+   // todo : add key 
+   if (hardware_io_ != nullptr)
+      hardware_io_->KeyAction(0, false);
+}
+
+///////////////////////////////////////////////////////////////////////////
+void Display::mouseMoveEvent(QMouseEvent* eventMove)
+{
+   // Send mouse coordinate to hardware_io
+   if (hardware_io_ != nullptr)
+   {
+      hardware_io_->SetMouvePos(eventMove->x(), eventMove->y());
+   }
+}
+
+void Display::mousePressEvent(QMouseEvent* event)
+{
+   
+   if (event->button() == Qt::LeftButton)
+   {
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(0, true);
+      // Capture the window
+   }
+   else
+   {
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(1, true);
+      // Capture the window
+
+   }
+}
+
+void Display::mouseReleaseEvent(QMouseEvent* event)
+{
+   if (event->button() == Qt::LeftButton)
+   {
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(0, false);
+      // Capture the window
+   }
+   else
+   {
+      if (hardware_io_ != nullptr)
+         hardware_io_->MouseClick(1, false);
+      // Capture the window
+
+   }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -130,28 +196,15 @@ void Display::dropEvent(QDropEvent* event)
       QList<QUrl> urlList = mimeData->urls();
 
       // extract the local paths of the files
-      for (int i = 0; i < urlList.size() && i < 32; +i)
+      for (int i = 0; i < urlList.size() && i < 32; ++i)
       {
          pathList.append(urlList.at(i).toLocalFile());
       }
 
       // call a function to open the files
-      OpenFiles(pathList);
+      target_->OpenFiles(pathList);
    }
 
-}
-
-void Display::OpenFiles(const QStringList& pathList)
-{
-   for (int i = 0; i < pathList.size() && i < 4; +i)
-   {
-      // Load first 4 files ( df0 to df3 )
-      //    Motherboard* mb = emu_handler_->GetMotherboard();
-      // Disk* disk = new Disk(filename.toStdString());
-      // mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
-
-
-   }
 }
 
 void Display::AFrameIsReady()

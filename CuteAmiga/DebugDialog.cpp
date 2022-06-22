@@ -7,6 +7,7 @@
 
 #include <QDir>
 #include <QMenuBar>
+#include <QDebug>
 
 DebugDialog::DebugDialog(QWidget *parent) :
    QDialog(parent),
@@ -87,6 +88,28 @@ void DebugDialog::on_dbg_step__clicked()
 void DebugDialog::on_dbg_run_clicked()
 {
    emu_handler_->Run();
+}
+
+void DebugDialog::on_set_top_address_clicked()
+{
+   // get top 
+   QString text = ui->dasm_address->text();
+   if (text.length() > 0)
+   {
+      unsigned int addr = (unsigned int)strtoul(text.toUtf8().constData(), NULL, 16);
+      if (addr >= 0 && addr < 0xFFFFFF)
+      {
+         // Set disassembly
+         UpdateDisassembly(addr);
+
+         // Write it on the log window
+         std::string out_txt;
+         disassembler_.DisassembleArrayOfcode(emu_handler_->GetMotherboard(), addr, 512, out_txt);
+         // Log it !
+         qDebug() << out_txt.c_str();
+
+      }
+   }
 }
 
 void DebugDialog::on_dbg_pause_clicked()
@@ -171,7 +194,6 @@ void DebugDialog::on_clear_bp_clicked()
 void DebugDialog::UpdateDebug()
 {
    unsigned int offset, offset_old;
-   char addr[16];
 
    // Update parent window
    this->parentWidget()->repaint();
@@ -239,8 +261,29 @@ void DebugDialog::UpdateDebug()
       }
    }
 
-   // Disassemble the next lines
    offset = offset_old = emu_handler_->GetMotherboard()->GetCpu()->GetPc() - 4; // -2 because of prefetch
+   UpdateDisassembly(offset);
+
+   // Breakpoints list
+   BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
+   ui->list_breakpoints->clear();
+   // Update breakpoints list
+   for (int i = 0; i < pb_handler->GetBreakpointNumber(); i++)
+   {
+      QListWidgetItem* item = new QListWidgetItem;
+      item->setText(pb_handler->GetBreakpoint(i)->GetLabel());
+      item->setData(Qt::UserRole, i);
+      
+      ui->list_breakpoints->addItem(item);
+   }
+}
+
+void DebugDialog::UpdateDisassembly(unsigned int offset)
+{
+   char addr[16];
+   unsigned int offset_old = offset;
+
+   // Disassemble the next lines
    std::string str_asm;
    ui->listWidget->clear();
    for (int i = 0; i < 32; i++)
@@ -254,15 +297,15 @@ void DebugDialog::UpdateDebug()
 
       offset = disassembler_.Disassemble(emu_handler_->GetMotherboard(), offset, str_asm);
       str_asm = addr + str_asm;
-      int size_tab = (ADD_SIZE+ASM_SIZE) - str_asm.size();
+      int size_tab = (ADD_SIZE + ASM_SIZE) - str_asm.size();
       if (size_tab > 0)
       {
-         str_asm.append(size_tab, ' ' );
+         str_asm.append(size_tab, ' ');
       }
-      for (unsigned int i = offset_old; i < offset; i++)
+      for (unsigned int j = offset_old; j < offset; j++)
       {
          char b[4];
-         sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(i));
+         sprintf(b, "%2.2X ", emu_handler_->GetMotherboard()->Read8(j));
          str_asm += b;
       }
       item->setText(str_asm.c_str());
@@ -270,18 +313,5 @@ void DebugDialog::UpdateDebug()
 
       //
       offset_old = offset;
-   }
-
-   // Breakpoints list
-   BreakPointHandler* pb_handler = emu_handler_->GetBreakpointHandler();
-   ui->list_breakpoints->clear();
-   // Update breakpoints list
-   for (int i = 0; i < pb_handler->GetBreakpointNumber(); i++)
-   {
-      QListWidgetItem* item = new QListWidgetItem;
-      item->setText(pb_handler->GetBreakpoint(i)->GetLabel());
-      item->setData(Qt::UserRole, i);
-      
-      ui->list_breakpoints->addItem(item);
    }
 }

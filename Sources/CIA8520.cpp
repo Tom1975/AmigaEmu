@@ -1,5 +1,6 @@
 #include "CIA8520.h"
 #include "Motherboard.h"
+#include "Keyboard.h"
 
 #define TODIN     0x80
 #define SPMODE    0x40
@@ -15,10 +16,11 @@
 #define  TA       0x1
 #define  TB       0x2
 #define  ALARM    0x4
-#define  SP       0x5
+#define  SP       0x8
 #define  FLAG     0x10
+#define  IR       0x80
 
-CIA8520::CIA8520(Motherboard* motherboard) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF)
+CIA8520::CIA8520(Motherboard* motherboard, Keyboard * keyboard, unsigned short intreq) : motherboard_(motherboard), alarm_(0), tod_counter_on_(false), pra_(0xFF), prb_(0xFF), intreq_(intreq), keyboard_(keyboard)
 {
 
    Reset();
@@ -37,6 +39,9 @@ void CIA8520::Reset()
    sdr_ = icr_ = cra_ = crb_ = 0;
    icr_mask_ = 0;
    timer_b_latch_ = timer_a_latch_ = 0xFF;
+   sdr_shift_size_ = 0;
+   sp_ = false;
+   flag_ = false;
 }
 
 void CIA8520::Tod()
@@ -49,7 +54,8 @@ void CIA8520::Tod()
          icr_ |= ALARM;
          if (icr_mask_ & ALARM)
          {
-            motherboard_->GetPaula()->Int(8);
+            icr_ |= IR;
+            motherboard_->GetPaula()->Int(intreq_);
          }
       }
    }
@@ -70,20 +76,27 @@ void CIA8520::Tick()
       }
       if (timer_a_ == 0xFFFF)
       {
+         if (cra_ & RUNMODE)
+            cra_ &= ~START;
          icr_ |= TA;
          if (icr_mask_ & TA)
          {
-            motherboard_->GetPaula()->Int(8);
+            icr_ |= IR;
+            motherboard_->GetPaula()->Int(intreq_);
          }
          if ((crb_ & 0x40) == 0x40)
          {
             timer_b_--;
             if (timer_b_ == 0xFFFF)
             {
+               if (crb_ & RUNMODE)
+                  crb_ &= ~START;
+
                icr_ |= TB;
                if (icr_mask_ & TB)
                {
-                  motherboard_->GetPaula()->Int(8);
+                  icr_ |= IR;
+                  motherboard_->GetPaula()->Int(intreq_);
                }
             }
          }
@@ -104,10 +117,14 @@ void CIA8520::Tick()
 
       if (timer_b_ == 0xFFFF)
       {
+         if (crb_ & RUNMODE)
+            crb_ &= ~START;
+
          icr_ |= TB;
          if (icr_mask_ & TB)
          {
-            motherboard_->GetPaula()->Int(8);
+            icr_ |= IR;
+            motherboard_->GetPaula()->Int(intreq_);
          }
       }
    }
@@ -137,10 +154,20 @@ unsigned char CIA8520::In(unsigned char addr)
       return event_/*latched_alarm_ */& 0xFF;
    case 9:
       return (event_/*latched_alarm_ */ >>8) & 0xFF;
-   case 10:
+   case 0xA:
       latched_alarm_ = event_;
       return (latched_alarm_ >>16) & 0xFF;
-
+   case 0xB:
+      // Not connected
+      break;
+   case 0xC:
+      // sdr : todo
+      if (keyboard_ != nullptr /*&& ((cra_ & 0x40) == 0x00)*/) // output mode ?
+      {
+         keyboard_->Handshake();
+      }
+      return sdr_;
+      break;
    case 0xD:
    {
       unsigned char tmp_icr = icr_;
@@ -257,9 +284,31 @@ void CIA8520::Out(unsigned char addr, unsigned char data)
       break;
    case 0xC:
       sdr_ = data;
+      // transmit to keyboard (if any)
+      if (keyboard_ != nullptr && ((cra_ & 0x40)==0x40)) // output mode ?
+      {
+         keyboard_->SendData(sdr_);
+      }
       break;
    case 0xD:
-      icr_mask_ = data;
+   {
+      //icr_mask_ = data;
+      if (data & 0x80)
+         icr_mask_ |= (data & 0x7F);
+      else
+         icr_mask_ &= ((~data) & 0x7F);
+
+      // Check if INT is to be done
+      if (icr_mask_ & icr_)
+      {
+         if (!(icr_ & IR)) 
+         {
+            icr_|= 0x80;
+            motherboard_->GetPaula()->Int(intreq_);
+         }
+      }
+   }
+      
       break;
    case 0xE:
       cra_ = data;
@@ -288,5 +337,44 @@ void CIA8520::HandleControlRegister(unsigned int timer)
          timer_b_ = timer_b_latch_;
       }
       *ctrl &= ~LOAD;
+   }
+}
+
+void CIA8520::Sp(bool set)
+{
+   sp_ = set;
+}
+
+void CIA8520::Flag(bool set)
+{
+   flag_ = set;
+   if (flag_)
+   {
+      icr_ |= FLAG;
+      if (icr_mask_ & FLAG)
+      {
+         icr_ |= IR;
+         motherboard_->GetPaula()->Int(intreq_);
+      }
+   }
+
+}
+
+void CIA8520::Cnt(bool set)
+{
+   // Clock : add the current sp to sdr
+   sdr_ <<= 1;
+   sdr_ |= (sp_) ? 1 : 0;
+   if (++sdr_shift_size_ == 8)
+   {
+      sdr_shift_size_ = 0;
+      // Int
+      icr_ |= SP;
+      if (icr_mask_ & SP)
+      {
+         icr_ |= IR;
+         motherboard_->GetPaula()->Int(intreq_);
+      }
+      
    }
 }

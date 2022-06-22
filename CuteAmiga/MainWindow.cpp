@@ -13,11 +13,16 @@ MainWindow::MainWindow(QWidget *parent) :
    copper_(this),
    exec_(this),
    bitplane_(this),
+   disk_debug_(this), 
    ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
 
+   ui->display_->SetDragnDropTarget(this);
+   
    emu_handler_ = new AmigaEmulation(ui->display_);
+
+   ui->display_->SetHardwareIO(emu_handler_->GetHardwareIO());
 
    // Menu connection
    connect(ui->actionReset, &QAction::triggered, emu_handler_, &AmigaEmulation::Reset);
@@ -26,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(ui->actionCopper, &QAction::triggered, this, &MainWindow::Copper);
    connect(ui->actionExec, &QAction::triggered, this, &MainWindow::Exec);
    connect(ui->actionBitplane, &QAction::triggered, this, &MainWindow::Bitplane);
+   connect(ui->actionDisk, &QAction::triggered, this, &MainWindow::DiskDebug);
    connect(ui->actionInsert_disk_df0, &QAction::triggered, this, &MainWindow::InsertDisk);
 
    connect(ui->display_, SIGNAL(Update()),
@@ -37,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
    copper_.SetEmulator(emu_handler_);
    exec_.SetEmulator(emu_handler_);
    bitplane_.SetEmulator(emu_handler_);
+   disk_debug_.SetEmulator(emu_handler_);
 
    // status bar
    led_on_ = new QPixmap(":/Images/led_on.png");
@@ -105,6 +112,12 @@ void MainWindow::SaveConfig()
       }
    }
    settings.setValue("breakpoints/number", nb_breapkoints_saved);
+
+   // Disk status (df0-df3)
+   if (df0_path_.length() > 0)
+   {
+      settings.setValue("disk/df0_path_file", df0_path_);
+   }
 }
 
 void MainWindow::LoadConfig()
@@ -124,6 +137,17 @@ void MainWindow::LoadConfig()
       pb_handler->CreateBreakpoint(str.c_str());
    }
    
+   // Disk status (df0-df3)
+   Motherboard* mb = emu_handler_->GetMotherboard();
+   if (df0_path_.length() > 0)
+   {
+      df0_path_ = settings.value("disk/df0_path_file", 0).toString();
+      Disk* disk = new Disk(df0_path_.toStdString());
+      if (disk->IsValid())
+      {
+         mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+      }
+   }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -143,6 +167,7 @@ void MainWindow::Break()
    copper_.Update();
    exec_.Update();
    bitplane_.Update();
+   disk_debug_.Update();
 }
 
 void MainWindow::Copper ()
@@ -169,6 +194,13 @@ void MainWindow::Bitplane()
    bitplane_.show();
 }
 
+void MainWindow::DiskDebug()
+{
+   disk_debug_.Update();
+   disk_debug_.show();
+}
+
+
 void MainWindow::InsertDisk()
 {
    // Select file to open
@@ -181,7 +213,17 @@ void MainWindow::InsertDisk()
    Motherboard* mb = emu_handler_->GetMotherboard();
 
    Disk* disk = new Disk (filename.toStdString());
-   mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+   if (disk->IsValid())
+   {
+      mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+      // Update df0 config
+      df0_path_ = filename;
+   }
+   else
+   {
+      df0_path_ = "";
+      delete disk;
+   }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -203,4 +245,28 @@ void MainWindow::Update()
       icondrive_[i].setPixmap( mb->GetDriveLed(i)?*drive_led_on_:*drive_led_off_);
    }
 
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Drag'n'Drop
+/////////////////////////////////////////////////////////////////////////////
+void MainWindow::OpenFiles(const QStringList& pathList)
+{
+   for (int i = 0; i < pathList.size() && i < 4; ++i)
+   {
+      // Load first 4 files ( df0 to df3 )
+      Motherboard* mb = emu_handler_->GetMotherboard();
+      Disk* disk = new Disk(pathList[i].toStdString(), emu_handler_);
+      if (disk->IsValid())
+      {
+         mb->GetDiskController()->GetDiskDrive(0)->InsertDisk(disk);
+         // Update df0 config
+         df0_path_ = pathList[i];
+      }
+      else
+      {
+         df0_path_ = "";
+         delete disk;
+      }
+   }
 }

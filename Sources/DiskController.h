@@ -1,7 +1,8 @@
 #pragma once
 
+#include "ILogger.h"
 #include "DiskDrive.h"
-
+#include "CIA8520.h"
 
 class DiskController
 {
@@ -10,9 +11,12 @@ public:
    DiskController();
    virtual ~DiskController();
 
+   void Init(ILogger* log, CIA8520* cia);
    void Reset();
 
    // Set signals
+   void SetCmd(unsigned char data, unsigned char mask);
+
    void SetSEL0(bool set);
    void SetSEL1(bool set);
    void SetSEL2(bool set);
@@ -38,8 +42,12 @@ public:
 
    DiskDrive* GetDiskDrive(int drive);
 
-private:
+   // To be redefined, once we have a rolling drive, etc.
+   unsigned short ReadNextWord();
 
+private:
+   ILogger* logger_;
+   CIA8520* cia_;
    ////////////////////////////////
    // Various registers
    bool mtr_;
@@ -48,6 +56,7 @@ private:
    bool sel_2_;
    bool sel_3_;
 
+   bool step_;
    ////////////////////////////////
    // Indentification register
    unsigned long identification_;

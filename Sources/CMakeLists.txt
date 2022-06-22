@@ -11,13 +11,17 @@ file( GLOB HEADERS
 
 set(EXTRA
    TODO.txt
+   "../Notes/BattleSquadron.asm"
 	"../Notes/DMA.txt"
    "../Notes/Kickstart 1.2.asm"
+   "../Notes/kickstart.txt"
+   "../Notes/RSI_Megademo.asm"
+   "../Notes/Structures.txt"
    )
-
 source_group("Docs" FILES ${EXTRA} )
 
 add_library(AmigaCore ${SRCS} ${HEADERS} ${EXTRA})
+target_compile_features(AmigaCore PRIVATE cxx_std_17)
 
 set(CompilerFlags
         CMAKE_CXX_FLAGS

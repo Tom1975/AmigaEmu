@@ -2,19 +2,28 @@
 #include <cstdio>
 #include <string>
 
+#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
+
 #include "Disassembler68k.h"
 
-Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this), cia_b_(this), led_(false)
+#define TickCDAC_UP denise_.TickCDACUp();
+#define TickCDAC_DOWN 
+#define Tick28Mhz_UP //agnus_.TickUp();
+#define Tick28Mhz_Down //agnus_.TickDown();
+
+Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, &keyboard_, 8), cia_b_(this, nullptr, 0x2000), led_(false), logger_(nullptr), count_Keyboard_(0)
 {
    m68k_.SetBus(&bus_);
+   keyboard_.SetCIA(&cia_a_);
    bus_.SetCIA(&cia_a_, &cia_b_);
    bus_.SetDMAControl(&dma_control_);
    bus_.SetCustomChips(&agnus_, &denise_, &paula_, &bitplanes_);
    bus_.SetRom(rom_);
    bitplanes_.Init(this);
    paula_.SetIntPin(m68k_.GetIntPin());
+   paula_.SetDiskController(&drive_);
    agnus_.Init(this);
-   denise_.Init(&bitplanes_, &agnus_.diwstrt_, &agnus_.diwstop_);
+   denise_.Init(this , &bitplanes_, &agnus_.diwstrt_, &agnus_.diwstop_);
 
    monitor_.InitLines(agnus_.GetVsync(), agnus_.GetHsync(), &denise_);
 }
@@ -22,10 +31,14 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this)
 Motherboard::~Motherboard()
 = default;
 
-bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware)
+bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger)
 {
+   logger_ = logger;
    frame_ = frame;
    denise_.SetDisplayFrame(frame_);
+   drive_.Init(logger, &cia_b_);
+   m68k_.InitLog(logger);
+   bus_.InitLog(logger_);
    hardware_ = hardware;
    monitor_.InitScreen(frame);
    // Load ROM
@@ -79,10 +92,16 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware)
 
 void Motherboard::VSync()
 {
+   // *** HACK : Add sprites here. TODO : remove and make it correct !
+   if ((dma_control_.dmacon_ & 0x220) == 0x220)
+      denise_.DrawSprites();
+
    frame_->VSync();
    // CIA-A TOD
    cia_a_.Tod();
    //agnus_.GetCopper()->VerticalRetraceBegin();
+
+   denise_.StrVbl();
 
    // Int VBlank
    paula_.Int(0x20);
@@ -166,22 +185,7 @@ void Motherboard::WriteCiaPort(CIA8520* cia, bool a, unsigned char data, unsigne
       else
       {
          // PRB
-         if (mask&0x80)
-            drive_.SetMTRON((data & 0x80) == 0x10);
-         if (mask & 0x40)
-            drive_.SetSEL3((data & 0x40) == 0x00);
-         if (mask & 0x20)
-            drive_.SetSEL2((data & 0x20) == 0x00);
-         if (mask & 0x10)
-            drive_.SetSEL1((data & 0x10) == 0x00);
-         if (mask & 0x08)
-            drive_.SetSEL0((data & 0x08) == 0x00);
-         if (mask & 0x04)
-            drive_.SetSIDE((data & 0x04) == 0x00);
-         if (mask & 0x02)
-            drive_.SetDIR((data & 0x02) == 0x00);
-         if (mask & 0x01)
-            drive_.SetSTEP((data & 0x01) == 0x00);
+         drive_.SetCmd(data, mask);
       }
    }
 }
@@ -208,6 +212,13 @@ void Motherboard::Tick7Mhz(bool up)
          cia_a_.Tick();
          cia_b_.Tick();
       }
+
+      count_Keyboard_++;
+      if (count_Keyboard_ == 7*40)
+      {
+         count_Keyboard_ = 0;
+         keyboard_.Tick();
+      }      
    }
    // Denise
 }
@@ -215,7 +226,10 @@ void Motherboard::Tick7Mhz(bool up)
 void Motherboard::TickCDAC(bool up)
 {
    // Denise
-   denise_.TickCDAC(up);
+   if (up)
+      denise_.TickCDACUp();
+   else
+      denise_.TickCDACDown();
    // Gary
 }
 
@@ -245,7 +259,17 @@ void Motherboard::TickCCKQ(bool up)
 void Motherboard::TickDebug()
 {
    static bool up_tick = false;
-   Tick28Mhz(up_tick);
+
+   //Tick28Mhz(up_tick);
+   if (up_tick)
+   {
+      Tick28Mhz_UP
+   }
+   else
+   {
+      Tick28Mhz_Down
+   }
+
    up_tick = !up_tick;
    switch ((debug_count_++)&0xF)
    {
@@ -255,7 +279,7 @@ void Motherboard::TickDebug()
       break;
    case 2:
    case 10:
-      TickCDAC(true);
+      TickCDAC_UP
       
       break;
    case 4:
@@ -265,7 +289,7 @@ void Motherboard::TickDebug()
       break;
    case 6:
    case 14:
-      TickCDAC(false);
+      TickCDAC_DOWN
       break;
    case 8:
       TickCCK(true);
@@ -295,63 +319,63 @@ void Motherboard::Tick()
    // Here is 8 ticks (8 down, 8 up) of the main clock
    // 28 Mhz down
    // This is ~285ns (1 pixel clock tick)
-   Tick28Mhz(false);
+   TickCDAC_DOWN
          // CCK down
    TickCCK(false);
       // 7MHZ down
    Tick7Mhz(false);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down 
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC up
-   TickCDAC(true);
+   TickCDAC_UP
    //monitor_.Tick();
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down 
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CCKQ down
    TickCCKQ(false);
       // 7MHZ up
    Tick7Mhz(true);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC down
-   TickCDAC(false);
+   TickCDAC_DOWN
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
          // CCK up
    TickCCK(true);
       // 7MHZ down
    Tick7Mhz(false);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC up
-   TickCDAC(true);
+   TickCDAC_UP
    //monitor_.Tick();
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CCKQ up
    TickCCKQ(true);
       // 7MHZ up
    Tick7Mhz(true);
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
    // 28 Mhz down
-   Tick28Mhz(false);
+   TickCDAC_DOWN
       // CDAC down
-   TickCDAC(false);
+   TickCDAC_DOWN
    // 28 Mhz up
-   Tick28Mhz(true);
+   Tick28Mhz_UP
 
 
    // Monitor : 28/16

@@ -1,4 +1,5 @@
 ﻿#include "AmigaEmulation.h"
+#include<QDebug>
 
 AmigaEmulation::AmigaEmulation(DisplayFrame* frame) : run_(false), frame_(frame)
 {
@@ -21,7 +22,7 @@ void AmigaEmulation::Start()
 {
    current_function_ = &AmigaEmulation::RunStep;
 
-   if (motherboard_->Init(frame_, &hardware_io_))
+   if (motherboard_->Init(frame_, &hardware_io_, this))
    {
       // Create thread with emulation handling
       emulation_thread_ = std::thread(Begin, this);
@@ -196,4 +197,32 @@ void AmigaEmulation::RemoveBreakpoint(unsigned int bp_to_remove)
          return;
       }
    }
+}
+/*
+template <typename T>
+void func(T t)
+{
+   std::cout << t << std::endl;
+}
+
+template<typename T, typename... Args>
+void func(T t, Args... args) // recursive variadic function
+{
+   std::cout << t << std::endl;
+
+   func(args...);
+}
+*/
+void AmigaEmulation::Log(Severity severity, const char* msg...)
+{
+   char buffer[256];
+   va_list args;
+
+   va_start(args, msg);
+   vsprintf_s(buffer, 256, msg, args);
+
+   qDebug() << buffer;
+
+   va_end(args);
+
 }

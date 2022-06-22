@@ -9,6 +9,8 @@
 #include "Denise.h"
 #include "Agnus.h"
 #include "DiskController.h"
+#include "Keyboard.h"
+#include "ILogger.h"
 
 class HardwareIO
 {
@@ -24,7 +26,7 @@ public :
    virtual ~Motherboard();
 
    // Init and settings
-   bool Init(DisplayFrame* frame, HardwareIO* hardware);
+   bool Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger );
 
    // Access 
    M68k* GetCpu() { return &m68k_; }
@@ -33,7 +35,7 @@ public :
    Denise* GetDenise() { return &denise_; }
    Paula* GetPaula() { return &paula_; }
    DiskController* GetDiskController() { return &drive_; }
-
+   ILogger* GetLogger() { return logger_; }
    Bitplanes * GetBitplanes() { return &bitplanes_; }
 
    unsigned char* GetRom () { return rom_; }
@@ -85,6 +87,9 @@ protected:
    CIA8520 cia_a_;
    CIA8520 cia_b_;
 
+   unsigned int count_Keyboard_;
+   Keyboard keyboard_;
+
    DiskController drive_;
 
    DMAControl dma_control_;
@@ -98,4 +103,6 @@ protected:
    HardwareIO* hardware_;
 
    DisplayFrame* frame_;
+
+   ILogger* logger_;
 };

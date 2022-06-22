@@ -40,7 +40,14 @@ void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment
          current_register_ = usp_;
       }
    }
-   
+   //Init();
+   address_to_write_ = *current_register_;
+   address_to_read_ = *current_register_;
+   offset_ = 0;
+}
+
+void AMAddress::Init()
+{
    if (increment_ == DECREMENT_PRE)
    {
       switch (operand_size_)
@@ -54,8 +61,8 @@ void AMAddress::Init(unsigned int reg_number, Size size, IncrementType increment
    address_to_write_ = *current_register_;
    address_to_read_ = *current_register_;
    offset_ = 0;
-}
 
+}
 
 void AMAddress::Complete()
 {
@@ -231,13 +238,51 @@ void AMAddress::Add(AddressingMode* source, unsigned short& sr)
 
 void AMAddress::Sub(AddressingMode* source, unsigned short& sr)
 {
-   // todo
-   //input_ = this->GetU32() + source->GetU32();
+   unsigned int sm, dm, rm;
+   sm = 0;
+   dm = result_;
+
+   unsigned int old_value = result_;
+   unsigned int mask = 0;
+   unsigned int data;
+   switch (source->GetSize())
+   {
+   case Byte:
+      sm = (unsigned char)source->GetU8();
+      rm = (unsigned char)dm - (unsigned char)sm;
+      break;
+   case Word:
+      sm = (unsigned short)source->GetU16();
+      rm = (unsigned short)dm - (unsigned short)sm;
+      break;
+   case 2:
+      written_input_ = 2;
+      sm = source->GetU32();
+      rm = dm - sm;
+      break;
+   }
+   input_ = rm;
+   address_to_write_ = *current_register_;
+
+   // flags 
+   ComputeFlagsSub(sr, sm, dm, rm, size_);
 }
 
 void AMAddress::Not(unsigned short& sr)
 {
-   // todo
+   switch (size_)
+   {
+   case Byte:
+      input_ = ~(GetU8());
+      break;
+   case Word:
+      input_ = ~(GetU16());
+      break;
+   case Long:
+      input_ = ~(GetU32());
+      break;
+   }
+   // todo : addflags
    //input_ = ~(this->GetU32());
    //ComputeFlagsNul(sr, input_, size_);
 }
@@ -260,13 +305,27 @@ void AMAddress::Or(AddressingMode* source, unsigned short& sr)
 
 void AMAddress::Subq(unsigned char data, unsigned char size, unsigned short& sr)
 {
-   unsigned int new_value;
-   unsigned int old_value;
+   unsigned int old_value = result_;
 
-   old_value = *current_register_;
-   *current_register_ -= data;
-   new_value = *current_register_;
+   switch (size_)
+   {
+   case Byte:
+      written_input_ = 1;
+      result_ -= data;
+      break;
+   case Word:
+      written_input_ = 1;
+      result_ -= data;
+      break;
+   case 2:
+      written_input_ = 2;
+      result_ -= data;
+      break;
+   }
+   input_ = result_;
 
-   ComputeFlags(sr, old_value, new_value, data);
+   address_to_write_ = *current_register_;
+
+   ComputeFlags(sr, old_value, result_, data);
 }
 

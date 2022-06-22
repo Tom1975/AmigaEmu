@@ -14,6 +14,7 @@ public :
    // Configuration and pin connections
    void SetBus(Bus* bus);
 
+   void InitLog(ILogger* log) {logger_ = log;}
    // Action
    void Reset();
    void Tick();
@@ -86,11 +87,14 @@ protected:
    // Generic bus
    Bus*              bus_;       // Bus connection
 
+   // Logger
+   ILogger*          logger_;    // Logger
+
    unsigned char     int_;    // interruption level
 
    //////////////////////////////////////////////////
    // Internal functions
-   enum
+   enum class Phase
    {
       STATE_FETCH,
       STATE_DECODE,
@@ -258,6 +262,7 @@ protected:
    unsigned int DecodeAdd();
    unsigned int DecodeAddA();
    unsigned int DecodeAddq();
+   unsigned int DecodeAddX();
    unsigned int DecodeAndToSr();
    unsigned int DecodeAndiToCcr();
    unsigned int DecodeAsd2();
@@ -273,6 +278,7 @@ protected:
    unsigned int DecodeCmpm();
    unsigned int DecodeDBcc();
    unsigned int DecodeDivu();
+   unsigned int DecodeDivs();
    unsigned int DecodeEoriToCcr();
    unsigned int DecodeEoriSr();
    unsigned int DecodeExg();
@@ -286,6 +292,8 @@ protected:
    unsigned int DecodeMove();
    unsigned int DecodeMoveFromSr();
    unsigned int DecodeMoveToSr();
+   unsigned int DecodeMoveCcr();
+   unsigned int DecodeMoveToCcr();
    unsigned int DecodeMovem();
    unsigned int DecodeMovembis();
    unsigned int OpcodeMovemWrite();
@@ -301,6 +309,7 @@ protected:
    unsigned int DecodeReset();
    unsigned int DecodeRod();
    unsigned int DecodeRod2();
+   unsigned int DecodeRoxd2();
    unsigned int DecodeRte();
    unsigned int DecodeRts();
    unsigned int DecodeScc();
@@ -311,6 +320,7 @@ protected:
    unsigned int DecodeSubq();
    unsigned int DecodeSubX();
    unsigned int DecodeSwap();
+   unsigned int DecodeTrap();
    unsigned int DecodeTst();
    unsigned int DecodeUnlk();
 
@@ -327,6 +337,7 @@ protected:
    unsigned int OpcodeAdd();
    unsigned int OpcodeAddA();
    unsigned int OpcodeAddq();
+   unsigned int OpcodeAddX();
    unsigned int OpcodeAnd();
    unsigned int OpcodeBcc();
    unsigned int OpcodeBchg();
@@ -355,6 +366,8 @@ protected:
    unsigned int OpcodeMove();
    unsigned int OpcodeMoveFromSr();
    unsigned int OpcodeMoveToSr();
+   unsigned int OpcodeMoveFromCcr();
+   unsigned int OpcodeMoveToCcr();
    unsigned int OpcodeMovem();
    unsigned int OpcodeMovem2();
    unsigned int OpcodeMoveUsp();
@@ -362,19 +375,24 @@ protected:
    unsigned int OpcodeMulu();
    unsigned int OpcodeMuls();
    unsigned int OpcodeNeg();
+   unsigned int OpcodeNegX();
    unsigned int OpcodeNot();
    unsigned int OpcodeNop();
    unsigned int OpcodeOr();
    unsigned int OpcodePea();
    unsigned int OpcodeReset();
    unsigned int OpcodeRod();
+   unsigned int OpcodeRodXd();
    unsigned int OpcodeRte();
    unsigned int OpcodeRte2();
    unsigned int OpcodeRts();
    unsigned int OpcodeStop();
    unsigned int OpcodeStop2();
    unsigned int OpcodeSub();
+   unsigned int OpcodeSubA();
+   unsigned int OpcodeSubI();
    unsigned int OpcodeSubq();
+   unsigned int OpcodeSubX();
    unsigned int OpcodeTst();
    unsigned int OpcodeUnlk();
 
@@ -427,6 +445,7 @@ protected:
    static Func Lsd2_[];
    static Func Move_[];
    static Func MoveFromSr_[];
+   static Func MoveFromCcr_[];
    static Func MoveToCcr_[];
    static Func MoveToSr_[];
    static Func Movem_[];

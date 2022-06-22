@@ -16,7 +16,21 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 // CMP
-TEST(Cpu68k, CmpI)
+TEST(DISABLED_Cpu68k, CPU_CMP)
+{
+   // TODO
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// CMPA
+TEST(DISABLED_Cpu68k, CPU_CMPA)
+{
+   // TODO
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// CMPI
+TEST(Cpu68k, CPU_CMPI)
 {
    unsigned int data_register_array[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
    unsigned int pc = 0;
@@ -37,3 +51,30 @@ TEST(Cpu68k, CmpI)
    data_register.Cmp(0x3E, sr, true);
    ASSERT_EQ(sr, 0x0); //  !N, !Z, !V, !C
 }
+
+TEST(Cpu68k, CPU_CMP_b_An_p_D) // CMP.B (A2)+, D1
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetAddressRegister(2, 0x200);
+   test_engine.Get68k()->SetDataRegister(1, 0x00);
+   test_engine.Get68k()->SetDataSr(0x2000);
+   unsigned char* ram = test_engine.GetRam();
+   for (int i = 0; i < 0x10; i++)
+   {
+      ram[0x200+i] = i;
+   }
+   
+   unsigned char opcode[] = { 0xB2, 0x1A}; // CMP.B (A2)+, D1
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(2), 0x201);
+   ASSERT_EQ(test_engine.Get68k()->GetDataSr(), 0x2004);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// CMPM
+TEST(DISABLED_Cpu68k, CPU_CMPM)
+{
+   // TODO
+}
+

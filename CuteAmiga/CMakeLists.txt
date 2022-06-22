@@ -22,13 +22,15 @@ file( GLOB HEADERS
 	"*.h"
 )
 
+
 set ( UIS
  BitplaneDialog.ui
- mainwindow.ui
- DebugDialog.ui
- MemoryDialog.ui
  CopperDialog.ui
- ExecDialog.ui
+ DebugDialog.ui
+ DiskDialog.ui
+ ExecDialog.ui  
+ mainwindow.ui
+ MemoryDialog.ui
 )
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Sources )
@@ -55,6 +57,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DSFML_STATIC ")
 qt5_add_resources(QRCS resources.qrc)
 
 add_executable (CuteAmiga WIN32 ${SRCS} ${HEADERS} ${UI_HEADERS} ${UIS} ${QRCS})
+
+target_compile_features(CuteAmiga PRIVATE cxx_std_17)
 
 target_link_libraries(CuteAmiga ${Qt5Widgets_LIBRARIES} Qt5::Core Qt5::Widgets 
 						AmigaCore

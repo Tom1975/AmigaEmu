@@ -1,65 +1,66 @@
-*** Dessin kickstart :
-
-Bitplane 1 : A4BA , lg FA0 => A4BA to B45A
-Bitplane 2 : C3FA , lg FA0 => C3FA to D39A
-
-Dessin : b5ce = 0044 au lieu de 004?? 
-=> Blit : draw line (next byte : fe8e40) 
-cbea/2015 - size : 2-b
+## ## ## ## ## 
+## Chargement Workbench : 
+1ba62 : not.b (A0)+ => no effect !
 
 
-Dbg : 
-1er FLOOD: 25h / 45h => CEC2
+Chargement : (bp sur FEA8D6)
+* 0; 0; 40; 71-1; 40-0; 57; 51-1; 54-0; 40; 50-1; 53-0; 51; 53 (??)
 
-FC56D6: btst D1, ($18,A1) => FF a a1+18 => flag  14 (0 attendu) 
+## ## ## ## ## 
+## TEST SHROTS2
+70090 asr d1,d0 => Clear X
 
-=> Lors du flood : Ecriture nécessaire (non faite) sur CC1A et +
-Blits : 
-bltcon0/1     addr d   size (wh)	  From
-- 0100/0000 - e33a     	14-c8			FC5BE8
-- 0100/0000 - 10400    	14-c8           FC5BE8
-- 071a/0002 - 10278		14-c8 			FC75EA
-- 072a/0002 - 10278     14-c8			FC75EA
-- 0100/0000 - 10400     20-1			FC54CA
-- 0100/0000 - 1043e		40-3e			FC54EC
-- 073a/0002 - 10278		14-c8			FC54EC
-- 03ca/0000 - f426		1-1				FC570E
-- 03ca/0000 - f44e		1-1				FC570E
-- 03ca/0000 - f476		1-1				FC570E
-- 03ca/0000 - f426		1-1				FC570E
-- 03ca/0000 - f3fe		1-1				FC570E
-- 03ca/0000 - f3fe		1-1				FC570E
-- 03ca/0000 - f3d6		2-1				FC570E
-- 03ca/0000 - f3ae		2-1				FC570E
-- 03ca/0000 - f386		2-1				FC570E
-- 03ca/0000 - f35e		2-1				FC570E
-- 03ca/0000 - f336		2-1				FC570E
-- 03ca/0000 - f30e		2-1				FC570E
-- 03ca/0000 - f2e6		2-1				FC570E
-- 03ca/0000 - f2be		2-1				FC570E
-- 03ca/0000 - f296		2-1				FC570E
-- 03ca/0000 - f26e		2-1				FC570E
-...
-- 03ca/0000 - f1ce		7-1				FC570E
-f1fa - 5-1
-f222 5-1
-f252
-f27a
-.. (many)
--> Blit to bitplane :
-- 0b2a/0000 - a4ba		14-c8			FC5DA0 *** bitplane 1 ! (a:10400 - b : e33a - c: a4ba - d: a4ba
-- 0bea/0000 - c3fa		14-c8			FC5DA0 *** bitplane 2 !
-==> 10c00 not correcly blit !
+## ## ## ## ## 
+## HYBRIS : 
 
-Ecran : 0x28 byte / row;
-Rows : 0xC8
+## ## ## ## ## 
+## LOTUS : 
+1086 Test sur RDY avec moteur eteint ? (pour STEP) puis TRK0 ?
 
-Stride : 40 (28h)  egalement ?
 
-On observe : 
-30 octets lu (lorsque hc = 227... !)
+## ## ## ## ## 
+## Battle Squadron (1989)(Innerprise)[cr TIC][t Freestyle]
 
-SYNCHRO LOGIQUE : 
+3c062 : Clic souris ! !! warning sur executions ???
+... 
+7f056 ok (?)
+100 ok
+15A : EORI 2700, SR => ??  
+
+0003C454: subq.w #1, 3C484          53 79 00 03 C4 84  => Pas de sub + flags incorrects => A TESTER
+
+## ## ## ## ## 
+## Chargement Shadow of the beast : Guru
+
+5bac : OK !
+5B88 ok
+5bbc ok
+5BC4 ok
+5BD6 ok (pas de pb sur cmp)
+5BFA ok
+5c0C : 5c0C (test potgor) => not Z !
+
+*** FC1162  move      USP,SP            Load user stack pointer. =>> SSP devrait être positionné ici (mais ça fait planter le début du kickstart...)
+
+###
+A VERIFIER :
+LSD/LSD2/ROd/ROD2 => Flags... 
+CIA : effet CRA-TODIN ?
+###
+*** Checksum header 
+	retour : D0 = 1b (TDERR_BadSecHdr)
+==> AAAA AAAA 4489 4489 
+==> Header : FF00000B => 11111111 00000000 00000000 00001011
+	odd  : 1x1x1x1x 0x0x0x0x 0x0x0x0x 0x0x1x1x 
+	=> 1111000000000011
+	MFM :01010101 00101010 10101010 10100101
+	=> 552A AAA5
+	even : x1x1x1x1 x0x0x0x0 x0x0x0x0 x0x0x0x1 
+	=> 1111000000000001
+	MFM :  01010101 00101010 10101010 10101001
+	=> 552A AA A9
+==> Ecriture ok.
+*** CHECKUM HEADER OK
 
 *** agnus & timing
 horizontal counter agnus : increment tous les ticks CCK (up)
@@ -79,207 +80,153 @@ Fonctionnement de l'écran :
 Si ve > vp, return true.
 
 
-FC5A04=> TEST BBUSY => "Your confusion comes from the BTST semantics. This instruction, when the operand is in memory, always operates on bytes. So, BTST #6,DMACON(a6) is testing bit 6 of the BYTE at adress DMACON+$dff000, which is the upper byte of the register DMACON. So, it tests bit 14 of DMACON, which is BBusy flag.
-The bits in INTENA/REQ are blitter interrupt requests, I would not use them for the purpose of waiting for the blitter to finish."
 
-=> 0xFC0B28 (InitResident)
-FC4afc (expansion.library)	: 
-FE4880 (potgo.resource)		: 
-FE4FE4 (keymap.resource)	:
-FC450C (cia.resource)		:
-FC4794 (disk.resource)		: Ok
-FE4774 (misc.resource)		: Ok 
-FC5378 (graphics.library)	: 
-( jusqu'a FCAC92 ok)
-FE502E (keyboard.device)	: Ok => everything seems ok 
-FE507A (gameport.device)	: 
-FE90EC (timer.device)		: 
-FC34CC (audio.device)		:
-FE50C6 (input.device)		:
-FE0D90 (layers.library)		: Ok => everything seems ok 
-FE510E (console.device) 	: 
-FE98E4 (trackdisk.device)	: (un décalage existe) 
-FD3F5C (intuition.library)  : 
-FC323A (alert.hook) 		: 
-FE424C (mathffp.library)	: 
-(FEB400) (workbench.task)
-(FF425A) (dos)
-FE8884 (strap.strap) 		: bloqué (init FE88D6 
-end.
-
-###
-A VERIFIER :
-LSD/LSD2/ROd/ROD2 => Flags... 
-CIA : effet CRA-TODIN ?
-###
-
-Erreur sur les affichages : 
-Addresses de bitplanes incorrectes () et incrément sans limite = error !
-DMACON fixé vers ici FCAF18
-Copper list 2 fixée ici :FC6D00
-Plus particulierement sur l'uinterrupt handler
-FC6CDC
-
-
-********************************
-STRUCTURES
-*********************
-; the 5E9A buffer  (allocated in FE8BBA ) is a big structure that containts : 
-; A3E0 is base addres
-struct{
-	ViewPort viewport; 	// 40 bytes  - A3E0
-	View view;			// 18 bytes  - A408
-	RastPort rastport;	// 100 bytes - A41A
-	TmpRas tmpras		// 8 bytes 	 - A47E
-	RasInfo rasinfo		// 12 bytes  - A486
-	Bitmap bmp	 		// 40 bytes  - A492
-	char[] b1				// 1F40 byte - A4BA
-	char[] b2				// 1F40 byte - C3FA
-	char[] b3				// 1F40 byte = E33A
-	// 12 bytes
-};
-
-A5 : offset 08: ViewPort *
-	 offset 0C: View*
-	 offset 10: RastPort *
-	 offset 14: TmpRas *
-	 offset 18: RasInfo*
-	 offset 1C: bitmap*
-	 offset 20: char*
-	 offset 24: char*
-	 offset 28: char*...
-;
-
-struct ViewPort (size : 0x28)
-{
-   struct   ViewPort *Next;
-   struct   ColorMap  *ColorMap;    /* table of colors for this viewport */
-		  /* if this is nil, MakeVPort assumes default values */
-   struct   CopList  *DspIns;	    /* user by MakeView() */
-   struct   CopList  *SprIns;	    /* used by sprite stuff */
-   struct   CopList  *ClrIns;	    /* used by sprite stuff */
-   struct   UCopList *UCopIns;	    /* User copper list */
-   WORD    DWidth,DHeight;
-   WORD    DxOffset,DyOffset;
-   UWORD    Modes;
-   UBYTE	SpritePriorities;		/* used by makevp */
-   UBYTE	ExtendedModes;
-   struct   RasInfo *RasInfo;
-};
-
-struct View (size : 0x12)
-{
-   struct ViewPort *ViewPort;
-   struct cprlist *LOFCprList;	 /* used for interlaced and noninterlaced */
-   struct cprlist *SHFCprList;	 /* only used during interlace */
-   WORD DyOffset,DxOffset;   /* for complete View positioning */
-			      /* offsets are +- adjustments to standard #s */
-   UWORD   Modes;	      /* such as INTERLACE, GENLOC */
-};
-
-struct RasInfo	/* used by callers to and InitDspC() */
-{
-   struct   RasInfo *Next;	    /* used for dualpf */
-   struct   BitMap *BitMap;
-   WORD    RxOffset,RyOffset;	   /* scroll offsets in this BitMap */
-};
-
-struct TmpRas
-{
-    BYTE *RasPtr;
-    LONG Size;
-};
-
-typedef UBYTE *PLANEPTR;
-struct BitMap (size : 40)
-{
-    UWORD   BytesPerRow;
-    UWORD   Rows;
-    UBYTE   Flags;
-    UBYTE   Depth;
-    UWORD   pad;
-    PLANEPTR Planes[8];
-};
-
-struct RastPort
-{
-    struct  Layer  *Layer;
-    struct  BitMap *BitMap;
-    UWORD          *AreaPtrn;  /* Ptr to areafill pattern */
-    struct  TmpRas *TmpRas;
-    struct  AreaInfo *AreaInfo;
-    struct  GelsInfo *GelsInfo;
-    UBYTE   Mask;              /* Write mask for this raster */
-    BYTE    FgPen;             /* Foreground pen for this raster */
-    BYTE    BgPen;             /* Background pen  */
-    BYTE    AOlPen;            /* Areafill outline pen */
-    BYTE    DrawMode;          /* Drawing mode for fill, lines, and text */
-    BYTE    AreaPtSz;          /* 2^n words for areafill pattern */
-    BYTE    linpatcnt;         /* Current line drawing pattern preshift */
-    BYTE    dummy;
-    UWORD   Flags;             /* Miscellaneous control bits */
-    UWORD   LinePtrn;          /* 16 bits for textured lines */
-    WORD    cp_x, cp_y;	       /* Current pen position */
-    UBYTE   minterms[8];
-    WORD    PenWidth;
-    WORD    PenHeight;
-    struct  TextFont *Font;    /* Current font address */
-    UBYTE   AlgoStyle;         /* The algorithmically generated style */
-    UBYTE   TxFlags;           /* Text specific flags */
-    UWORD   TxHeight;          /* Text height */
-    UWORD   TxWidth;           /* Text nominal width */
-    UWORD   TxBaseline;        /* Text baseline */
-    WORD    TxSpacing;         /* Text spacing (per character) */
-    APTR    *RP_User;
-    ULONG   longreserved[2];
-#ifndef GFX_RASTPORT_1_2
-    UWORD   wordreserved[7];   /* Used to be a node */
-    UBYTE   reserved[8];       /* For future use */
-#endif
-};
-
-
-1F12 => ID lecteurs
-unsigned int id_lecteur_0
-unsigned int id_lecteur_1
-unsigned int id_lecteur_2
- 
-
-
-;struct Node {
-;    struct  Node *ln_Succ;	/* Pointer to next (successor) */
-;    struct  Node *ln_Pred;	/* Pointer to previous (predecessor) */
-;    UBYTE   ln_Type;
-;    BYTE    ln_Pri;		/* Priority, for sorting */
-;    char    *ln_Name;		/* ID string, null terminated */
-;};
-;struct MsgPort {
-;    struct  Node mp_Node;
-;    UBYTE   mp_Flags;
-;    UBYTE   mp_SigBit;		/* signal bit number	*/
-;    void   *mp_SigTask;		/* object to be signalled */
-;    struct  List mp_MsgList;	/* message linked list	*/
-;};
-;
-;struct Message {
-;    struct  Node mn_Node;
-;    struct  MsgPort *mn_ReplyPort;  /* message reply port */
-;    UWORD   mn_Length;		    /* total message length, in bytes */
-;				    /* (include the size of the Message */
-;				    /* structure in the length) */
-;};
-;;struct IORequest {
-;    struct  Message io_Message; (size = 14 + 4 + 2) = 20
-;    struct  Device  *io_Device;     /* device node pointer  */ 4 
-;    struct  Unit    *io_Unit;	    /* unit (driver private)*/ 4 
-;    UWORD   io_Command;	    /* device command */ 2 
-;    UBYTE   io_Flags; 1 
-;    BYTE    io_Error;		    /* error or warning num */ 1 
-;};28 bytes ( $1C)
 *********************
 ********************************
 *** HISTORIQUE 
 ********************************
+*** Battle Squadron
+*** 1A2 MOVE 12a, SR => Ne va pas lire 12a ???
+0003C426: addi.w #$3E8, 3C81A       06 79 03 E8 00 03 C8 1A  => Increment du zoom, ca marche ?
+3c1E4 : Subq.b #$1, D2 = FFFFFFFF(000000FF)
+3c21E : DIVSw d6, d4 FAUX (89 c6) !! Resultat attendu pour test : D6 = 1d9; D4 = 8271; result = ffbd; SR=8
+3C212 = subi.w #$4, (A4)+ => subi pas codé pour address ! ajouter des tests !
+3C018: addi.w #$C3DA, 30003      06 79 00 03 00 03 C3 DA  => 0000 0110 0111 1001 => ADDI.w #$03, 3c3dA
+
+*** Fix SUB flags
+FC559C  sub.w  D0, D2  => SR = 9(19 ) !!
+FC5682: sub.w  D0, D1  => SR = 18 (08) !!
+
+
+00FC7FF8 => -60 : Text
+00FC7F26 => -66 : FC7F26
+
+FCB136 => FF22 -222 Load View => 6 / (9*4) + 6
+FCB146 => FF0A -246 FF DRAW 
+
+Text(rastPort, string, length)
+
+		
+******** FDECB2: move.l ($2C,SP), -(SP)    lire SP avant de decrementer !!!!
+	 on lit d25c au lieu de d260 ! lire avant le -sp)
+	 SP avant = d234 + 2c = d260 (valeur correcte)
+	 ==> AMAddress.cpp ligne 44 : pas lors de l'init !!!
+
+
+ext.w D1 : DO NOT ERASE 31-16 !!!
+**************
+FF58F4: jsr (A5) / 
+	FF49B6: jsr ($FE92,A6)            	; PutMsg
+		FC1B9A  jsr       -$0144(A6)        Signal the task.
+			FC1F38  bset      #7,$0124(A6)      Set the scheduling attention flag.
+			FC1F3E  sne       D0                Save its previous state.
+***SNE = CONDITION NON EVALUEE ! CORRIGE !
+
+FEACFA -> 	Mise en place blit 	
+***	Source : A1 (639a => 00f298 au lieu de 6a5C !!
+	element depuis FEA8D2 : A1 incorrect !
+	FEA8A8 : On additionne des choses a A4... 
+	FEA892: move.b ($49,A3), D0 => D0 = 20 !!! => 6081h !
+	
+	issue de Command 2 FEA762 => D1 = (3)20 !!! 
+	FEA182 ?? (3e apres insertion disk)
+	(FEA060 appel de command 2 ( D1 = 320 !!)
+	FEA02C puis )
+	
+	FEA198: divu #$B, D0 => 370 pour d0 donne 3200050 (attendu 50) ?!!!!
+
+Decodage MFM:
+FEACDC => QBlit :  => Blit routine FEACF0
+		Blit : bltcon0 1dd8 / bltcon1 0002
+		FEB2CC => l/f mask + CDAT + MOD ABD
+		FEAD22=> Lancement du blit !
+Origine A =>  6C97
+Origine B =>  6E97
+C = 5555
+Destination	D => 5D87
+Operation : D8 => 1101 1000 => /ABC + A/B/C + AB/C + ABC
+*****************
+
+
+Message du cia timer => FE643C ?
+FE9824 => Ecriture du timer
+FE9740 : Bouclage regulier... mais pas de retour au handler ?
+Plus d'interrrupt...
+
+Debut : FEA01C
+
+***FEAE98 => GetMsg with a message. (port : 6038)
+
+Message : 60BE :
+;struct Message {
+	mn_Node {
+		ln_Succ = 00006050
+		ln_Pred = 0000604c
+		ln_Type = 0x07
+		ln_Pri = 00
+		ln_Name = FE98FE ("trackdisk.device")
+	}
+	mn_ReplyPort = 00006038
+	length = 0000
+}
+
+Posté par ReplyMsg : 
+STACK :
+(
+FE979E => CIA
+)
+
+==> Demande de timer faite par le trackdisk ???
+
+FE9984 SendIO : ioRequest : 60BE
+	struct IORequest
+	{
+		io_Message
+		{
+			mn_Node 
+			{
+				ln_Succ ; : 00006050
+				ln_Pred : 604C
+				lnType : 07
+				lnPri : 0
+				ln_Name : FE98FE ("trackdisk.device")
+			}
+			mn_ReplyPort : 6038
+			mnLength : 0
+		}
+		io_Device : 00002ede
+		io_unit : 00002f56
+		io_command 0009
+		io_flag : 0
+		io_error : 0
+	}
+FEAF28
+
+; Task trackdisk.device : Jamais reveillée !
+
+FE99F4 : step
+
+******************
+
+
+
+=> Trackdisk.device = pas de reveil !
+=> ; Handle ICR register from CIA-A  FC461C: movem.l D2/A2, -(SP)     = pas d'interrupt ?!
+FC4620 : On passe bien ici avec D2 = 82 (CIA A t
+TIMER B)
+
+
+Timer : 
+*****
+***** FE9706 => On y passe !!! = ANALYSER ICI !!
+9710 : 800 =>E4(EA)
+FE9740 ok
+
+FE97A2
+00FE977C => A3+22h => pas la meme chose !
+=>FE97EC (alors qu'on a fe9834 !)
+...FE982C: move.b D0, BFE701         ; set TBLHI
+
 
 **** Dessin Kickstart
 FC55D2: movem.w ($24,A1), D2/D3 => D2ok, D3 ecrit tel un word.... ?

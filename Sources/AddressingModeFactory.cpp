@@ -74,6 +74,7 @@ AddressingMode* AddressingModeFactory::InitAlu(unsigned char m, unsigned char xn
          return false;
       }
    }
+   return false;
 }
 
 AddressingMode* AddressingModeFactory::InitNewAlu(unsigned char m, unsigned char xn, unsigned int size)
@@ -135,4 +136,5 @@ AddressingMode* AddressingModeFactory::InitNewAlu(unsigned char m, unsigned char
          return false;
       }
    }
+   return false;
 }

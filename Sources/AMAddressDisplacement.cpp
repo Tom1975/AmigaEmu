@@ -35,16 +35,19 @@ void AMAddressDisplacement::Init(unsigned int reg_number, Size size)
    if (register_number_ < 7)
    {
       current_register_ = &registers_[register_number_];
+      //address_write_ = address_read_ = ((register_number_ == -1) ? (*pc_ - 2) : registers_[register_number_]);
    }
    else
    {
       if (*sr_ & 0x2000)
       {
          current_register_ = ssp_;
+         //address_write_ = address_read_ = *ssp_;
       }
       else
       {
          current_register_ = usp_;
+         //address_write_ = address_read_ = *usp_;
       }
    }
 }
@@ -133,6 +136,9 @@ void AMAddressDisplacement::AddWord(unsigned short value)
       displacement_ = static_cast<short> (value);
 
       address_write_ = address_read_ = ((register_number_ == -1) ? (*pc_ - 2) : *current_register_) + displacement_;
+      //address_write_ += displacement_;
+      //address_read_ += displacement_;
+
    }
    else
    {

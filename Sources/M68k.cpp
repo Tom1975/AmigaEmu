@@ -3,18 +3,26 @@
 #include <cstdio>
 #include <stdarg.h>
 
+#define LOG(fmt, ...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, fmt, ##__VA_ARGS__);
+
+unsigned int MaskSign[4] = { 0x80, 0x8000, 0x80000000, 0 };
+unsigned int MaskZero[4] = { 0xFF, 0xFFFF, 0xFFFFFFFF, 0 };
+unsigned int SizeSizeNbBits[4] = { 8, 16, 32, 0};
+
+
 static unsigned int last_opcodes[256];
 static unsigned char op_index = 0;
 
 
 M68k::Func M68k::ResetList_[] = { &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr };
 
-M68k::Func M68k::Add_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAddA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::AddI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Add_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::AddI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Addq_[] = { &M68k::DecodeAddq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::AddX_[] = { &M68k::DecodeAddX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AndiToCcr_[] = { &M68k::DecodeAndiToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Asd2_[] = { &M68k::DecodeAsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -32,10 +40,10 @@ M68k::Func M68k::CmpD_[] = { &M68k::DecodeCmpD, &M68k::SourceFetch, &M68k::Sourc
 M68k::Func M68k::CmpI_[] = { &M68k::DecodeCmpI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeCmpI, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::DBcc_[] = { &M68k::InitWait, &M68k::Wait2Ticks, &M68k::DecodeDBcc, &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr,
                               &M68k::Wait2Ticks, &M68k::OpcodeDBcc, &M68k::CpuFetchInit, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Divs_[] = { &M68k::DecodeDivu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivs, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Divs_[] = { &M68k::DecodeDivs, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivs, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Divu_[] = { &M68k::DecodeDivu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeDivu, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Eor_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Eori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Eori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeEor, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::EoriToCcr_[] = { &M68k::DecodeEoriToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::EoriSr_[] = { &M68k::DecodeEoriSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Exg_[] = { &M68k::DecodeExg, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -46,37 +54,43 @@ M68k::Func M68k::Lea_[] = { &M68k::DecodeLea, &M68k::SourceFetch, &M68k::OpcodeL
 M68k::Func M68k::Link_[] = { &M68k::DecodeLink, &M68k::OperandFetch, &M68k::DecodeLink2, &M68k::OpcodeLink, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Lsd_[] = { &M68k::DecodeLsd, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeLsd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Lsd2_[] = { &M68k::DecodeLsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Move_[] = { &M68k::DecodeMove, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::OpcodeMove, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Move_[] = { &M68k::DecodeMove, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::OpcodeMove, &M68k::CpuFetch, &M68k::OperandFinished, nullptr};
 M68k::Func M68k::MoveFromSr_[] = { &M68k::DecodeMoveFromSr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::DestinationFetch, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,  
+M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::MoveFromCcr_[] = { &M68k::DecodeMoveCcr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::MoveToCcr_[] = { &M68k::DecodeMoveToCcr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeMoveToCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,
                               &M68k::OpcodeMovemWrite, &M68k::WriteSourceToDestinationSimple, &M68k::OpcodeMovem2, &M68k::CpuFetch, nullptr }; // loop
 M68k::Func M68k::Moveq_[] = { &M68k::DecodeMoveq, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveUsp_[] = { &M68k::OpcodeMoveUsp, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Muls_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMuls, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Mulu_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMulu, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Neg_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNeg, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Negx_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNegX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Nop_[] = { &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Not_[] = { &M68k::DecodeNot, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeNot, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Or_[] = { &M68k::DecodeOr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Ori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Ori_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeOr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::OriSr_[] = { &M68k::DecodeOriSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::OriToCcr_[] = { &M68k::DecodeOriToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Pea_[] = { &M68k::DecodePea, &M68k::DestinationFetch, &M68k::OpcodePea, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Reset_[] = { &M68k::DecodeReset, &M68k::WaitTick<124>, &M68k::OpcodeReset, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Rod_[] = { &M68k::DecodeRod, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeRod, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Roxd_[] = { &M68k::DecodeRod, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeRodXd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Rod2_[] = { &M68k::DecodeRod2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Roxd2_[] = { &M68k::DecodeRoxd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RteOpcode_[] = { &M68k::DecodeRte, &M68k::SourceRead, &M68k::OpcodeRte, &M68k::SourceRead, &M68k::OpcodeRte2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RtsOpcode_[] = { &M68k::DecodeRts, &M68k::SourceRead, &M68k::OpcodeRts, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Stop_[] = { &M68k::DecodeStop, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeStop, &M68k::OpcodeStop2, nullptr };
 M68k::Func M68k::Sub_[] = { &M68k::DecodeSub, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubA_[] = { &M68k::DecodeSubA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::DestinationFetch, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubA_[] = { &M68k::DecodeSubA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSubA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubI_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubI, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 //M68k::Func M68k::Subq_L_Dn_An_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Subq_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSubq, &M68k::CpuFetch, &M68k::Wait4Ticks, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::SubX_[] = { &M68k::DecodeSubX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::SubX_[] = { &M68k::DecodeSubX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSubX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Swap_[] = { &M68k::DecodeSwap, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Trap_[] = { &M68k::DecodeTrap, nullptr };
 M68k::Func M68k::Tst_[] = { &M68k::DecodeTst, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeTst, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::OpcodeUnlk, &M68k::CpuFetch, nullptr, };
 
@@ -86,28 +100,22 @@ M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::Not
 // TO IMPLEMENT & DISASSEMBLE
 M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::MoveToCcr_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Negx_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Trap_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Trapv_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Chk_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::AddX_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Asd_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Roxd_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Roxd2_[] = { &M68k::NotImplemented, nullptr };
 
 
 M68k::M68k() : pc_(0), sr_(0), current_state_(0),
-                  current_phase_(STATE_FETCH), 
+                  current_phase_(Phase::STATE_FETCH), 
                   current_bus_operation_(nullptr), current_waiting_instruction_(nullptr), bus_granted_(false), 
                   next_bus_operation_(nullptr), next_waiting_instruction_(nullptr),source_alu_(nullptr),destination_alu_(nullptr),
                   irc_ready_(false), new_opcode_ (0), source_factory_(a_, d_, &pc_, &usp_, &ssp_, &sr_), destination_factory_(a_, d_, &pc_, &usp_, &ssp_, &sr_),
-                  register_list_(a_, d_, &pc_, &source_factory_, &usp_, &ssp_, &sr_), pc_alu_(&pc_), mask_(0)
+                  register_list_(a_, d_, &pc_, &source_factory_, &usp_, &ssp_, &sr_), pc_alu_(&pc_), mask_(0), logger_(nullptr)
 
 {
    memset(d_, 0, sizeof(d_));
@@ -253,6 +261,7 @@ void M68k::InitOpcodes()
    AddCommand(0xFFC0, 0x4840, Pea_);
    AddCommand(0xFFC0, 0x40C0, MoveFromSr_);
    AddCommand(0xFFC0, 0x46C0, MoveToSr_);
+   AddCommand(0xFFC0, 0x42C0, MoveFromCcr_);
    AddCommand(0xFFC0, 0x44C0, MoveToCcr_);
    AddCommand(0xFFC0, 0x4800, Nbcd_);
    AddCommand(0xFFC0, 0x4AC0, Tas_);
@@ -824,6 +833,7 @@ unsigned int M68k::DestinationRead()
 
 unsigned int M68k::SourceFetch()
 {
+   source_alu_->Init();
    if (!source_alu_->FetchComplete())
    {
       source_alu_->AddWord(irc_);
@@ -905,6 +915,7 @@ unsigned int M68k::ReadDestination()
 
 unsigned int M68k::DestinationFetch()
 {
+   destination_alu_->Init();
    if (!destination_alu_->FetchComplete())
    {
       destination_alu_->AddWord(irc_);
@@ -1085,7 +1096,7 @@ unsigned int M68k::OpcodeMove()
       }
    }
 
-   current_phase_ = STATE_EXECUTE;
+   current_phase_ = Phase::STATE_EXECUTE;
    if (destination_alu_->WriteInput(source_alu_))
    {
       if (!destination_alu_->WriteComplete())
@@ -1112,8 +1123,15 @@ unsigned int M68k::OpcodeMove()
 
 unsigned int M68k::DecodeMoveFromSr()
 {
-   operand_size_ = WORD;
-   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+   if (sr_ & 0x2000)
+   {
+      operand_size_ = WORD;
+      destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+   }
+   else
+   {
+      return TRAP(8);
+   }
    return true;
 }
 
@@ -1126,10 +1144,10 @@ unsigned int M68k::OpcodeMoveFromSr()
 
 unsigned int M68k::DecodeMoveToSr()
 {
-   if ( sr_ & 0x2000)
+   if (sr_ & 0x2000)
    {
       operand_size_ = WORD;
-      destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+      source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
    }
    else
    {
@@ -1140,9 +1158,41 @@ unsigned int M68k::DecodeMoveToSr()
 
 unsigned int M68k::OpcodeMoveToSr()
 {
-   sr_ = destination_alu_->GetU16();
+   sr_ = source_alu_->GetU16();
    Fetch();
    return true;
+}
+
+unsigned int M68k::DecodeMoveCcr()
+{
+   operand_size_ = WORD;
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+
+   return true;
+}
+
+unsigned int M68k::DecodeMoveToCcr()
+{
+   operand_size_ = WORD;
+   source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+
+   return true;
+}
+
+unsigned int M68k::OpcodeMoveFromCcr()
+{
+   destination_alu_->WriteInput(sr_ & 0x1F);
+   return WriteSourceToDestination();
+   return true;
+}
+
+unsigned int M68k::OpcodeMoveToCcr()
+{
+   sr_ &= ~(0x1F);
+   sr_ = source_alu_->GetU16() & 0x1F;
+   Fetch();
+   return true;
+
 }
 
 unsigned int M68k::DecodeMovem ()
@@ -1269,7 +1319,13 @@ unsigned int M68k::OpcodeMoveUsp()
    {
       if (ird_ & 0x8)
       {
-         a_[ird_ & 0x7] = usp_;
+         if ((ird_ & 0x7) != 7)
+         {
+            a_[ird_ & 0x7] = usp_;
+         }
+         else
+            ssp_ = a_[ird_ & 0x7] = usp_;
+         
       }
       else
       {
@@ -1299,12 +1355,15 @@ unsigned int M68k::OpcodeMuls()
    short s1 = destination_alu_->GetU16();
    short s2 = d_[(ird_ >> 9) & 0x7];
 
-   int result = s1 * s2;
+   int result = (int)s1 * (int)s2;
    d_[(ird_ >> 9) & 0x7] = (unsigned int)result;
 
    sr_ &= 0xFFF0;
    if (result < 0) sr_ |= F_N;
    if (result == 0) sr_ |= F_Z;
+
+   // Overflow  : never with 16x16=32
+
 
    // Wait for xxx cycle :
    // todo
@@ -1371,17 +1430,57 @@ unsigned int M68k::OpcodeNeg()
       break;
    }
    
-   sr_ &= 0xFFFE;
+   sr_ &= 0xFFE0;
    if (rm == 0) sr_ |= 0x4;
    rm &= mask;
    dm &= mask;
    if (rm) sr_ |= 0x8;
 
    if (dm&rm) sr_ |= 2;
-   if (dm|rm) sr_ |= 11;
+   if (dm|rm) sr_ |= 0x11;
 
    return WriteSourceToDestination();
 }
+
+unsigned int M68k::OpcodeNegX()
+{
+   // NOT
+   unsigned int dm, rm, mask;
+   unsigned char x = (sr_ & 0x10)?1:0;
+   switch (size_)
+   {
+   case 0:
+      mask = 0x80;
+      dm = destination_alu_->GetU8();
+      rm = (char)(0 - (char)dm - x);
+      destination_alu_->WriteInput(rm);
+      break;
+   case 1:
+      mask = 0x8000;
+      dm = destination_alu_->GetU16();
+      rm = (short)(0 - (short)dm - x);
+      destination_alu_->WriteInput(rm);
+      break;
+   case 2:
+      mask = 0x80000000;
+      dm = destination_alu_->GetU32();
+      rm = 0 - (int)dm - x;
+      destination_alu_->WriteInput(rm);
+      break;
+   }
+
+   sr_ &= 0xFFE4;
+   if (rm != 0) sr_ &= ~0x4;
+   rm &= mask;
+   dm &= mask;
+   if (rm) sr_ |= 0x8;
+
+   if (dm&rm) sr_ |= 2;
+   if (dm | rm) sr_ |= 0x11;
+
+   return WriteSourceToDestination();
+}
+
 
 unsigned int M68k::OpcodeNot()
 {
@@ -1449,7 +1548,7 @@ unsigned int M68k::DecodeOriSr()
 
 unsigned int M68k::DecodeOriToCcr()
 {
-   sr_ |= (irc_&0xFF);
+   sr_ |= (irc_ & 0xFF);
 
    Fetch();
    return true;
@@ -1527,6 +1626,7 @@ unsigned int M68k::DecodeRte()
    if (sr_ & 0x2000)
    {
       source_alu_ = source_factory_.InitAlu(2, 7, 1); // sr
+      source_alu_->Init();
       return true;
 
    }
@@ -1562,6 +1662,7 @@ unsigned int M68k::DecodeRts()
 {
    // 
    source_alu_ = source_factory_.InitAlu(2, 7, 2); // sp
+   source_alu_->Init();
    return true;
 }
 
@@ -1685,7 +1786,6 @@ unsigned int M68k::DecodeLsd2()
    bool right = ((ird_>> 8) & 0x1) == 0;
    unsigned int rotat = (ird_ >> 9) & 0x7;
    
-
    if (((ird_ >> 5) & 0x1) == 1)
    {
       rotat = d_[rotat]&0x3F;
@@ -1696,12 +1796,13 @@ unsigned int M68k::DecodeLsd2()
    }
 
    // Rotate
-   switch ((ird_>> 6) & 3)
+   sr_ &= ~0x2; // V is cleared
+   unsigned char x = 0;
+   if (rotat != 0)
    {
-   case 0:
       if (right)
       {
-         if (d_[ird_ & 0x7] & 0x1)
+         if (((d_[ird_ & 0x7] & 0xFF) >> (rotat - 1))&0x1)
          {
             sr_ |= F_X | F_C;
          }
@@ -1709,12 +1810,23 @@ unsigned int M68k::DecodeLsd2()
          {
             sr_ &= ~(F_X | F_C);
          }
+      }
+   }
+   else
+   {
+      sr_ &= ~(F_C);
+   }
+   switch ((ird_>> 6) & 3)
+   {
+   case 0:
+      if (right)
+      {
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFFFF00;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFF) >> rotat);
       }
       else
       {
-         if (d_[ird_ & 0x7] & 0x80)
+         if ((d_[ird_ & 0x7] << (rotat-1)) & 0x80)
          {
             sr_ |= F_X | F_C;
          }
@@ -1725,26 +1837,27 @@ unsigned int M68k::DecodeLsd2()
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFFFF00;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) << rotat);
       }
+      if ((d_[ird_ & 0x7] & 0xFF) == 0)
+         sr_ |= 0x4;
+      else
+         sr_ &= ~0x4;
       
+      if ((d_[ird_ & 0x7] & 0x80) )
+         sr_ |= 0x8;
+      else
+         sr_ &= ~0x8;
+
       break;
    case 1:
       if (right)
       {
-         if (d_[ird_ & 0x7] & 0x1)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFF0000;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFF) >> rotat);
          
       }
       else
       {
-         if (d_[ird_ & 0x7] & 0x8000)
+         if ((d_[ird_ & 0x7] << (rotat - 1)) & 0x8000)
          {
             sr_ |= F_X | F_C;
          }
@@ -1755,23 +1868,25 @@ unsigned int M68k::DecodeLsd2()
          unsigned int tmp = d_[ird_ & 0x7] & 0xFFFF0000;
          d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFF) << rotat);
       }
+      if ((d_[ird_ & 0x7] & 0x8000))
+         sr_ |= 0x8;
+      else
+         sr_ &= ~0x8;
+
+      if ((d_[ird_ & 0x7] & 0xFFFF) == 0)
+         sr_ |= 0x4;
+      else
+         sr_ &= ~0x4;
+
       break;
    case 2:
       if (right)
       {
-         if (d_[ird_ & 0x7] & 0x1)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
          d_[ird_ & 0x7] = (d_[ird_ & 0x7] ) >> rotat;
       }
       else
       {
-         if (d_[ird_ & 0x7] & 0x80000000)
+         if ((d_[ird_ & 0x7] << (rotat - 1)) & 0x80000000)
          {
             sr_ |= F_X | F_C;
          }
@@ -1781,6 +1896,16 @@ unsigned int M68k::DecodeLsd2()
          }
          d_[ird_ & 0x7] = (d_[ird_ & 0x7]) << rotat;
       }
+      if ((d_[ird_ & 0x7] & 0x80000000))
+         sr_ |= 0x8;
+      else
+         sr_ &= ~0x8;
+
+      if ((d_[ird_ & 0x7] ) == 0)
+         sr_ |= 0x4;
+      else
+         sr_ &= ~0x4;
+
       break;
    }
    Fetch();
@@ -1797,6 +1922,12 @@ unsigned int M68k::DecodeRod()
 unsigned int M68k::OpcodeRod()
 {
    destination_alu_->Rod(((ird_ >> 8) & 0x1) == 0, sr_);
+   return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeRodXd()
+{
+   destination_alu_->Roxd(((ird_ >> 8) & 0x1) == 0, sr_);
    return WriteSourceToDestination();
 }
 
@@ -1910,7 +2041,7 @@ unsigned int M68k::DecodeRod2()
             unsigned int out_of_pos = d_[ird_ & 0x7] & (mask << (32 - rotat));
             out_of_pos >>= (32 - rotat);
 
-            d_[ird_ & 0x7] |= shifted_bits | out_of_pos;
+            d_[ird_ & 0x7] = shifted_bits | out_of_pos;
             if (d_[ird_ & 0x7] & 0x01)
                sr_ |= F_N | F_C;
          }
@@ -1921,8 +2052,187 @@ unsigned int M68k::DecodeRod2()
    return true;
 }
 
+unsigned int M68k::DecodeRoxd2()
+{
+   unsigned char x = (sr_ & 0x10)>>4;
+   
+   bool right = ((ird_ >> 8) & 0x1) == 0;
+   unsigned int rotat = (ird_ >> 9) & 0x7;
+
+   if (((ird_ >> 5) & 0x1) == 1)
+   {
+      rotat = d_[rotat] & 0x3F;
+   }
+   else
+   {
+      if (rotat == 0)rotat = 8;
+   }
+
+   sr_ &= ~(F_V | F_N | F_C | F_Z|F_X);
+
+   /*if (rotat != 0 && x)
+   {
+      sr_ |= F_C;
+   }*/
+   unsigned char last_x = 0;
+   // Rotate
+   switch ((ird_ >> 6) & 3)
+   {
+      // byte
+   case 0:
+   {
+      // Get rotate mask
+      unsigned char mask = (1 << rotat) - 1;
+      if (right)
+      {
+         if (rotat != 0)
+         {
+            last_x = ((d_[ird_ & 0x7] & 0xFF) >> ((rotat & 0x7) - 1)) & 0x1;
+            if (last_x) sr_ |= F_X|F_C;
+         }
+
+         unsigned char shifted_bits = (d_[ird_ & 0x7] & 0xFF) >> rotat;
+         unsigned char out_of_pos = d_[ird_ & 0x7] & mask;
+         if (rotat > 1)
+            out_of_pos <<= (9 - rotat);
+         else
+            out_of_pos = 0;
+
+         d_[ird_ & 0x7] &= 0xFFFFFF00;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x ? 0x80 : 0);
+      }
+      else
+      {
+         if (rotat != 0)
+         {
+            last_x = ((d_[ird_ & 0x7] & 0xFF) << ((rotat & 0x7) - 1)) & 0x80;
+            if (last_x) sr_ |= F_X | F_C;
+         }
+
+         unsigned char shifted_bits = (d_[ird_ & 0x7] & 0xFF) << rotat;
+         unsigned char out_of_pos = d_[ird_ & 0x7] & (mask << (8 - rotat));
+         if (rotat > 1)
+            out_of_pos >>= (9 - rotat);
+         else
+            out_of_pos = 0;
+
+         d_[ird_ & 0x7] &= 0xFFFFFF00;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | x;
+      }
+      if (d_[ird_ & 0x7] & 0x80)
+         sr_ |= F_N;
+      if ((d_[ird_ & 0x7] & 0xFF) == 0)
+      {
+         sr_ |= F_Z;
+      }
+
+      break;
+   }
+   // word
+   case 1:
+   {
+      // Get rotate mask
+      unsigned short mask = (1 << rotat) - 1;
+      if (right)
+      {
+         if (rotat != 0)
+         {
+            last_x = ((d_[ird_ & 0x7] & 0xFFFF) >> ((rotat & 0xF) - 1)) & 0x1;
+            if (last_x) sr_ |= F_X | F_C;
+         }
+         unsigned short shifted_bits = (d_[ird_ & 0x7] & 0xFFFF) >> rotat;
+         unsigned short out_of_pos = d_[ird_ & 0x7] & mask;
+         if (rotat > 1)
+            out_of_pos <<= (17 - rotat);
+         else
+            out_of_pos = 0;
+
+         d_[ird_ & 0x7] &= 0xFFFF0000;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | (x ?0x8000:0);
+      }
+      else
+      {
+         if (rotat != 0)
+         {
+            last_x = (((d_[ird_ & 0x7] & 0xFFFF) << ((rotat & 0xF) - 1)) & 0x8000) == 0x8000;
+            if (last_x) sr_ |= F_X | F_C;
+         }
+
+         unsigned short shifted_bits = (d_[ird_ & 0x7] & 0xFFFF) << rotat;
+         unsigned short out_of_pos = d_[ird_ & 0x7] & (mask << (16 - rotat));
+         if (rotat > 1)
+            out_of_pos >>= (17 - rotat);
+         else
+            out_of_pos = 0;
+
+         d_[ird_ & 0x7] &= 0xFFFF0000;
+         d_[ird_ & 0x7] |= shifted_bits | out_of_pos | x ;
+      }
+      if (d_[ird_ & 0x7] & 0x8000)
+         sr_ |= F_N;
+      if ((d_[ird_ & 0x7] & 0xFFFF) == 0)
+      {
+         sr_ |= F_Z;
+      }
+      break;
+      // long
+   }
+   case 2:
+   {
+      // Get rotate mask
+      unsigned short mask = (1 << rotat) - 1;
+      if (right)
+      {
+         if (rotat != 0)
+         {
+            last_x = ((d_[ird_ & 0x7] ) >> ((rotat & 0x1F) - 1)) & 0x1;
+            if (last_x) sr_ |= F_X | F_C;
+         }
+
+         unsigned int shifted_bits = d_[ird_ & 0x7] >> rotat;
+         unsigned int out_of_pos = d_[ird_ & 0x7] & mask;
+         if (rotat > 1)
+            out_of_pos <<= (33 - rotat);
+         else
+            out_of_pos = 0;
+
+         d_[ird_ & 0x7] = shifted_bits | out_of_pos | (x?0x80000000:0);
+      }
+      else
+      {
+         if (rotat != 0)
+         {
+            last_x = (((d_[ird_ & 0x7]) << ((rotat & 0x1F) - 1)) & 0x80000000) == 0x80000000;
+            if (last_x) sr_ |= F_X | F_C;
+         }
+
+         unsigned int shifted_bits = d_[ird_ & 0x7] << rotat;
+         unsigned int out_of_pos = d_[ird_ & 0x7] & (mask << (32 - rotat));
+         if (rotat > 1)
+            out_of_pos >>= (33 - rotat);
+         else
+            out_of_pos = 0;
+
+
+         d_[ird_ & 0x7] = shifted_bits | out_of_pos |x ;
+      }
+      if (d_[ird_ & 0x7] & 0x80000000)
+         sr_ |= F_N;
+      if (d_[ird_ & 0x7] == 0)
+      {
+         sr_ |= F_Z;
+      }
+
+      break;
+   }
+   }
+   Fetch();
+   return true;
+}
+
 unsigned int M68k::DecodeScc()
 {
+   conditon_ = (Condition)((ird_ & 0xF00) >> 8);
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, 0);
 
    EvalCondition();
@@ -2037,11 +2347,155 @@ unsigned int M68k::DecodeSwap()
 }
 
 
-unsigned int M68k::OpcodeSub()
+unsigned int M68k::OpcodeSubA()
 {
    destination_alu_->Sub(source_alu_, sr_);
 
    return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeSub()
+{
+   //destination_alu_->Sub(source_alu_, sr_);
+   return OpcodeSubI();
+   //return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeSubI()
+{
+   unsigned int sm, dm, rm;
+   sm = 0;
+   dm = 0;
+
+   unsigned int mask = 0;
+   unsigned int data;
+   switch (size_)
+   {
+   case 0:
+      sm = (unsigned char)source_alu_->GetU8();
+      dm = (unsigned char)destination_alu_->GetU8();
+      rm = (unsigned char)dm - (unsigned char)sm;
+      break;
+   case 1:
+      sm = (unsigned short)source_alu_->GetU16();
+      dm = (unsigned short)destination_alu_->GetU16();
+      rm = (unsigned short)dm - (unsigned short)sm;
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      dm = destination_alu_->GetU32();
+      rm = dm - sm;
+      break;
+   }
+
+   destination_alu_->WriteInput(rm);
+
+   unsigned short flag = sr_ & 0xFFF0;
+
+   // Z
+   if (rm == 0) flag |= 0x4;
+
+   rm &= MaskSign[size_];
+   dm &= MaskSign[size_];
+   sm &= MaskSign[size_];
+
+   // N
+   if (rm) flag |= 0x8;
+   // V
+   if ((~sm) & dm & (~rm) | sm & (~dm) & rm) flag |= 0x2;
+   // C-X
+   if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x11;
+
+   sr_ = flag;
+
+   return WriteSourceToDestination();
+}
+
+unsigned int M68k::OpcodeSubX()
+{
+   unsigned int sm, dm, rm = 0;
+   switch (destination_alu_->GetSize())
+   {
+   case 0:
+      dm = destination_alu_->GetU8();
+      break;
+   case 1:
+      dm = destination_alu_->GetU16();
+      break;
+   case 2:
+      dm = destination_alu_->GetU32();
+      break;
+   }
+
+   switch (source_alu_->GetSize())
+   {
+   case 0:
+      sm = source_alu_->GetU8();
+      break;
+   case 1:
+      sm = source_alu_->GetU16();
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      break;
+   }
+   rm = sm - (dm + ((sr_ & 0x10) ? 1 : 0));
+   switch (size_)
+   {
+   case 0:
+      rm &= 0xFF;
+      break;
+   case 1:
+      rm &= 0xFFFF;
+      break;
+   }
+   destination_alu_->WriteInput(rm);
+
+   sr_ &= 0xFFE4;
+   if (rm != 0) sr_ &= ~F_Z;
+   switch (size_)
+   {
+   case BYTE:
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm) sr_ |= F_N;
+      break;
+   case WORD:
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
+      break;
+   case LONG:
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm) sr_ |= F_N;
+      break;
+   }
+   if ((sm & dm & (~rm)) | ((~sm) & (~dm) & (rm)))
+   {
+      sr_ |= F_V;
+   }
+   if (sm & dm | (~rm) & dm | sm & (~rm))
+   {
+      sr_ |= F_C | F_X;
+   }
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
+   Fetch();
+   return true;
 }
 
 unsigned int M68k::DecodeSubq()
@@ -2076,6 +2530,11 @@ unsigned int M68k::OpcodeSubq()
 
    Fetch();
    return true;
+}
+
+unsigned int M68k::DecodeTrap()
+{
+   return TRAP(32 + (ird_&0xF));
 }
 
 unsigned int M68k::DecodeAddq()
@@ -2199,6 +2658,8 @@ unsigned int M68k::OpcodeAdd ()
       rm &= 0xFF;
       break;
    case 1:
+      
+      
       rm &= 0xFFFF;
       break;
    }
@@ -2209,20 +2670,29 @@ unsigned int M68k::OpcodeAdd ()
    switch (size_)
    {
    case BYTE:
-      if (rm & 0x80) sr_ |= F_N;
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm ) sr_ |= F_N;
       break;
    case WORD:
-      if (rm & 0x8000) sr_ |= F_N;
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
       break;
    case LONG:
-      if (rm & 0x80000000) sr_ |= F_N;
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm ) sr_ |= F_N;
       break;
    }
    if ( (sm&dm&(~rm)) | ((~sm)&(~dm)&(rm)))
    {
       sr_ |= F_V;
    }
-   if ( sm&dm|rm&dm|sm&rm)
+   if ( sm&dm|(~rm)&dm|sm&(~rm))
    {
       sr_ |= F_C | F_X;
    }
@@ -2286,6 +2756,115 @@ unsigned int M68k::OpcodeAddq()
    return true;
 }
 
+unsigned int M68k::DecodeAddX()
+{
+   // Depending of sense :
+   size_ = ((ird_ >> 6) & 0x3);
+
+   // -(an) / D
+   if (ird_ & 8)
+   {
+      // Memory
+      source_alu_ = source_factory_.InitAlu(4, (ird_) & 0x7, size_);
+      destination_alu_ = destination_factory_.InitAlu(4, (ird_ >> 9) & 0x7, size_);
+   }
+   else
+   {
+      // Register
+      source_alu_ = source_factory_.InitAlu(0, (ird_) & 0x7, size_);
+      destination_alu_ = destination_factory_.InitAlu(0, (ird_ >> 9) & 0x7, size_);
+   }
+
+   return true;
+}
+
+unsigned int M68k::OpcodeAddX()
+{
+   unsigned int sm, dm, rm = 0;
+   switch (destination_alu_->GetSize())
+   {
+   case 0:
+      dm = destination_alu_->GetU8();
+      break;
+   case 1:
+      dm = destination_alu_->GetU16();
+      break;
+   case 2:
+      dm = destination_alu_->GetU32();
+      break;
+   }
+
+   switch (source_alu_->GetSize())
+   {
+   case 0:
+      sm = source_alu_->GetU8();
+      break;
+   case 1:
+      sm = source_alu_->GetU16();
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      break;
+   }
+   rm = sm + dm + ((sr_ &0x10)?1:0);
+   switch (size_)
+   {
+   case 0:
+      rm &= 0xFF;
+      break;
+   case 1:
+      rm &= 0xFFFF;
+      break;
+   }
+   destination_alu_->WriteInput(rm);
+
+   sr_ &= 0xFFE4;
+   if (rm != 0) sr_ &= ~F_Z;
+   switch (size_)
+   {
+   case BYTE:
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm) sr_ |= F_N;
+      break;
+   case WORD:
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
+      break;
+   case LONG:
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm) sr_ |= F_N;
+      break;
+   }
+   if ((sm & dm & (~rm)) | ((~sm) & (~dm) & (rm)))
+   {
+      sr_ |= F_V;
+   }
+   if (sm & dm | (~rm) & dm | sm & (~rm))
+   {
+      sr_ |= F_C | F_X;
+   }
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
+   Fetch();
+   return true;
+}
+
 unsigned int M68k::OpcodeAnd()
 {
    unsigned int rm = 0, dm = 0, sm = 0;
@@ -2315,7 +2894,7 @@ unsigned int M68k::OpcodeAnd()
       break;
    }
    rm = sm & dm;
-   sr_ &= 0xFFE0;
+   sr_ &= 0xFFF0;
    if (rm == 0) sr_ |= F_Z;
    switch (size_)
    {
@@ -2337,7 +2916,7 @@ unsigned int M68k::OpcodeAnd()
 
 unsigned int M68k::DecodeAndiToCcr()
 {
-   sr_ &= (irc_ & 0xFF);
+   sr_ &= 0xFF00|(irc_ & 0xFF);
 
    Fetch();
    return true;
@@ -2372,197 +2951,84 @@ unsigned int M68k::DecodeAsd2()
       if (rotat == 0)rotat = 8;
    }
 
-   // Rotate
-   switch ((ird_ >> 6) & 3)
+   unsigned int mask, signbit;
+
+   mask = MaskZero[((ird_ >> 6) & 3)];
+   signbit = MaskSign[((ird_ >> 6) & 3)];
+
+   // If 0
+   if (rotat == 0)
    {
-   case 0:
-      if (right)
-      {
-         if (rotat > 0)
-         {
-            if (d_[ird_ & 0x7] & 0x1 << (rotat - 1))
-            {
-               sr_ |= F_X | F_C;
-            }
-            else
-            {
-               sr_ &= ~(F_X | F_C);
-            }
-         }
-         else
-            sr_ &= ~(F_X | F_C);
-
-         sr_ &= ~(F_V);
-
-         unsigned long tmp = 0;
-         if (d_[ird_ & 0x7] & 0x80)
-         {
-            tmp = (0xFF << (8 - rotat)) & 0xFF;
-         }
-         tmp |= (d_[ird_ & 0x7] & 0xFFFFFF00);
-
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFF) >> rotat);
-
-         /*unsigned char tmp = d_[ird_ & 0x7] & 0xFFFFFF80;
-
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) >> rotat);*/
-      }
-      else
-      {
-         if (d_[ird_ & 0x7] & 0x80)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
-         // If sign changed : F_V
-         bool v = false;
-         unsigned int sign = d_[ird_ & 0x7] & 0x80;
-         for (unsigned int i = 0; (i < rotat) && (v == false); i++)
-         {
-            if (((d_[ird_ & 0x7] & (0x80 >> i)) != 0 && sign == 0) ||
-               ((d_[ird_ & 0x7] & (0x80 >> i)) == 0 && sign != 0))
-               v = true;
-         }
-         if (v)
-         {
-            sr_ |= F_V;
-         }
-         else
-         {
-            sr_ &= ~F_V;
-         }
-
-         unsigned char tmp = d_[ird_ & 0x7] & 0xFFFFFF00;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7F) << rotat);
-      }
-      if (d_[ird_ & 0x7] == 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
-      if (d_[ird_ & 0x7] & 0x80) sr_ |= F_N; else sr_ &= ~(F_N);
-
-      break;
-   case 1:
-      if (right)
-      {
-         if (rotat > 0)
-         {
-            if (d_[ird_ & 0x7] & 0x1 << (rotat - 1))
-            {
-               sr_ |= F_X | F_C;
-            }
-            else
-            {
-               sr_ &= ~(F_X | F_C);
-            }
-         }
-         else
-            sr_ &= ~(F_X | F_C);
-
-         sr_ &= ~(F_V);
-
-         unsigned long tmp = 0;
-         if (d_[ird_ & 0x7] & 0x8000)
-         {
-            tmp = (0xFFFF << (16 - rotat) )& 0xFFFF;
-         }
-         tmp |= d_[ird_ & 0x7] & 0xFFFF0000;
-         
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFF) >> rotat);
-      }
-      else
-      {
-         if (d_[ird_ & 0x7] & 0x8000)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
-         // If sign changed : F_V
-         bool v = false;
-         unsigned int sign = d_[ird_ & 0x7] & 0x8000;
-         for (unsigned int i = 0; (i < rotat) && (v == false); i++)
-         {
-            if (((d_[ird_ & 0x7] & (0x8000 >> i)) != 0 && sign == 0) ||
-               ((d_[ird_ & 0x7] & (0x8000 >> i)) == 0 && sign != 0))
-               v = true;
-         }
-         if (v)
-         {
-            sr_ |= F_V;
-         }
-         else
-         {
-            sr_ &= ~F_V;
-         }
-         unsigned short tmp = d_[ird_ & 0x7] & 0xFFFF0000;
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0x7FFF) << rotat);
-      }
-      if (d_[ird_ & 0x7] == 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
-      if (d_[ird_ & 0x7] & 0x8000) sr_ |= F_N; else sr_ &= ~(F_N);
-      break;
-   case 2:
-      if (right)
-      {
-         if (rotat > 0)
-         {
-            if (d_[ird_ & 0x7] & 0x1 << (rotat - 1))
-            {
-               sr_ |= F_X | F_C;
-            }
-            else
-            {
-               sr_ &= ~(F_X | F_C);
-            }
-         }
-         else
-            sr_ &= ~(F_X | F_C);
-
-         sr_ &= ~(F_V);
-         unsigned long tmp = 0;
-         if (d_[ird_ & 0x7] & 0x80000000)
-         {
-            tmp = 0xFFFFFFFF << (32- rotat);
-         }
-
-         d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & 0xFFFFFFFF) >> rotat);
-      }
-      else
-      {
-         if (d_[ird_ & 0x7] & 0x80000000)
-         {
-            sr_ |= F_X | F_C;
-         }
-         else
-         {
-            sr_ &= ~(F_X | F_C);
-         }
-         // If sign changed : F_V
-         bool v = false;
-         unsigned int sign = d_[ird_ & 0x7] & 0x80000000;
-         for (unsigned int i = 0; i < rotat && v == false; i++)
-         {
-            if (((d_[ird_ & 0x7] & (0x80000000>> i)) != 0 && sign == 0) ||
-               ((d_[ird_ & 0x7] & (0x80000000 >> i)) == 0 && sign != 0))
-               v = true;
-         }
-         if (v)
-         {
-            sr_ |= F_V;
-         }
-         else
-         {
-            sr_ &= ~F_V;
-         }
-         d_[ird_ & 0x7] = (d_[ird_ & 0x7]) << rotat;
-      }
-      if (d_[ird_ & 0x7] == 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
-      if (d_[ird_ & 0x7] & 0x80000000) sr_ |= F_N; else sr_ &= ~(F_N);
-
-      break;
+      sr_ &= ~(F_C);
    }
+   else
+   {
+      // X, C : 
+      // X Set according to the last bit shifted out of the operand; unaffected for a shift count of zero.
+      // Set according to the last bit shifted out of the operand; cleared for a shift count of zero.
+      // V — Set if the most significant bit is changed at any time during the shift operation; Cleared otherwise
+      if (right)
+      {
+         unsigned int sign = d_[ird_ & 0x7] & signbit;
+         unsigned long tmp = 0;
+         if (rotat >= SizeSizeNbBits[((ird_ >> 6) & 3)])
+         {
+            if (sign) sr_ |= F_X | F_C; else sr_ &= ~(F_X | F_C);
+            if (d_[ird_ & 0x7] & signbit)
+            {
+               tmp = mask;
+            }
+            tmp |= (d_[ird_ & 0x7] & (~mask));
+            d_[ird_ & 0x7] = tmp ;
+         }
+         else
+         {
+            if (d_[ird_ & 0x7] & (0x1 << (rotat - 1))) sr_ |= F_X | F_C; else sr_ &= ~(F_X | F_C);
+            if (d_[ird_ & 0x7] & signbit)
+            {
+               //tmp = (mask << (8 - rotat)) & mask;
+               tmp = (mask << (SizeSizeNbBits[((ird_ >> 6) & 3)] - rotat)) & mask;
+            }
+            tmp |= (d_[ird_ & 0x7] & (~mask));
+            d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & mask) >> rotat);
+         }
+         sr_ &= ~F_V; // Never change
+
+      }
+      else
+      {
+         
+         if (rotat > SizeSizeNbBits[((ird_ >> 6) & 3)])
+         {
+            sr_ &= ~(F_X | F_C);
+            unsigned int sign = d_[ird_ & 0x7] & signbit;
+            if (sign) sr_ |= F_V; else sr_ &= ~F_V;
+            unsigned int tmp = d_[ird_ & 0x7] & (~mask);
+            d_[ird_ & 0x7] = tmp ;
+         }
+         else
+         {
+            if (d_[ird_ & 0x7] & (signbit >> (rotat - 1))) sr_ |= F_X | F_C; else sr_ &= ~(F_X | F_C);
+            // get the whole bitfield shifted out. If it's not only '1' or '0', then set the flag
+            bool v = false;
+            unsigned int sign = d_[ird_ & 0x7] & signbit;
+            for (unsigned int i = 1; (i <= rotat) && (v == false); i++)
+            {
+               if (((d_[ird_ & 0x7] & (signbit >> i)) != 0 && sign == 0) ||
+                  ((d_[ird_ & 0x7] & (signbit >> i)) == 0 && sign != 0))
+                  v = true;
+            }
+            if (v) sr_ |= F_V; else sr_ &= ~F_V;
+            unsigned int tmp = d_[ird_ & 0x7] & (~mask);
+            d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] << rotat)& mask);
+         }
+
+      }
+   }
+
+   // Flags Z, N
+   if ((d_[ird_ & 0x7] & mask )== 0) sr_ |= F_Z; else sr_ &= ~(F_Z);
+   if (d_[ird_ & 0x7] & signbit) sr_ |= F_N; else sr_ &= ~(F_N);
    Fetch();
    return true;
 }
@@ -2593,12 +3059,12 @@ unsigned int M68k::OpcodeBcc()
       {
          // ir_ should value something
          displacement_ = (short)irc_;
-         current_phase_ = STATE_DECODE;
+         current_phase_ = Phase::STATE_DECODE;
       }
       else
       {
          size_ = 0;
-         current_phase_ = STATE_EXECUTE;
+         current_phase_ = Phase::STATE_EXECUTE;
       }
       // PC is updated 
       pc_ = pc_ -2 + displacement_;
@@ -2731,7 +3197,16 @@ unsigned int M68k::OpcodeDBcc()
 unsigned int M68k::DecodeDivu()
 {
    // Decode , M, Xn
-   size_ = 1;  //16 bits source
+   size_ = 1;  //16 bits destination
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+
+   return true;
+}
+
+unsigned int M68k::DecodeDivs()
+{
+   // Decode , M, Xn
+   size_ = 2;  //32 bits destination
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
 
    return true;
@@ -2749,20 +3224,20 @@ unsigned int M68k::OpcodeDivu()
       return true;
    }
    unsigned int result = s1 / s2;
-   unsigned short rest = s1 - (s1 / s2);
+   unsigned short rest = s1 - ((s1 / s2)*s2);
 
-   if (result > 0x10000)
+   if (result >= 0x10000)
    {
       // Nothing to do
    }
    else
    {
-      d_[(ird_ >> 9) & 0x7] = (rest<<16)|result;
+      d_[(ird_ >> 9) & 0x7] = (rest<<16)|(result & 0xFFFF);
    }
    
 
    sr_ &= 0xFFF0;
-   if (((int)result) < 0) sr_ |= F_N;
+   if (result & 0x8000)sr_ |= F_N;
    if (result == 0) sr_ |= F_Z;
 
    // Wait for xxx cycle :
@@ -2776,35 +3251,30 @@ unsigned int M68k::OpcodeDivu()
 unsigned int M68k::OpcodeDivs()
 {
    // Do it and adjust the flags
-   int s1 = destination_alu_->GetU32();
+   short s1 = destination_alu_->GetU16();
    short s2 = d_[(ird_ >> 9) & 0x7];
 
-   if (s2 == 0)
+   if (s1 == 0)
    {
       TRAP(5);
       return true;
    }
-   int result = s1 / s2;
-   short rest = s1 - (s1 / s2);
+   short result = s2 / s1;
+   short rest = s2 - result*s1;
 
-   if (result > 0x10000)
+   sr_ &= 0xFFF0;
+   if (result & 0x8000) sr_ |= F_N;
+   if (result == 0) sr_ |= F_Z;
+
+
+   if (result >= 0x10000)
    {
-      // Nothing to do
+      sr_ |= F_V;
    }
    else
    {
-      d_[(ird_ >> 9) & 0x7] = (rest << 16) | result;
+      d_[(ird_ >> 9) & 0x7] = (rest << 16) | (result&0xFFFF);
    }
-
-
-   sr_ &= 0xFFF0;
-   if (((int)result) < 0) sr_ |= F_N;
-   if (result == 0) sr_ |= F_Z;
-
-   // Wait for xxx cycle :
-   // todo
-
-   // Fetch x1
    Fetch();
    return true;
 }
@@ -2825,8 +3295,16 @@ unsigned int M68k::OpcodeEor()
       input = source_alu_->GetU32() ^ (destination_alu_->GetU32());
       break;
    }
+
+   /*if (pc_ == 0xFEADB2)
+   {
+      // Log D2, D0
+      LOG("dword %8.8X = %8.8X", d_[2], input);
+   }*/
+
    destination_alu_->WriteInput(input);
 
+   sr_ &= 0xFFF0;
    if (input == 0) sr_ |= F_Z;
    switch (operand_size_)
    {
@@ -2938,6 +3416,8 @@ unsigned int M68k::DecodeCmpm()
    // Decode , M, Xn
    size_ = ((ird_ >> 6) & 0x3);
    source_alu_ = source_factory_.InitAlu(2, (ird_) & 0x7, size_);
+   source_alu_->Init();
+
    destination_alu_= destination_factory_.InitAlu(2, (ird_>>9) & 0x7, size_);
 
    time_counter_ = 0;
@@ -3192,7 +3672,7 @@ unsigned int M68k::DecodeEoriSr()
 
 unsigned int M68k::DecodeEoriToCcr()
 {
-   sr_ ^= (irc_ & 0xFF);
+   sr_ ^=  (irc_ & 0xFF);
 
    Fetch();
    return true;
@@ -3252,7 +3732,7 @@ unsigned int M68k::DecodeExt()
       }
       else
       {
-         d_[ird_ & 0x7] &= 0x00FF;
+         d_[ird_ & 0x7] &= 0xFFFF00FF;
       }
 
       //d_[ird_ & 0x7] &= 0xFFFF0000;
@@ -3372,6 +3852,7 @@ unsigned int M68k::DecodeUnlk()
 
    // Write register to the stack
    source_alu_ = source_factory_.InitAlu(7, 1, 2); // Absolute long
+   source_alu_->Init();
 
    source_alu_->AddWord(An >> 16);
    source_alu_->AddWord(An & 0xFFFF);

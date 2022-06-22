@@ -23,6 +23,7 @@ public:
     void Break();
 
    public slots:
+      void on_set_top_address_clicked();
       void on_dbg_pause_clicked();
       void on_dbg_step__clicked();
       void on_dbg_run_clicked();
@@ -36,6 +37,7 @@ public:
 
     // Update the view
     virtual void Update();
+    virtual void UpdateDisassembly(unsigned int offset);
 
 protected:
    // Menu action

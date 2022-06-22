@@ -7,13 +7,15 @@
 #include "CopperDialog.h"
 #include "ExecDialog.h"
 #include "BitplaneDialog.h"
+#include "DiskDialog.h"
 #include "AmigaEmulation.h"
+#include "IDragNDropTarget.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public IDragNDropTarget
 {
     Q_OBJECT
 
@@ -21,6 +23,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    virtual void OpenFiles(const QStringList& pathList);
     virtual void closeEvent(QCloseEvent *event);
     void InitEmulation();
     void Break();
@@ -28,6 +31,7 @@ public:
     void Copper();
     void Exec();
     void Bitplane();
+    void DiskDebug();
     void SaveConfig();
     void LoadConfig();
 
@@ -49,6 +53,10 @@ private:
     CopperDialog copper_;
     ExecDialog exec_;
     BitplaneDialog bitplane_;
+    DiskDialog disk_debug_;
+
+    // Configuration
+    QString df0_path_;
 
     // Ressources
     QPixmap* led_on_;

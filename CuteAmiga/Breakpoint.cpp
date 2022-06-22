@@ -17,7 +17,7 @@ BreakPointHandler::BreakPointHandler()
 
 BreakPointHandler::~BreakPointHandler()
 {
-   for (int i = 0; i < breakpoint_number_; i++)
+   for (size_t i = 0; i < breakpoint_number_; i++)
    {
       delete breakpoint_list_[i];
    }
@@ -27,7 +27,9 @@ BreakPointHandler::~BreakPointHandler()
 
 bool BreakPointHandler::IsBreak()
 {
+   const std::lock_guard<std::mutex> lock(bp_mutex);
    // Parcours des breakpoints
+   
    //for (std::vector<IBreakpointItem*>::iterator it = m_BreakpointList.begin(); it != m_BreakpointList.end(); it++)
    for (unsigned int i = 0; i < breakpoint_number_; i++)
    {
@@ -40,6 +42,7 @@ bool BreakPointHandler::IsBreak()
 
 void BreakPointHandler::RemoveBreakpoint(IBreakpointItem* breakpoint)
 {
+   const std::lock_guard<std::mutex> lock(bp_mutex);
    //for (std::vector<IBreakpointItem*>::iterator it = m_BreakpointList.begin(); it != m_BreakpointList.end(); it++)
    for (unsigned int i = 0; i < breakpoint_number_; i++)
    {
@@ -58,6 +61,7 @@ void BreakPointHandler::RemoveBreakpoint(IBreakpointItem* breakpoint)
 
 bool BreakPointHandler::IsThereBreakOnAdress(unsigned short addr)
 {
+   const std::lock_guard<std::mutex> lock(bp_mutex);
    for (unsigned int j = 0; j < breakpoint_number_; j++)
    {
       if (breakpoint_list_[j]->IsThereBreakOnAdress(addr))
@@ -68,6 +72,7 @@ bool BreakPointHandler::IsThereBreakOnAdress(unsigned short addr)
 
 void BreakPointHandler::ToggleBreakpoint(unsigned short addr)
 {
+   const std::lock_guard<std::mutex> lock(bp_mutex);
    for (unsigned int j = 0; j < breakpoint_number_; j++)
    {
       if (breakpoint_list_[j]->IsThereBreakOnAdress(addr))
@@ -84,7 +89,8 @@ void BreakPointHandler::ToggleBreakpoint(unsigned short addr)
 
 void BreakPointHandler::Clear()
 {
-   for (int i = 0; i < breakpoint_number_; i++)
+   const std::lock_guard<std::mutex> lock(bp_mutex);
+   for (size_t i = 0; i < breakpoint_number_; i++)
    {
       delete breakpoint_list_[i];
    }
@@ -93,6 +99,7 @@ void BreakPointHandler::Clear()
 
 void BreakPointHandler::AddBreakpoint(IBreakpointItem* breakpoint)
 {
+   const std::lock_guard<std::mutex> lock(bp_mutex);
    if (breakpoint_number_ + 1 == breakpoint_list_size_)
    {
       int old_brk_size = breakpoint_list_size_;

@@ -19,7 +19,8 @@ Bus::Bus(): tick_count_(0),
             denise_(nullptr),
             copper_(nullptr),
             bitplanes_(nullptr),
-            blitter_(nullptr)
+            blitter_(nullptr),
+            paula_(nullptr)
 {
    Reset();
    memory_overlay_ = true;
@@ -65,7 +66,7 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   if (address == 0xB5CE)
+   if (address == 0xA9d8)
    {
       int dbg = 1;
    }
@@ -285,7 +286,11 @@ void Bus::TickDMA()
          break;
       // Disk DMA
       case 4:
+         dma_used = paula_->DmaDiskTick();
+         break;
       case 5:
+         dma_used = paula_->DmaDiskTick();
+         break;
       // Audio DMA
       case 6:
       case 7:
@@ -293,19 +298,25 @@ void Bus::TickDMA()
       case 9:
       // Sprite DMA
       case 10:
-      case 11:
+         dma_used = denise_->DmaSprite(0);
          break;
+      case 11:
       case 12:
       case 13:
       case 14:
       case 15:
       case 16:
       case 17:
+         // Check if bitplane has not a high priority - todo
+         //if ((odd_counter_ << 2) < first_dma_bitplane)
+            dma_used = denise_->DmaSprite(odd_counter_ - 11);
+         break;
       case 18:
       case 19:
       case 20:
       case 21:
       case 22:
+         break;
       default:
       // Bitplanes (1, 2, 3, 4 for low res, 1, 2 for high res)
          break;
@@ -318,22 +329,27 @@ void Bus::TickDMA()
       // EVEN (or value not used) : Only Copper, Blitter and 68000 (and Bitplanes eventually) are available on this 
       // Bitplane read can begin here
       if (!bitplanes_->DmaTick(tick_count_))
-      // Copper
-      if ( !copper_->DmaTick())
-      // Blitter
-      if (!blitter_->DmaTick())
-      // 68000 
-      if (agnus_bus_required_)
       {
-         
-         operation_memory.address_ = address_;
-         operation_memory.data_ = data_;
-         operation_memory.current_operation_ = current_operation_;
-         operation_memory.lds_ = lds_;
-         operation_memory.uds_ = uds_;
-         operation_memory.operation_complete_ = false;
-         pending_ = &operation_memory;
-         agnus_bus_required_ = false;
+         // Copper
+         if (!copper_->DmaTick())
+            // Blitter
+            if (!blitter_->DmaTick())
+               // 68000 
+               if (agnus_bus_required_)
+               {
+
+                  operation_memory.address_ = address_;
+                  operation_memory.data_ = data_;
+                  operation_memory.current_operation_ = current_operation_;
+                  operation_memory.lds_ = lds_;
+                  operation_memory.uds_ = uds_;
+                  operation_memory.operation_complete_ = false;
+                  pending_ = &operation_memory;
+                  agnus_bus_required_ = false;
+               }
+      }
+      else
+      {
       }
       // End of line ? 
       // refresh odd_counter_
@@ -341,6 +357,9 @@ void Bus::TickDMA()
       {
          odd_counter_ = 0;
       }
+   }
+   else
+   {
    }
    tick_count_++;
 }
@@ -364,6 +383,18 @@ void Bus::DmaOperationMemory::DoDma ()
             break;
          case 0x006:    // VHPOS
             word_of_data = agnus_->GetVhpos();
+            break;
+         case 0x008:    // DSKDATR
+            word_of_data = paula_->GetDskDat();
+            break;
+         case 0x10:     // ADKCONR
+            word_of_data = paula_->GetAdkCon();
+            break;
+         case 0x16:     // POTGOR
+            word_of_data = 0xFF00; // TODO !!!
+            break;
+         case 0x01A:    // DSKBYTR
+            word_of_data = paula_->GetDskByte();
             break;
          case 0x01C:    // INTENAR
             word_of_data = paula_->GetIntEna();
@@ -419,6 +450,10 @@ void Bus::DmaOperationMemory::DoDma ()
          }
          // Chip ram
          // Whole word ?
+         if ((address_ == 0xA9d8 || address_ == 0xA9da ) && data_ == 0xBB4C)
+         {
+            int dgb = 1;
+         }
          if (uds_ == ACTIVE)
             ram_[address_ & 0x7FFFF] = data_ >> 8;
          if (lds_ == ACTIVE)
@@ -453,6 +488,12 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
 {
    switch (addr)
    {
+      case 0x20:  // DSKPTH
+         paula_->SetDskPt(data, true);
+         break;
+      case 0x22:  // DSKPTL
+         paula_->SetDskPt(data, false);
+         break;
       case 0x24:  // DSKLEN
          paula_->SetDskLen(data);
          break;
@@ -536,6 +577,9 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          blitter_->SetBltDat(0, data);
          break;
 
+      case 0x7E:  // DSKSYNC
+         paula_->SetDskSync(data);
+         break;
       case 0x80:  // 1rst address COPPER (bit 16-18)
          agnus_->GetCopper()->Set1rstHighAddress(data);
          break;
@@ -667,58 +711,151 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x118: //BPL5DAT
       case 0x11A: //BPL6DAT
          denise_->SetData(((addr & 0x1FF) - 0x110) >> 1, data);
-         // todo
          break;
       case 0x120: // Sprites
+         denise_->SetSpritePth(0, data);
+         break;
       case 0x122: // Sprites
+         denise_->SetSpritePtl(0, data);
+         break;
       case 0x124: // Sprites
+         denise_->SetSpritePth(1, data);
+         break;
       case 0x126: // Sprites
+         denise_->SetSpritePtl(1, data);
+         break;
       case 0x128: // Sprites
+         denise_->SetSpritePth(2, data);
+         break;
       case 0x12A: // Sprites
+         denise_->SetSpritePtl(2, data);
+         break;
       case 0x12C: // Sprites
+         denise_->SetSpritePth(3, data);
+         break;
       case 0x12E: // Sprites
+         denise_->SetSpritePtl(3, data);
+         break;
       case 0x130: // Sprites
+         denise_->SetSpritePth(4, data);
+         break;
       case 0x132: // Sprites
+         denise_->SetSpritePtl(4, data);
+         break;
       case 0x134: // Sprites
+         denise_->SetSpritePth(5, data);
+         break;
       case 0x136: // Sprites
+         denise_->SetSpritePtl(5, data);
+         break;
       case 0x138: // Sprites
+         denise_->SetSpritePth(6, data);
+         break;
       case 0x13A: // Sprites
+         denise_->SetSpritePtl(6, data);
+         break;
       case 0x13C: // Sprites
+         denise_->SetSpritePth(7, data);
+         break;
       case 0x13E: // Sprites
-
+         denise_->SetSpritePtl(7, data);
+         break;
       case 0x140: // Sprites
+         denise_->SetSpritePos(0, data); 
+         break;
       case 0x142: // Sprites
+         denise_->SetSpriteCtl(0, data);
+         break;
       case 0x144: // Sprites
+         denise_->SetSpriteDatA(0, data);
+         break;
       case 0x146: // Sprites
+         denise_->SetSpriteDatB(0, data);
+         break;
       case 0x148: // Sprites
+         denise_->SetSpritePos(1, data);
+         break;
       case 0x14A: // Sprites
+         denise_->SetSpriteCtl(1, data);
+         break;
       case 0x14C: // Sprites
+         denise_->SetSpriteDatA(1, data);
+         break;
       case 0x14E: // Sprites
+         denise_->SetSpriteDatB(1, data);
+         break;
       case 0x150: // Sprites
+         denise_->SetSpritePos(2, data);
+         break;
       case 0x152: // Sprites
+         denise_->SetSpriteCtl(2, data);
+         break;
       case 0x154: // Sprites
+         denise_->SetSpriteDatA(2, data);
+         break;
       case 0x156: // Sprites
+         denise_->SetSpriteDatB(2, data);
+         break;
       case 0x158: // Sprites
+         denise_->SetSpritePos(3, data);
+         break;
       case 0x15A: // Sprites
+         denise_->SetSpriteCtl(3, data);
+         break;
       case 0x15C: // Sprites
+         denise_->SetSpriteDatA(3, data);
+         break;
       case 0x15E: // Sprites
+         denise_->SetSpriteDatB(3, data);
+         break;
       case 0x160: // Sprites
+         denise_->SetSpritePos(4, data);
+         break;
       case 0x162: // Sprites
+         denise_->SetSpriteCtl(4, data);
+         break;
       case 0x164: // Sprites
+         denise_->SetSpriteDatA(4, data);
+         break;
       case 0x166: // Sprites
+         denise_->SetSpriteDatB(4, data);
+         break;
       case 0x168: // Sprites
+         denise_->SetSpritePos(5, data);
+         break;
       case 0x16A: // Sprites
+         denise_->SetSpriteCtl(5, data);
+         break;
       case 0x16C: // Sprites
+         denise_->SetSpriteDatA(5, data);
+         break;
       case 0x16E: // Sprites
+         denise_->SetSpriteDatB(5, data);
+         break;
       case 0x170: // Sprites
+         denise_->SetSpritePos(6, data);
+         break;
       case 0x172: // Sprites
+         denise_->SetSpriteCtl(6, data);
+         break;
       case 0x174: // Sprites
+         denise_->SetSpriteDatA(6, data);
+         break;
       case 0x176: // Sprites
+         denise_->SetSpriteDatB(6, data);
+         break;
       case 0x178: // Sprites
+         denise_->SetSpritePos(7, data);
+         break;
       case 0x17A: // Sprites
+         denise_->SetSpriteCtl(7, data);
+         break;
       case 0x17C: // Sprites
+         denise_->SetSpriteDatA(7, data);
+         break;
       case 0x17E: // Sprites
-         // todo
+         denise_->SetSpriteDatB(7, data);
+         break;
          break;
       case 0x180: // Color registers
       case 0x182:
@@ -736,7 +873,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x19A:
       case 0x19C:
       case 0x19E:
-      case 0x1A0: // Color registers
+      case 0x1A0:
       case 0x1A2:
       case 0x1A4:
       case 0x1A6:
@@ -806,7 +943,7 @@ void Bus::Write16(unsigned int address, unsigned short data)
 {
    unsigned short written_value = SWAP_UINT16(data);
 
-   if (address == 0xB5CE )
+   if (address == 0x60DE)
    {
       int dbg = 1;
    }

@@ -23,13 +23,23 @@ int main(int argc, char *argv[])
    parser.setApplicationDescription(QCoreApplication::applicationName());
    parser.addHelpOption();
    parser.addVersionOption();
-   parser.addPositionalArgument("file", "The file to open.");
+
+   
+   QCommandLineOption df0("df0", "Disk image to insert in df0", "directory");
+   parser.addOption(df0);
    parser.process(app);
+
+   QString filepath_df0;
+   if (parser.isSet(df0))
+   {
+      filepath_df0 = parser.value(df0);
+   }
 
    MainWindow mainWin;
    mainWin.show();
    mainWin.InitEmulation();
 
+   // Init what can be initialised
 
    return app.exec();
 }

@@ -27,6 +27,8 @@ public:
       rom_ = rom;
    }
 
+   void InitLog(ILogger* log) { logger_ = log; }
+
    void Reset();
 
    void Tick();         // Handle main bus access
@@ -58,6 +60,7 @@ public:
       if (bitplanes_ != nullptr)bitplanes_->SetDmaCon(dma_control_);
       
       operation_memory.SetDMAControl(dma_control);
+      if (paula_!=nullptr) paula_->SetDMAControl(this, dma_control);
    }
 
    void SetCustomChips (Agnus* agnus, Denise* denise, Paula* paula, Bitplanes *bitplanes)
@@ -71,6 +74,7 @@ public:
       copper_->SetDmaCon(dma_control_);
       blitter_= agnus_->GetBlitter();
       blitter_->SetDmaCon(dma_control_);
+      paula_->SetDMAControl(this, dma_control_);
 
       operation_memory.InitCustomChips(paula_, agnus_, bitplanes_);
    }
@@ -216,6 +220,9 @@ protected:
 
    // todo : for test, but should be replaced by hardware for RAM/ROM selection
    bool memory_overlay_;
+
+   // Logger
+   ILogger* logger_;    // Logger
 
    CIA8520* cia_a_;
    CIA8520* cia_b_;

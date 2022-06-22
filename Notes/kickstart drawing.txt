@@ -1,3 +1,8 @@
+CIA TIMER : 
+
+FE9550 : command timer.device TR_ADDREQUEST	 ?
+
+
 Blitter :
 
 Barrel shifter:  (IN : desc, mask, a_old, a_new; OUT : aout)
