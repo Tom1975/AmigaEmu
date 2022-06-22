@@ -45422,12 +45422,14 @@ FE0606: rts
 0002062A: move.l (SP)+, A6          2C 5F 
 0002062C: rts                       4E 75 
 0002062E: move.? D0, D0             00 00 
+
 00020630: move.l A6, -(SP)          2F 0E 
 00020632: move.l ($60,A6), A6       2C 6E 00 60 
 00020636: move.l ($8,SP), D0        20 2F 00 08 
 0002063A: jsr ($FEC2,A6)            4E AE FE C2 
 0002063E: move.l (SP)+, A6          2C 5F 
 00020640: rts                       4E 75 
+
 00020642: move.? D0, D0             00 00 
 00020644: move.l A6, -(SP)          2F 0E 
 00020646: move.l ($60,A6), A6       2C 6E 00 60 
@@ -51491,7 +51493,7 @@ FE4BC6: move.l D0, ($1A,A4)       29 40 00 1A
 00024DCA: addq.b #1, ($127,A6)      52 2E 01 27 
 FE4DCE: jsr ($FFE2,A5)            	; AllocMem
 FE4DD2: move.l D0, D4             28 00 
-FE4DD4: bne.s 24E0E               66 38 
+FE4DD4: bne.s FE4E0E               66 38 
 FE4DD6: lea 24DBC(PC), A2         45 FA FF E4 
 FE4DDA: lea ($17A,A6), A0         41 EE 01 7A 
 FE4DDE: bsr 24E1A                 61 00 00 3A 
