@@ -297,6 +297,7 @@ mouse_not_equal:
    0003C3C0: bsr 3C2EE                 ; write it
    0003C3C4: rts                       4E 75 
 
+; data
    0003C3C6: beq.s 3C43A               67 72 
    0003C3C8: bsr 3C43A                 61 70 
    0003C3CA: bvc.s 3C435               68 69 

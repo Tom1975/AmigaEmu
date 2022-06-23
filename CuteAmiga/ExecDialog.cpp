@@ -74,42 +74,46 @@ void ExecDialog::AddTask(unsigned long task_adress_ptr, QTreeWidgetItem * root_i
 
    unsigned long task_adress = EXTRACT_LONG((&ram[task_adress_ptr]));
 
-   QTreeWidgetItem* item = new QTreeWidgetItem;
-   // Add a device
-   unsigned long name_address = EXTRACT_LONG((&ram[task_adress + 10]));
-   unsigned long current_sp = EXTRACT_LONG((&ram[task_adress + 54]));
-   char* name = (name_address >= 0xFC0000) ? (char*)&rom[name_address & 0x3FFFF] : (char*)&ram[name_address];
-   if (strlen(name) > 0)
+   if (task_adress != 0 && task_adress < 0x7FFFF)
    {
-      item->setText(0, QString(name));
-      // Add base address
-      QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
-      base_address_item->setText(0, QString("Base address : %1").arg(task_adress, 6, 16));
-      if (list_handler != nullptr)
+      QTreeWidgetItem* item = new QTreeWidgetItem;
+      // Add a device
+      unsigned long name_address = EXTRACT_LONG((&ram[(task_adress + 10) & 0x7FFFF]));
+      unsigned long current_sp = EXTRACT_LONG((&ram[(task_adress + 54) & 0x7FFFF]));
+      char* name = (name_address >= 0xFC0000) ? (char*)&rom[name_address & 0x3FFFF] : (char*)&ram[(name_address) & 0x7FFFF];
+
+      if (strlen(name) > 0)
       {
-         list_handler(task_adress, item, &list_items_);
+         item->setText(0, QString(name));
+         // Add base address
+         QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
+         base_address_item->setText(0, QString("Base address : %1").arg(task_adress & 0x7FFFF, 6, 16));
+         if (list_handler != nullptr)
+         {
+            list_handler(task_adress & 0x7FFFF, item, &list_items_);
+         }
+         item->addChild(base_address_item);
+
+         QTreeWidgetItem* sp_address_item = new QTreeWidgetItem;
+         sp_address_item->setText(0, QString("Stack sp : %1").arg(current_sp, 6, 16));
+         item->addChild(sp_address_item);
+
+         unsigned long sig_wait = EXTRACT_LONG((&ram[(task_adress + 22) & 0x7FFFF]));
+         QTreeWidgetItem* sp_signal_awaited = new QTreeWidgetItem;
+         sp_signal_awaited->setText(0, QString("SIGNAL_WAIT : %1").arg(sig_wait, 6, 16));
+         item->addChild(sp_signal_awaited);
+
+         unsigned long sig_recv = EXTRACT_LONG((&ram[(task_adress + 30) & 0x7FFFF]));
+         QTreeWidgetItem* sp_signal_received = new QTreeWidgetItem;
+         sp_signal_received->setText(0, QString("SIGNAL_RECV : %1").arg(sig_recv, 6, 16));
+         item->addChild(sp_signal_received);
+
+         list_items_.push_back(base_address_item);
+         root_item->addChild(item);
+         list_items_.push_back(item);
+         // Add specific informations
+
       }
-      item->addChild(base_address_item);
-
-      QTreeWidgetItem* sp_address_item = new QTreeWidgetItem;
-      sp_address_item->setText(0, QString("Stack sp : %1").arg(current_sp, 6, 16));
-      item->addChild(sp_address_item);
-
-      unsigned long sig_wait = EXTRACT_LONG((&ram[task_adress + 22]));
-      QTreeWidgetItem* sp_signal_awaited= new QTreeWidgetItem;
-      sp_signal_awaited->setText(0, QString("SIGNAL_WAIT : %1").arg(sig_wait, 6, 16));
-      item->addChild(sp_signal_awaited);
-
-      unsigned long sig_recv = EXTRACT_LONG((&ram[task_adress + 30]));
-      QTreeWidgetItem* sp_signal_received = new QTreeWidgetItem;
-      sp_signal_received->setText(0, QString("SIGNAL_RECV : %1").arg(sig_recv, 6, 16));
-      item->addChild(sp_signal_received);
-
-      list_items_.push_back(base_address_item);
-      root_item->addChild(item);
-      list_items_.push_back(item);
-      // Add specific informations
-
    }
 }
 
