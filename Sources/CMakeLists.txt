@@ -11,12 +11,6 @@ file( GLOB HEADERS
 
 set(EXTRA
    TODO.txt
-   "../Notes/BattleSquadron.asm"
-	"../Notes/DMA.txt"
-   "../Notes/Kickstart 1.2.asm"
-   "../Notes/kickstart.txt"
-   "../Notes/RSI_Megademo.asm"
-   "../Notes/Structures.txt"
    )
 source_group("Docs" FILES ${EXTRA} )
 

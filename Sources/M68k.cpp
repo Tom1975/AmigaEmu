@@ -2390,7 +2390,7 @@ unsigned int M68k::OpcodeSubI()
 
    destination_alu_->WriteInput(rm);
 
-   unsigned short flag = sr_ & 0xFFF0;
+   unsigned short flag = sr_ & 0xFFE0;
 
    // Z
    if (rm == 0) flag |= 0x4;
@@ -2402,7 +2402,7 @@ unsigned int M68k::OpcodeSubI()
    // N
    if (rm) flag |= 0x8;
    // V
-   if ((~sm) & dm & (~rm) | sm & (~dm) & rm) flag |= 0x2;
+   if (((~sm) & dm & (~rm)) | (sm & (~dm) & rm)) flag |= 0x2;
    // C-X
    if ((sm & ~dm) | (rm & ~dm) | (sm & rm)) flag |= 0x11;
 
