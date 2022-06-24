@@ -1,12 +1,7 @@
 
-#######################
-# Kickstart 1.2       #
-#######################
-
 -----------
 TO FIX : 
 -----------
-Add SUB ADD tests. (lots of flags seems to be missing)
 
 -----------
 EXECUTE OK : 
@@ -20,6 +15,8 @@ TODO :
 -----------
 FIXED 
 -----------
+Add SUB ADD tests. (lots of flags seems to be missing)
+
 Interrupt handler (vertical blanking) : FC12FC
 => FC6CDC  (a comprendre)
 - Handle interruption / Exceptions
