@@ -39,6 +39,7 @@ bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logge
    drive_.Init(logger, &cia_b_);
    m68k_.InitLog(logger);
    bus_.InitLog(logger_);
+   bus_.InitHardware(hardware);
    hardware_ = hardware;
    monitor_.InitScreen(frame);
    // Load ROM
