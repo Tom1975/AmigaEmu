@@ -20,7 +20,7 @@ void AmigaEmulation::AddUpdateListener(IUpdate* listener)
 
 void AmigaEmulation::Start()
 {
-   current_function_ = &AmigaEmulation::RunStep;
+   current_function_ = &AmigaEmulation::RunRun;
 
    if (motherboard_->Init(frame_, &hardware_io_, this))
    {
