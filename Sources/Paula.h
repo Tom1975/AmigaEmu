@@ -2,15 +2,18 @@
 
 #include "DMAControl.h"
 #include "DiskController.h"
-
+#include "SoundMixer.h"
+#include "ISound.h"
 class Bus;
+
 
 class Paula
 {
 public:
-   Paula();
+   Paula(SoundMixer* sound_mixer);
    virtual ~Paula();
 
+   void SetSoundMixer(SoundMixer* sound_mixer);
    void SetDiskController(DiskController* disk_controller);
    void SetDMAControl(Bus* bus, DMAControl* dma_control)
    {
@@ -18,7 +21,18 @@ public:
       bus_ = bus;
    }
 
+   // Audio
+   void SetAudioChannelLocation(int channel, unsigned short address, bool low);
+   void SetAudioChannelLength(int channel, unsigned short data) { channels_[channel].length = data; }
+   void SetAudioChannelVolume(int channel, unsigned short data) { channels_[channel].volume = data; }
+   void SetAudioChannelPeriod(int channel, unsigned short data) { channels_[channel].period = data; }
+   void SetAudioChannelData(int channel, unsigned short data) { channels_[channel].data = data; }
+   bool DmaAudioTick(unsigned int audio_channel);
+
+   // Disk
    bool DmaDiskTick();
+
+   // Int
    void SetIntPin(unsigned char *interrupt_pin) { interrupt_pin_ = interrupt_pin; };
    void Reset();
 
@@ -60,6 +74,21 @@ protected:
    ////////////////////////////////
    // serial port
    unsigned int serper_;
+   
+   ////////////////////////////////
+   // Audio
+   struct AudioChannel
+   {
+      unsigned int init_address_location;
+      unsigned int address_location;
+      unsigned short length;
+      unsigned short period;
+      unsigned short volume;
+      unsigned short data;
+   };
+   AudioChannel channels_[4];
+   SoundMixer *sound_mixer_;
+   SoundSource sound_source_;
 
    ////////////////////////////////
    // Disk

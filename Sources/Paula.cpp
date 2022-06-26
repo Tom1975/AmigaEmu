@@ -19,7 +19,8 @@
 #define DSKBLK 0x0002
 #define TBE    0x0001
 
-Paula::Paula() : interrupt_pin_(nullptr), dsk_byte_(0)
+Paula::Paula(SoundMixer* sound_mixer) : interrupt_pin_(nullptr), dsk_byte_(0), sound_source_(sound_mixer), sound_mixer_(sound_mixer)
+
 {
    Reset();
 }
@@ -39,6 +40,48 @@ void Paula::Reset()
 void Paula::SetDiskController(DiskController* disk_controller)
 {
    disk_controller_ = disk_controller;
+}
+
+
+////////////////////////////////
+// DMA Audio
+void Paula::SetAudioChannelLocation(int channel, unsigned short address, bool low)
+{
+   if (low)
+   {
+      channels_[channel].address_location &= 0xFFFF0000;
+      channels_[channel].address_location |= (address);
+
+      channels_[channel].init_address_location = channels_[channel].address_location;
+   }
+   else
+   {
+      channels_[channel].address_location &= 0xFFFF;
+      channels_[channel].address_location |= (address << 16);
+      channels_[channel].init_address_location = channels_[channel].address_location;
+   }
+      
+}
+
+bool Paula::DmaAudioTick(unsigned int audio_channel)
+{
+   // DMA enable   
+   channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location++);
+   if (channels_[audio_channel].address_location - channels_[audio_channel].init_address_location >= channels_[audio_channel].length)
+   {
+      channels_[audio_channel].address_location = channels_[audio_channel].init_address_location ;
+   }
+
+   if (audio_channel == 1)
+   {
+      sound_source_.AddSound(channels_[0].data&0xFF, channels_[1].data & 0xFF, 0);
+      sound_source_.AddSound(channels_[0].data >> 8, channels_[1].data>>8, 0);
+      //sound_mixer_->AddSound(channels_[0].data, channels_[1].data);
+      sound_mixer_->Tick();
+   }
+      
+
+   return false;
 }
 
 ////////////////////////////////

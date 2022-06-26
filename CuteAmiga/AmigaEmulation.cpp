@@ -5,6 +5,8 @@ AmigaEmulation::AmigaEmulation(DisplayFrame* frame) : run_(false), frame_(frame)
 {
    motherboard_ = new Motherboard();
    breakpoint_handler_.Init(motherboard_);
+
+   
 }
 
 AmigaEmulation::~AmigaEmulation()
@@ -22,7 +24,7 @@ void AmigaEmulation::Start()
 {
    current_function_ = &AmigaEmulation::RunRun;
 
-   if (motherboard_->Init(frame_, &hardware_io_, this))
+   if (motherboard_->Init(frame_, &hardware_io_, this, &sound_mixer_))
    {
       // Create thread with emulation handling
       emulation_thread_ = std::thread(Begin, this);

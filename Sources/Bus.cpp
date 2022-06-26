@@ -151,6 +151,10 @@ void Bus::Tick()
       
       if (current_operation_ == READ)
       {         
+         if (address_ == 0x7000)
+         {
+            int dgb = 1;
+         }
          // Set data on the bus (if from memory)
          unsigned char* real_address = 0;
          if (address_ > 0xF80000
@@ -161,6 +165,7 @@ void Bus::Tick()
          else if (address_ < 0x200000)
          {
             // FAST ram
+
          }
          else if (address_ < 0xA00000)
          {
@@ -290,32 +295,42 @@ void Bus::TickDMA()
          break;
       case 5:
          dma_used = paula_->DmaDiskTick();
-         break;
-      // Audio DMA
+         break;   
       case 6:
+         dma_used = paula_->DmaDiskTick();
+         break;
+
+         // Audio DMA
       case 7:
+         if ((dma_control_->dmacon_ & 0x201) == 0x201) dma_used = paula_->DmaAudioTick(0);
+         break;
       case 8:
+         if ((dma_control_->dmacon_ & 0x202) == 0x202) dma_used = paula_->DmaAudioTick(1);
+         break;
       case 9:
-      // Sprite DMA
+         if ((dma_control_->dmacon_ & 0x204) == 0x204) dma_used = paula_->DmaAudioTick(2);
+         break;
       case 10:
+         if ((dma_control_->dmacon_ & 0x208) == 0x208) dma_used = paula_->DmaAudioTick(3);
+         break;
+         // Sprite DMA
+      case 11:
          dma_used = denise_->DmaSprite(0);
          break;
-      case 11:
       case 12:
       case 13:
       case 14:
       case 15:
       case 16:
       case 17:
-         // Check if bitplane has not a high priority - todo
-         //if ((odd_counter_ << 2) < first_dma_bitplane)
-            dma_used = denise_->DmaSprite(odd_counter_ - 11);
-         break;
       case 18:
       case 19:
       case 20:
       case 21:
       case 22:
+         // Check if bitplane has not a high priority - todo
+         if ((odd_counter_ << 2) < first_dma_bitplane)
+            dma_used = denise_->DmaSprite(odd_counter_ - 11);
          break;
       default:
       // Bitplanes (1, 2, 3, 4 for low res, 1, 2 for high res)
@@ -642,31 +657,67 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
 
       case 0xA0:  // AUD0LCH
       case 0xA2:  // AUD0LCL
+         paula_->SetAudioChannelLocation(0, data, (addr & 0x2) ? true : false);
+         break;
       case 0xA4:  // AUD0LEN
+         paula_->SetAudioChannelLength(0, data);
+         break;
       case 0xA6:  // AUD0PER
+         paula_->SetAudioChannelPeriod(0, data);
+         break;
       case 0xA8:  // AUD0VOL
+         paula_->SetAudioChannelVolume(0, data);
+         break;
       case 0xAA:  // AUD0DAT
-
+         paula_->SetAudioChannelData(0, data);
+         break;
       case 0xB0:  // AUD1LCH
       case 0xB2:  // AUD1LCL
+         paula_->SetAudioChannelLocation(1, data, (addr & 0x2) ? true : false);
+         break;
       case 0xB4:  // AUD1LEN
+         paula_->SetAudioChannelLength(1, data);
+         break;
       case 0xB6:  // AUD1PER
+         paula_->SetAudioChannelPeriod(1, data);
+         break;
       case 0xB8:  // AUD1VOL
+         paula_->SetAudioChannelVolume(1, data);
+         break;
       case 0xBA:  // AUD1DAT
-
+         paula_->SetAudioChannelData(1, data);
+         break;
       case 0xC0:  // AUD2LCH
       case 0xC2:  // AUD2LCL
+         paula_->SetAudioChannelLocation(2, data, (addr & 0x2) ? true : false);
+         break;
       case 0xC4:  // AUD2LEN
+         paula_->SetAudioChannelLength(2, data);
+         break;
       case 0xC6:  // AUD2PER
+         paula_->SetAudioChannelPeriod(2, data);
+         break;
       case 0xC8:  // AUD2VOL
+         paula_->SetAudioChannelVolume(2, data);
+         break;
       case 0xCA:  // AUD2DAT
-
+         paula_->SetAudioChannelData(2, data);
+         break;
       case 0xD0:  // AUD3LCH
       case 0xD2:  // AUD3LCL
+         paula_->SetAudioChannelLocation(3, data, (addr & 0x2) ? true : false);
+         break;
       case 0xD4:  // AUD3LEN
+         paula_->SetAudioChannelLength(3, data);
+         break;
       case 0xD6:  // AUD3PER
+         paula_->SetAudioChannelPeriod(3, data);
+         break;
       case 0xD8:  // AUD3VOL
+         paula_->SetAudioChannelVolume(3, data);
+         break;
       case 0xDA:  // AUD3DAT
+         paula_->SetAudioChannelData(3, data);
          break;
 
       // Bitplanes

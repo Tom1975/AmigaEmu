@@ -1,5 +1,4 @@
 #pragma once
-//#include "Mmsystem.h"
 
 class IWaveHDR
 {
@@ -25,7 +24,7 @@ public:
    virtual void StartMixer() = 0;
 };
 
-class ISound
+class ISound 
 {
 public:
    virtual bool Init(int sample_rate, int sample_bits, int nb_channels) = 0;

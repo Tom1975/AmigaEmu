@@ -5,7 +5,7 @@
 #include <functional>
 #include "QObject.h"
 
-
+#include "ALSoundMixer.h"
 #include "Motherboard.h"
 #include "Breakpoint.h"
 #include "HardwareInterface.h"
@@ -94,4 +94,5 @@ protected:
    DisplayFrame* frame_;
    HardwareInterface hardware_io_;
 
+   ALSoundMixer sound_mixer_;
 };

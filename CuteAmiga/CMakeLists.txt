@@ -102,7 +102,6 @@ target_compile_features(CuteAmiga PRIVATE cxx_std_17)
 target_link_libraries(CuteAmiga ${Qt5Widgets_LIBRARIES} OpenAL Qt5::Core Qt5::Widgets 
 						AmigaCore
 						)
-
 #if(WIN32)
     #include(Windeployqt)
     #windeployqt(CuteAmiga ${INSTALL_BIN_PATH})

@@ -11,7 +11,7 @@
 #define Tick28Mhz_UP //agnus_.TickUp();
 #define Tick28Mhz_Down //agnus_.TickDown();
 
-Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, &keyboard_, 8), cia_b_(this, nullptr, 0x2000), led_(false), logger_(nullptr), count_Keyboard_(0)
+Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, &keyboard_, 8), cia_b_(this, nullptr, 0x2000), led_(false), logger_(nullptr), count_Keyboard_(0), sound_player_(nullptr), paula_(&sound_mixer_)
 {
    m68k_.SetBus(&bus_);
    keyboard_.SetCIA(&cia_a_);
@@ -31,8 +31,11 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this,
 Motherboard::~Motherboard()
 = default;
 
-bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger)
+bool Motherboard::Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger, ISound* sound_player)
 {
+   sound_player_ = sound_player;
+
+   sound_mixer_.Init(sound_player, nullptr);
    logger_ = logger;
    frame_ = frame;
    denise_.SetDisplayFrame(frame_);
