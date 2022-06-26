@@ -46,7 +46,7 @@ void HardwareInterface::KeyAction(int key, bool pressed)
 
 unsigned short HardwareInterface::JoyDat0()
 {
-   return (((y_ / 4) & 0xFF) << 8) | ((x_ / 4) & 0xFF);
+   return (((y_ ) & 0xFF) << 8) | ((x_ ) & 0xFF);
 }
 
 unsigned short HardwareInterface::JoyDat1()
