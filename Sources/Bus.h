@@ -6,6 +6,7 @@
 #include "Bitplanes.h"
 #include "Agnus.h"
 #include "Denise.h"
+#include "HardwareIO.h"
 
 class Bus
 {
@@ -27,6 +28,9 @@ public:
       rom_ = rom;
    }
 
+   void InitHardware(HardwareIO* hardware) {
+      hardware_ = hardware;
+   }
    void InitLog(ILogger* log) { logger_ = log; }
 
    void Reset();
@@ -165,6 +169,8 @@ protected:
 
    };
    
+   friend class DmaOperationMemory;
+
    class DmaOperationMemory : public DmaOperation
    {
    public:
@@ -239,4 +245,8 @@ protected:
    unsigned int odd_counter_;
 
    unsigned char register_trace_[0x200];
+
+   // Hardware interface 
+   HardwareIO * hardware_;
+
 };

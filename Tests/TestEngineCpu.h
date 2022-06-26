@@ -22,6 +22,10 @@ public:
       return 0;
    }
 
+   virtual unsigned short JoyDat0() { return 0; }
+   virtual unsigned short JoyDat1() { return 0; }
+
+
 protected:
 };
 

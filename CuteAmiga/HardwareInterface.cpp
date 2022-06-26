@@ -36,9 +36,20 @@ void HardwareInterface::SetMouvePos(int x, int y)
 void HardwareInterface::MouseClick(int button, bool down)
 {
    port_1_button_[button] = down;
+   // capture mouse
 }
 
 void HardwareInterface::KeyAction(int key, bool pressed)
 {
    // Add key to current key pressed
+}
+
+unsigned short HardwareInterface::JoyDat0()
+{
+   return (((y_ ) & 0xFF) << 8) | ((x_ ) & 0xFF);
+}
+
+unsigned short HardwareInterface::JoyDat1()
+{
+   return 0;
 }

@@ -387,11 +387,20 @@ void Bus::DmaOperationMemory::DoDma ()
          case 0x008:    // DSKDATR
             word_of_data = paula_->GetDskDat();
             break;
+         case 0x00A:    // JOY0DAT
+            word_of_data = bus_->hardware_->JoyDat0();
+            break;
+         case 0x00C:    // JOY1DAT
+            word_of_data = bus_->hardware_->JoyDat1();
+            break;
          case 0x10:     // ADKCONR
             word_of_data = paula_->GetAdkCon();
             break;
          case 0x16:     // POTGOR
-            word_of_data = 0xFF00; // TODO !!!
+            {
+               word_of_data = 0xFF00; // 
+            }
+            
             break;
          case 0x01A:    // DSKBYTR
             word_of_data = paula_->GetDskByte();
