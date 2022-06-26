@@ -11,13 +11,7 @@
 #include "DiskController.h"
 #include "Keyboard.h"
 #include "ILogger.h"
-
-class HardwareIO
-{
-public:
-   
-   virtual unsigned char GetJoystick(unsigned int port_number) = 0;
-};
+#include "HardwareIO.h"
 
 class Motherboard
 {
