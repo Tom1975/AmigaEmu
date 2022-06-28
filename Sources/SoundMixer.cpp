@@ -341,7 +341,7 @@ void SoundMixer::ConvertToWav(SoundBuffer* buffer_in)
 
    // filter
 #ifndef __circle__
-   FiltrerOnSamples(float_buffer_l, float_buffer_r, BUFFER_SIZE);
+   //FiltrerOnSamples(float_buffer_l, float_buffer_r, BUFFER_SIZE);
 #endif
    if (current_wav_buffer_ == nullptr)
    {

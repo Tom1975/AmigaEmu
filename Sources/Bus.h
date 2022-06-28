@@ -55,7 +55,7 @@ public:
       cia_a_ = cia_a;
       cia_b_ = cia_b;
    }
-
+   void SetMixer(SoundMixer* sound_mixer);
    void SetDMAControl (DMAControl* dma_control)
    {
       dma_control_ = dma_control;
@@ -248,5 +248,6 @@ protected:
 
    // Hardware interface 
    HardwareIO * hardware_;
+   SoundMixer* sound_mixer_;
 
 };

@@ -19,6 +19,7 @@ Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this,
    bus_.SetDMAControl(&dma_control_);
    bus_.SetCustomChips(&agnus_, &denise_, &paula_, &bitplanes_);
    bus_.SetRom(rom_);
+   bus_.SetMixer(&sound_mixer_);
    bitplanes_.Init(this);
    paula_.SetIntPin(m68k_.GetIntPin());
    paula_.SetDiskController(&drive_);

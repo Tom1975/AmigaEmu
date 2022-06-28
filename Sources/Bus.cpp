@@ -31,6 +31,11 @@ Bus::~Bus()
 {
 }
 
+void Bus::SetMixer(SoundMixer* sound_mixer)
+{
+   sound_mixer_ = sound_mixer;
+}
+
 void Bus::SetBusActive(unsigned char active)
 {
    uds_ = (active & 0x2) ? ACTIVE : INACTIVE;
@@ -312,6 +317,7 @@ void Bus::TickDMA()
          break;
       case 10:
          if ((dma_control_->dmacon_ & 0x208) == 0x208) dma_used = paula_->DmaAudioTick(3);
+         paula_->DmaAudioSampleOver();
          break;
          // Sprite DMA
       case 11:

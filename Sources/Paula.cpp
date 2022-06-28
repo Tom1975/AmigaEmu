@@ -66,22 +66,30 @@ void Paula::SetAudioChannelLocation(int channel, unsigned short address, bool lo
 bool Paula::DmaAudioTick(unsigned int audio_channel)
 {
    // DMA enable   
-   channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location++);
-   if (channels_[audio_channel].address_location - channels_[audio_channel].init_address_location >= channels_[audio_channel].length)
+   if (channels_[audio_channel].length > 1)
    {
-      channels_[audio_channel].address_location = channels_[audio_channel].init_address_location ;
+      channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location++);
+      if (channels_[audio_channel].address_location - channels_[audio_channel].init_address_location >= channels_[audio_channel].length)
+      {
+         channels_[audio_channel].address_location = channels_[audio_channel].init_address_location;
+      }
    }
-
-   if (audio_channel == 1)
-   {
-      sound_source_.AddSound(channels_[0].data&0xFF, channels_[1].data & 0xFF, 0);
-      sound_source_.AddSound(channels_[0].data >> 8, channels_[1].data>>8, 0);
-      //sound_mixer_->AddSound(channels_[0].data, channels_[1].data);
-      sound_mixer_->Tick();
-   }
-      
 
    return false;
+}
+
+void Paula::DmaAudioSampleOver()
+{
+   sound_source_.AddSound(channels_[0].data & 0xFF, channels_[1].data & 0xFF, 0);
+   sound_source_.AddSound(channels_[2].data & 0xFF, channels_[3].data & 0xFF, 0);
+   sound_mixer_->Tick();
+   sound_source_.AddSound(channels_[0].data >> 8, channels_[1].data >> 8, 0);
+   sound_source_.AddSound(channels_[2].data >> 8, channels_[3].data >> 8, 0);
+   sound_mixer_->Tick();
+   channels_[0].data = 0;
+   channels_[1].data = 0;
+   channels_[2].data = 0;
+   channels_[3].data = 0;
 }
 
 ////////////////////////////////

@@ -28,6 +28,7 @@ public:
    void SetAudioChannelPeriod(int channel, unsigned short data) { channels_[channel].period = data; }
    void SetAudioChannelData(int channel, unsigned short data) { channels_[channel].data = data; }
    bool DmaAudioTick(unsigned int audio_channel);
+   void DmaAudioSampleOver();
 
    // Disk
    bool DmaDiskTick();
