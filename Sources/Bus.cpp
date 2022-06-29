@@ -317,7 +317,11 @@ void Bus::TickDMA()
          break;
       case 10:
          if ((dma_control_->dmacon_ & 0x208) == 0x208) dma_used = paula_->DmaAudioTick(3);
-         paula_->DmaAudioSampleOver();
+
+         if ((dma_control_->dmacon_ & 0x200)  == 0x200 
+            && (dma_control_->dmacon_ & 0xF) != 0
+            )
+            paula_->DmaAudioSampleOver();
          break;
          // Sprite DMA
       case 11:
@@ -434,6 +438,7 @@ void Bus::DmaOperationMemory::DoDma ()
             break;
          default:
          {
+            bus_->logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Read unhandled : %4.4X", address_ & 0x1FF);
             int dbg = 1;
             break;
          }
@@ -961,6 +966,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       default:
       {
          //UNDEF
+         logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %4.4X", address_ & 0x1FF);
          int test = 1;
          break;
       }
