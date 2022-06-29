@@ -293,6 +293,7 @@ void SoundMixer::StartMixer()
 
 void SoundMixer::Init(ISound* sound, IExternalSource* tape)
 {
+   start_recording_ = true;
    tape_ = tape;
 #ifndef NO_MULTITHREAD
    if (worker_thread_ != nullptr)
@@ -508,6 +509,8 @@ bool SoundMixer::GetNewSoundFile(char * buffer, unsigned int size)
    {
       sprintf(buffer, "%sSND%4.4i.WAV", exe_path, inc);
       const std::regex my_filter(buffer);
+
+      return true;
 
       for (auto& p : std::filesystem::directory_iterator(exe_path))
       {
