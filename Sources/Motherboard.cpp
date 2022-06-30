@@ -250,6 +250,9 @@ void Motherboard::TickCCK(bool up)
    // "Chroma clock"
 
    // Paula 
+   if (up)
+      paula_.Tick();
+
    // Denise
    // Gary
 }

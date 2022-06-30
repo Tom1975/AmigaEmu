@@ -13,6 +13,8 @@ public:
    Paula(SoundMixer* sound_mixer);
    virtual ~Paula();
 
+   void Tick();
+
    void SetSoundMixer(SoundMixer* sound_mixer);
    void SetDiskController(DiskController* disk_controller);
    void SetDMAControl(Bus* bus, DMAControl* dma_control)
@@ -102,4 +104,21 @@ protected:
 
    unsigned int dsk_dma_pt_;
    
+   ////////////////////////////////
+   // Audio state machine
+   struct AudioStateMachine
+   {
+      AudioStateMachine(Paula* paula);
+
+      // Audio Tick
+      void Tick();
+
+      // External Action
+      
+
+      unsigned char current_state_:3;
+      Paula* paula_;
+   };
+   friend AudioStateMachine;
+
 };

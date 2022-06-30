@@ -927,7 +927,6 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x17E: // Sprites
          denise_->SetSpriteDatB(7, data);
          break;
-         break;
       case 0x180: // Color registers
       case 0x182:
       case 0x184:
@@ -966,7 +965,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       default:
       {
          //UNDEF
-         logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %4.4X", address_ & 0x1FF);
+         logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", address_ );
          int test = 1;
          break;
       }

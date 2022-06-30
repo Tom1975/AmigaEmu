@@ -42,6 +42,12 @@ void Paula::SetDiskController(DiskController* disk_controller)
    disk_controller_ = disk_controller;
 }
 
+////////////////////////////////
+// CCK Tick
+void Paula::Tick()
+{
+   // Tick Each Audio Channel
+}
 
 ////////////////////////////////
 // DMA Audio
@@ -303,3 +309,26 @@ void Paula::CheckInt()
 
 }
 
+
+////////////////////////////////
+// Audio state machine
+Paula::AudioStateMachine::AudioStateMachine(Paula* paula) : paula_(paula), current_state_(0)
+{
+
+}
+
+void Paula::AudioStateMachine::Tick()
+{
+   switch (current_state_)
+   {
+   case 0b000:
+      break;
+
+
+   case 0b100:
+   case 0b110:
+   case 0b111:
+      current_state_ = 0;
+      break;
+   }
+}
