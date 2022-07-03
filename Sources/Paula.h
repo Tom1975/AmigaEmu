@@ -108,17 +108,34 @@ protected:
    // Audio state machine
    struct AudioStateMachine
    {
-      AudioStateMachine(Paula* paula);
+      AudioStateMachine();
+      void Init (int channel, Paula* paula);
+      
+      void AUDxDAT(unsigned short data);
 
       // Audio Tick
       void Tick();
 
       // External Action
       
-
+      // state 
       unsigned char current_state_:3;
+
+      // Inner vaalues
       Paula* paula_;
+      int channel_;
+      unsigned short audxon_;
+      unsigned short audxdat_;
+      bool audxdatwaiting_;
+
+      // period counter
+      unsigned short period_counter_;
+
+      // output data
+      unsigned char sound_;
+
    };
    friend AudioStateMachine;
 
+   AudioStateMachine audio_[4];
 };

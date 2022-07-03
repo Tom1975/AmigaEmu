@@ -20,8 +20,11 @@
 #define TBE    0x0001
 
 Paula::Paula(SoundMixer* sound_mixer) : interrupt_pin_(nullptr), dsk_byte_(0), sound_source_(sound_mixer), sound_mixer_(sound_mixer)
-
 {
+   audio_[0].Init(0, this);
+   audio_[1].Init(1, this);
+   audio_[2].Init(2, this);
+   audio_[3].Init(3, this);
    Reset();
 }
 
@@ -47,6 +50,12 @@ void Paula::SetDiskController(DiskController* disk_controller)
 void Paula::Tick()
 {
    // Tick Each Audio Channel
+   audio_[0].Tick();
+   audio_[1].Tick();
+   audio_[2].Tick();
+   audio_[3].Tick();
+
+   // If sample is necessary, do it.
 }
 
 ////////////////////////////////
@@ -312,18 +321,150 @@ void Paula::CheckInt()
 
 ////////////////////////////////
 // Audio state machine
-Paula::AudioStateMachine::AudioStateMachine(Paula* paula) : paula_(paula), current_state_(0)
+Paula::AudioStateMachine::AudioStateMachine()
 {
 
 }
+
+void Paula::AudioStateMachine::Init(int channel, Paula* paula) 
+{
+   paula_ = paula;
+   current_state_ = 0b000;
+   channel_ = channel;
+   audxon_ = (0x200 | (1 << channel));
+}
+
+void Paula::AudioStateMachine::AUDxDAT(unsigned short data)
+{
+   audxdat_ = data;
+   audxdatwaiting_ = true;
+}
+
+// AUDIO
+// STATE MACHINE.
+//
+// AUDxON : DMA on "x" indicates channel number (signal from  DMACON ).
+// AUDxIP : Audio interrupt  pending (input to channel from interrupt circuitry).
+// AUDxIR : Audio interrupt  request (output from channel to interrupt circuitry)
+// AUDxDAT: Audio data load signal. Loads 16 bits of data to audio channel.
+// AUDxDR      Audio DMA request to Agnus for one word of data.
+// AUDxDSR     Audio DMA request to Agnus to reset pointer to start of block.
+// dmasen      Restart request enable.
+// percntrld   Reload period counter from back - up latch typically written by processor with  AUDxPER(can also be written by attach mode).
+// percount    Count period counter down one latch.
+// perfin      Period counter finished(value = 1).
+// lencntrld   Reload length counter from back - up latch.
+// lencount    Count length counter down one notch.
+// lenfin      Length counter finished(value = 1).
+// volcntrld   Reload volume counter from back - up latch.
+// pbufld1     Load output buffer from holding latch written to by AUDxDAT.
+// pbufld2     Like pbufld1, but only during 010->011 with attach period.
+// AUDxAV      Attach volume.Send data to volume latch of next channel instead of to D->A converter.
+// AUDxAP      Attach period.Send data to period latch of next channel instead of to the D->A converter.
+// penhi       Enable the high 8 bits of data to go to the D->A converter.
+// napnav / AUDxAV * / AUDxAP + AUDxAV -- no attach stuff or else attach volume.Condition for normal DMA and interrupt requests.
+// sq2, 1, 0     The name of the state flip - flops, MSB to LSB.
 
 void Paula::AudioStateMachine::Tick()
 {
    switch (current_state_)
    {
+      // Idle
    case 0b000:
+      // Period Counter is decremented
+
+      
+      if ((paula_->dma_control_->dmacon_ & audxon_) == audxon_) // AUDxON : 
+      {
+         // Request DMA
+         current_state_ = 0b001;
+      }
+      // todo : add a condition on audxip ?
+      else if (audxdatwaiting_) // !AUDxON + AUDxDAT + !AUDxIP
+      {
+         // Request DMA
+         current_state_ = 0b010;
+         audxdatwaiting_ = false;
+      }
+      
       break;
 
+      // DMA
+   case 0b001:
+      if ((paula_->dma_control_->dmacon_ & audxon_) != audxon_)
+      {
+         // return to idle
+         current_state_ = 0b000;
+      }
+      else
+      {
+         if (audxdatwaiting_)
+         {
+            // todo : do something ?
+
+            // Change state
+            current_state_ = 0b101;
+         }
+      }
+      break;
+
+   case 0b101:
+      break;
+      if ((paula_->dma_control_->dmacon_ & audxon_) != audxon_)
+      {
+         // return to idle
+         current_state_ = 0b000;
+      }
+      else
+      {
+         if (audxdatwaiting_)
+         {
+            // todo : do something ?
+
+
+            // Change state
+            sound_ = (audxdat_ >> 8);
+            current_state_ = 0b010;
+         }
+      }
+      break;
+
+   case 0b010:
+      if (true)
+      {
+
+      }
+      if (period_counter_ == 1)
+      {
+         sound_ = (audxdat_ & 0xFF);
+         current_state_ = 0b010;
+      }
+      else
+      {
+         --period_counter_;
+      }
+      break;
+
+   case 0b011:
+      if (((paula_->dma_control_->dmacon_ & audxon_) == audxon_)
+         && (true))  // Pending interrupt
+      {
+         if (period_counter_ == 0)
+         {
+            sound_ = (audxdat_ >> 8);
+            current_state_ = 0b010;
+         }
+         else
+         {
+            --period_counter_;
+         }
+      }
+      else 
+      {
+         // return to idle
+         current_state_ = 0b000;
+      }
+      break;
 
    case 0b100:
    case 0b110:
