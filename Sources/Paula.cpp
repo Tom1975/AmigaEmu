@@ -37,6 +37,7 @@ void Paula::Reset()
 {
    int_ena_ = 0;
    int_req_ = 0;
+   counter_ = 0.0;
 }
 
 
@@ -56,6 +57,52 @@ void Paula::Tick()
    audio_[3].Tick();
 
    // If sample is necessary, do it.
+   // 3546895 hz on PAL system
+   // 
+   // Sample is done with 44100 hz. Every time we hit this, we sample the Paula output, and add a new sample.
+   counter_ += (1.0 / 3546895.0);
+
+   if ( counter_ > 1.0/ 125000.0)
+   {
+      counter_ -= 1.0 / 125000.0;
+
+
+      double l = 0.0;
+      double r = 0.0;
+      double divl = 0.0;
+      double divr = 0.0;
+
+      if ((dma_control_->dmacon_ & 0x201) == 0x201) 
+      {
+         l += audio_[0].sound_;
+         divl += 256.0;
+      }
+      if ((dma_control_->dmacon_ & 0x202) == 0x202) 
+      {
+         r += audio_[1].sound_;
+         divr += 256.0;
+      }
+      if ((dma_control_->dmacon_ & 0x204) == 0x204) 
+      {
+         l += audio_[2].sound_;
+         divl += 256.0;
+      }
+      if ((dma_control_->dmacon_ & 0x208) == 0x208) 
+      {
+         r += audio_[3].sound_;
+         divr += 256.0;
+      }
+      
+      if (divl > 0)
+          l = l / divl;
+      if (divr > 0)
+         r = r / divr;
+      sound_mixer_->AddSound(l, r);
+      sound_mixer_->Tick();
+   }
+   
+   
+
 }
 
 ////////////////////////////////
@@ -84,6 +131,7 @@ bool Paula::DmaAudioTick(unsigned int audio_channel)
    if (channels_[audio_channel].length > 1)
    {
       channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location++);
+      audio_[audio_channel].AUDxDAT(channels_[audio_channel].data);
       if (channels_[audio_channel].address_location - channels_[audio_channel].init_address_location >= channels_[audio_channel].length)
       {
          channels_[audio_channel].address_location = channels_[audio_channel].init_address_location;
@@ -372,8 +420,6 @@ void Paula::AudioStateMachine::Tick()
       // Idle
    case 0b000:
       // Period Counter is decremented
-
-      
       if ((paula_->dma_control_->dmacon_ & audxon_) == audxon_) // AUDxON : 
       {
          // Request DMA
@@ -401,6 +447,7 @@ void Paula::AudioStateMachine::Tick()
          if (audxdatwaiting_)
          {
             // todo : do something ?
+            audxdatwaiting_ = false;
 
             // Change state
             current_state_ = 0b101;
@@ -409,7 +456,6 @@ void Paula::AudioStateMachine::Tick()
       break;
 
    case 0b101:
-      break;
       if ((paula_->dma_control_->dmacon_ & audxon_) != audxon_)
       {
          // return to idle
@@ -419,6 +465,7 @@ void Paula::AudioStateMachine::Tick()
       {
          if (audxdatwaiting_)
          {
+            audxdatwaiting_ = false;
             // todo : do something ?
 
 
@@ -436,8 +483,9 @@ void Paula::AudioStateMachine::Tick()
       }
       if (period_counter_ == 1)
       {
+         period_counter_ = paula_->channels_[channel_].period;
          sound_ = (audxdat_ & 0xFF);
-         current_state_ = 0b010;
+         current_state_ = 0b011;
       }
       else
       {
@@ -449,8 +497,9 @@ void Paula::AudioStateMachine::Tick()
       if (((paula_->dma_control_->dmacon_ & audxon_) == audxon_)
          && (true))  // Pending interrupt
       {
-         if (period_counter_ == 0)
+         if (period_counter_ == 1)
          {
+            period_counter_ = paula_->channels_[channel_].period;
             sound_ = (audxdat_ >> 8);
             current_state_ = 0b010;
          }

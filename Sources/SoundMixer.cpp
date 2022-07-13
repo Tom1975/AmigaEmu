@@ -9,8 +9,12 @@
 #include <regex>
 #include <filesystem>
 
+#define NO_MULTITHREAD
+
+
 #define NOFILTER
 #ifndef NOFILTER
+
 
 #include <cmath>
 
@@ -487,7 +491,7 @@ void SoundMixer::PrepareBufferThread()
          sound_->CheckBuffersStatus();
 #ifndef NO_MULTITHREAD
          std::this_thread::sleep_for(std::chrono::milliseconds(1));
-#elif __circle
+#elif __circle 
          CTimer::Get()->MsDelay(1);
 #endif
       }
@@ -624,12 +628,6 @@ void SoundMixer::EndRecordImp()
 // This is a pragmatic value, set because it is the tick rate of AY8912 used by both CPC and PlayCITY
 unsigned int SoundMixer::Tick()
 {
-   if (tape_ && tape_->SoundOn())
-   {
-      double tapeSnd = tape_->GetSoundVolume() * tape_adjust_volume_;
-      buffer_list_[index_current_buffer_].buffer_.AddSound(tapeSnd, tapeSnd);
-   }
-
    // Advance
    if (buffer_list_[index_current_buffer_].buffer_.Advance() == false )
    {
@@ -668,9 +666,9 @@ unsigned int SoundMixer::Tick()
          // Buffer is full ? Prepare next, and mark this one to be played
          buffer_list_[index_current_buffer_].status_ = BufferItem::TO_PLAY;
 
-/*#ifdef NO_MULTITHREAD
+#ifdef NO_MULTITHREAD
          ConvertToWav(&buffer_list_[index_current_buffer_].buffer_);
-#else*/
+#else
 
          if(index_current_buffer_ == next_to_play)
          {
@@ -678,7 +676,7 @@ unsigned int SoundMixer::Tick()
          }
 
          index_current_buffer_ = next_to_play;
-//#endif
+#endif
          if (buffer_list_[index_current_buffer_].status_ != BufferItem::FREE)
          {
             buffer_list_[index_current_buffer_].buffer_.InitBuffer();

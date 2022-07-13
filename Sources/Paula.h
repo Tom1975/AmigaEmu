@@ -138,4 +138,7 @@ protected:
    friend AudioStateMachine;
 
    AudioStateMachine audio_[4];
+
+   // Sound sampling
+   double counter_;
 };
