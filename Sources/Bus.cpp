@@ -307,16 +307,16 @@ void Bus::TickDMA()
 
          // Audio DMA
       case 7:
-         if ((dma_control_->dmacon_ & 0x201) == 0x201) dma_used = paula_->DmaAudioTick(0);
+         dma_used = paula_->DmaAudioTick(0);
          break;
       case 8:
-         if ((dma_control_->dmacon_ & 0x202) == 0x202) dma_used = paula_->DmaAudioTick(1);
+         dma_used = paula_->DmaAudioTick(1);
          break;
       case 9:
-         if ((dma_control_->dmacon_ & 0x204) == 0x204) dma_used = paula_->DmaAudioTick(2);
+         dma_used = paula_->DmaAudioTick(2);
          break;
       case 10:
-         if ((dma_control_->dmacon_ & 0x208) == 0x208) dma_used = paula_->DmaAudioTick(3);
+         dma_used = paula_->DmaAudioTick(3);
 
          if ((dma_control_->dmacon_ & 0x200)  == 0x200 
             && (dma_control_->dmacon_ & 0xF) != 0

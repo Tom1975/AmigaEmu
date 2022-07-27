@@ -60,45 +60,50 @@ void Paula::Tick()
    // 3546895 hz on PAL system
    // 
    // Sample is done with 44100 hz. Every time we hit this, we sample the Paula output, and add a new sample.
-   counter_ += (1.0 / 3546895.0);
+   counter_ += (0.50 / 3546895.0);
 
-   if ( counter_ > 1.0/ 125000.0)
+   //if ( counter_ > 1.0/ 44100.0)
+   if (counter_ > 1.0 / 44100.0)
    {
-      counter_ -= 1.0 / 125000.0;
+      short l = 0;
+      short r = 0;
+      int count_l = 0;
+      int count_r = 0;
 
-
-      double l = 0.0;
-      double r = 0.0;
-      double divl = 0.0;
-      double divr = 0.0;
+      counter_ -= 1.0 / 44100.0;
 
       if ((dma_control_->dmacon_ & 0x201) == 0x201) 
       {
-         l += audio_[0].sound_;
-         divl += 256.0;
+         //l += static_cast<char>(audio_[0].sound_);
+         l += static_cast<char>(audio_[0].audxdat_&0xFF);
+         
+         count_l++;
       }
       if ((dma_control_->dmacon_ & 0x202) == 0x202) 
       {
-         r += audio_[1].sound_;
-         divr += 256.0;
+         //r += static_cast<char>(audio_[1].sound_);
+         r += static_cast<char>(audio_[1].audxdat_ & 0xFF);
+         count_r++;
       }
       if ((dma_control_->dmacon_ & 0x204) == 0x204) 
       {
-         l += audio_[2].sound_;
-         divl += 256.0;
+         //l += static_cast<char>(audio_[2].sound_);
+         l += static_cast<char>(audio_[2].audxdat_ & 0xFF);
+         count_l++;
       }
       if ((dma_control_->dmacon_ & 0x208) == 0x208) 
       {
-         r += audio_[3].sound_;
-         divr += 256.0;
+         //r += static_cast<char>(audio_[3].sound_);
+         r += static_cast<char>(audio_[3].audxdat_ & 0xFF);
+         count_r++;
       }
       
-      if (divl > 0)
-          l = l / divl;
-      if (divr > 0)
-         r = r / divr;
-      sound_mixer_->AddSound(l, r);
-      sound_mixer_->Tick();
+      if (count_l > 1)
+         l = l / count_l;
+      if (count_r > 1)
+         r = r / count_r;
+
+      sound_mixer_->AddSample((char)l, (char)r);
    }
    
    
@@ -111,39 +116,66 @@ void Paula::SetAudioChannelLocation(int channel, unsigned short address, bool lo
 {
    if (low)
    {
-      channels_[channel].address_location &= 0xFFFF0000;
-      channels_[channel].address_location |= (address);
+      channels_[channel].init_address_location &= 0xFFFF0000;
+      channels_[channel].init_address_location |= (address);
 
-      channels_[channel].init_address_location = channels_[channel].address_location;
+      //channels_[channel].init_address_location = channels_[channel].address_location;
    }
    else
    {
-      channels_[channel].address_location &= 0xFFFF;
-      channels_[channel].address_location |= (address << 16);
-      channels_[channel].init_address_location = channels_[channel].address_location;
+      channels_[channel].init_address_location &= 0xFFFF;
+      channels_[channel].init_address_location |= (address << 16);
+      //channels_[channel].init_address_location = channels_[channel].address_location;
    }
       
 }
 
 bool Paula::DmaAudioTick(unsigned int audio_channel)
 {
-   // DMA enable   
-   if (channels_[audio_channel].length > 1)
+   // Fresh start ?
+   unsigned short dma_mask = 0x200 + (1 << audio_channel);
+   if ((dma_control_->dmacon_ & dma_mask) == dma_mask)
    {
-      channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location++);
-      audio_[audio_channel].AUDxDAT(channels_[audio_channel].data);
-      if (channels_[audio_channel].address_location - channels_[audio_channel].init_address_location >= channels_[audio_channel].length)
+      if (!channels_[audio_channel].dmarunning_)
       {
+         channels_[audio_channel].length = channels_[audio_channel].init_length;
          channels_[audio_channel].address_location = channels_[audio_channel].init_address_location;
+         channels_[audio_channel].dmarunning_ = true;
+      }
+
+      // DMA enable   
+      if (channels_[audio_channel].length > 0)
+      {
+         channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location);
+         channels_[audio_channel].address_location += 2;
+         audio_[audio_channel].AUDxDAT(channels_[audio_channel].data);
+         if (--channels_[audio_channel].length == 0)
+         {
+            channels_[audio_channel].length = channels_[audio_channel].init_length;
+            channels_[audio_channel].address_location = channels_[audio_channel].init_address_location;
+         }
+      }
+      else
+      {
+         // ??
+         channels_[audio_channel].dmarunning_ = false;
       }
    }
+   else
+   {
+      channels_[audio_channel].dmarunning_ = false;
+   }
+
 
    return false;
 }
 
 void Paula::DmaAudioSampleOver()
 {
-   sound_source_.AddSound(channels_[0].data & 0xFF, channels_[1].data & 0xFF, 0);
+   //sound_mixer_->AddSample((char)channels_[0].data, (char)channels_[1].data);
+   //sound_mixer_->AddSample((char)((channels_[0].data)>>8), (char)((channels_[1].data)>>8));
+
+   /*sound_source_.AddSound(channels_[0].data & 0xFF, channels_[1].data & 0xFF, 0);
    sound_source_.AddSound(channels_[2].data & 0xFF, channels_[3].data & 0xFF, 0);
    sound_mixer_->Tick();
    sound_source_.AddSound(channels_[0].data >> 8, channels_[1].data >> 8, 0);
@@ -152,7 +184,7 @@ void Paula::DmaAudioSampleOver()
    channels_[0].data = 0;
    channels_[1].data = 0;
    channels_[2].data = 0;
-   channels_[3].data = 0;
+   channels_[3].data = 0;*/
 }
 
 ////////////////////////////////
@@ -366,6 +398,11 @@ void Paula::CheckInt()
 
 }
 
+
+Paula::AudioChannel::AudioChannel() : init_address_location(0), address_location(0), init_length(0), length(0), dmarunning_(false)
+{
+
+}
 
 ////////////////////////////////
 // Audio state machine

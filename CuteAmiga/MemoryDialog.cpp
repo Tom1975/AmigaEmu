@@ -3,6 +3,7 @@
 
 #include <QDir>
 #include <QMenuBar>
+#include <QDebug>
 
 MemoryDialog::MemoryDialog(QWidget *parent) :
    QDialog(parent),
@@ -114,6 +115,8 @@ void MemoryDialog::UpdateDebug()
       str_asm += hexa_line;
       str_asm += "   ";
       str_asm += ascii_line;
+
+      qDebug() << str_asm.c_str();
 
       ui->memoryWidget->addItem(str_asm.c_str());
    }

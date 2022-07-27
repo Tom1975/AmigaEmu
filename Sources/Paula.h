@@ -25,9 +25,9 @@ public:
 
    // Audio
    void SetAudioChannelLocation(int channel, unsigned short address, bool low);
-   void SetAudioChannelLength(int channel, unsigned short data) { channels_[channel].length = data; }
-   void SetAudioChannelVolume(int channel, unsigned short data) { channels_[channel].volume = data; }
-   void SetAudioChannelPeriod(int channel, unsigned short data) { channels_[channel].period = data; }
+   void SetAudioChannelLength(int channel, unsigned short data) { channels_[channel].init_length = data; }
+   void SetAudioChannelVolume(int channel, unsigned short data) { channels_[channel].init_volume = data; }
+   void SetAudioChannelPeriod(int channel, unsigned short data) { channels_[channel].init_period = data; }
    void SetAudioChannelData(int channel, unsigned short data) { channels_[channel].data = data; }
    bool DmaAudioTick(unsigned int audio_channel);
    void DmaAudioSampleOver();
@@ -80,14 +80,23 @@ protected:
    
    ////////////////////////////////
    // Audio
-   struct AudioChannel
+   class AudioChannel
    {
+   public:
+      AudioChannel();
       unsigned int init_address_location;
       unsigned int address_location;
+      unsigned short init_length;
       unsigned short length;
+      unsigned short init_period;
       unsigned short period;
+      unsigned short init_volume;
       unsigned short volume;
+      unsigned short init_data;
+
       unsigned short data;
+
+      bool dmarunning_;
    };
    AudioChannel channels_[4];
    SoundMixer *sound_mixer_;
@@ -141,4 +150,5 @@ protected:
 
    // Sound sampling
    double counter_;
+   
 };

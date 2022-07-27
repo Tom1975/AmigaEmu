@@ -26,7 +26,7 @@ ALSoundMixer::ALSoundMixer():sample_rate_(0),
       wav_buffers_list_[i].buffer_length_ = 0;
       wav_buffers_list_[i].status_ = IWaveHDR::UNUSED;
    }
-   Init(44100, 16, 2);
+   Init(44100, 8, 2);
 }
 
 ALSoundMixer::~ALSoundMixer()

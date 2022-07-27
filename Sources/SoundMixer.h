@@ -48,6 +48,7 @@ public:
    void Init(ISound* sound, IExternalSource* tape = nullptr);
 
    // Add sound
+   void AddSample(char left, char right);
    void AddSound(double  volume_left, double  volume_right);
    unsigned int Tick();
    void PrepareBufferThread();
@@ -152,13 +153,14 @@ protected:
    ///////////////////////
    // Record to wav file
    bool GetNewSoundFile(char * buffer, unsigned int size);
-   void AddRecord(short left, short right);
+   void AddRecord(char left, char right);
    void InitWave(Wave* wav, unsigned int length);
 
    bool record_;
    FILE * rec_file_;
    unsigned int data_rec_size_;
 
+   static char volume_[256];
 };
 
 class SoundSource 

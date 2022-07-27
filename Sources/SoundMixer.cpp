@@ -40,6 +40,9 @@
 #define MAX_PATH 256
 
 
+
+char SoundMixer::volume_[256];
+
 double SoundSource::volume_[256];/* = {
    0.0055242730304598808, 
    0.0078125018626451492, 
@@ -111,6 +114,13 @@ SoundMixer::SoundMixer() :
    log_(nullptr),
    sync_on_sound_(true)
 {
+
+   for (int i = 0; i < 0xFF; i++)
+   {
+      //volume_[i] = (char)  (((1.0f / (pow(sqrt(2.0f), (0xFF - i))))) * 256 );
+      volume_[i] = (char)i;
+   }
+
    // Everything, except firt, is on the "free buffer" list
    buffer_list_ = new BufferItem[NB_BUFFERS];
    buffer_list_[0].Init();
@@ -188,6 +198,8 @@ SoundMixer::~SoundMixer()
 #else
    finished_ = true;
 #endif
+
+   EndRecordImp();
 
    delete[]buffer_list_;
    delete[]xv_left_;
@@ -324,6 +336,47 @@ void SoundMixer::AddSound(double  volume_left, double  volume_right)
 {
    buffer_list_[index_current_buffer_].buffer_.AddSound(volume_left, volume_right);
 }
+
+void SoundMixer::AddSample(char left, char right)
+{
+   if (!record_)
+   {
+      BeginRecordImp();
+   }
+   // Add this sample to record / current sample buffer
+   /*left = volume_[left];
+   right = volume_[right];*/
+   AddRecord(left, right);
+
+   if (current_wav_buffer_ == nullptr)
+   {
+      // No buffer ? just wait until there is one (discard current sound)
+      current_wav_buffer_ = sound_->GetFreeBuffer();
+      current_wav_index_ = 0;
+   }
+   else
+   {
+
+      char* data = current_wav_buffer_->data_;
+      data[current_wav_index_++] = left;
+      data[current_wav_index_++] = right;
+
+      if (((current_wav_index_ + 2) ) > current_wav_buffer_->buffer_length_)
+      {
+         // Play it and set a new one
+         sound_->AddBufferToPlay(current_wav_buffer_);
+
+         current_wav_buffer_ = sound_->GetFreeBuffer();
+         current_wav_index_ = 0;
+         if (current_wav_buffer_ != nullptr)
+         {
+            data = current_wav_buffer_->data_;
+         }
+      }
+
+   }
+}
+
 
 //
 // The downsampling (if needed) has to be rework with more math !
@@ -536,18 +589,16 @@ bool SoundMixer::GetNewSoundFile(char * buffer, unsigned int size)
 }
 
 
-void SoundMixer::AddRecord(short left, short right)
+void SoundMixer::AddRecord(char left, char right)
 {
    if (record_)
    {
       unsigned char buff[4];
 
-      buff[0] = left & 0xFF;
-      buff[1] = left >> 8;
-      buff[2] = right & 0xFF;
-      buff[3] = right >> 8;
+      buff[0] = left+128;
+      buff[1] = right + 128;
 
-      fwrite(buff, 1, 4, rec_file_);
+      fwrite(buff, 1, 2, rec_file_);
       //fflush(rec_file_);
       data_rec_size_++;
    }
