@@ -56,9 +56,15 @@ public:
    // static function
    static void Begin(void* param);
 
+   int GetSpeed() {return speed_percent_; }
 protected:
 
    void MainLoop();
+   void HandleSyncro(int runtime);
+
+   int time_computed_;
+   std::chrono::time_point<std::chrono::steady_clock> time_elapsed_;
+   int speed_percent_;
 
    typedef unsigned int (AmigaEmulation::*RunFunc)();
    RunFunc current_function_;

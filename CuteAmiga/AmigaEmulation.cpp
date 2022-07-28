@@ -6,7 +6,9 @@ AmigaEmulation::AmigaEmulation(DisplayFrame* frame) : run_(false), frame_(frame)
    motherboard_ = new Motherboard();
    breakpoint_handler_.Init(motherboard_);
 
-   
+   time_computed_ = 0;
+
+   time_elapsed_ = std::chrono::steady_clock::now();
 }
 
 AmigaEmulation::~AmigaEmulation()
@@ -67,6 +69,32 @@ void AmigaEmulation::ActionRun()
    {
       current_function_ = &AmigaEmulation::RunRun;
    }
+   
+}
+
+void AmigaEmulation::HandleSyncro(int runtime)
+{
+   // rutime tick at ?? mhz => value increased in ms.
+   time_computed_ += runtime / (28000/8);
+
+   std::chrono::time_point<std::chrono::steady_clock> time_elapsed_end = std::chrono::steady_clock::now();
+
+   std::chrono::milliseconds real_time = std::chrono::duration_cast<std::chrono::milliseconds> (time_elapsed_end - time_elapsed_);
+   std::chrono::milliseconds base_realtime = real_time;
+
+   if (std::chrono::milliseconds(time_computed_) > real_time)
+   {
+      std::this_thread::sleep_for(std::chrono::microseconds((std::chrono::milliseconds(time_computed_) - real_time)));
+   }
+
+   if (base_realtime.count() != 0)
+   {
+      speed_percent_ = (unsigned int)(time_computed_ * 100 / base_realtime.count());
+   }
+   else
+   {
+      speed_percent_ = 1000;
+   }
 }
 
 void AmigaEmulation::ActionBreak ()
@@ -101,6 +129,7 @@ void AmigaEmulation::MainLoop()
          }
 
       }
+      HandleSyncro(50000);
       //std::this_thread::sleep_for(std::chrono::microseconds(10));
    }
 }
@@ -109,6 +138,8 @@ unsigned int AmigaEmulation::RunRun()
 {
    for (int i = 0; i < 50000; i++)
       motherboard_->Tick ();
+
+
    return 1;
 }
 

@@ -62,6 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
       statusBar()->addWidget(&icondrive_[i]);
    }
 
+   // Speed percentage
+   speed_.setNum(0);
+   statusBar()->addWidget(&speed_);
 
 }
 
@@ -245,6 +248,8 @@ void MainWindow::Update()
       icondrive_[i].setPixmap( mb->GetDriveLed(i)?*drive_led_on_:*drive_led_off_);
    }
 
+   // Speed percentage
+   speed_.setNum(emu_handler_->GetSpeed());
 }
 
 /////////////////////////////////////////////////////////////////////////////
