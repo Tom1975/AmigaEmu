@@ -60,17 +60,18 @@ void Paula::Tick()
    // 3546895 hz on PAL system
    // 
    // Sample is done with 44100 hz. Every time we hit this, we sample the Paula output, and add a new sample.
-   counter_ += (0.50 / 3546895.0);
+   counter_ += (1.0 / 3546895.0);
 
    //if ( counter_ > 1.0/ 44100.0)
-   if (counter_ > 1.0 / 44100.0)
+   if (counter_ > 1.0 / (3*44100.0))
    {
       short l = 0;
       short r = 0;
       int count_l = 0;
       int count_r = 0;
 
-      counter_ -= 1.0 / 44100.0;
+      // This *3.0 value is needed to have correct pitch. Seems like some timings are pretty wrong !!
+      counter_ -= 1.0 / (3 * 44100.0);
 
       if ((dma_control_->dmacon_ & 0x201) == 0x201) 
       {

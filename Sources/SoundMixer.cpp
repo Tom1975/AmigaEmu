@@ -354,12 +354,12 @@ void SoundMixer::AddSample(char left, char right)
       current_wav_buffer_ = sound_->GetFreeBuffer();
       current_wav_index_ = 0;
    }
-   else
+   if (current_wav_buffer_ != nullptr)
    {
 
       char* data = current_wav_buffer_->data_;
-      data[current_wav_index_++] = left;
-      data[current_wav_index_++] = right;
+      data[current_wav_index_++] = left+128;
+      data[current_wav_index_++] = right + 128;
 
       if (((current_wav_index_ + 2) ) > current_wav_buffer_->buffer_length_)
       {

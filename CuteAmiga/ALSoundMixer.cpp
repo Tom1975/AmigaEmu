@@ -165,7 +165,7 @@ void ALSoundMixer::AddBufferToPlay(IWaveHDR* new_buffer)
 {
    ALenum error;
    OAWaveHDR* oal_wav = (OAWaveHDR*)new_buffer;
-   alBufferData(oal_wav->buffer, AL_FORMAT_STEREO16, oal_wav->data_, oal_wav->buffer_length_, sample_rate_);
+   alBufferData(oal_wav->buffer, format_, oal_wav->data_, oal_wav->buffer_length_, sample_rate_);
    if ((error = alGetError()) != AL_NO_ERROR)
    {
    }
