@@ -2,14 +2,40 @@
 #include <cstdio>
 #include <string>
 
-#define LOG(x) if (logger_)logger_->Log(ILogger::SEV_DEBUG, x);
+#define LOG(x) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, x);
 
 #include "Disassembler68k.h"
 
-#define TickCDAC_UP denise_.TickCDACUp();
-#define TickCDAC_DOWN 
-#define Tick28Mhz_UP //agnus_.TickUp();
-#define Tick28Mhz_Down //agnus_.TickDown();
+#define LOG_CLOCKS
+#ifdef LOG_CLOCKS
+   #define INIT_CHRONOGRAM_LINES static std::string log_chrono_main = "{signal: [", log_cdac="{name: 'cdac', wave: '", log_cck="{name: 'cck', wave: '", log_cckq="{name: 'cckq', wave: '",\
+   log_28mhz="{name: '28Mhz', wave: '", log_7mhz = "{name: '7Mhz', wave: '";\
+   static int sig_cck = 1, sig_cckq= 1, sig_cdac= 0, sig_28mhz= 1, sig_7mhz= 1;static int nb_sample=0;
+   #define WRITE_SIG(log,u) if(u==2)log+=".";else {log += u?"1":"0";u=2;}
+   #define SAMPLE WRITE_SIG(log_28mhz,sig_28mhz);WRITE_SIG(log_7mhz,sig_7mhz);WRITE_SIG(log_cdac,sig_cdac);WRITE_SIG(log_cck,sig_cck);WRITE_SIG(log_cckq,sig_cckq);nb_sample++;
+   #define CLOSE_CHRONOGRAM_LINES if(nb_sample==32){log_7mhz+="'},";log_cdac+="'},";log_cck+="'},";log_cckq+="'},";log_28mhz+="'},";log_chrono_main += log_28mhz+ log_7mhz+log_cdac + log_cck + log_cckq;log_chrono_main +="]}";LOG(log_chrono_main.c_str());}
+   
+   #define TickCDAC_UP sig_cdac = 1;denise_.TickCDACUp();
+   #define TickCDAC_DOWN sig_cdac = 0;
+   #define Tick28Mhz_UP sig_28mhz = 1;SAMPLE;//agnus_.TickUp();
+   #define Tick28Mhz_DOWN sig_28mhz = 0;SAMPLE;//agnus_.TickDown();
+   #define TICK_CCK(u) sig_cck = u?1:0;TickCCK(u); 
+   #define TICK_CCKQ(u) sig_cckq = u?1:0;TickCCKQ(u); 
+   #define TICK_7Mhz(u) sig_7mhz = u?1:0;Tick7Mhz(u); 
+#else
+   #define INIT_CHRONOGRAM_LINES 
+   #define CLOSE_CHRONOGRAM_LINES
+   #define TickCDAC_UP denise_.TickCDACUp();
+   #define TickCDAC_DOWN 
+   #define Tick28Mhz_UP 
+   #define Tick28Mhz_DOWN 
+   #define TICK_CCK(u) TickCCK(u); 
+   #define TICK_CCKQ(u) TickCCKQ(u); 
+   #define TICK_7Mhz(u) Tick7Mhz(u); 
+#endif
+
+
+
 
 Motherboard::Motherboard() : m68k_(), debug_count_(0), count_E_(0), cia_a_(this, &keyboard_, 8), cia_b_(this, nullptr, 0x2000), led_(false), logger_(nullptr), count_Keyboard_(0), sound_player_(nullptr), paula_(&sound_mixer_)
 {
@@ -266,6 +292,7 @@ void Motherboard::TickCCKQ(bool up)
 
 void Motherboard::TickDebug()
 {
+   INIT_CHRONOGRAM_LINES
    static bool up_tick = false;
 
    //Tick28Mhz(up_tick);
@@ -275,15 +302,15 @@ void Motherboard::TickDebug()
    }
    else
    {
-      Tick28Mhz_Down
+      Tick28Mhz_DOWN
    }
 
    up_tick = !up_tick;
    switch ((debug_count_++)&0xF)
    {
    case 0:
-      TickCCK(false);
-      Tick7Mhz(false);
+      TICK_CCK(false);//TickCCK(false);
+      TICK_7Mhz(false);
       break;
    case 2:
    case 10:
@@ -291,31 +318,33 @@ void Motherboard::TickDebug()
       
       break;
    case 4:
-      TickCCKQ(false);
+      TICK_CCKQ(false);
       // 7MHZ up
-      Tick7Mhz(true);
+      TICK_7Mhz(true);
       break;
    case 6:
    case 14:
       TickCDAC_DOWN
       break;
    case 8:
-      TickCCK(true);
-      Tick7Mhz(false);
+      TICK_CCK(true);
+      TICK_7Mhz(false);
       break;
    case 12:
-      TickCCKQ(true);
-      Tick7Mhz(true);
+      TICK_CCKQ(true);
+      TICK_7Mhz(true);
       break;
    }
    if ((debug_count_ & 0x1F) == 0x1F)
    {
       //monitor_.Tick();
    }
+   CLOSE_CHRONOGRAM_LINES
 }
 
 void Motherboard::Tick()
 {
+   INIT_CHRONOGRAM_LINES
    // Various clocks are handled here for convenience.
    // Thus : 
    // 28 Master clock is used by Agnus, wich generate the followings clocks
@@ -327,59 +356,59 @@ void Motherboard::Tick()
    // Here is 8 ticks (8 down, 8 up) of the main clock
    // 28 Mhz down
    // This is ~285ns (1 pixel clock tick)
-   TickCDAC_DOWN
-         // CCK down
-   TickCCK(false);
+   Tick28Mhz_DOWN
+   // CCK down 
+   TICK_CCK(false);
       // 7MHZ down
-   Tick7Mhz(false);
+   TICK_7Mhz(false);
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down 
-   TickCDAC_DOWN
-      // CDAC up
+   Tick28Mhz_DOWN
+   // CDAC up
    TickCDAC_UP
    //monitor_.Tick();
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down 
-   TickCDAC_DOWN
-      // CCKQ down
-   TickCCKQ(false);
-      // 7MHZ up
-   Tick7Mhz(true);
+   Tick28Mhz_DOWN
+   // CCKQ down
+   TICK_CCKQ(false);
+   // 7MHZ up
+   TICK_7Mhz(true);
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down
-   TickCDAC_DOWN
-      // CDAC down
+   Tick28Mhz_DOWN
+   // CDAC down
    TickCDAC_DOWN
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down
-   TickCDAC_DOWN
-         // CCK up
-   TickCCK(true);
-      // 7MHZ down
-   Tick7Mhz(false);
+   Tick28Mhz_DOWN
+   // CCK up
+   TICK_CCK(true);
+   // 7MHZ down
+   TICK_7Mhz(false);
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down
-   TickCDAC_DOWN
-      // CDAC up
+   Tick28Mhz_DOWN
+   // CDAC up
    TickCDAC_UP
    //monitor_.Tick();
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down
-   TickCDAC_DOWN
+   Tick28Mhz_DOWN
       // CCKQ up
-   TickCCKQ(true);
+   TICK_CCKQ(true);
       // 7MHZ up
-   Tick7Mhz(true);
+   TICK_7Mhz(true);
    // 28 Mhz up
    Tick28Mhz_UP
    // 28 Mhz down
-   TickCDAC_DOWN
+   Tick28Mhz_DOWN
       // CDAC down
    TickCDAC_DOWN
    // 28 Mhz up
@@ -396,7 +425,7 @@ void Motherboard::Tick()
       // denise_.GetRGB();
    }
    
-
+   CLOSE_CHRONOGRAM_LINES
    counters_++;
    debug_count_ = 0;
 }

@@ -248,11 +248,11 @@ void func(T t, Args... args) // recursive variadic function
 */
 void AmigaEmulation::Log(Severity severity, const char* msg...)
 {
-   char buffer[256];
+   char buffer[1024];
    va_list args;
 
    va_start(args, msg);
-   vsprintf_s(buffer, 256, msg, args);
+   vsprintf_s(buffer, sizeof(buffer), msg, args);
 
    qDebug() << buffer;
 
