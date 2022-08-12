@@ -32,7 +32,21 @@ public:
    void StrVbl();
    void StrHor();
 
-   void TickCDACUp();
+   void TickCDACUp()
+   {
+      hpos_counter_++;
+
+      // Pixel writer : Every 16 tick (pixels hires), write the buffer to screen
+      if (hpos_counter_ == 8)
+      {
+         hpos_counter_ = 0;
+
+         // Write 16 pixels to screen
+         unsigned int pixel_buffer[16];
+         GetRGB(pixel_buffer);
+         frame_->Add16Pixels(pixel_buffer);
+      }
+   }
    void TickCDACDown();
    void SetBplDat(unsigned int bitplane_number, unsigned short data);
 

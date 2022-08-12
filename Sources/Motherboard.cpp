@@ -6,7 +6,7 @@
 
 #include "Disassembler68k.h"
 
-#define LOG_CLOCKS
+//#define LOG_CLOCKS
 #ifdef LOG_CLOCKS
    #define INIT_CHRONOGRAM_LINES static std::string log_chrono_main = "{signal: [", log_cdac="{name: 'cdac', wave: '", log_cck="{name: 'cck', wave: '", log_cckq="{name: 'cckq', wave: '",\
    log_28mhz="{name: '28Mhz', wave: '", log_7mhz = "{name: '7Mhz', wave: '";\

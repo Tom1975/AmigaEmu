@@ -348,7 +348,7 @@ void SoundMixer::AddSample(char left, char right)
    right = volume_[right];*/
    AddRecord(left, right);
 
-   if (current_wav_buffer_ == nullptr)
+   if (current_wav_buffer_ == nullptr && sound_ != nullptr)
    {
       // No buffer ? just wait until there is one (discard current sound)
       current_wav_buffer_ = sound_->GetFreeBuffer();

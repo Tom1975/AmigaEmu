@@ -51,7 +51,7 @@ void Denise::StrHor()
 
 ////////////////////////////////
 // Clock ticks
-void Denise::TickCDACUp()
+/*void Denise::TickCDACUp()
 {
    hpos_counter_++;
 
@@ -66,7 +66,7 @@ void Denise::TickCDACUp()
       frame_->Add16Pixels(pixel_buffer);
    }
    // Then refresh from ready buffer.
-}
+}*/
 
 void Denise::TickCDACDown()
 {
