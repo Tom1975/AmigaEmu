@@ -434,5 +434,10 @@ void Motherboard::Reset()
 {
    m68k_.Reset();
    monitor_.Reset();
+   bus_.Reset();
+   bus_.SetRST(Bus::ACTIVE);
+   bus_.SetRST(Bus::INACTIVE);
+   GetDiskController()->Reset();
+
    counters_ = 0;
 }

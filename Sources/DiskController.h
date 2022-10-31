@@ -44,6 +44,7 @@ public:
 
    // To be redefined, once we have a rolling drive, etc.
    unsigned short ReadNextWord();
+   void Advance();
 
 private:
    ILogger* logger_;

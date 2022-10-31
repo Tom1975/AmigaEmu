@@ -224,6 +224,10 @@ bool Paula::DmaDiskTick()
       }
       return true;
    }
+   else
+   {
+      disk_controller_->Advance();
+   }
 
    return false;
 }

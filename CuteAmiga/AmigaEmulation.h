@@ -91,6 +91,7 @@ protected:
    void ActionStep();
    void ActionRun();
    void ActionBreak();
+   void ActionReset();
 
    // Breakpoints handler
    BreakPointHandler breakpoint_handler_;

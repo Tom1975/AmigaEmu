@@ -50,7 +50,9 @@ void Bus::SetRST(InOutSignal rst)
    cia_b_->Reset();
    paula_->Reset();
    agnus_->Reset();
-
+   denise_->Reset();
+   bitplanes_->Reset();
+   dma_control_->Reset();
 }
 
 void Bus::Reset()

@@ -102,6 +102,11 @@ void AmigaEmulation::ActionBreak ()
    current_function_ = &AmigaEmulation::RunBreak;
 }
 
+void AmigaEmulation::ActionReset()
+{
+   motherboard_->Reset();
+}
+
 void AmigaEmulation::MainLoop()
 {
    motherboard_->Reset();
@@ -185,10 +190,7 @@ unsigned int AmigaEmulation::RunBreak()
 
 void AmigaEmulation::Reset()
 {
-   motherboard_->Reset();
-
-   // Does some windows need update ? 
-   // todo
+   action_list_.push_back(std::bind(&AmigaEmulation::ActionReset, this));   
 }
 
 void AmigaEmulation::Break()
