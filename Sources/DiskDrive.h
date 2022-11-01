@@ -49,6 +49,9 @@ private:
    unsigned char side_;
    char track_;
 
+   // Current data
+   unsigned short data_;
+
    // Head position
    size_t head_;
 

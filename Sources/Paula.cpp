@@ -201,6 +201,15 @@ bool Paula::DmaDiskTick()
       // Read from disk
       dsk_dat_ = disk_controller_->ReadNextWord();
 
+      if (adkcon_ & 0x400) // Test WORDSYNC bit ?
+      {
+         // beware : datas should be tested every bit
+         if (sync_ == dsk_dat_)
+         {
+            // set dskbytr, launch int if necessary
+         }
+      }
+
       // Write to memory
       bus_->Write16(dsk_dma_pt_, dsk_dat_);
       
@@ -226,7 +235,7 @@ bool Paula::DmaDiskTick()
    }
    else
    {
-      disk_controller_->Advance();
+      //disk_controller_->Advance();
    }
 
    return false;
