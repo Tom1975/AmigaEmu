@@ -58,7 +58,7 @@ public:
    unsigned short GetAdkCon() { return adkcon_; };
 
    unsigned short GetDskDat() { return dsk_dat_; }
-   unsigned short GetDskByte() { return dsk_byte_; }
+   unsigned short GetDskByte() { unsigned short tmp = dsk_byte_;  dsk_byte_ &= 0x7FFF;  return tmp; }
 
 protected:
    ////////////////////////////////
@@ -104,13 +104,23 @@ protected:
 
    ////////////////////////////////
    // Disk
+   unsigned int dsk_counter_clock_;
+
    unsigned short dsklen_;
    unsigned short adkcon_;
 
    unsigned short sync_;
    unsigned short dsk_dat_;
-   unsigned short dsk_byte_;
+   unsigned int dsk_dat_long_;
 
+   unsigned short dsk_dat_fetch_data_[4];
+   int fetch_index_;
+   int fetch_read_index_;
+   unsigned short dsk_byte_;
+   unsigned char disk_bit_count_;
+
+   unsigned char shift_data_sync_;
+   bool sync_ok_;
    unsigned int dsk_dma_pt_;
    
    ////////////////////////////////

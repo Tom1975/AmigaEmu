@@ -33,7 +33,7 @@ public:
    bool GetWPROT() { return wprot_; }
 
    unsigned short ReadAndAdvance();
-   void Advance();
+   unsigned char Advance();
 
 
    unsigned char GetSide() { return side_; }

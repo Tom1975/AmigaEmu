@@ -338,7 +338,7 @@ void M68k::Reset()
    // todo : We could upgrade this with 'real' memory reads (but is it really necessary)
 
    Fetch();
-
+   new_opcode_ = 0;
    current_working_list_ = ResetList_;
    current_function_ = *current_working_list_;
    index_list_ = 0;

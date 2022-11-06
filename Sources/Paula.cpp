@@ -19,8 +19,10 @@
 #define DSKBLK 0x0002
 #define TBE    0x0001
 
-Paula::Paula(SoundMixer* sound_mixer) : interrupt_pin_(nullptr), dsk_byte_(0), sound_source_(sound_mixer), sound_mixer_(sound_mixer)
+Paula::Paula(SoundMixer* sound_mixer) : adkcon_(0), interrupt_pin_(nullptr), dsk_byte_(0), dsk_dat_long_(0),
+shift_data_sync_(0), sync_ok_(false), sound_source_(sound_mixer), sound_mixer_(sound_mixer), dsk_counter_clock_(0), fetch_index_(0), fetch_read_index_(0)
 {
+   memset(dsk_dat_fetch_data_, 0, sizeof(dsk_dat_fetch_data_));
    audio_[0].Init(0, this);
    audio_[1].Init(1, this);
    audio_[2].Init(2, this);
@@ -38,6 +40,11 @@ void Paula::Reset()
    int_ena_ = 0;
    int_req_ = 0;
    counter_ = 0.0;
+   shift_data_sync_ = 0;
+   sync_ok_ = false;
+   adkcon_ = 0;
+   dsk_counter_clock_ = 0;
+   disk_bit_count_ = 16;
 }
 
 
@@ -50,6 +57,38 @@ void Paula::SetDiskController(DiskController* disk_controller)
 // CCK Tick
 void Paula::Tick()
 {
+
+   // Tick for disk : Every 7 CCK/CCKQ
+   /*if (++dsk_counter_clock_ == 7)
+   {
+      dsk_counter_clock_ = 0;
+
+      // Motor on ? advance disks
+      // Check SYNC
+      dsk_dat_long_ <<= 1;
+      dsk_dat_long_ |= (disk_controller_->Advance() & 0x1);
+      --disk_bit_count_ ;
+      if (adkcon_ & 0x400) // Test WORDSYNC bit ?
+      {
+         dsk_byte_ &= ~0x1000;
+         if (dsk_dat_long_ == sync_)
+         {
+            sync_ok_ = true;
+            // set dskbytr, launch int if necessary
+            dsk_byte_ |= 0x1000;
+            Int(0x1000);
+            disk_bit_count_ = 0;
+         }
+      }
+
+      if (disk_bit_count_ == 0)
+      {
+         // Complete data ? add it
+         dsk_dat_fetch_data_[(fetch_index_++)&0x3] = (dsk_dat_long_ & 0xFFFF);
+         disk_bit_count_ = 16;
+      }
+   }*/
+
    // Tick Each Audio Channel
    audio_[0].Tick();
    audio_[1].Tick();
@@ -193,25 +232,45 @@ void Paula::DmaAudioSampleOver()
 bool Paula::DmaDiskTick()
 {
    // If dma, do it
+   dsk_dat_ = disk_controller_->ReadNextWord();
    if (dsk_byte_ & 0x4000)
    {
       // Read next word to data
       unsigned short length = dsklen_ & 0x3FFF;
 
       // Read from disk
-      dsk_dat_ = disk_controller_->ReadNextWord();
-
+      //dsk_dat_ = disk_controller_->ReadNextWord();
+      dsk_dat_long_ <<= 16;
+      dsk_dat_long_ |= dsk_dat_;
       if (adkcon_ & 0x400) // Test WORDSYNC bit ?
       {
-         // beware : datas should be tested every bit
-         if (sync_ == dsk_dat_)
+         dsk_byte_ &= ~0x1000;
+         for (int i = 15; i >= 0; i++)
          {
-            // set dskbytr, launch int if necessary
+            if ((dsk_dat_long_ >> i) == sync_)
+            {
+               sync_ok_ = true;
+               // set dskbytr, launch int if necessary
+               dsk_byte_ |= 0x1000;
+               Int(0x1000);
+               // Set index to shift when reading data
+               shift_data_sync_ = i; 
+               break;
+            }
          }
       }
-
+      
       // Write to memory
-      bus_->Write16(dsk_dma_pt_, dsk_dat_);
+      //bus_->Write16(dsk_dma_pt_, dsk_dat_);
+      // Only if sync is done
+      if (sync_ok_)
+      {
+         bus_->Write16(dsk_dma_pt_, dsk_dat_long_ >> shift_data_sync_);
+         //bus_->Write16(dsk_dma_pt_, dsk_dat_fetch_data_[(fetch_read_index_++) & 0x3]);
+         //dsk_dat_fetch_data_ <<= 16;
+         
+      }
+      
       
       length -= 1;
 
@@ -232,10 +291,6 @@ bool Paula::DmaDiskTick()
 
       }
       return true;
-   }
-   else
-   {
-      //disk_controller_->Advance();
    }
 
    return false;
@@ -266,6 +321,7 @@ void Paula::SetDskLen(unsigned short dsklen)
       if ((dma_control_->dmacon_ & 0x210) == 0x210)
       {
          // Start DMA !
+         sync_ok_ = ((adkcon_ & ~0x400) == 0);
          dsk_byte_ |= 0x4000;
       }
    }

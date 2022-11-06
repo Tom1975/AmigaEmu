@@ -244,7 +244,7 @@ void Denise::DrawSprites()
          SetSpriteCtl(i, w2);
          SetSpritePos(i, w1);
 
-         for (size_t l = sprites_[i].svpos_; l < sprites_[i].evpos_; l++)
+         for (size_t l = sprites_[i].svpos_; l < sprites_[i].evpos_ ; l++)
          {
             // get buffer
             unsigned int* line_buffer = frame_->GetFrameBuffer(l*2);
@@ -255,7 +255,7 @@ void Denise::DrawSprites()
             sprites_[i].ptr_ += 2;
             unsigned short wb = sprites_[i].datB_ = motherboard_->GetBus()->Read16(sprites_[i].ptr_ & 0x3FFFF);
             sprites_[i].ptr_ += 2;
-
+            sprites_[i].enabled_ = true;
             // draw 
             for (int c = 0; c < 16; c++)
             {
@@ -286,7 +286,7 @@ void Denise::SetSpriteCtl(size_t index, unsigned short data)
    sprites_[index].svpos_ &= 0xFF;
    sprites_[index].svpos_ |= (data & 0x4) << 6;
 
-   //sprites_[index].enabled_ = false;
+   sprites_[index].enabled_ = false;
 }
 
 void Denise::SetSpritePos(size_t index, unsigned short data)
@@ -296,6 +296,7 @@ void Denise::SetSpritePos(size_t index, unsigned short data)
 
    sprites_[index].svpos_ &= 0x100;
    sprites_[index].svpos_ |= ((data & 0xFF00)>>8);
+
 }
 
 void Denise::SetSpritePth(size_t index, unsigned short data)
