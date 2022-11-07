@@ -236,6 +236,37 @@ void ExecDialog::UpdateDebug()
       ui->ExecWidget->addTopLevelItem(item_task_list);
       list_items_.push_back(item_task_list);
 
+      item_task_list = new QTreeWidgetItem;
+      item_task_list->setText(0, QString("LIBRARIES"));
+
+      // Check memory : From top node, 
+      unsigned long node = EXTRACT_LONG((&ram[0x676 + 0x17A]));
+      while (node != 0)
+      {
+         // 
+         // offset 0x0A : name
+         QTreeWidgetItem* item = new QTreeWidgetItem;
+         unsigned long lib_name_ptr = EXTRACT_LONG((&ram[node + 0x0A]));
+         char* lib_name = (lib_name_ptr >= 0xFC0000) ? (char*)&rom[lib_name_ptr & 0x3FFFF] : (char*)&ram[(lib_name_ptr) & 0x7FFFF];
+         item->setText(0, QString(lib_name));
+         QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
+         base_address_item->setText(0, QString("Base address : %1").arg(node, 6, 16));
+         // Add Signals
+         item->addChild(base_address_item);
+         node = EXTRACT_LONG((&ram[node]));
+
+         item_task_list->addChild(item);
+      }
+      ui->ExecWidget->addTopLevelItem(item_task_list);
+      list_items_.push_back(item_task_list);
+
+      // Add Interrupt vectors
+      item_task_list = new QTreeWidgetItem;
+      item_task_list->setText(0, QString("Interrupt Vectors"));
+
+      ui->ExecWidget->addTopLevelItem(item_task_list);
+      list_items_.push_back(item_task_list);
+
    }
 
 }
