@@ -253,6 +253,21 @@ void ExecDialog::UpdateDebug()
          base_address_item->setText(0, QString("Base address : %1").arg(node, 6, 16));
 
          // Add all functions 
+         unsigned long vector_address = node - 6;
+         unsigned short jmp = EXTRACT_WORD((&ram[vector_address]));
+         while (jmp == 0x4EF9 && vector_address > 6)
+         {
+            QTreeWidgetItem* func = new QTreeWidgetItem;
+            unsigned long func_addr = EXTRACT_LONG((&ram[vector_address +2]));
+            func->setText(0, QString("-$%1 : %2").arg( (short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
+
+            base_address_item->addChild(func);
+
+            vector_address -= 6;
+            jmp = EXTRACT_WORD((&ram[vector_address]));
+
+         }
+         
 
          // Add Signals
          item->addChild(base_address_item);
