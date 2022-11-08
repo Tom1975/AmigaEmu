@@ -264,6 +264,20 @@ void ExecDialog::UpdateDebug()
       item_task_list = new QTreeWidgetItem;
       item_task_list->setText(0, QString("Interrupt Vectors"));
 
+      // Check memory : From top node, 
+      for (int i = 1; i < 8; i++)
+      {
+         unsigned long intVector= EXTRACT_LONG((&ram[(24 + i) * 4]));
+
+         QTreeWidgetItem* item = new QTreeWidgetItem;
+         item->setText(0, QString("Int %1").arg(i));
+         QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
+         base_address_item->setText(0, QString("Base address : %1").arg(intVector, 6, 16));
+         // Add Signals
+         item->addChild(base_address_item);
+         item_task_list->addChild(item);
+      }
+
       ui->ExecWidget->addTopLevelItem(item_task_list);
       list_items_.push_back(item_task_list);
 
