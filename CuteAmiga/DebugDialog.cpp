@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QMenuBar>
 #include <QDebug>
+#include <QMouseEvent>
 
 DebugDialog::DebugDialog(QWidget *parent) :
    QDialog(parent),
@@ -15,7 +16,10 @@ DebugDialog::DebugDialog(QWidget *parent) :
 {
    ui->setupUi(this);
    ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+   ui->callStack->viewport()->installEventFilter(this);
+
    connect(ui->listWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(DasmShowContextMenu(QPoint)));
+
 
    ui->registers_list_->clear();
    ui->registers_list_->setColumnCount(2);
@@ -67,6 +71,15 @@ bool DebugDialog::event(QEvent *event)
       return true;
    }
    return QWidget::event(event);
+}
+
+bool DebugDialog::eventFilter(QObject* watched, QEvent* event)
+{
+   if (watched == ui->callStack->viewport() && event->type() == QEvent::MouseButtonDblClick) {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      qDebug() << "MouseButtonDblClick" << mouseEvent->pos();
+   }
+   return QDialog::eventFilter(watched, event);
 }
 
 void DebugDialog::SetEmulator(AmigaEmulation* emu_handler)
@@ -123,6 +136,13 @@ void DebugDialog::Update()
    QEvent* event = new QEvent(QEvent::User);
    QCoreApplication::postEvent( this, event);
 
+}
+
+void DebugDialog::StackToDasm()
+{
+   // double click on a stack value
+   
+   
 }
 
 void DebugDialog::DasmShowContextMenu(const QPoint &pos)

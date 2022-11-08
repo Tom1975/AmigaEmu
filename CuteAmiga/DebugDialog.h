@@ -22,12 +22,15 @@ public:
     virtual bool event(QEvent *event);
     void Break();
 
+    bool eventFilter(QObject* watched, QEvent* event);
+
    public slots:
       void on_set_top_address_clicked();
       void on_dbg_pause_clicked();
       void on_dbg_step__clicked();
       void on_dbg_run_clicked();
       void DasmShowContextMenu(const QPoint &pos);
+      void StackToDasm();
       void AddBreakpoint();
       void RemoveBreakpoint();
       void on_add_bp_clicked();

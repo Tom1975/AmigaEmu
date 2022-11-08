@@ -251,6 +251,9 @@ void ExecDialog::UpdateDebug()
          item->setText(0, QString(lib_name));
          QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
          base_address_item->setText(0, QString("Base address : %1").arg(node, 6, 16));
+
+         // Add all functions 
+
          // Add Signals
          item->addChild(base_address_item);
          node = EXTRACT_LONG((&ram[node]));
