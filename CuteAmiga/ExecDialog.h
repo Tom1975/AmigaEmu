@@ -35,11 +35,15 @@ protected:
    static void UpdateTask(unsigned long task_adress, QTreeWidgetItem* base_item, std::vector<QTreeWidgetItem*> *list_items);
 
 private:
+   void InitHelper();
 
     Ui::ExecDialog *ui;
     AmigaEmulation* emu_handler_;
 
     QTreeWidgetItem * exec_base_item_;
     std::vector<QTreeWidgetItem*> list_items_;
+
+    // HELPER : List of operating system function name, by library / index
+    std::map<std::string, std::map<short, std::string>> library_helper_;
 
 };
