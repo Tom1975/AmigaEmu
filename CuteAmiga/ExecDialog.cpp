@@ -1,8 +1,9 @@
 #include "ExecDialog.h"
 #include "ui_ExecDialog.h"
-
 #include <QDir>
 #include <QMenuBar>
+
+#include"FunctionHelper.h"
 
 #define EXTRACT_LONG(c) \
    ((c[0]<<24)|(c[1]<<16)|(c[2]<<8)|(c[3]))
@@ -18,107 +19,6 @@ ExecDialog::ExecDialog(QWidget* parent) :
 
    exec_base_item_ = new QTreeWidgetItem;
    ui->ExecWidget->addTopLevelItem(exec_base_item_);
-
-   // Helper function population
-   InitHelper();
-}
-
-void ExecDialog::InitHelper()
-{
-   // Exec
-   library_helper_["exec.library"][-480] = "AbortIO";
-   library_helper_["exec.library"][-432] = "AddDevice";
-   library_helper_["exec.library"][-240] = "AddHead";
-   library_helper_["exec.library"][-168] = "AddIntServer";
-   library_helper_["exec.library"][-396] = "AddLibrary";
-   library_helper_["exec.library"][-618] = "AddMemList";
-   library_helper_["exec.library"][-354] = "AddPort";
-   library_helper_["exec.library"][-486] = "AddResouree";
-   library_helper_["exec.library"][-600] = "AddSemaphore";
-   library_helper_["exec.library"][-246] = "AddTail";
-   library_helper_["exec.library"][-282] = "AddTask";
-   library_helper_["exec.library"][-108] = "Alert";
-   library_helper_["exec.library"][-204] = "AllocAbs";
-   library_helper_["exec.library"][-186] = "Allocate";
-   library_helper_["exec.library"][-222] = "AllocEntry";
-   library_helper_["exec.library"][-198] = "AllocMem";
-   library_helper_["exec.library"][-330] = "AllocSignal";
-   library_helper_["exec.library"][-342] = "AllocTrap";
-   library_helper_["exec.library"][-576] = "AttemptSemaphore";
-   library_helper_["exec.library"][-216] = "AvailMem";
-   library_helper_["exec.library"][-180] = "Cause";
-   library_helper_["exec.library"][-366] = "CBump";
-   library_helper_["exec.library"][-468] = "CheckIO";
-   library_helper_["exec.library"][-450] = "CloseDevice";
-   library_helper_["exec.library"][-414] = "CloseLibrary";
-   library_helper_["exec.library"][-624] = "CopyMem";
-   library_helper_["exec.library"][-630] = "CopyMemQuick";
-   library_helper_["exec.library"][-192] = "Deallocate";
-   library_helper_["exec.library"][-114] = "Debug";
-   library_helper_["exec.library"][-120] = "Disable";
-   library_helper_["exec.library"][-465] = "DoIO";
-   library_helper_["exec.library"][-126] = "Enable";
-   library_helper_["exec.library"][-270] = "Enqueue";
-   library_helper_["exec.library"][-276] = "FindName";
-   library_helper_["exec.library"][-390] = "FindPort";
-   library_helper_["exec.library"][-96]  = "FindResident";
-   library_helper_["exec.library"][-612] = "FindSemaphore";
-   library_helper_["exec.library"][-294] = "FindTask";
-   library_helper_["exec.library"][-132] = "Forbid";
-   library_helper_["exec.library"][-228] = "FreeEntry";
-   library_helper_["exec.library"][-210] = "FreeMem";
-   library_helper_["exec.library"][-336] = "FreeSignal";
-   library_helper_["exec.library"][-348] = "FreeTrap";
-   library_helper_["exec.library"][-528] = "GetCC";
-   library_helper_["exec.library"][-372] = "GetMsg";
-   library_helper_["exec.library"][-72]  = "InitCode";
-   library_helper_["exec.library"][-102] = "InitResident";
-   library_helper_["exec.library"][-78] = "InitStruct";
-   library_helper_["exec.library"][-234] = "Insert";
-   library_helper_["exec.library"][-90] = "MakeFunctions";
-   library_helper_["exec.library"][-84] = "MakeLibrary";
-   library_helper_["exec.library"][-564] = "ObtainSemaphore";
-   library_helper_["exec.library"][-582] = "ObtainSemaphoreList";
-   library_helper_["exec.library"][-408] = "OldOpenLibrary";
-   library_helper_["exec.library"][-444] = "OpenDevice";
-   library_helper_["exec.library"][-552] = "OpenLibrary";
-   library_helper_["exec.library"][-498] = "OpenResource";
-   library_helper_["exec.library"][-138] = "Permit";
-   library_helper_["exec.library"][-540] = "Procure";
-   library_helper_["exec.library"][-366] = "PutMsg";
-   library_helper_["exec.library"][-522] = "RawDoFmt";
-   library_helper_["exec.library"][-570] = "ReleaseSemaphore";
-   library_helper_["exec.library"][-588] = "ReleaseSemaphoreList";
-   library_helper_["exec.library"][-438] = "RemDevice";
-   library_helper_["exec.library"][-258] = "RemHead";
-   library_helper_["exec.library"][-174] = "RemIntServer";
-   library_helper_["exec.library"][-402] = "RemLibrary";
-   library_helper_["exec.library"][-252] = "Remove";
-   library_helper_["exec.library"][-360] = "RemPort";
-   library_helper_["exec.library"][-492] = "RemResource";
-   library_helper_["exec.library"][-606] = "RemSemaphore";
-   library_helper_["exec.library"][-264] = "RemTail";
-   library_helper_["exec.library"][-288] = "RemTask";
-   library_helper_["exec.library"][-378] = "ReplyMsg";
-   library_helper_["exec.library"][-462] = "SendIO";
-   library_helper_["exec.library"][-312] = "SetExcept";
-   library_helper_["exec.library"][-420] = "SetFunction";
-   library_helper_["exec.library"][-162] = "SetIntVector";
-   library_helper_["exec.library"][-306] = "SetSignal";
-   library_helper_["exec.library"][-144] = "SetSR";
-   library_helper_["exec.library"][-300] = "SetTaskPri";
-   library_helper_["exec.library"][-324] = "Signal";
-   library_helper_["exec.library"][-612] = "SumKickData";
-   library_helper_["exec.library"][-426] = "SumLibrary";
-   library_helper_["exec.library"][-150] = "SuperState";
-   library_helper_["exec.library"][-534] = "TypeOfMem";
-   library_helper_["exec.library"][-156] = "UserState";
-   library_helper_["exec.library"][-546] = "Vacate";
-   library_helper_["exec.library"][-318] = "Wait";
-   library_helper_["exec.library"][-474] = "WaitIO";
-   library_helper_["exec.library"][-384] = "WaitPort";
-
-
 }
 
 ExecDialog::~ExecDialog()
@@ -361,9 +261,9 @@ void ExecDialog::UpdateDebug()
             unsigned long func_addr = EXTRACT_LONG((&ram[vector_address +2]));
 
             short index = vector_address - node;
-            if ( (library_helper_.find(lib_name) != library_helper_ .end()) && (library_helper_[lib_name].find(index) != library_helper_[lib_name].end()))
+            std::string func_name = FunctionHelper::GetFunctionName(lib_name, index);
+            if (func_name.size() > 0)
             {
-               std::string func_name = library_helper_[lib_name][index];
                func->setText(0, QString("-$%1 (%3) : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16).arg(func_name.c_str()));
             }
             else
