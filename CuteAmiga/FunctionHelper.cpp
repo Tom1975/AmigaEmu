@@ -143,6 +143,23 @@ std::map<std::string, std::map<short, std::string>> FunctionHelper::library_help
    {  "graphics.library", {
       { -156 , "AddAnimOb"},
       { -96, "AddBob"},
+      { -480, "AddFont"},
+      { -102, "AddVSprite"},
+      { -492, "AllocRaster"},
+      { -504, "AndRectRegion"},
+      { -624, "AndRegionRegion"},
+      { -162, "Animate"},
+      { -258, "AreaDraw"},
+      { -186, "AreaEllipse"},
+      { -582, "AttemptLockLayerRom"},
+      { -264, "AreaEnd"},
+      { -252, "AreaMove"},
+      { -474, "AskFont"},
+      { -84, "AskSoftStyle"},
+      { -30, "BltBitMap"},
+      { -606, "BltBltMapRastPort"},
+      { -300, "BltClear"},
+      { -636, "BltMaskBitMapRastPort"},
       }
    } , 
    {  "icon.library", {
