@@ -2,6 +2,8 @@
 #include "ui_ExecDialog.h"
 #include <QDir>
 #include <QMenuBar>
+#include <QDebug>
+#include <QMouseEvent>
 
 #include"FunctionHelper.h"
 
@@ -34,6 +36,15 @@ bool ExecDialog::event(QEvent *event)
       return true;
    }
    return QWidget::event(event);
+}
+
+bool ExecDialog::eventFilter(QObject* watched, QEvent* event)
+{
+   if (watched == ui->ExecWidget->viewport() && event->type() == QEvent::MouseButtonDblClick) {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      qDebug() << "MouseButtonDblClick" << mouseEvent->pos();
+   }
+   return QDialog::eventFilter(watched, event);
 }
 
 void ExecDialog::SetEmulator(AmigaEmulation* emu_handler)

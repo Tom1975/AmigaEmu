@@ -22,6 +22,8 @@ public:
     virtual bool event(QEvent *event);
     void Break();
 
+    bool eventFilter(QObject* watched, QEvent* event);
+
    public slots:
 
     // Update the view
