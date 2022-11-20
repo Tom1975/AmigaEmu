@@ -28,6 +28,7 @@ public:
 
     // Update the view
     virtual void Update();
+    void itemDoubleClicked(QTreeWidgetItem *item);
 
 protected:
    // Menu action

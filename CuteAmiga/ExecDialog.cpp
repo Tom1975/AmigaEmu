@@ -4,6 +4,7 @@
 #include <QMenuBar>
 #include <QDebug>
 #include <QMouseEvent>
+#include <QStandardItemModel>
 
 #include"FunctionHelper.h"
 
@@ -21,6 +22,19 @@ ExecDialog::ExecDialog(QWidget* parent) :
 
    exec_base_item_ = new QTreeWidgetItem;
    ui->ExecWidget->addTopLevelItem(exec_base_item_);
+   //ui->ExecWidget->viewport()->installEventFilter(this);
+
+   QMetaObject::Connection result = connect(ui->ExecWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem* , int )), SLOT(itemDoubleClicked(QTreeWidgetItem*)));
+
+   if (result)
+   {
+      qDebug() << "connect ok";
+   }
+   else
+   {
+      qDebug() << "connect ERROR !";
+
+   }
 }
 
 ExecDialog::~ExecDialog()
@@ -38,11 +52,19 @@ bool ExecDialog::event(QEvent *event)
    return QWidget::event(event);
 }
 
+void ExecDialog::itemDoubleClicked(QTreeWidgetItem *item)
+{
+   // Get data and set the debugger with it
+   int addr = item->data(0, Qt::UserRole).toInt();
+
+}
+
 bool ExecDialog::eventFilter(QObject* watched, QEvent* event)
 {
    if (watched == ui->ExecWidget->viewport() && event->type() == QEvent::MouseButtonDblClick) {
       QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
       qDebug() << "MouseButtonDblClick" << mouseEvent->pos();
+      mouseDoubleClickEvent(mouseEvent);
    }
    return QDialog::eventFilter(watched, event);
 }
@@ -281,9 +303,10 @@ void ExecDialog::UpdateDebug()
             {
                func->setText(0, QString("-$%1 : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
             }
-            
 
+            base_address_item->setData(0, Qt::UserRole, (int)func_addr);
             base_address_item->addChild(func);
+            
 
             vector_address -= 6;
             jmp = EXTRACT_WORD((&ram[vector_address]));
