@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
    memory_.SetEmulator(emu_handler_);
    copper_.SetEmulator(emu_handler_);
    exec_.SetEmulator(emu_handler_);
+   exec_.SetDebugInterface(&debug_);
    bitplane_.SetEmulator(emu_handler_);
    disk_debug_.SetEmulator(emu_handler_);
 

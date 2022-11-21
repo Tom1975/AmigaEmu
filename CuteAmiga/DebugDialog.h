@@ -5,11 +5,13 @@
 #include "AmigaEmulation.h"
 #include "Disassembler68k.h"
 
+#include "DebugInterface.h"
+
 namespace Ui {
 class DebugDialog;
 }
 
-class DebugDialog : public QDialog, IUpdate
+class DebugDialog : public QDialog, public DebugInterface, IUpdate
 {
     Q_OBJECT
 
@@ -19,6 +21,7 @@ public:
 
     // Init dialog
     void SetEmulator(AmigaEmulation* emu_handler);
+    virtual void SetAddress(unsigned int addr);
     virtual bool event(QEvent *event);
     void Break();
 

@@ -335,3 +335,9 @@ void DebugDialog::UpdateDisassembly(unsigned int offset)
       offset_old = offset;
    }
 }
+
+void DebugDialog::SetAddress(unsigned int addr)
+{
+   UpdateDisassembly(addr);
+}
+

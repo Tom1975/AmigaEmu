@@ -16,7 +16,8 @@
 
 ExecDialog::ExecDialog(QWidget* parent) :
    QDialog(parent),
-   ui(new Ui::ExecDialog)
+   ui(new Ui::ExecDialog),
+   debug_interface_(nullptr)
 {
    ui->setupUi(this);
 
@@ -56,6 +57,8 @@ void ExecDialog::itemDoubleClicked(QTreeWidgetItem *item)
 {
    // Get data and set the debugger with it
    int addr = item->data(0, Qt::UserRole).toInt();
+   if (debug_interface_)
+      debug_interface_->SetAddress(addr);
 
 }
 
