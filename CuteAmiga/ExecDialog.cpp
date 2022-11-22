@@ -307,7 +307,7 @@ void ExecDialog::UpdateDebug()
                func->setText(0, QString("-$%1 : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
             }
 
-            base_address_item->setData(0, Qt::UserRole, (int)func_addr);
+            func->setData(0, Qt::UserRole, (int)func_addr);
             base_address_item->addChild(func);
             
 
