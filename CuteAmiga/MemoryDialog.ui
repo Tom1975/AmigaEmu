@@ -39,7 +39,7 @@
   <widget class="QPushButton" name="setAddress">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>140</x>
      <y>10</y>
      <width>51</width>
      <height>23</height>
@@ -57,6 +57,29 @@
      <width>113</width>
      <height>20</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="pattern">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>10</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="searchAddress">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>10</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Search</string>
    </property>
   </widget>
   <action name="actionTest">

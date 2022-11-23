@@ -57,9 +57,66 @@ void MemoryDialog::on_setAddress_clicked()
 {
    QString text = ui->address->text();
    start_addr_ = (unsigned int)strtoul(text.toUtf8().constData(), NULL, 16);
-   ;
    UpdateDebug();
 }
+
+void MemoryDialog::on_pattern_returnPressed()
+{
+   on_searchAddress_clicked();
+}
+
+void MemoryDialog::on_searchAddress_clicked()
+{
+   // Get CPU, memory
+   M68k* m68k = emu_handler_->GetCpu();
+   unsigned char* mem = emu_handler_->GetMotherboard()->GetBus()->GetRam();
+
+   QString text = ui->pattern->text();
+   text = text.toUpper();
+
+   // Remove anything but 0-9 A-F
+   QByteArray data_pattern = QByteArray::fromHex(text.toUtf8());
+   const char* search_buffer = data_pattern.data();
+   size_t size = data_pattern.size();
+
+   // Look into memory from current address + 1
+   bool finished = false;
+   bool roll = false;
+   unsigned int current_address = start_addr_ + 1;
+   while (!finished)
+   {
+      finished = (memcmp(&mem[current_address], search_buffer, size) == 0);
+      if (!finished)
+      {
+         current_address++;
+         if (roll)
+         {
+            if (current_address >= start_addr_)
+            {
+               finished = true;
+            }
+         }
+         else
+         {
+            if (current_address >= 512 * 1024)
+            {
+               roll = true;
+               current_address = 0;
+            }
+         }
+            
+      }
+      else
+      {
+         start_addr_ = current_address;
+      }
+   }
+   // until found or all memory looked up
+   // found ? display
+   // 
+   UpdateDebug();
+}
+
 
 void MemoryDialog::UpdateDebug()
 {
