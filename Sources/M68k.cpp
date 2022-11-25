@@ -11,7 +11,7 @@ unsigned int SizeSizeNbBits[4] = { 8, 16, 32, 0};
 
 #define LAST_OPCODE_SIZE 0xFFFF
 static unsigned int last_opcodes[LAST_OPCODE_SIZE];
-static unsigned char op_index = 0;
+static unsigned int op_index = 0;
 
 
 M68k::Func M68k::ResetList_[] = { &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr };
@@ -1123,15 +1123,9 @@ unsigned int M68k::OpcodeMove()
 
 unsigned int M68k::DecodeMoveFromSr()
 {
-   if (sr_ & 0x2000)
-   {
-      operand_size_ = WORD;
-      destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
-   }
-   else
-   {
-      return TRAP(8);
-   }
+   operand_size_ = WORD;
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+
    return true;
 }
 
