@@ -19,8 +19,14 @@
 #define DSKBLK 0x0002
 #define TBE    0x0001
 
-Paula::Paula() : interrupt_pin_(nullptr), dsk_byte_(0)
+Paula::Paula(SoundMixer* sound_mixer) : adkcon_(0), interrupt_pin_(nullptr), dsk_byte_(0), dsk_dat_long_(0),
+shift_data_sync_(0), sync_ok_(false), sound_source_(sound_mixer), sound_mixer_(sound_mixer), dsk_counter_clock_(0), fetch_index_(0), fetch_read_index_(0)
 {
+   memset(dsk_dat_fetch_data_, 0, sizeof(dsk_dat_fetch_data_));
+   audio_[0].Init(0, this);
+   audio_[1].Init(1, this);
+   audio_[2].Init(2, this);
+   audio_[3].Init(3, this);
    Reset();
 }
 
@@ -33,6 +39,12 @@ void Paula::Reset()
 {
    int_ena_ = 0;
    int_req_ = 0;
+   counter_ = 0.0;
+   shift_data_sync_ = 0;
+   sync_ok_ = false;
+   adkcon_ = 0;
+   dsk_counter_clock_ = 0;
+   disk_bit_count_ = 16;
 }
 
 
@@ -42,20 +54,223 @@ void Paula::SetDiskController(DiskController* disk_controller)
 }
 
 ////////////////////////////////
+// CCK Tick
+void Paula::Tick()
+{
+
+   // Tick for disk : Every 7 CCK/CCKQ
+   /*if (++dsk_counter_clock_ == 7)
+   {
+      dsk_counter_clock_ = 0;
+
+      // Motor on ? advance disks
+      // Check SYNC
+      dsk_dat_long_ <<= 1;
+      dsk_dat_long_ |= (disk_controller_->Advance() & 0x1);
+      --disk_bit_count_ ;
+      if (adkcon_ & 0x400) // Test WORDSYNC bit ?
+      {
+         dsk_byte_ &= ~0x1000;
+         if (dsk_dat_long_ == sync_)
+         {
+            sync_ok_ = true;
+            // set dskbytr, launch int if necessary
+            dsk_byte_ |= 0x1000;
+            Int(0x1000);
+            disk_bit_count_ = 0;
+         }
+      }
+
+      if (disk_bit_count_ == 0)
+      {
+         // Complete data ? add it
+         dsk_dat_fetch_data_[(fetch_index_++)&0x3] = (dsk_dat_long_ & 0xFFFF);
+         disk_bit_count_ = 16;
+      }
+   }*/
+
+   // Tick Each Audio Channel
+   audio_[0].Tick();
+   audio_[1].Tick();
+   audio_[2].Tick();
+   audio_[3].Tick();
+
+   // If sample is necessary, do it.
+   // 3546895 hz on PAL system
+   // 
+   // Sample is done with 44100 hz. Every time we hit this, we sample the Paula output, and add a new sample.
+   counter_ += (1.0 / 3546895.0);
+
+   //if ( counter_ > 1.0/ 44100.0)
+   if (counter_ > 1.0 / (3*44100.0))
+   {
+      short l = 0;
+      short r = 0;
+      int count_l = 0;
+      int count_r = 0;
+
+      // This *3.0 value is needed to have correct pitch. Seems like some timings are pretty wrong !!
+      counter_ -= 1.0 / (3 * 44100.0);
+
+      if ((dma_control_->dmacon_ & 0x201) == 0x201) 
+      {
+         //l += static_cast<char>(audio_[0].sound_);
+         l += static_cast<char>(audio_[0].audxdat_&0xFF);
+         
+         count_l++;
+      }
+      if ((dma_control_->dmacon_ & 0x202) == 0x202) 
+      {
+         //r += static_cast<char>(audio_[1].sound_);
+         r += static_cast<char>(audio_[1].audxdat_ & 0xFF);
+         count_r++;
+      }
+      if ((dma_control_->dmacon_ & 0x204) == 0x204) 
+      {
+         //l += static_cast<char>(audio_[2].sound_);
+         l += static_cast<char>(audio_[2].audxdat_ & 0xFF);
+         count_l++;
+      }
+      if ((dma_control_->dmacon_ & 0x208) == 0x208) 
+      {
+         //r += static_cast<char>(audio_[3].sound_);
+         r += static_cast<char>(audio_[3].audxdat_ & 0xFF);
+         count_r++;
+      }
+      
+      if (count_l > 1)
+         l = l / count_l;
+      if (count_r > 1)
+         r = r / count_r;
+
+      sound_mixer_->AddSample((char)l, (char)r);
+   }
+   
+   
+
+}
+
+////////////////////////////////
+// DMA Audio
+void Paula::SetAudioChannelLocation(int channel, unsigned short address, bool low)
+{
+   if (low)
+   {
+      channels_[channel].init_address_location &= 0xFFFF0000;
+      channels_[channel].init_address_location |= (address);
+
+      //channels_[channel].init_address_location = channels_[channel].address_location;
+   }
+   else
+   {
+      channels_[channel].init_address_location &= 0xFFFF;
+      channels_[channel].init_address_location |= (address << 16);
+      //channels_[channel].init_address_location = channels_[channel].address_location;
+   }
+      
+}
+
+bool Paula::DmaAudioTick(unsigned int audio_channel)
+{
+   // Fresh start ?
+   unsigned short dma_mask = 0x200 + (1 << audio_channel);
+   if ((dma_control_->dmacon_ & dma_mask) == dma_mask)
+   {
+      if (!channels_[audio_channel].dmarunning_)
+      {
+         channels_[audio_channel].length = channels_[audio_channel].init_length;
+         channels_[audio_channel].address_location = channels_[audio_channel].init_address_location;
+         channels_[audio_channel].dmarunning_ = true;
+      }
+
+      // DMA enable   
+      if (channels_[audio_channel].length > 0)
+      {
+         channels_[audio_channel].data = bus_->Read16(channels_[audio_channel].address_location);
+         channels_[audio_channel].address_location += 2;
+         audio_[audio_channel].AUDxDAT(channels_[audio_channel].data);
+         if (--channels_[audio_channel].length == 0)
+         {
+            channels_[audio_channel].length = channels_[audio_channel].init_length;
+            channels_[audio_channel].address_location = channels_[audio_channel].init_address_location;
+         }
+      }
+      else
+      {
+         // ??
+         channels_[audio_channel].dmarunning_ = false;
+      }
+   }
+   else
+   {
+      channels_[audio_channel].dmarunning_ = false;
+   }
+
+
+   return false;
+}
+
+void Paula::DmaAudioSampleOver()
+{
+   //sound_mixer_->AddSample((char)channels_[0].data, (char)channels_[1].data);
+   //sound_mixer_->AddSample((char)((channels_[0].data)>>8), (char)((channels_[1].data)>>8));
+
+   /*sound_source_.AddSound(channels_[0].data & 0xFF, channels_[1].data & 0xFF, 0);
+   sound_source_.AddSound(channels_[2].data & 0xFF, channels_[3].data & 0xFF, 0);
+   sound_mixer_->Tick();
+   sound_source_.AddSound(channels_[0].data >> 8, channels_[1].data >> 8, 0);
+   sound_source_.AddSound(channels_[2].data >> 8, channels_[3].data >> 8, 0);
+   sound_mixer_->Tick();
+   channels_[0].data = 0;
+   channels_[1].data = 0;
+   channels_[2].data = 0;
+   channels_[3].data = 0;*/
+}
+
+////////////////////////////////
 // DMA Disk
 bool Paula::DmaDiskTick()
 {
    // If dma, do it
+   dsk_dat_ = disk_controller_->ReadNextWord();
    if (dsk_byte_ & 0x4000)
    {
       // Read next word to data
       unsigned short length = dsklen_ & 0x3FFF;
 
       // Read from disk
-      dsk_dat_ = disk_controller_->ReadNextWord();
-
+      //dsk_dat_ = disk_controller_->ReadNextWord();
+      dsk_dat_long_ <<= 16;
+      dsk_dat_long_ |= dsk_dat_;
+      if (adkcon_ & 0x400) // Test WORDSYNC bit ?
+      {
+         dsk_byte_ &= ~0x1000;
+         for (int i = 15; i >= 0; i++)
+         {
+            if ((dsk_dat_long_ >> i) == sync_)
+            {
+               sync_ok_ = true;
+               // set dskbytr, launch int if necessary
+               dsk_byte_ |= 0x1000;
+               Int(0x1000);
+               // Set index to shift when reading data
+               shift_data_sync_ = i; 
+               break;
+            }
+         }
+      }
+      
       // Write to memory
-      bus_->Write16(dsk_dma_pt_, dsk_dat_);
+      //bus_->Write16(dsk_dma_pt_, dsk_dat_);
+      // Only if sync is done
+      if (sync_ok_)
+      {
+         bus_->Write16(dsk_dma_pt_, dsk_dat_long_ >> shift_data_sync_);
+         //bus_->Write16(dsk_dma_pt_, dsk_dat_fetch_data_[(fetch_read_index_++) & 0x3]);
+         //dsk_dat_fetch_data_ <<= 16;
+         
+      }
+      
       
       length -= 1;
 
@@ -106,6 +321,7 @@ void Paula::SetDskLen(unsigned short dsklen)
       if ((dma_control_->dmacon_ & 0x210) == 0x210)
       {
          // Start DMA !
+         sync_ok_ = ((adkcon_ & ~0x400) == 0);
          dsk_byte_ |= 0x4000;
       }
    }
@@ -252,3 +468,164 @@ void Paula::CheckInt()
 
 }
 
+
+Paula::AudioChannel::AudioChannel() : init_address_location(0), address_location(0), init_length(0), length(0), dmarunning_(false)
+{
+
+}
+
+////////////////////////////////
+// Audio state machine
+Paula::AudioStateMachine::AudioStateMachine()
+{
+
+}
+
+void Paula::AudioStateMachine::Init(int channel, Paula* paula) 
+{
+   paula_ = paula;
+   current_state_ = 0b000;
+   channel_ = channel;
+   audxon_ = (0x200 | (1 << channel));
+}
+
+void Paula::AudioStateMachine::AUDxDAT(unsigned short data)
+{
+   audxdat_ = data;
+   audxdatwaiting_ = true;
+}
+
+// AUDIO
+// STATE MACHINE.
+//
+// AUDxON : DMA on "x" indicates channel number (signal from  DMACON ).
+// AUDxIP : Audio interrupt  pending (input to channel from interrupt circuitry).
+// AUDxIR : Audio interrupt  request (output from channel to interrupt circuitry)
+// AUDxDAT: Audio data load signal. Loads 16 bits of data to audio channel.
+// AUDxDR      Audio DMA request to Agnus for one word of data.
+// AUDxDSR     Audio DMA request to Agnus to reset pointer to start of block.
+// dmasen      Restart request enable.
+// percntrld   Reload period counter from back - up latch typically written by processor with  AUDxPER(can also be written by attach mode).
+// percount    Count period counter down one latch.
+// perfin      Period counter finished(value = 1).
+// lencntrld   Reload length counter from back - up latch.
+// lencount    Count length counter down one notch.
+// lenfin      Length counter finished(value = 1).
+// volcntrld   Reload volume counter from back - up latch.
+// pbufld1     Load output buffer from holding latch written to by AUDxDAT.
+// pbufld2     Like pbufld1, but only during 010->011 with attach period.
+// AUDxAV      Attach volume.Send data to volume latch of next channel instead of to D->A converter.
+// AUDxAP      Attach period.Send data to period latch of next channel instead of to the D->A converter.
+// penhi       Enable the high 8 bits of data to go to the D->A converter.
+// napnav / AUDxAV * / AUDxAP + AUDxAV -- no attach stuff or else attach volume.Condition for normal DMA and interrupt requests.
+// sq2, 1, 0     The name of the state flip - flops, MSB to LSB.
+
+void Paula::AudioStateMachine::Tick()
+{
+   switch (current_state_)
+   {
+      // Idle
+   case 0b000:
+      // Period Counter is decremented
+      if ((paula_->dma_control_->dmacon_ & audxon_) == audxon_) // AUDxON : 
+      {
+         // Request DMA
+         current_state_ = 0b001;
+      }
+      // todo : add a condition on audxip ?
+      else if (audxdatwaiting_) // !AUDxON + AUDxDAT + !AUDxIP
+      {
+         // Request DMA
+         current_state_ = 0b010;
+         audxdatwaiting_ = false;
+      }
+      
+      break;
+
+      // DMA
+   case 0b001:
+      if ((paula_->dma_control_->dmacon_ & audxon_) != audxon_)
+      {
+         // return to idle
+         current_state_ = 0b000;
+      }
+      else
+      {
+         if (audxdatwaiting_)
+         {
+            // todo : do something ?
+            audxdatwaiting_ = false;
+
+            // Change state
+            current_state_ = 0b101;
+         }
+      }
+      break;
+
+   case 0b101:
+      if ((paula_->dma_control_->dmacon_ & audxon_) != audxon_)
+      {
+         // return to idle
+         current_state_ = 0b000;
+      }
+      else
+      {
+         if (audxdatwaiting_)
+         {
+            audxdatwaiting_ = false;
+            // todo : do something ?
+
+
+            // Change state
+            sound_ = (audxdat_ >> 8);
+            current_state_ = 0b010;
+         }
+      }
+      break;
+
+   case 0b010:
+      if (true)
+      {
+
+      }
+      if (period_counter_ == 1)
+      {
+         period_counter_ = paula_->channels_[channel_].period;
+         sound_ = (audxdat_ & 0xFF);
+         current_state_ = 0b011;
+      }
+      else
+      {
+         --period_counter_;
+      }
+      break;
+
+   case 0b011:
+      if (((paula_->dma_control_->dmacon_ & audxon_) == audxon_)
+         && (true))  // Pending interrupt
+      {
+         if (period_counter_ == 1)
+         {
+            period_counter_ = paula_->channels_[channel_].period;
+            sound_ = (audxdat_ >> 8);
+            current_state_ = 0b010;
+         }
+         else
+         {
+            --period_counter_;
+         }
+      }
+      else 
+      {
+         // return to idle
+         current_state_ = 0b000;
+      }
+      break;
+
+   case 0b100:
+   case 0b110:
+   case 0b111:
+      current_state_ = 0;
+      break;
+   }
+}

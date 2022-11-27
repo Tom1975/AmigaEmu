@@ -87,6 +87,32 @@ void DiskDrive::SetSIDE(bool set)
    side_ = set?1:0;
 }
 
+unsigned char DiskDrive::Advance()
+{
+   unsigned char value = 0;
+   if (motor_ && disk_inserted_ != nullptr && disk_inserted_->side_[side_].track_[track_].size_ > 0)
+   {
+      if (++head_ >= disk_inserted_->side_[side_].track_[track_].size_)
+      {
+         head_ = 0;
+         index_ = true;
+         // set FLAG from CIA
+         if (cia_ != nullptr)
+         {
+            cia_->Flag(true);
+         }
+      }
+      else
+      {
+         cia_->Flag(false);
+         index_ = false;
+      }
+
+      value = disk_inserted_->side_[side_].track_[track_].bitstream_[head_];
+   }
+   return value;
+}
+
 unsigned short DiskDrive::ReadAndAdvance()
 {
    unsigned short data = 0;

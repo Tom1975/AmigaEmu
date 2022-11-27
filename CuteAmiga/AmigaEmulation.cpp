@@ -5,6 +5,10 @@ AmigaEmulation::AmigaEmulation(DisplayFrame* frame) : run_(false), frame_(frame)
 {
    motherboard_ = new Motherboard();
    breakpoint_handler_.Init(motherboard_);
+
+   time_computed_ = 0;
+
+   time_elapsed_ = std::chrono::steady_clock::now();
 }
 
 AmigaEmulation::~AmigaEmulation()
@@ -22,7 +26,7 @@ void AmigaEmulation::Start()
 {
    current_function_ = &AmigaEmulation::RunRun;
 
-   if (motherboard_->Init(frame_, &hardware_io_, this))
+   if (motherboard_->Init(frame_, &hardware_io_, this, &sound_mixer_))
    {
       // Create thread with emulation handling
       emulation_thread_ = std::thread(Begin, this);
@@ -65,11 +69,42 @@ void AmigaEmulation::ActionRun()
    {
       current_function_ = &AmigaEmulation::RunRun;
    }
+   
+}
+
+void AmigaEmulation::HandleSyncro(int runtime)
+{
+   // rutime tick at ?? mhz => value increased in ms.
+   time_computed_ += runtime / (28000/8);
+
+   std::chrono::time_point<std::chrono::steady_clock> time_elapsed_end = std::chrono::steady_clock::now();
+
+   std::chrono::milliseconds real_time = std::chrono::duration_cast<std::chrono::milliseconds> (time_elapsed_end - time_elapsed_);
+   std::chrono::milliseconds base_realtime = real_time;
+
+   if (std::chrono::milliseconds(time_computed_) > real_time)
+   {
+      std::this_thread::sleep_for(std::chrono::microseconds((std::chrono::milliseconds(time_computed_) - real_time)));
+   }
+
+   if (base_realtime.count() != 0)
+   {
+      speed_percent_ = (unsigned int)(time_computed_ * 100 / base_realtime.count());
+   }
+   else
+   {
+      speed_percent_ = 1000;
+   }
 }
 
 void AmigaEmulation::ActionBreak ()
 {
    current_function_ = &AmigaEmulation::RunBreak;
+}
+
+void AmigaEmulation::ActionReset()
+{
+   motherboard_->Reset();
 }
 
 void AmigaEmulation::MainLoop()
@@ -99,7 +134,8 @@ void AmigaEmulation::MainLoop()
          }
 
       }
-      std::this_thread::sleep_for(std::chrono::microseconds(10));
+      HandleSyncro(50000);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
    }
 }
 
@@ -107,6 +143,8 @@ unsigned int AmigaEmulation::RunRun()
 {
    for (int i = 0; i < 50000; i++)
       motherboard_->Tick ();
+
+
    return 1;
 }
 
@@ -152,10 +190,7 @@ unsigned int AmigaEmulation::RunBreak()
 
 void AmigaEmulation::Reset()
 {
-   motherboard_->Reset();
-
-   // Does some windows need update ? 
-   // todo
+   action_list_.push_back(std::bind(&AmigaEmulation::ActionReset, this));   
 }
 
 void AmigaEmulation::Break()
@@ -215,11 +250,11 @@ void func(T t, Args... args) // recursive variadic function
 */
 void AmigaEmulation::Log(Severity severity, const char* msg...)
 {
-   char buffer[256];
+   char buffer[1024];
    va_list args;
 
    va_start(args, msg);
-   vsprintf_s(buffer, 256, msg, args);
+   vsprintf_s(buffer, sizeof(buffer), msg, args);
 
    qDebug() << buffer;
 

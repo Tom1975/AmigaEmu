@@ -9,9 +9,9 @@ unsigned int MaskSign[4] = { 0x80, 0x8000, 0x80000000, 0 };
 unsigned int MaskZero[4] = { 0xFF, 0xFFFF, 0xFFFFFFFF, 0 };
 unsigned int SizeSizeNbBits[4] = { 8, 16, 32, 0};
 
-
-static unsigned int last_opcodes[256];
-static unsigned char op_index = 0;
+#define LAST_OPCODE_SIZE 0xFFFF
+static unsigned int last_opcodes[LAST_OPCODE_SIZE];
+static unsigned int op_index = 0;
 
 
 M68k::Func M68k::ResetList_[] = { &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr };
@@ -173,7 +173,7 @@ void M68k::Tick()
          {
             // Fetch next opcode
             // save last opcodes
-            last_opcodes[(op_index++) & 0xFF] = pc_-4;
+            last_opcodes[(op_index++) & LAST_OPCODE_SIZE] = pc_-4;
 
 
             current_working_list_ = M68k::working_array_[ird_];
@@ -338,7 +338,7 @@ void M68k::Reset()
    // todo : We could upgrade this with 'real' memory reads (but is it really necessary)
 
    Fetch();
-
+   new_opcode_ = 0;
    current_working_list_ = ResetList_;
    current_function_ = *current_working_list_;
    index_list_ = 0;
@@ -1123,15 +1123,9 @@ unsigned int M68k::OpcodeMove()
 
 unsigned int M68k::DecodeMoveFromSr()
 {
-   if (sr_ & 0x2000)
-   {
-      operand_size_ = WORD;
-      destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
-   }
-   else
-   {
-      return TRAP(8);
-   }
+   operand_size_ = WORD;
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, operand_size_);
+
    return true;
 }
 
@@ -3206,7 +3200,7 @@ unsigned int M68k::DecodeDivu()
 unsigned int M68k::DecodeDivs()
 {
    // Decode , M, Xn
-   size_ = 2;  //32 bits destination
+   size_ = 1;  //32 bits destination
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
 
    return true;

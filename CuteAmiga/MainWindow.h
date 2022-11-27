@@ -68,5 +68,6 @@ private:
     QLabel* iconled_;
 
     QLabel icondrive_[4];
+    QLabel speed_;
 };
 

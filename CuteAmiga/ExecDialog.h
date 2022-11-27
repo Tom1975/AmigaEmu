@@ -3,7 +3,9 @@
 
 #include <QDialog>
 #include <QTreeWidgetItem>
+
 #include "AmigaEmulation.h"
+#include "DebugInterface.h"
 
 namespace Ui {
 class ExecDialog;
@@ -18,14 +20,20 @@ public:
     ~ExecDialog();
 
     // Init dialog
+    void SetDebugInterface(DebugInterface* interface) {
+       debug_interface_ = interface;
+    }
     void SetEmulator(AmigaEmulation* emu_handler);
     virtual bool event(QEvent *event);
     void Break();
+
+    bool eventFilter(QObject* watched, QEvent* event);
 
    public slots:
 
     // Update the view
     virtual void Update();
+    void itemDoubleClicked(QTreeWidgetItem *item);
 
 protected:
    // Menu action
@@ -42,4 +50,5 @@ private:
     QTreeWidgetItem * exec_base_item_;
     std::vector<QTreeWidgetItem*> list_items_;
 
+    DebugInterface* debug_interface_;
 };

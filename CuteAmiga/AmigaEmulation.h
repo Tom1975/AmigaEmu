@@ -5,7 +5,7 @@
 #include <functional>
 #include "QObject.h"
 
-
+#include "ALSoundMixer.h"
 #include "Motherboard.h"
 #include "Breakpoint.h"
 #include "HardwareInterface.h"
@@ -56,9 +56,15 @@ public:
    // static function
    static void Begin(void* param);
 
+   int GetSpeed() {return speed_percent_; }
 protected:
 
    void MainLoop();
+   void HandleSyncro(int runtime);
+
+   int time_computed_;
+   std::chrono::time_point<std::chrono::steady_clock> time_elapsed_;
+   int speed_percent_;
 
    typedef unsigned int (AmigaEmulation::*RunFunc)();
    RunFunc current_function_;
@@ -85,6 +91,7 @@ protected:
    void ActionStep();
    void ActionRun();
    void ActionBreak();
+   void ActionReset();
 
    // Breakpoints handler
    BreakPointHandler breakpoint_handler_;
@@ -94,4 +101,5 @@ protected:
    DisplayFrame* frame_;
    HardwareInterface hardware_io_;
 
+   ALSoundMixer sound_mixer_;
 };

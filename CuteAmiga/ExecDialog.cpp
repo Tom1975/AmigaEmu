@@ -1,8 +1,12 @@
 #include "ExecDialog.h"
 #include "ui_ExecDialog.h"
-
 #include <QDir>
 #include <QMenuBar>
+#include <QDebug>
+#include <QMouseEvent>
+#include <QStandardItemModel>
+
+#include"FunctionHelper.h"
 
 #define EXTRACT_LONG(c) \
    ((c[0]<<24)|(c[1]<<16)|(c[2]<<8)|(c[3]))
@@ -10,15 +14,28 @@
 #define EXTRACT_WORD(c) \
    ((c[0]<<8)|(c[1]))
 
-ExecDialog::ExecDialog(QWidget *parent) :
+ExecDialog::ExecDialog(QWidget* parent) :
    QDialog(parent),
-   ui(new Ui::ExecDialog)
+   ui(new Ui::ExecDialog),
+   debug_interface_(nullptr)
 {
    ui->setupUi(this);
-   
+
    exec_base_item_ = new QTreeWidgetItem;
    ui->ExecWidget->addTopLevelItem(exec_base_item_);
+   //ui->ExecWidget->viewport()->installEventFilter(this);
 
+   QMetaObject::Connection result = connect(ui->ExecWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem* , int )), SLOT(itemDoubleClicked(QTreeWidgetItem*)));
+
+   if (result)
+   {
+      qDebug() << "connect ok";
+   }
+   else
+   {
+      qDebug() << "connect ERROR !";
+
+   }
 }
 
 ExecDialog::~ExecDialog()
@@ -34,6 +51,25 @@ bool ExecDialog::event(QEvent *event)
       return true;
    }
    return QWidget::event(event);
+}
+
+void ExecDialog::itemDoubleClicked(QTreeWidgetItem *item)
+{
+   // Get data and set the debugger with it
+   int addr = item->data(0, Qt::UserRole).toInt();
+   if (debug_interface_)
+      debug_interface_->SetAddress(addr);
+
+}
+
+bool ExecDialog::eventFilter(QObject* watched, QEvent* event)
+{
+   if (watched == ui->ExecWidget->viewport() && event->type() == QEvent::MouseButtonDblClick) {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      qDebug() << "MouseButtonDblClick" << mouseEvent->pos();
+      mouseDoubleClickEvent(mouseEvent);
+   }
+   return QDialog::eventFilter(watched, event);
 }
 
 void ExecDialog::SetEmulator(AmigaEmulation* emu_handler)
@@ -233,6 +269,81 @@ void ExecDialog::UpdateDebug()
       item_task_list = new QTreeWidgetItem;
       item_task_list->setText(0, QString("TASK_WAIT"));
       UpdateList(exec_base + 0x1A4, item_task_list, UpdateTask);
+      ui->ExecWidget->addTopLevelItem(item_task_list);
+      list_items_.push_back(item_task_list);
+
+      item_task_list = new QTreeWidgetItem;
+      item_task_list->setText(0, QString("LIBRARIES"));
+
+      // Check memory : From top node, 
+      unsigned long node = EXTRACT_LONG((&ram[0x676 + 0x17A]));
+      while (node != 0)
+      {
+         // 
+         // offset 0x0A : name
+         QTreeWidgetItem* item = new QTreeWidgetItem;
+         unsigned long lib_name_ptr = EXTRACT_LONG((&ram[node + 0x0A]));
+         char* lib_name = (lib_name_ptr >= 0xFC0000) ? (char*)&rom[lib_name_ptr & 0x3FFFF] : (char*)&ram[(lib_name_ptr) & 0x7FFFF];
+         item->setText(0, QString(lib_name));
+         QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
+         base_address_item->setText(0, QString("Base address : %1").arg(node, 6, 16));
+
+         // Add all functions 
+         unsigned long vector_address = node - 6;
+         unsigned short jmp = EXTRACT_WORD((&ram[vector_address]));
+         while (jmp == 0x4EF9 && vector_address > 6)
+         {
+            QTreeWidgetItem* func = new QTreeWidgetItem;
+            unsigned long func_addr = EXTRACT_LONG((&ram[vector_address +2]));
+
+            short index = vector_address - node;
+            std::string func_name = FunctionHelper::GetFunctionName(lib_name, index);
+            if (func_name.size() > 0)
+            {
+               func->setText(0, QString("-$%1 (%3) : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16).arg(func_name.c_str()));
+            }
+            else
+            {
+               func->setText(0, QString("-$%1 : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
+            }
+
+            func->setData(0, Qt::UserRole, (int)func_addr);
+            base_address_item->addChild(func);
+            
+
+            vector_address -= 6;
+            jmp = EXTRACT_WORD((&ram[vector_address]));
+
+         }
+         
+
+         // Add Signals
+         item->addChild(base_address_item);
+         node = EXTRACT_LONG((&ram[node]));
+
+         item_task_list->addChild(item);
+      }
+      ui->ExecWidget->addTopLevelItem(item_task_list);
+      list_items_.push_back(item_task_list);
+
+      // Add Interrupt vectors
+      item_task_list = new QTreeWidgetItem;
+      item_task_list->setText(0, QString("Interrupt Vectors"));
+
+      // Check memory : From top node, 
+      for (int i = 1; i < 8; i++)
+      {
+         unsigned long intVector= EXTRACT_LONG((&ram[(24 + i) * 4]));
+
+         QTreeWidgetItem* item = new QTreeWidgetItem;
+         item->setText(0, QString("Int %1").arg(i));
+         QTreeWidgetItem* base_address_item = new QTreeWidgetItem;
+         base_address_item->setText(0, QString("Base address : %1").arg(intVector, 6, 16));
+         // Add Signals
+         item->addChild(base_address_item);
+         item_task_list->addChild(item);
+      }
+
       ui->ExecWidget->addTopLevelItem(item_task_list);
       list_items_.push_back(item_task_list);
 

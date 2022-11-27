@@ -2,15 +2,20 @@
 
 #include "DMAControl.h"
 #include "DiskController.h"
-
+#include "SoundMixer.h"
+#include "ISound.h"
 class Bus;
+
 
 class Paula
 {
 public:
-   Paula();
+   Paula(SoundMixer* sound_mixer);
    virtual ~Paula();
 
+   void Tick();
+
+   void SetSoundMixer(SoundMixer* sound_mixer);
    void SetDiskController(DiskController* disk_controller);
    void SetDMAControl(Bus* bus, DMAControl* dma_control)
    {
@@ -18,7 +23,19 @@ public:
       bus_ = bus;
    }
 
+   // Audio
+   void SetAudioChannelLocation(int channel, unsigned short address, bool low);
+   void SetAudioChannelLength(int channel, unsigned short data) { channels_[channel].init_length = data; }
+   void SetAudioChannelVolume(int channel, unsigned short data) { channels_[channel].init_volume = data; }
+   void SetAudioChannelPeriod(int channel, unsigned short data) { channels_[channel].init_period = data; }
+   void SetAudioChannelData(int channel, unsigned short data) { channels_[channel].data = data; }
+   bool DmaAudioTick(unsigned int audio_channel);
+   void DmaAudioSampleOver();
+
+   // Disk
    bool DmaDiskTick();
+
+   // Int
    void SetIntPin(unsigned char *interrupt_pin) { interrupt_pin_ = interrupt_pin; };
    void Reset();
 
@@ -41,7 +58,7 @@ public:
    unsigned short GetAdkCon() { return adkcon_; };
 
    unsigned short GetDskDat() { return dsk_dat_; }
-   unsigned short GetDskByte() { return dsk_byte_; }
+   unsigned short GetDskByte() { unsigned short tmp = dsk_byte_;  dsk_byte_ &= 0x7FFF;  return tmp; }
 
 protected:
    ////////////////////////////////
@@ -60,16 +77,88 @@ protected:
    ////////////////////////////////
    // serial port
    unsigned int serper_;
+   
+   ////////////////////////////////
+   // Audio
+   class AudioChannel
+   {
+   public:
+      AudioChannel();
+      unsigned int init_address_location;
+      unsigned int address_location;
+      unsigned short init_length;
+      unsigned short length;
+      unsigned short init_period;
+      unsigned short period;
+      unsigned short init_volume;
+      unsigned short volume;
+      unsigned short init_data;
+
+      unsigned short data;
+
+      bool dmarunning_;
+   };
+   AudioChannel channels_[4];
+   SoundMixer *sound_mixer_;
+   SoundSource sound_source_;
 
    ////////////////////////////////
    // Disk
+   unsigned int dsk_counter_clock_;
+
    unsigned short dsklen_;
    unsigned short adkcon_;
 
    unsigned short sync_;
    unsigned short dsk_dat_;
-   unsigned short dsk_byte_;
+   unsigned int dsk_dat_long_;
 
+   unsigned short dsk_dat_fetch_data_[4];
+   int fetch_index_;
+   int fetch_read_index_;
+   unsigned short dsk_byte_;
+   unsigned char disk_bit_count_;
+
+   unsigned char shift_data_sync_;
+   bool sync_ok_;
    unsigned int dsk_dma_pt_;
+   
+   ////////////////////////////////
+   // Audio state machine
+   struct AudioStateMachine
+   {
+      AudioStateMachine();
+      void Init (int channel, Paula* paula);
+      
+      void AUDxDAT(unsigned short data);
+
+      // Audio Tick
+      void Tick();
+
+      // External Action
+      
+      // state 
+      unsigned char current_state_:3;
+
+      // Inner vaalues
+      Paula* paula_;
+      int channel_;
+      unsigned short audxon_;
+      unsigned short audxdat_;
+      bool audxdatwaiting_;
+
+      // period counter
+      unsigned short period_counter_;
+
+      // output data
+      unsigned char sound_;
+
+   };
+   friend AudioStateMachine;
+
+   AudioStateMachine audio_[4];
+
+   // Sound sampling
+   double counter_;
    
 };

@@ -4,3 +4,7 @@
 [submodule "amiga_replacement_project"]
 	path = amiga_replacement_project
 	url = https://github.com/nonarkitten/amiga_replacement_project
+[submodule "openal-soft"]
+	path = openal-soft
+	url = https://github.com/kcat/openal-soft.git
+	branch = master

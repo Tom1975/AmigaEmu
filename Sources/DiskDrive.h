@@ -33,6 +33,7 @@ public:
    bool GetWPROT() { return wprot_; }
 
    unsigned short ReadAndAdvance();
+   unsigned char Advance();
 
 
    unsigned char GetSide() { return side_; }
@@ -47,6 +48,9 @@ private:
    // Side, track
    unsigned char side_;
    char track_;
+
+   // Current data
+   unsigned short data_;
 
    // Head position
    size_t head_;

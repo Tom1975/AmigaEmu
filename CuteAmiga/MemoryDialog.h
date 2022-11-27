@@ -29,6 +29,9 @@ public:
     void on_setAddress_clicked();
     void on_address_returnPressed();
 
+    void on_searchAddress_clicked();
+    void on_pattern_returnPressed();
+
 protected:
    // Menu action
    

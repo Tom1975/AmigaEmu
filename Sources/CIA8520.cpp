@@ -357,6 +357,10 @@ void CIA8520::Flag(bool set)
          motherboard_->GetPaula()->Int(intreq_);
       }
    }
+   else
+   {
+      icr_ &= ~FLAG;
+   }
 
 }
 

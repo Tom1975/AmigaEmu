@@ -5,11 +5,13 @@
 #include "AmigaEmulation.h"
 #include "Disassembler68k.h"
 
+#include "DebugInterface.h"
+
 namespace Ui {
 class DebugDialog;
 }
 
-class DebugDialog : public QDialog, IUpdate
+class DebugDialog : public QDialog, public DebugInterface, IUpdate
 {
     Q_OBJECT
 
@@ -19,8 +21,11 @@ public:
 
     // Init dialog
     void SetEmulator(AmigaEmulation* emu_handler);
+    virtual void SetAddress(unsigned int addr);
     virtual bool event(QEvent *event);
     void Break();
+
+    bool eventFilter(QObject* watched, QEvent* event);
 
    public slots:
       void on_set_top_address_clicked();
@@ -28,6 +33,7 @@ public:
       void on_dbg_step__clicked();
       void on_dbg_run_clicked();
       void DasmShowContextMenu(const QPoint &pos);
+      void StackToDasm();
       void AddBreakpoint();
       void RemoveBreakpoint();
       void on_add_bp_clicked();

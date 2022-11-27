@@ -12,6 +12,8 @@
 #include "Keyboard.h"
 #include "ILogger.h"
 #include "HardwareIO.h"
+#include "ISound.h"
+#include "SoundMixer.h"
 
 class Motherboard
 {
@@ -20,7 +22,7 @@ public :
    virtual ~Motherboard();
 
    // Init and settings
-   bool Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger );
+   bool Init(DisplayFrame* frame, HardwareIO* hardware, ILogger* logger, ISound* sound_player);
 
    // Access 
    M68k* GetCpu() { return &m68k_; }
@@ -99,4 +101,8 @@ protected:
    DisplayFrame* frame_;
 
    ILogger* logger_;
+
+   ISound* sound_player_;
+   SoundMixer sound_mixer_;
+
 };

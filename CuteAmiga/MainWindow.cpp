@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
    memory_.SetEmulator(emu_handler_);
    copper_.SetEmulator(emu_handler_);
    exec_.SetEmulator(emu_handler_);
+   exec_.SetDebugInterface(&debug_);
    bitplane_.SetEmulator(emu_handler_);
    disk_debug_.SetEmulator(emu_handler_);
 
@@ -62,6 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
       statusBar()->addWidget(&icondrive_[i]);
    }
 
+   // Speed percentage
+   speed_.setNum(0);
+   statusBar()->addWidget(&speed_);
 
 }
 
@@ -245,6 +249,8 @@ void MainWindow::Update()
       icondrive_[i].setPixmap( mb->GetDriveLed(i)?*drive_led_on_:*drive_led_off_);
    }
 
+   // Speed percentage
+   speed_.setNum(emu_handler_->GetSpeed());
 }
 
 /////////////////////////////////////////////////////////////////////////////
