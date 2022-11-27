@@ -3200,7 +3200,7 @@ unsigned int M68k::DecodeDivu()
 unsigned int M68k::DecodeDivs()
 {
    // Decode , M, Xn
-   size_ = 2;  //32 bits destination
+   size_ = 1;  //32 bits destination
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
 
    return true;
