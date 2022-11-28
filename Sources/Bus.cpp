@@ -207,12 +207,15 @@ void Bus::Tick()
          }
          // ROM or fast ram : 
          data_ = 0;
-         if (uds_ == ACTIVE)
-            data_ = real_address[0];
-         if (lds_ == ACTIVE)
+         if (real_address != 0)
          {
-            data_ <<= 8;
-            data_ |= real_address[+1];
+            if (uds_ == ACTIVE)
+               data_ = real_address[0];
+            if (lds_ == ACTIVE)
+            {
+               data_ <<= 8;
+               data_ |= real_address[+1];
+            }
          }
          operation_complete_ = true;
       }

@@ -277,7 +277,7 @@ void ExecDialog::UpdateDebug()
 
       // Check memory : From top node, 
       unsigned long node = EXTRACT_LONG((&ram[0x676 + 0x17A]));
-      while (node != 0)
+      while (node != 0 && node < 512*1024)
       {
          // 
          // offset 0x0A : name

@@ -245,7 +245,7 @@ bool Paula::DmaDiskTick()
       if (adkcon_ & 0x400) // Test WORDSYNC bit ?
       {
          dsk_byte_ &= ~0x1000;
-         for (int i = 15; i >= 0; i++)
+         for (int i = 15; i >= 0; i--)
          {
             if ((dsk_dat_long_ >> i) == sync_)
             {

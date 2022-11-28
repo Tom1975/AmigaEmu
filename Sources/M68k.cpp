@@ -28,6 +28,8 @@ M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k
 M68k::Func M68k::Asd2_[] = { &M68k::DecodeAsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bcc_[] = { &M68k::DecodeBcc, &M68k::OpcodeBcc, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Bchg_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
+//M68k::Func M68k::Bchg_dn_[] = { &M68k::DecodeBchg_D, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg_D, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Bclr_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBclr, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bset_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBset, &M68k::CpuFetch, &M68k::OpcodeBset2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bsr_[] = { &M68k::DecodeBsr, &M68k::OpcodeBsr, &M68k::CpuFetch, nullptr, };
@@ -98,7 +100,6 @@ M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::Opcode
 M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::NotSupported, &M68k::NotSupported2, &M68k::NotSupported3, &M68k::SourceRead, &M68k::NotSupported4, &M68k::CpuFetch, nullptr, };
 
 // TO IMPLEMENT & DISASSEMBLE
-M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
@@ -3477,6 +3478,20 @@ unsigned int M68k::OpcodeBclr()
    return true;
 }
 
+unsigned int M68k::DecodeBchg_D()
+{
+   // Decode , M, Xn
+   // decode size
+   size_ = (ird_ >> 6) & 0x3;
+
+   // Always long
+   source_alu_ = source_factory_.InitAlu(0, (ird_ >> 9) & 0x7, 2);
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+   time_counter_ = 0;
+   Fetch();
+   return true;
+}
+
 unsigned int M68k::OpcodeBchg()
 {
    // Do it and adjust the flags
@@ -3493,6 +3508,28 @@ unsigned int M68k::OpcodeBchg()
       value |= bit_to_test;
    }
    
+   destination_alu_->WriteInput(value);
+   Fetch();
+   return true;
+}
+
+unsigned int M68k::OpcodeBchg_D()
+{
+   // Do it and adjust the flags
+   unsigned int value = destination_alu_->GetU32();
+   unsigned int bit_to_test = destination_alu_->IsDataRegister() ? (1 << (source_alu_->GetU8() & 0x1F)) : (1 << (source_alu_->GetU8() & 7));
+
+   if (value & bit_to_test)
+   {
+      sr_ = sr_ & ~F_Z;
+      value &= ~bit_to_test;
+   }
+   else
+   {
+      sr_ |= F_Z;
+      value |= bit_to_test;
+   }
+
    destination_alu_->WriteInput(value);
    Fetch();
    return true;

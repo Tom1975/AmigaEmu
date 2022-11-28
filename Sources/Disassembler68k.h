@@ -38,6 +38,7 @@ protected:
    unsigned int AsdOpcode2(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BccOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BchgOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
+   unsigned int BchgDnOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BclrOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BsetOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int BsrOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
