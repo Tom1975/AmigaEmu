@@ -28,8 +28,8 @@ M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k
 M68k::Func M68k::Asd2_[] = { &M68k::DecodeAsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bcc_[] = { &M68k::DecodeBcc, &M68k::OpcodeBcc, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Bchg_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
-//M68k::Func M68k::Bchg_dn_[] = { &M68k::DecodeBchg_D, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg_D, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
+M68k::Func M68k::Bchg_dn_[] = { &M68k::DecodeBchg_D, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg_D, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
+//M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Bclr_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBclr, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bset_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBset, &M68k::CpuFetch, &M68k::OpcodeBset2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bsr_[] = { &M68k::DecodeBsr, &M68k::OpcodeBsr, &M68k::CpuFetch, nullptr, };
@@ -3482,9 +3482,17 @@ unsigned int M68k::DecodeBchg_D()
 {
    // Decode , M, Xn
    // decode size
-   size_ = (ird_ >> 6) & 0x3;
 
-   // Always long
+   // Long if destination is a data register, otherwise byte
+   if (((ird_ >> 9) & 0x7) == 0)
+   {
+      size_ = 2;
+   }
+   else
+   {
+      size_ = 0;
+   }
+
    source_alu_ = source_factory_.InitAlu(0, (ird_ >> 9) & 0x7, 2);
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
    time_counter_ = 0;
