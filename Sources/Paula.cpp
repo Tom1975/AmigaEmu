@@ -247,7 +247,7 @@ bool Paula::DmaDiskTick()
          dsk_byte_ &= ~0x1000;
          for (int i = 15; i >= 0; i--)
          {
-            if ((dsk_dat_long_ >> i) == sync_)
+            if (((dsk_dat_long_ >> i) & 0xFFFF)== sync_)
             {
                sync_ok_ = true;
                // set dskbytr, launch int if necessary
