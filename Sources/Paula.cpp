@@ -231,6 +231,7 @@ void Paula::DmaAudioSampleOver()
 // DMA Disk
 bool Paula::DmaDiskTick()
 {
+   // During DMA, if (adkcon_ & 0x400) => DMA transfert begin with sync.
    // If dma, do it
    dsk_dat_ = disk_controller_->ReadNextWord();
    if (dsk_byte_ & 0x4000)
@@ -242,7 +243,7 @@ bool Paula::DmaDiskTick()
       //dsk_dat_ = disk_controller_->ReadNextWord();
       dsk_dat_long_ <<= 16;
       dsk_dat_long_ |= dsk_dat_;
-      if (adkcon_ & 0x400) // Test WORDSYNC bit ?
+      //if (adkcon_ & 0x400) // Test WORDSYNC bit ?
       {
          dsk_byte_ &= ~0x1000;
          for (int i = 15; i >= 0; i--)
@@ -254,7 +255,8 @@ bool Paula::DmaDiskTick()
                dsk_byte_ |= 0x1000;
                Int(0x1000);
                // Set index to shift when reading data
-               shift_data_sync_ = i; 
+               if (adkcon_ & 0x400)
+                  shift_data_sync_ = i; 
                break;
             }
          }

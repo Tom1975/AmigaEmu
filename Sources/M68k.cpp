@@ -10,7 +10,7 @@ unsigned int MaskZero[4] = { 0xFF, 0xFFFF, 0xFFFFFFFF, 0 };
 unsigned int SizeSizeNbBits[4] = { 8, 16, 32, 0};
 
 #define LAST_OPCODE_SIZE 0xFFFF
-static unsigned int last_opcodes[LAST_OPCODE_SIZE];
+static unsigned int last_opcodes[LAST_OPCODE_SIZE+1];
 static unsigned int op_index = 0;
 
 
@@ -2363,7 +2363,6 @@ unsigned int M68k::OpcodeSubI()
    dm = 0;
 
    unsigned int mask = 0;
-   unsigned int data;
    switch (size_)
    {
    case 0:
@@ -3615,10 +3614,15 @@ unsigned int M68k::OpcodeBset2()
 unsigned int M68k::DecodeBtst_D()
 {
    // Decode , M, Xn
-   // decode size
-   size_ = (ird_ >> 6) & 0x3;
+   if (((ird_ >> 9) & 0x7) == 0)
+   {
+      size_ = 2;
+   }
+   else
+   {
+      size_ = 0;
+   }
 
-   // Always long
    source_alu_ = source_factory_.InitAlu(0, (ird_>>9)&0x7, 2);
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
    time_counter_ = 0;
