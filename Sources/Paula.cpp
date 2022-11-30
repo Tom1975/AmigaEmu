@@ -243,7 +243,7 @@ bool Paula::DmaDiskTick()
       //dsk_dat_ = disk_controller_->ReadNextWord();
       dsk_dat_long_ <<= 16;
       dsk_dat_long_ |= dsk_dat_;
-      //if (adkcon_ & 0x400) // Test WORDSYNC bit ?
+      if (adkcon_ & 0x400) // Test WORDSYNC bit ?
       {
          dsk_byte_ &= ~0x1000;
          for (int i = 15; i >= 0; i--)
@@ -323,7 +323,7 @@ void Paula::SetDskLen(unsigned short dsklen)
       if ((dma_control_->dmacon_ & 0x210) == 0x210)
       {
          // Start DMA !
-         sync_ok_ = ((adkcon_ & ~0x400) == 0);
+         sync_ok_ = ((adkcon_ & 0x400) == 0);
          dsk_byte_ |= 0x4000;
       }
    }

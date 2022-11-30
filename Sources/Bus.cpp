@@ -668,7 +668,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
          break;
 
       case 0x9E:  // ADKCON
-         // todo
+         paula_->SetAdkCon(data);
          break;
 
       case 0xA0:  // AUD0LCH

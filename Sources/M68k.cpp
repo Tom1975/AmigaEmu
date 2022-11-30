@@ -3483,7 +3483,7 @@ unsigned int M68k::DecodeBchg_D()
    // decode size
 
    // Long if destination is a data register, otherwise byte
-   if (((ird_ >> 9) & 0x7) == 0)
+   if (((ird_ >> 3) & 0x7) == 0)
    {
       size_ = 2;
    }
@@ -3614,7 +3614,7 @@ unsigned int M68k::OpcodeBset2()
 unsigned int M68k::DecodeBtst_D()
 {
    // Decode , M, Xn
-   if (((ird_ >> 9) & 0x7) == 0)
+   if (((ird_ >> 3) & 0x7) == 0)
    {
       size_ = 2;
    }
