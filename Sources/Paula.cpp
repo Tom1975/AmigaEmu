@@ -271,27 +271,27 @@ bool Paula::DmaDiskTick()
          //bus_->Write16(dsk_dma_pt_, dsk_dat_fetch_data_[(fetch_read_index_++) & 0x3]);
          //dsk_dat_fetch_data_ <<= 16;
          
+         length -= 1;
+
+         dsklen_ &= 0xC000;
+         dsklen_ |= length;
+
+         dsk_dma_pt_ += 2;
+         if (length == 0)
+         {
+            // End of DMA : 
+            dsk_byte_ &= ~0x4000;
+
+            // int;
+            Int(0x2);
+
+            // set various data
+
+         }
       }
       
       
-      length -= 1;
 
-      dsklen_ &= 0xC000;
-      dsklen_ |= length;
-
-      dsk_dma_pt_+= 2;
-
-      if (length == 0)
-      {
-         // End of DMA : 
-         dsk_byte_ &= ~0x4000;
-
-         // int;
-         Int(0x2);
-
-         // set various data
-
-      }
       return true;
    }
 
