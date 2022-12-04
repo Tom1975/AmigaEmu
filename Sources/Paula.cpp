@@ -243,6 +243,7 @@ bool Paula::DmaDiskTick()
       //dsk_dat_ = disk_controller_->ReadNextWord();
       dsk_dat_long_ <<= 16;
       dsk_dat_long_ |= dsk_dat_;
+      bool bsync_now = true;
       if (adkcon_ & 0x400) // Test WORDSYNC bit ?
       {
          dsk_byte_ &= ~0x1000;
@@ -250,13 +251,16 @@ bool Paula::DmaDiskTick()
          {
             if (((dsk_dat_long_ >> i) & 0xFFFF)== sync_)
             {
-               sync_ok_ = true;
                // set dskbytr, launch int if necessary
                dsk_byte_ |= 0x1000;
                Int(0x1000);
                // Set index to shift when reading data
                if (adkcon_ & 0x400)
-                  shift_data_sync_ = i; 
+               {
+                  if (!sync_ok_) bsync_now = false;
+                  sync_ok_ = true;
+                  shift_data_sync_ = i;
+               }
                break;
             }
          }
@@ -265,7 +269,7 @@ bool Paula::DmaDiskTick()
       // Write to memory
       //bus_->Write16(dsk_dma_pt_, dsk_dat_);
       // Only if sync is done
-      if (sync_ok_)
+      if (sync_ok_ && bsync_now)
       {
          bus_->Write16(dsk_dma_pt_, dsk_dat_long_ >> shift_data_sync_);
          //bus_->Write16(dsk_dma_pt_, dsk_dat_fetch_data_[(fetch_read_index_++) & 0x3]);
