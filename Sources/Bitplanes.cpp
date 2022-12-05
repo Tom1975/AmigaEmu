@@ -39,7 +39,7 @@ void Bitplanes::NewLine()
    for (int i = 0; i < nb_bitplanes_; i++)
    {
       // todo : handle even/odd planes
-      bplxpt_[i] += (i&1)?bpl1mod_: bpl2mod_;
+      bplxpt_[i] += (i&1)?(short)bpl2mod_: (short)bpl1mod_;
    }
 }
 

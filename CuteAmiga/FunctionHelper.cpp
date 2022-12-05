@@ -118,7 +118,7 @@ std::map<unsigned short, std::string> FunctionHelper::register_name_ = {
 {0x104," BPLCON2"},
 {0x106," BPLCON3"},
 {0x108," BPL1MOD"},
-{0x10C,"BPL2MOD"},
+{0x10A,"BPL2MOD"},
 {0x110,"BPL1DAT"},
 {0x112,"BPL2DAT"},
 {0x114,"BPL3DAT"},
