@@ -1,8 +1,10 @@
 #include "CopperDialog.h"
 #include "ui_CopperDialog.h"
+#include "FunctionHelper.h"
 
 #include <QDir>
 #include <QMenuBar>
+#include <QDebug>
 
 CopperDialog::CopperDialog(QWidget *parent) :
    QDialog(parent),
@@ -115,7 +117,12 @@ void CopperDialog::UpdateDebug()
       unsigned short instr2 = emu_handler_->GetMotherboard()->Read16(counter);
       counter += 2;
 
-      ui->copperlist_1->addItem(Decode(instr1, instr2));
+      QString decode = Decode(instr1, instr2);
+      char buffer[16];
+      sprintf(buffer, "%8.8X: ", counter - 4);
+
+      qDebug() << buffer << " " << decode;
+      ui->copperlist_1->addItem(decode);
       if (instr1 == 0xFFFF && instr2 == 0xFFFE)
          copperlist_end = true;
    }
@@ -130,7 +137,13 @@ void CopperDialog::UpdateDebug()
       unsigned short instr2 = emu_handler_->GetMotherboard()->Read16(counter);
       counter += 2;
 
-      ui->copperlist_2->addItem(Decode(instr1, instr2)); 
+      QString decode = Decode(instr1, instr2);
+
+      char buffer[16];
+      sprintf(buffer, "%8.8X: ", counter - 4);
+
+      qDebug() << buffer << " " << decode;
+      ui->copperlist_2->addItem(decode); 
 
       if (instr1 == 0xFFFF && instr2 == 0xFFFE)
          copperlist_end = true;
@@ -168,8 +181,19 @@ QString CopperDialog::Decode(unsigned short instr1, unsigned short instr2)
    {
       // Move
       str += " MOVE ";
-      str += QString("#%1").arg(instr2, 0, 16).toUpper();
-      str += QString(", $%1").arg((instr1) & 0x1FF, 3, 16, QLatin1Char('0')).toUpper();
+      str += QString("#%1").arg(instr2, 4, 16, QLatin1Char('0')).toUpper();
+      //str += QString("#%1").arg(instr2, 0, 16).toUpper();
+
+      std::string rgaName = FunctionHelper::GetRegisterName((instr1) & 0x1FF);
+      if (rgaName.size() > 0)
+      {
+         str += QString(", %1").arg(rgaName.c_str());
+      }
+      else
+      {
+         str += QString(", $%1").arg((instr1) & 0x1FF, 3, 16, QLatin1Char('0')).toUpper();
+      }
+      
 
    }
    return str;
