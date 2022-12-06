@@ -438,13 +438,13 @@ bool Blitter::DmaTick()
 
       if (addmod && !submod)
       {
-         address_d_ += modulo_c_; // modulo_d_;
-         address_c_ += modulo_c_;
+         address_d_ += (short)modulo_c_; // modulo_d_;
+         address_c_ += (short)modulo_c_;
       }
       else if (!addmod && submod)
       {
-         address_d_ -= modulo_c_; // modulo_d_;
-         address_c_ -= modulo_c_;
+         address_d_ -= (short)modulo_c_; // modulo_d_;
+         address_c_ -= (short)modulo_c_;
       }
       // size change
       --window_height_count_;

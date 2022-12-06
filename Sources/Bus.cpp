@@ -244,7 +244,7 @@ void Bus::Tick()
             //if ((address_ & 0xE03001) == 0xA01000)
             if ((address_ & 0xFFF000) == 0xBFE000)
             {
-               cia_a_->Out((address_ >> 8) & 0xF, data_);
+               cia_a_->Out((address_ >> 8) & 0xF, data_&0xFF);
                memory_overlay_ = (cia_a_->GetPA() & 0x1);
                // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high
                operation_complete_ = true;
@@ -255,7 +255,7 @@ void Bus::Tick()
             if ((address_ & 0xFFF000) == 0xBFD000)
             //if ((address_ & 0xE03001) == 0xA02000)
             {
-               cia_b_->Out((address_ >> 8) & 0xF, data_);
+               cia_b_->Out((address_ >> 8) & 0xF, data_&0xFF);
                // todo : gayle (or gary) should turn this 2.5 clock after E CLK is high
                operation_complete_ = true;
             }

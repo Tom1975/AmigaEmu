@@ -1485,12 +1485,12 @@ void Disassembler68k::DisassembleArrayOfcode(Motherboard* mobo, unsigned int bas
 
       offset = Disassemble(mobo, offset, str_asm);
       str_asm = addr + str_asm;
-      int size_tab = (ADD_SIZE + ASM_SIZE) - str_asm.size();
+      int size_tab = (ADD_SIZE + ASM_SIZE) - static_cast<int>(str_asm.size());
       if (size_tab > 0)
       {
          str_asm.append(size_tab, ' ');
       }
-      for (int i = offset_old; i < offset; i++)
+      for (unsigned int i = offset_old; i < offset; i++)
       {
          char b[4];
          sprintf(b, "%2.2X ", mobo->GetBus()->Read8(i));

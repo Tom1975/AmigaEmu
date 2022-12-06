@@ -81,7 +81,7 @@ void DiskDrive::SetDIR(bool set)
 
 void DiskDrive::SetSIDE(bool set)
 {
-   if (side_!= set ? 1:0)
+   if (side_!= (set ? 1:0))
       LOG("DiskDrive : SIDE to %i", set?1:0);
 
    side_ = set?1:0;

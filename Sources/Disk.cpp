@@ -237,7 +237,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
    AddMFMByteToTrack(track->bitstream_, 0, 0xE5E5);
  
    // add sectors
-   size_t stream_index = 0;
+   int stream_index = 0;
    size_t stream_in = track_number * 11 * 512;
    for (size_t s = 0; s < nb_sectors; s++)
    {
@@ -249,7 +249,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
       stream_index = AddMFMByteToTrack(track->bitstream_, stream_index, 0x4489);
 
       // HEADER : 
-      size_t stream_header = stream_index;
+      int stream_header = stream_index;
       unsigned long header_info = 0xFF000000 | (track_number << 16) | ((s & 0xFF) << 8) | ((nb_sectors - s) & 0xFF);
       stream_index = AddOddEven<unsigned long>(track->bitstream_, stream_index, &header_info, 1);
 
@@ -305,7 +305,7 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
       checksum &= 0x55555555;
       */
 
-      for (size_t i = 0; i < 1024/4; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
+      for (int i = 0; i < 1024/4; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
       {
          unsigned int value = 0;
          for (int b = 0; b < 32; b++)

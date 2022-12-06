@@ -22,7 +22,7 @@ BitplaneDialog::~BitplaneDialog()
    // Empty list
    for (auto it : list_items_)
    {
-      delete (bitplane_struct*)it->data(Qt::UserRole).toUInt();
+      //delete (bitplane_struct*)it->data(Qt::UserRole).toUInt();
       delete it;
    }
 }

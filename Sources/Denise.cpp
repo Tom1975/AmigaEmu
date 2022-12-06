@@ -231,7 +231,7 @@ bool Denise::DmaSprite(unsigned char sprite_index)
 
 void Denise::DrawSprites()
 {
-   for (size_t i = 0; i < 8; i++)
+   for (unsigned int i = 0; i < 8; i++)
    {
       // Draw sprite i ?
       //if (sprites_[i].enabled_)
@@ -244,7 +244,7 @@ void Denise::DrawSprites()
          SetSpriteCtl(i, w2);
          SetSpritePos(i, w1);
 
-         for (size_t l = sprites_[i].svpos_; l < sprites_[i].evpos_ ; l++)
+         for (unsigned int l = sprites_[i].svpos_; l < sprites_[i].evpos_ ; l++)
          {
             // get buffer
             unsigned int* line_buffer = frame_->GetFrameBuffer(l*2);

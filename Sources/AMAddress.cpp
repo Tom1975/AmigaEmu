@@ -238,13 +238,12 @@ void AMAddress::Add(AddressingMode* source, unsigned short& sr)
 
 void AMAddress::Sub(AddressingMode* source, unsigned short& sr)
 {
-   unsigned int sm, dm, rm;
+   unsigned int sm, dm, rm = 0;
    sm = 0;
    dm = result_;
 
    unsigned int old_value = result_;
    unsigned int mask = 0;
-   unsigned int data;
    switch (source->GetSize())
    {
    case Byte:
