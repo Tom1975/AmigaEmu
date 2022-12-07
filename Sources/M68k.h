@@ -388,6 +388,7 @@ protected:
    unsigned int OpcodeRte();
    unsigned int OpcodeRte2();
    unsigned int OpcodeRts();
+   unsigned int OpcodeScc();
    unsigned int OpcodeStop();
    unsigned int OpcodeStop2();
    unsigned int OpcodeSub();

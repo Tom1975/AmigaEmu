@@ -83,7 +83,7 @@ M68k::Func M68k::Rod2_[] = { &M68k::DecodeRod2, &M68k::CpuFetch, &M68k::OperandF
 M68k::Func M68k::Roxd2_[] = { &M68k::DecodeRoxd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RteOpcode_[] = { &M68k::DecodeRte, &M68k::SourceRead, &M68k::OpcodeRte, &M68k::SourceRead, &M68k::OpcodeRte2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::RtsOpcode_[] = { &M68k::DecodeRts, &M68k::SourceRead, &M68k::OpcodeRts, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Scc_[] = { &M68k::DecodeScc, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeScc, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Stop_[] = { &M68k::DecodeStop, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeStop, &M68k::OpcodeStop2, nullptr };
 M68k::Func M68k::Sub_[] = { &M68k::DecodeSub, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSub, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::SubA_[] = { &M68k::DecodeSubA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSubA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -2229,7 +2229,12 @@ unsigned int M68k::DecodeScc()
 {
    conditon_ = (Condition)((ird_ & 0xF00) >> 8);
    destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, 0);
+   Fetch();
+   return true;
+}
 
+unsigned int M68k::OpcodeScc()
+{
    EvalCondition();
 
    if (condition_true_)
@@ -2241,7 +2246,9 @@ unsigned int M68k::DecodeScc()
       destination_alu_->WriteInput((unsigned int)0x00);
    }
    return WriteSourceToDestination();
+
 }
+
 
 unsigned int M68k::DecodeStop()
 {
