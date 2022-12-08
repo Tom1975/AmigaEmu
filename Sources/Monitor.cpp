@@ -74,16 +74,20 @@ void Monitor::Tick( )
       {
          ///////////////////////////////////
          // Display color : Black (sync on)
-         memset(curent_framebuffer_line_, 0, NBPIXELADDED * sizeof(unsigned int));
+         int y = (((y_) % (RESY)));
+         curent_framebuffer_line_ = frame_->GetFrameBuffer(y);
 
+
+         memset(curent_framebuffer_line_, 0, NBPIXELADDED * sizeof(unsigned int));
       }
       else
       {
          // Colors from Denise
          denise_->GetRGB(curent_framebuffer_line_);
+         curent_framebuffer_line_ += NBPIXELADDED;
       }
    }
-   curent_framebuffer_line_ += NBPIXELADDED;
+   
 
    ///////////////////////////////////
    // Display : Monitor Part

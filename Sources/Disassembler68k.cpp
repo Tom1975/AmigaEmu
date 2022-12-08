@@ -27,6 +27,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFF00, 0x4A00, &Disassembler68k::TstOpcode);
    AddCommand(0xF000, 0x7000, &Disassembler68k::MoveqOpcode);
    AddCommand(0xFFF0, 0x4E60, &Disassembler68k::MoveUspOpcode);
+   AddCommand(0xFFF0, 0x4E40, &Disassembler68k::Trap_);
    AddCommand(0xFF00, 0x4600, &Disassembler68k::NotOpcode);
    AddCommand(0xFFF8, 0x4E50, &Disassembler68k::LinkOpcode);
    AddCommand(0xFFF8, 0x4E58, &Disassembler68k::UnlkOpcode);
@@ -1345,6 +1346,14 @@ unsigned int Disassembler68k::CmpIOpcode_(Motherboard* motherboard, unsigned sho
    }
    pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, size, str_opcode);
    sstream <<  ", " << str_opcode;
+   str_asm = sstream.str();
+   return pc;
+}
+
+unsigned int Disassembler68k::Trap_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+   sstream << "trap #$" << std::hex << std::uppercase << (opcode & 0xF);
    str_asm = sstream.str();
    return pc;
 }
