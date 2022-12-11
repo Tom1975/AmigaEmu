@@ -73,7 +73,7 @@ void Bus::Reset()
 
 unsigned int Bus::Write(unsigned int address, unsigned short data)
 {
-   if (address == 0xA9d8)
+   if (address == 0x40712)
    {
       int dbg = 1;
    }
@@ -970,7 +970,8 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       default:
       {
          //UNDEF
-         logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", address_ );
+         if (address_ < 0x200)
+            logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", address_ );
          int test = 1;
          break;
       }
@@ -1019,7 +1020,7 @@ void Bus::Write16(unsigned int address, unsigned short data)
 {
    unsigned short written_value = SWAP_UINT16(data);
 
-   if (address == 0x60DE)
+   if (address == 0x40712)
    {
       int dbg = 1;
    }
