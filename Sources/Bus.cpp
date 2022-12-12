@@ -224,6 +224,7 @@ void Bus::Tick()
          if (address_ < 0x200000)
          {
             // FAST ram
+            int dgb = 1;
          }
          else
          {
