@@ -291,29 +291,62 @@ void ExecDialog::UpdateDebug()
          // Add all functions 
          unsigned long vector_address = node - 6;
          unsigned short jmp = EXTRACT_WORD((&ram[vector_address]));
-         while (jmp == 0x4EF9 && vector_address > 6)
+         if (jmp == 0x4EF9)
          {
-            QTreeWidgetItem* func = new QTreeWidgetItem;
-            unsigned long func_addr = EXTRACT_LONG((&ram[vector_address +2]));
-
-            short index = vector_address - node;
-            std::string func_name = FunctionHelper::GetFunctionName(lib_name, index);
-            if (func_name.size() > 0)
+            while (jmp == 0x4EF9 && vector_address > 6)
             {
-               func->setText(0, QString("-$%1 (%3) : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16).arg(func_name.c_str()));
+               QTreeWidgetItem* func = new QTreeWidgetItem;
+               unsigned long func_addr = EXTRACT_LONG((&ram[vector_address + 2]));
+
+               short index = vector_address - node;
+               std::string func_name = FunctionHelper::GetFunctionName(lib_name, index);
+               if (func_name.size() > 0)
+               {
+                  func->setText(0, QString("-$%1 (%3) : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16).arg(func_name.c_str()));
+               }
+               else
+               {
+                  func->setText(0, QString("-$%1 : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
+               }
+
+               func->setData(0, Qt::UserRole, (int)func_addr);
+               base_address_item->addChild(func);
+
+
+               vector_address -= 6;
+               jmp = EXTRACT_WORD((&ram[vector_address]));
+
             }
-            else
+         }
+         else if (jmp == 0x4E71) // NOP 
+         {
+            unsigned short bra = EXTRACT_WORD((&ram[vector_address+2]));
+            while ((bra & 0xFF00) == 0x6000)
             {
-               func->setText(0, QString("-$%1 : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
+               // BRA
+               short offset = EXTRACT_WORD((&ram[vector_address + 4]));
+               QTreeWidgetItem* func = new QTreeWidgetItem;
+               unsigned long func_addr = vector_address + 4 + offset;
+
+               short index = vector_address - node;
+               std::string func_name = FunctionHelper::GetFunctionName(lib_name, index);
+               if (func_name.size() > 0)
+               {
+                  func->setText(0, QString("-$%1 (%3) : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16).arg(func_name.c_str()));
+               }
+               else
+               {
+                  func->setText(0, QString("-$%1 : %2").arg((short)(node - vector_address), 4, 16).arg(func_addr, 6, 16));
+               }
+
+               func->setData(0, Qt::UserRole, (int)func_addr);
+               base_address_item->addChild(func);
+
+
+               vector_address -= 6;
+               bra = EXTRACT_WORD((&ram[vector_address+2]));
+
             }
-
-            func->setData(0, Qt::UserRole, (int)func_addr);
-            base_address_item->addChild(func);
-            
-
-            vector_address -= 6;
-            jmp = EXTRACT_WORD((&ram[vector_address]));
-
          }
          
 

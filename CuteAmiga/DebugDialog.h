@@ -2,6 +2,7 @@
 
 
 #include <QDialog>
+#include <QListWidgetItem>
 #include "AmigaEmulation.h"
 #include "Disassembler68k.h"
 
@@ -40,6 +41,7 @@ public:
       void on_remove_bp_clicked();
       void on_clear_bp_clicked();
       void on_bpAddress_returnPressed();
+      void itemDoubleClicked(QListWidgetItem*);
 
     // Update the view
     virtual void Update();

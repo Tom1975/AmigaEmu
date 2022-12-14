@@ -21,6 +21,8 @@ DebugDialog::DebugDialog(QWidget *parent) :
    connect(ui->listWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(DasmShowContextMenu(QPoint)));
 
 
+   QMetaObject::Connection result = connect(ui->callStack, SIGNAL(itemDoubleClicked(QListWidgetItem*, int)), SLOT(itemDoubleClicked(QListWidgetItem*)));
+
    ui->registers_list_->clear();
    ui->registers_list_->setColumnCount(2);
    ui->registers_list_->setRowCount(20);
@@ -71,6 +73,12 @@ bool DebugDialog::event(QEvent *event)
       return true;
    }
    return QWidget::event(event);
+}
+
+void DebugDialog::itemDoubleClicked(QListWidgetItem* item)
+{
+   int addr = item->data(Qt::UserRole).toInt();
+   SetAddress(addr);
 }
 
 bool DebugDialog::eventFilter(QObject* watched, QEvent* event)
@@ -275,6 +283,7 @@ void DebugDialog::UpdateDebug()
          sstream << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << dword_value;
 
          stackitem->setText(sstream.str().c_str());
+         stackitem->setData(Qt::UserRole, (int)dword_value);
 
          ui->callStack->addItem(stackitem);
          offset += 4;
