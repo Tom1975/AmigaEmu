@@ -1,5 +1,13 @@
+#include <ios>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
 #include "Paula.h"
 #include "Bus.h"
+
+#define LOG(...) if (logger_)logger_->Log(ILogger::Severity::SEV_DEBUG, __VA_ARGS__);
+
 
 // Interrupt bits definition
 #define SETCLR 0x8000
@@ -20,7 +28,7 @@
 #define TBE    0x0001
 
 Paula::Paula(SoundMixer* sound_mixer) : adkcon_(0), interrupt_pin_(nullptr), dsk_byte_(0), dsk_dat_long_(0),
-shift_data_sync_(0), sync_ok_(false), sound_source_(sound_mixer), sound_mixer_(sound_mixer), dsk_counter_clock_(0), fetch_index_(0), fetch_read_index_(0)
+shift_data_sync_(0), sync_ok_(false), sound_source_(sound_mixer), sound_mixer_(sound_mixer), dsk_counter_clock_(0), fetch_index_(0), fetch_read_index_(0), logger_(nullptr)
 {
    memset(dsk_dat_fetch_data_, 0, sizeof(dsk_dat_fetch_data_));
    audio_[0].Init(0, this);
@@ -271,9 +279,20 @@ bool Paula::DmaDiskTick()
       // Only if sync is done
       if (sync_ok_ && bsync_now)
       {
-         bus_->Write16(dsk_dma_pt_, dsk_dat_long_ >> shift_data_sync_);
-         //bus_->Write16(dsk_dma_pt_, dsk_dat_fetch_data_[(fetch_read_index_++) & 0x3]);
-         //dsk_dat_fetch_data_ <<= 16;
+         static std::stringstream str_log;
+         static int count = 0;
+         count++;
+         unsigned short wd = (dsk_dat_long_ >> shift_data_sync_);
+
+         str_log << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << ((unsigned int)(wd >>8))<< " " << ((unsigned int)(wd&0xFF)) << " ";
+         if (count == 16)
+         {
+            LOG(str_log.str().c_str());
+            str_log.str(std::string());;
+            count = 0;
+         }
+         bus_->Write16(dsk_dma_pt_, wd);
+
          
          length -= 1;
 

@@ -15,7 +15,8 @@ public:
 
    void Tick();
 
-   void SetSoundMixer(SoundMixer* sound_mixer);
+   void InitLog(ILogger* log) { logger_ = log; }
+//   void SetSoundMixer(SoundMixer* sound_mixer);
    void SetDiskController(DiskController* disk_controller);
    void SetDMAControl(Bus* bus, DMAControl* dma_control)
    {
@@ -61,6 +62,9 @@ public:
    unsigned short GetDskByte() { unsigned short tmp = dsk_byte_;  dsk_byte_ &= 0x7FFF;  return tmp; }
 
 protected:
+   // Logger
+   ILogger* logger_;    // Logger
+
    ////////////////////////////////
    // Interruptions
    void CheckInt();
