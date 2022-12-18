@@ -383,7 +383,22 @@ bool Disk::LoadADF(unsigned char* buffer, size_t size)
    {
       for (size_t s = 0; s < nb_sides_; s++)
       {
+         LOG("DISK Side %i, cylinder %i, ", s, c);
          index = AddCylinderFromSectorList(&side_[s].track_[c], (c*2+s), nb_sectors, index, buffer, size);
+
+         char buffer[64] = { 0 };
+         int cnt = 0;
+         for (int i = 0; i < side_[s].track_[c].size_; i++)
+         {
+            char hex[4];
+            sprintf(hex, "%2.2X ", side_[s].track_[c].bitstream_[cnt++]);
+            strcat(buffer, hex);
+            if ((cnt & 0xF) == 0)
+            {
+               LOG(buffer);
+               buffer[0] = '\0';
+            }
+         }
       }
    }
 
