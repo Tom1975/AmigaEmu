@@ -234,7 +234,16 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
    track->bitstream_ = new unsigned char[track->size_];
 
    // Fill track with GAP
-   AddMFMByteToTrack(track->bitstream_, 0, 0xE5E5);
+   size_t default_count = 0;
+   for (; default_count < track->size_ ; )
+   {
+      default_count = AddByteToTrack(track->bitstream_, default_count, 0xE5);
+      //AddMFMByteToTrack(track->bitstream_, default_count, 0xE5E5);
+   }
+
+   if ((default_count & 0xF) > 0)
+      AddMFMByteToTrack(track->bitstream_, default_count-16, 0xE5E5, default_count & 0xF);
+   
  
    // add sectors
    int stream_index = 0;
@@ -284,28 +293,8 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
 
       // Compute Data checksum
       checksum = 0;
-      /*for (size_t i = 0; i < 128; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
-      {
-         unsigned long odd_bits = 0, even_bits = 0;
-         // Odd
-         for (int b = 0; b < 32; b++)
-         {
-            odd_bits <<= 1;
-            odd_bits |= (track->bitstream_[stream_header + i * 32 + b]) &0x01;
-         }
-         // Even
-         for (int b = 0; b < 32; b++)
-         {
-            even_bits <<= 1;
-            even_bits |= (track->bitstream_[stream_header + (i+128) * 32 + b]) & 0x01;
-         }
-         checksum ^= odd_bits;
-         checksum ^= even_bits;
-      }
-      checksum &= 0x55555555;
-      */
 
-      for (int i = 0; i < 1024/4; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
+      for (int i = 0; i < 256; i++) // 128*4*2 = 1024 = 512 bytes with MFM encoding
       {
          unsigned int value = 0;
          for (int b = 0; b < 32; b++)
@@ -314,7 +303,6 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
             value |= (track->bitstream_[stream_header + i * 32 + b]) & 0x01;
          }
          checksum ^= value;
-         //LOG("TRACK : %i; SECTOR : %i, dword %8.8X = %8.8X", track_number, s, value, checksum)
       }
       checksum &= 0x55555555;
       
@@ -322,21 +310,24 @@ size_t Disk::AddCylinderFromSectorList(Track* track, unsigned char track_number,
       AddOddEven<unsigned long>(track->bitstream_, data_checksum_index, &checksum, 1);
 
       // Check clock bit of first data bit (depending on checksum !)
-      if (track->bitstream_[stream_header + 1] == 1)
+      /*if (track->bitstream_[stream_header + 1] == 1)
       {
-         track->bitstream_[stream_header] = 1;
+         if (track->bitstream_[stream_header] != 1)
+            track->bitstream_[stream_header] = 1;
       }
       else
       {
          if (track->bitstream_[stream_header-1] == 0)
          {
-            track->bitstream_[stream_header] = 1;
+            if (track->bitstream_[stream_header] != 1)
+               track->bitstream_[stream_header] = 1;
          }
          else
          {
-            track->bitstream_[stream_header] = 0;
+            if (track->bitstream_[stream_header] != 0)
+               track->bitstream_[stream_header] = 0;
          }
-      }
+      }*/
          
 
       stream_in += 512;
@@ -386,7 +377,7 @@ bool Disk::LoadADF(unsigned char* buffer, size_t size)
          LOG("DISK Side %i, cylinder %i, ", s, c);
          index = AddCylinderFromSectorList(&side_[s].track_[c], (c*2+s), nb_sectors, index, buffer, size);
 
-         char buffer[64] = { 0 };
+         /*char buffer[64] = {0};
          int cnt = 0;
          for (int i = 0; i < side_[s].track_[c].size_; i++)
          {
@@ -398,7 +389,7 @@ bool Disk::LoadADF(unsigned char* buffer, size_t size)
                LOG(buffer);
                buffer[0] = '\0';
             }
-         }
+         }*/
       }
    }
 

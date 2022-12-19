@@ -254,6 +254,8 @@ unsigned short DiskController::ReadNextWord()
    // Get next word on the current drive / track, and make the head advance
    if (mtr_)
       return disk_drive_[0].ReadAndAdvance();
+   else
+      return 0;
 }
 
 unsigned char DiskController::Advance()
@@ -261,5 +263,7 @@ unsigned char DiskController::Advance()
    // Get next word on the current drive / track, and make the head advance
    if (mtr_)
       return disk_drive_[0].Advance();
+   else
+      return 0;
 }
 

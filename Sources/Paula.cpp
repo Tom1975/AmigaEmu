@@ -241,14 +241,14 @@ bool Paula::DmaDiskTick()
 {
    // During DMA, if (adkcon_ & 0x400) => DMA transfert begin with sync.
    // If dma, do it
-   dsk_dat_ = disk_controller_->ReadNextWord();
+   //dsk_dat_ = disk_controller_->ReadNextWord();
    if (dsk_byte_ & 0x4000)
    {
       // Read next word to data
       unsigned short length = dsklen_ & 0x3FFF;
 
       // Read from disk
-      //dsk_dat_ = disk_controller_->ReadNextWord();
+      dsk_dat_ = disk_controller_->ReadNextWord();
       dsk_dat_long_ <<= 16;
       dsk_dat_long_ |= dsk_dat_;
       bool bsync_now = true;
