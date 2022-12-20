@@ -27,7 +27,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFF00, 0x4A00, &Disassembler68k::TstOpcode);
    AddCommand(0xF000, 0x7000, &Disassembler68k::MoveqOpcode);
    AddCommand(0xFFF0, 0x4E60, &Disassembler68k::MoveUspOpcode);
-   AddCommand(0xFFF0, 0x4E40, &Disassembler68k::Trap_);
+   AddCommand(0xFFF0, 0x4E40, &Disassembler68k::TrapOpcode);
    AddCommand(0xFF00, 0x4600, &Disassembler68k::NotOpcode);
    AddCommand(0xFFF8, 0x4E50, &Disassembler68k::LinkOpcode);
    AddCommand(0xFFF8, 0x4E58, &Disassembler68k::UnlkOpcode);
@@ -79,6 +79,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFFFF, 0x4E70, &Disassembler68k::ResetOpcode);
    AddCommand(0xFFFF, 0x4E71, &Disassembler68k::NopOpcode);
    AddCommand(0xFFFF, 0x4E72, &Disassembler68k::StopOpcode);
+   AddCommand(0xFFFF, 0x4E76, &Disassembler68k::TrapvOpcode);
    AddCommand(0xFFFF, 0x4E73, &Disassembler68k::RteOpcode);
    AddCommand(0xFFFF, 0x4E75, &Disassembler68k::RtsOpcode);
    AddCommand(0xFFFF, 0x007C, &Disassembler68k::OriSrOpcode);
@@ -929,6 +930,7 @@ unsigned int Disassembler68k::SccOpcode(Motherboard* motherboard, unsigned short
    return pc;
 }
 
+
 unsigned int Disassembler68k::StopOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    std::stringstream sstream;
@@ -1350,10 +1352,19 @@ unsigned int Disassembler68k::CmpIOpcode_(Motherboard* motherboard, unsigned sho
    return pc;
 }
 
-unsigned int Disassembler68k::Trap_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+unsigned int Disassembler68k::TrapOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    std::stringstream sstream;
    sstream << "trap #$" << std::hex << std::uppercase << (opcode & 0xF);
+   str_asm = sstream.str();
+   return pc;
+}
+
+
+unsigned int Disassembler68k::TrapvOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+   sstream << "trapv" ;
    str_asm = sstream.str();
    return pc;
 }

@@ -96,7 +96,8 @@ protected:
    unsigned int SubQOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int SubXOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int SwapOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
-   unsigned int Trap_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
+   unsigned int TrapOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
+   unsigned int TrapvOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int TstOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    unsigned int UnlkOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm);
    

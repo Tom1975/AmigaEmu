@@ -93,6 +93,7 @@ M68k::Func M68k::Subq_[] = { &M68k::DecodeSubq, &M68k::DestinationFetch, &M68k::
 M68k::Func M68k::SubX_[] = { &M68k::DecodeSubX, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeSubX, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Swap_[] = { &M68k::DecodeSwap, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Trap_[] = { &M68k::DecodeTrap, nullptr };
+M68k::Func M68k::Trapv_[] = { &M68k::DecodeTrapV, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::Tst_[] = { &M68k::DecodeTst, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeTst, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::OpcodeUnlk, &M68k::CpuFetch, nullptr, };
 
@@ -103,7 +104,6 @@ M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::Not
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Trapv_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Chk_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
@@ -2536,6 +2536,16 @@ unsigned int M68k::OpcodeSubq()
 unsigned int M68k::DecodeTrap()
 {
    return TRAP(32 + (ird_&0xF));
+}
+
+unsigned int M68k::DecodeTrapV()
+{
+   if (sr_ & F_V)
+   {
+      return TRAP(32 + 7);
+   }
+   Fetch();
+   return true;
 }
 
 unsigned int M68k::DecodeAddq()

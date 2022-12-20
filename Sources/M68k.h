@@ -322,6 +322,7 @@ protected:
    unsigned int DecodeSubX();
    unsigned int DecodeSwap();
    unsigned int DecodeTrap();
+   unsigned int DecodeTrapV();
    unsigned int DecodeTst();
    unsigned int DecodeUnlk();
 
