@@ -2542,7 +2542,7 @@ unsigned int M68k::DecodeTrapV()
 {
    if (sr_ & F_V)
    {
-      return TRAP(32 + 7);
+      return TRAP(7);
    }
    Fetch();
    return true;

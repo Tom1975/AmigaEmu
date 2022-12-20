@@ -802,9 +802,30 @@ TEST(DISABLED_Cpu68k, CPU_TRAP)
 
 //////////////////////////////////////////////////////////////////////////////////
 // TRAPV
-TEST(DISABLED_Cpu68k, CPU_TRAPV)
+TEST(Cpu68k, CPU_TRAPV)
 {
-   // TODO
+   TestEngineCpu test_engine;
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x0F, 512 * 1024);
+   
+   ram[0x1C] = 0x00;
+   ram[0x1D] = 0x00;
+   ram[0x1E] = 0x50;
+   ram[0x1F] = 0x00;
+
+   unsigned char opcode[] = { 0x4E, 0x76, }; // trapv
+   test_engine.Get68k()->SetDataSr(0x2002);    // Set overflow
+
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   // Check : PC should be now in the exception vector 7
+   ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x5004); // Add 4 for prefetch
+
+   test_engine.Get68k()->SetDataSr(0x2000);    // Set overflow
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   // Check : PC should be now in the exception vector 7
+   ASSERT_NE(test_engine.Get68k()->GetPc(), 0x5004); // Add 4 for prefetch
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////
