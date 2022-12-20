@@ -62,7 +62,7 @@ void DiskDrive::Step()
       // Move head
       track_ += (dir_) ? 1 : -1;
       if (track_ < 0) track_ = 0;
-      if (track_ > disk_inserted_->side_[0].nb_tracks_ && disk_inserted_->side_[0].nb_tracks_ > 0) track_ = disk_inserted_->side_[0].nb_tracks_ - 1;
+      if (track_ > disk_inserted_->side_[0].nb_tracks_ && disk_inserted_->side_[0].nb_tracks_ > 0) track_ = static_cast<unsigned char>(disk_inserted_->side_[0].nb_tracks_ - 1);
    }
 
    LOG("DiskDrive : STEP to %i", track_);

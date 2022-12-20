@@ -375,7 +375,7 @@ bool Disk::LoadADF(unsigned char* buffer, size_t size)
       for (size_t s = 0; s < nb_sides_; s++)
       {
          LOG("DISK Side %i, cylinder %i, ", s, c);
-         index = AddCylinderFromSectorList(&side_[s].track_[c], (c*2+s), nb_sectors, index, buffer, size);
+         index = AddCylinderFromSectorList(&side_[s].track_[c], static_cast<unsigned char>(c*2+s), nb_sectors, index, buffer, size);
 
          /*char buffer[64] = {0};
          int cnt = 0;
