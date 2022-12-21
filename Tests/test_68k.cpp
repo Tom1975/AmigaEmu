@@ -353,9 +353,45 @@ TEST(DISABLED_Cpu68k, CPU_BTST)
 
 ///////////////////////////////////////////////////////////////////////////////////
 // CHK
-TEST(DISABLED_Cpu68k, CPU_CHK)
+TEST(Cpu68k, CPU_CHK)
 {
-   // TODO
+   TestEngineCpu test_engine;
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x0F, 512 * 1024);
+
+   ram[0x18] = 0x00;
+   ram[0x19] = 0x00;
+   ram[0x1A] = 0x50;
+   ram[0x1B] = 0x00;
+
+   
+   unsigned char opcode[] = { 0x45, 0xAB, 0x10, 0x00}; // CHK (1000, A3), D2
+   test_engine.Get68k()->SetDataSr(0x2002);    // Set overflow
+
+   test_engine.Get68k()->SetAddressRegister(3, 0x5000);
+   test_engine.Get68k()->SetDataRegister(2, 0xF123);    // Set D2 < 0 
+   ram[0x6000] = 0x00;
+   ram[0x6001] = 0x50;
+
+   // check D < 0
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   // Check : PC should be now in the exception vector 7
+   ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x5004); // Add 4 for prefetch
+   ASSERT_EQ(test_engine.Get68k()->GetSr()&0x8, 8); // Check flag N
+
+   // Check D > upper bound
+   test_engine.Get68k()->SetDataRegister(2, 0x750);    // Set D2 > (0x6000)
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   // Check : PC should be now in the exception vector 7
+   ASSERT_EQ(test_engine.Get68k()->GetPc(), 0x5004); // Add 4 for prefetch
+   ASSERT_EQ(test_engine.Get68k()->GetSr() & 0x8, 0); // Check flag N is cleared
+
+   // Check D is in range
+   test_engine.Get68k()->SetDataRegister(2, 0x25);    // Set D2 > (0x6000)
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   // Check : PC should be now in the exception vector 7
+   ASSERT_NE(test_engine.Get68k()->GetPc(), 0x5004); // Add 4 for prefetch
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -824,8 +860,6 @@ TEST(Cpu68k, CPU_TRAPV)
    test_engine.RunOpcode(opcode, sizeof(opcode), 1);
    // Check : PC should be now in the exception vector 7
    ASSERT_NE(test_engine.Get68k()->GetPc(), 0x5004); // Add 4 for prefetch
-
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////

@@ -24,6 +24,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF130, 0xC100, &Disassembler68k::ExgOpcode);
    AddCommand(0xFF00, 0x4200, &Disassembler68k::ClrOpcode);
    AddCommand(0xF1C0, 0x41C0, &Disassembler68k::LeaOpcode);
+   AddCommand(0xF1C0, 0x4180, &Disassembler68k::ChkOpcode);
    AddCommand(0xFF00, 0x4A00, &Disassembler68k::TstOpcode);
    AddCommand(0xF000, 0x7000, &Disassembler68k::MoveqOpcode);
    AddCommand(0xFFF0, 0x4E60, &Disassembler68k::MoveUspOpcode);
@@ -1278,6 +1279,16 @@ unsigned int Disassembler68k::ExtOpcode(Motherboard* motherboard, unsigned short
    str_asm = "ext.";
    str_asm += (opcode & 0x40) ? "l " : "w ";
    str_asm += data_[opcode & 0x7];
+   return pc;
+}
+
+unsigned int Disassembler68k::ChkOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   str_asm = "CHK ";
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   str_asm += str_opcode + ", " + data_[(opcode >> 9) & 0x7];
+
    return pc;
 }
 

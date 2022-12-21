@@ -272,6 +272,7 @@ protected:
    unsigned int DecodeBsr();
    unsigned int DecodeBtst();
    unsigned int DecodeBtst_D();
+   unsigned int DecodeChk();
    unsigned int DecodeClr();
    unsigned int DecodeCmpAL();
    unsigned int DecodeCmpD();
@@ -351,6 +352,7 @@ protected:
    unsigned int OpcodeBsr();
    unsigned int OpcodeBtst();
    unsigned int OpcodeBtst_D();
+   unsigned int OpcodeChk();
    unsigned int OpcodeClr();
    unsigned int OpcodeCmpAL();
    unsigned int OpcodeCmpD();

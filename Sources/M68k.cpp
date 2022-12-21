@@ -29,12 +29,12 @@ M68k::Func M68k::Asd2_[] = { &M68k::DecodeAsd2, &M68k::CpuFetch, &M68k::OperandF
 M68k::Func M68k::Bcc_[] = { &M68k::DecodeBcc, &M68k::OpcodeBcc, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Bchg_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bchg_dn_[] = { &M68k::DecodeBchg_D, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg_D, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
-//M68k::Func M68k::Bchg_dn_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Bclr_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBclr, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bset_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBset, &M68k::CpuFetch, &M68k::OpcodeBset2, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bsr_[] = { &M68k::DecodeBsr, &M68k::OpcodeBsr, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Btst_[] = { &M68k::DecodeBtst, &M68k::OperandFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBtst, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Btst_dn_[] = { &M68k::DecodeBtst_D, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBtst_D, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Chk_[] = { &M68k::DecodeChk, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeChk, nullptr };
 M68k::Func M68k::Clr_[] = { &M68k::DecodeClr, &M68k::DestinationFetch/*, &M68k::DestinationRead*/, &M68k::OpcodeClr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::CmpA_L_[] = { &M68k::DecodeCmpAL, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeCmpAL, &M68k::CpuFetch, &M68k::Wait2Ticks, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Cmpm_[] = { &M68k::DecodeCmpm, &M68k::SourceRead, &M68k::DestinationRead, &M68k::OpcodeCmpm, &M68k::CpuFetch, &M68k::Wait2Ticks, &M68k::OperandFinished, nullptr };
@@ -100,12 +100,12 @@ M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::Opcode
 // ILLEGAL
 M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::NotSupported, &M68k::NotSupported2, &M68k::NotSupported3, &M68k::SourceRead, &M68k::NotSupported4, &M68k::CpuFetch, nullptr, };
 
+
 // TO IMPLEMENT & DISASSEMBLE
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Chk_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Asd_[] = { &M68k::NotImplemented, nullptr };
@@ -3331,6 +3331,35 @@ unsigned int M68k::OpcodeEor()
    }
 
    return WriteSourceToDestination();
+}
+
+unsigned int M68k::DecodeChk()
+{
+   source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, ird_ & 0x7, 1);
+   destination_alu_ = destination_factory_.InitAlu(0, (ird_ >> 9) & 0x7, 1);
+   return true;
+}
+
+unsigned int M68k::OpcodeChk()
+{
+   if (static_cast<short>(destination_alu_->GetU16()) < 0 
+      || destination_alu_->GetU16() > source_alu_->GetU16())
+   {
+      if (static_cast<short>(destination_alu_->GetU16()) < 0)
+      {
+         sr_ |= F_N;
+      }
+      else
+      {
+         sr_ &= ~F_N;
+      }
+      TRAP(6);
+   }
+   else
+   {
+      Fetch();
+      return true;
+   }
 }
 
 unsigned int M68k::DecodeClr()
