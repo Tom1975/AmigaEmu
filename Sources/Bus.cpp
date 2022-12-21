@@ -548,10 +548,14 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x32:  // SERPER
          paula_->SetSerPer(data);
          break;
-
-      case 0x34:  // POTGOT
+      case 0x34:  // POTGOT TODO
          // todo
          break;
+         // JOYTEST TODO
+         // STREQU TODO
+         // STRVBL TODO
+         // STRHOR TODO
+         // STRLONG TODO
 
       case 0x40:  // BLTCON0
          blitter_->SetBltCon0(data);
@@ -617,6 +621,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x74:  // BLTADAT
          blitter_->SetBltDat(0, data);
          break;
+         // DENISEID - TODO
 
       case 0x7E:  // DSKSYNC
          paula_->SetDskSync(data);
@@ -654,12 +659,11 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x94: // DDFSTOP
          agnus_->ddfstop_ = data & 0x1FC;
          break;
-
-
       case 0x96: // DMACON
          dma_control_->Dmacon(data);
          break;
 
+         // CLXCON - TODO
 
       case 0x9A: // INTENA
          paula_->SetIntEna(data);
@@ -667,11 +671,9 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       case 0x9C: // INTREQ
          paula_->SetIntReq(data);
          break;
-
       case 0x9E:  // ADKCON
          paula_->SetAdkCon(data);
          break;
-
       case 0xA0:  // AUD0LCH
       case 0xA2:  // AUD0LCL
          paula_->SetAudioChannelLocation(0, data, (addr & 0x2) ? true : false);
@@ -971,8 +973,8 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       default:
       {
          //UNDEF
-         if (address_ < 0x200)
-            logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", address_ );
+         if (addr < 0x200)
+            logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", addr);
          int test = 1;
          break;
       }

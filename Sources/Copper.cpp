@@ -179,14 +179,20 @@ void Copper::DmaDecode()
 
       // Any delay to add ?
       // todo
-
-      motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
-
-      if (ram_data_ != 0 || destination_address_ != 0)
+      if (destination_address_ > 0x40)
       {
-         if (ram_data_ == 0x302 && destination_address_ == 0x100)
+         // Danger mode ?
+         if (destination_address_ > 0x80 || (con_ & 0x2))
          {
-            int dbg = 1;
+            motherboard_->GetBus()->SetRGA(destination_address_, ram_data_);
+
+            if (ram_data_ != 0 || destination_address_ != 0)
+            {
+               if (ram_data_ == 0x302 && destination_address_ == 0x100)
+               {
+                  int dbg = 1;
+               }
+            }
          }
       }
       current_state_ = NONE;
