@@ -93,6 +93,22 @@ bool TestOpcodeWordAsr(unsigned char opcode[2], unsigned int reg_1_in, unsigned 
    return result;
 }
 
+bool TestOpcodeWordAsdMemory(unsigned char opcode[2], char addr_reg, unsigned short memAddr, unsigned short in, unsigned short out, unsigned short sr_in, unsigned short sr_out)
+{
+   TestEngineCpu test_engine;
+   unsigned char* ram = test_engine.GetRam();
+   ram[memAddr] = in >> 8;
+   ram[memAddr + 1] = in & 0xFF;
+   test_engine.Get68k()->SetDataSr(sr_in);
+   test_engine.Get68k()->SetAddressRegister(addr_reg, memAddr);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+
+   bool result = (test_engine.Get68k()->GetSr() == sr_out);
+   result &= (ram[memAddr] == (out >> 8));
+   result &= (ram[memAddr + 1] == (out & 0xFF));
+   return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 // ASL
 TEST(Cpu68k, CPU_ASL_B_D)
@@ -179,8 +195,23 @@ TEST(Cpu68k, CPU_ASL_L_D)
    ASSERT_EQ(TestOpcodeWordAsr(opcode, 65, 0x7FFFFFFF, 0x01, 65, 0xFFFFFFFE, 0x0A), true);   // Rotate 1
 }
 
+
+TEST(Cpu68k, CPU_ASL_W)
+{
+   unsigned char opcode[] = { 0xE1, 0xD1 }; // asr.w (A1)   
+   ASSERT_EQ(TestOpcodeWordAsdMemory(opcode, 1, 0x2000, 0x70FF, 0xE1FE, 0x2000, 0x200A), true);
+   ASSERT_EQ(TestOpcodeWordAsdMemory(opcode, 1, 0x2000, 0x80FF, 0x01FE, 0x2000, 0x2013), true);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 // ASR
+TEST(Cpu68k, CPU_ASR_W)
+{
+   unsigned char opcode[] = { 0xE0, 0xD1 }; // asr.w (A1)   
+   ASSERT_EQ(TestOpcodeWordAsdMemory(opcode, 1, 0x2000, 0x70FF, 0x387F, 0x2000, 0x2011), true);
+   ASSERT_EQ(TestOpcodeWordAsdMemory(opcode, 1, 0x2000, 0x80FF, 0xC07F, 0x2000, 0x2019), true);
+   ASSERT_EQ(TestOpcodeWordAsdMemory(opcode, 1, 0x2000, 0x4000, 0x2000, 0x2000, 0x2000), true);
+}
 TEST(Cpu68k, CPU_ASR_B_D)
 {
    unsigned char opcode[] = { 0xE2, 0x20 }; // asr.b D1, D0

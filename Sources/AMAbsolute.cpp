@@ -212,7 +212,7 @@ void AMAbsolute::Lsd(bool right, unsigned short& sr)
    else
    {
       input_ = GetU16();
-      if (input_ & 0x800)
+      if (input_ & 0x8000)
       {
          sr |= 0x10 | 0x1;
       }

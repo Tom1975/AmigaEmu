@@ -25,6 +25,7 @@ M68k::Func M68k::AddX_[] = { &M68k::DecodeAddX, &M68k::SourceFetch, &M68k::Sourc
 M68k::Func M68k::Andi_[] = { &M68k::DecodeSubI, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AndiToCcr_[] = { &M68k::DecodeAndiToCcr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, nullptr };
 M68k::Func M68k::AndToSr_[] = { &M68k::DecodeAndToSr, &M68k::OperandFetch, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Asd_[] = { &M68k::DecodeAsd, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAsd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Asd2_[] = { &M68k::DecodeAsd2, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Bcc_[] = { &M68k::DecodeBcc, &M68k::OpcodeBcc, &M68k::CpuFetch, nullptr, };
 M68k::Func M68k::Bchg_[] = { &M68k::DecodeBclr, &M68k::CpuFetch, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeBchg, &M68k::CpuFetch, &M68k::OpcodeBclr2, &M68k::OperandFinished, nullptr };
@@ -108,7 +109,6 @@ M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Asd_[] = { &M68k::NotImplemented, nullptr };
 
 
 M68k::M68k() : pc_(0), sr_(0), current_state_(0),
@@ -2947,6 +2947,20 @@ unsigned int M68k::DecodeAndToSr()
    Fetch();
    return true;
 }
+
+unsigned int M68k::DecodeAsd()
+{
+   bool right = ((ird_ >> 8) & 0x1) == 0;
+   destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, 1);// Word only
+   return true;
+}
+
+unsigned int M68k::OpcodeAsd()
+{
+   destination_alu_->Asd(((ird_ >> 8) & 0x1) == 0, sr_);
+   return WriteSourceToDestination();
+}
+
 
 unsigned int M68k::DecodeAsd2()
 {

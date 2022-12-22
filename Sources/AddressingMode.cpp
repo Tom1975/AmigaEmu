@@ -205,6 +205,56 @@ void AddressingMode::Btst(unsigned int bit_tested, unsigned short& sr)
 
 }
 
+
+void AddressingMode::Asd(bool right, unsigned short& sr)
+{
+   sr &= ~0x2; // V is cleared
+   input_ = GetU16();
+   unsigned short msb = input_ & 0x8000;
+   if (right)
+   {
+      if (input_ & 0x1)
+      {
+         sr |= 0x10 | 0x1;
+      }
+      else
+      {
+         sr &= ~(0x10 | 0x1);
+      }
+      
+      input_ >>= 1;
+      input_ |= msb;
+   }
+   else
+   {
+      if (input_ & 0x8000)
+      {
+         sr |= 0x10 | 0x1;
+      }
+      else
+      {
+         sr &= ~(0x10 | 0x1);
+      }
+
+      input_ <<= 1;
+      if ((msb ^ (input_ & 0x8000)) != 0)
+      {
+         sr |= 0x2;
+      }
+   }
+   if (input_ & 0x8000)
+      sr |= 0x8;
+   else
+      sr &= ~0x8;
+
+   if (input_ == 0)
+      sr |= 0x4;
+   else
+      sr &= ~0x4;
+
+   written_input_ = 1;
+}
+
 void AddressingMode::Lsd(bool right, unsigned short& sr)
 {
    sr &= ~0x2; // V is cleared
@@ -224,7 +274,7 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
    else
    {
       input_ = GetU16();
-      if (input_ & 0x800)
+      if (input_ & 0x8000)
       {
          sr |= 0x10 | 0x1;
       }
@@ -235,7 +285,7 @@ void AddressingMode::Lsd(bool right, unsigned short& sr)
 
       input_ <<= 1;
    }
-   if (input_ | 0x8000)
+   if (input_ & 0x8000)
       sr |= 0x8;
    else
       sr &= ~0x8;
@@ -276,7 +326,7 @@ void AddressingMode::Roxd(bool right, unsigned short& sr)
    }
    else
    {
-      if (input_ & 0x800)
+      if (input_ & 0x8000)
       {
          sr &= ~(0x2 | 0x8 | 0x1 | 0x4);
          sr |= 0x1|0x10;
@@ -289,7 +339,7 @@ void AddressingMode::Roxd(bool right, unsigned short& sr)
          input_ <<= 1;
          input_ |= (x == 1) ? 1 : 0;
       }
-      if (input_ & 0x800) sr |= 0x8;
+      if (input_ & 0x8000) sr |= 0x8;
    }
    if (input_ == 0)
       sr |= 0x4;
@@ -322,7 +372,7 @@ void AddressingMode::Rod(bool right, unsigned short& sr)
    }
    else
    {
-      if (input_ & 0x800)
+      if (input_ & 0x8000)
       {
          sr &= ~(0x2 | 0x8 | 0x1);
          sr |= 0x1;
@@ -334,7 +384,7 @@ void AddressingMode::Rod(bool right, unsigned short& sr)
          sr &= ~(0x2 | 0x8 | 0x1);
          input_ <<= 1;
       }
-      if (input_ & 0x800) sr |= 0x8;
+      if (input_ & 0x8000) sr |= 0x8;
    }
    written_input_ = 1;
 }

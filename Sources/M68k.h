@@ -265,6 +265,7 @@ protected:
    unsigned int DecodeAddX();
    unsigned int DecodeAndToSr();
    unsigned int DecodeAndiToCcr();
+   unsigned int DecodeAsd();
    unsigned int DecodeAsd2();
    unsigned int DecodeBcc();
    unsigned int DecodeBchg_D();
@@ -342,6 +343,7 @@ protected:
    unsigned int OpcodeAddq();
    unsigned int OpcodeAddX();
    unsigned int OpcodeAnd();
+   unsigned int OpcodeAsd();
    unsigned int OpcodeBcc();
    unsigned int OpcodeBchg();
    unsigned int OpcodeBchg_D();

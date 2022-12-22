@@ -63,6 +63,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF0C0, 0xB0C0, &Disassembler68k::CmpAOpcode_);
 
    AddCommand(0xFEC0, 0xE2C0, &Disassembler68k::LsdOpcode);
+   AddCommand(0xFEC0, 0xE0C0, &Disassembler68k::AsdOpcode);
    AddCommand(0xFEC0, 0xE6C0, &Disassembler68k::RodOpcode);
    AddCommand(0xF1C0, 0xC0C0, &Disassembler68k::MuluOpcode_);
    AddCommand(0xF1C0, 0xC1C0, &Disassembler68k::MulsOpcode_);
@@ -1431,6 +1432,20 @@ unsigned int Disassembler68k::RodOpcode2(Motherboard* motherboard, unsigned shor
 
    sstream << ", " << data_[opcode & 0x7];
 
+   str_asm = sstream.str();
+   return pc;
+}
+
+unsigned int Disassembler68k::AsdOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+
+   std::string str_opcode;
+   bool right = ((opcode >> 8) & 0x1) == 0;
+
+   sstream << "as" << (right ? "r." : "l.") << size2_[(opcode >> 6) & 3] << " ";
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   sstream << str_opcode;
    str_asm = sstream.str();
    return pc;
 }
