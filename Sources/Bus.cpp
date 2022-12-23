@@ -974,7 +974,7 @@ void Bus::SetRGA(unsigned short addr, unsigned short data)
       {
          //UNDEF
          if (addr < 0x200)
-            logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", addr);
+            //logger_->Log(ILogger::Severity::SEV_DEBUG, "RGA Write unhandled : %8.8X", addr);
          int test = 1;
          break;
       }

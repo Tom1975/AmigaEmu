@@ -284,13 +284,13 @@ bool Paula::DmaDiskTick()
          count++;
          unsigned short wd = (dsk_dat_long_ >> shift_data_sync_);
 
-         str_log << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << ((unsigned int)(wd >>8))<< " " << ((unsigned int)(wd&0xFF)) << " ";
+         /*str_log << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << ((unsigned int)(wd >> 8)) << " " << ((unsigned int)(wd & 0xFF)) << " ";
          if (count == 16)
          {
             LOG(str_log.str().c_str());
             str_log.str(std::string());;
             count = 0;
-         }
+         }*/
          bus_->Write16(dsk_dma_pt_, wd);
 
          

@@ -339,7 +339,7 @@ void M68k::Reset()
    // todo : We could upgrade this with 'real' memory reads (but is it really necessary)
 
    Fetch();
-   new_opcode_ = 0;
+   new_opcode_ = 1;
    current_working_list_ = ResetList_;
    current_function_ = *current_working_list_;
    index_list_ = 0;
@@ -1793,11 +1793,13 @@ unsigned int M68k::DecodeLsd2()
    // Rotate
    sr_ &= ~0x2; // V is cleared
    unsigned char x = 0;
+   unsigned int mask = MaskZero[((ird_ >> 6) & 3)];
    if (rotat != 0)
    {
       if (right)
       {
-         if (((d_[ird_ & 0x7] & 0xFF) >> (rotat - 1))&0x1)
+         // TODO : Flags are not ok there if rotat > 8 and word / byte !
+         if (((d_[ird_ & 0x7] & mask) >> (rotat - 1))&0x1)
          {
             sr_ |= F_X | F_C;
          }
@@ -1877,7 +1879,7 @@ unsigned int M68k::DecodeLsd2()
    case 2:
       if (right)
       {
-         d_[ird_ & 0x7] = (d_[ird_ & 0x7] ) >> rotat;
+         d_[ird_ & 0x7] = (rotat == 32) ? 0 : (d_[ird_ & 0x7] ) >> rotat;
       }
       else
       {
@@ -2022,7 +2024,7 @@ unsigned int M68k::DecodeRod2()
          }
          else if (right)
          {
-            unsigned int shifted_bits = d_[ird_ & 0x7] >> rotat;
+            unsigned int shifted_bits = (rotat==32)?0:d_[ird_ & 0x7] >> rotat;
             unsigned int out_of_pos = d_[ird_ & 0x7] & mask;
             out_of_pos <<= (32 - rotat);
 
@@ -2184,7 +2186,7 @@ unsigned int M68k::DecodeRoxd2()
             if (last_x) sr_ |= F_X | F_C;
          }
 
-         unsigned int shifted_bits = d_[ird_ & 0x7] >> rotat;
+         unsigned int shifted_bits = (rotat == 32) ? 0 : d_[ird_ & 0x7] >> rotat;
          unsigned int out_of_pos = d_[ird_ & 0x7] & mask;
          if (rotat > 1)
             out_of_pos <<= (33 - rotat);
@@ -3015,7 +3017,7 @@ unsigned int M68k::DecodeAsd2()
                tmp = (mask << (SizeSizeNbBits[((ird_ >> 6) & 3)] - rotat)) & mask;
             }
             tmp |= (d_[ird_ & 0x7] & (~mask));
-            d_[ird_ & 0x7] = tmp | ((d_[ird_ & 0x7] & mask) >> rotat);
+            d_[ird_ & 0x7] = tmp | ((rotat == 32) ? 0 : ((d_[ird_ & 0x7] & mask) >> rotat));
          }
          sr_ &= ~F_V; // Never change
 
