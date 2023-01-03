@@ -2537,6 +2537,7 @@ unsigned int M68k::OpcodeSubq()
 
 unsigned int M68k::DecodeTrap()
 {
+   pc_ += 4;
    return TRAP(32 + (ird_&0xF));
 }
 
@@ -2544,6 +2545,7 @@ unsigned int M68k::DecodeTrapV()
 {
    if (sr_ & F_V)
    {
+      pc_ += 4;
       return TRAP(7);
    }
    Fetch();
