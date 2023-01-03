@@ -259,6 +259,7 @@ protected:
    /////////////////////////
    // Decoding
    unsigned int Nothing();
+   unsigned int DecodeAbcd();
    unsigned int DecodeAdd();
    unsigned int DecodeAddA();
    unsigned int DecodeAddq();
@@ -338,6 +339,7 @@ protected:
    unsigned int NotSupported2();
    unsigned int NotSupported3();
    unsigned int NotSupported4();
+   unsigned int OpcodeAbcd();
    unsigned int OpcodeAdd();
    unsigned int OpcodeAddA();
    unsigned int OpcodeAddq();

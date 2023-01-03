@@ -101,6 +101,8 @@ M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::Opcode
 // ILLEGAL
 M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::NotSupported, &M68k::NotSupported2, &M68k::NotSupported3, &M68k::SourceRead, &M68k::NotSupported4, &M68k::CpuFetch, nullptr, };
 
+// WIP
+M68k::Func M68k::Abcd_[] = { &M68k::DecodeAbcd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAbcd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 
 // TO IMPLEMENT & DISASSEMBLE
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
@@ -108,7 +110,7 @@ M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
+//M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
 
 
 M68k::M68k() : pc_(0), sr_(0), current_state_(0),
@@ -2548,6 +2550,115 @@ unsigned int M68k::DecodeTrapV()
       pc_ += 4;
       return TRAP(7);
    }
+   Fetch();
+   return true;
+}
+
+unsigned int M68k::DecodeAbcd()
+{
+   // Depending of sense :
+   size_ = 0;
+   if (ird_ & 0x8)   // R/M
+   {
+      // Address register
+      //destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+      //source_alu_ = source_factory_.InitAlu(0, (ird_ >> 9) & 0x7, size_);
+   }
+   else
+   {
+      // Data register
+      //source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
+      //destination_alu_ = destination_factory_.InitAlu(0, (ird_ >> 9) & 0x7, size_);
+   }
+   return true;
+}
+
+unsigned int M68k::OpcodeAbcd()
+{
+   // TODO ALL
+   unsigned int sm, dm, rm = 0;
+   switch (destination_alu_->GetSize())
+   {
+   case 0:
+      dm = destination_alu_->GetU8();
+      break;
+   case 1:
+      dm = destination_alu_->GetU16();
+      break;
+   case 2:
+      dm = destination_alu_->GetU32();
+      break;
+   }
+
+   switch (source_alu_->GetSize())
+   {
+   case 0:
+      sm = source_alu_->GetU8();
+      break;
+   case 1:
+      sm = source_alu_->GetU16();
+      break;
+   case 2:
+      sm = source_alu_->GetU32();
+      break;
+   }
+   rm = sm + dm;
+   switch (size_)
+   {
+   case 0:
+      rm &= 0xFF;
+      break;
+   case 1:
+
+
+      rm &= 0xFFFF;
+      break;
+   }
+   destination_alu_->WriteInput(rm);
+
+   sr_ &= 0xFFE0;
+   if (rm == 0) sr_ |= F_Z;
+   switch (size_)
+   {
+   case BYTE:
+      rm &= 0x80;
+      sm &= 0x80;
+      dm &= 0x80;
+      if (rm) sr_ |= F_N;
+      break;
+   case WORD:
+      rm &= 0x8000;
+      sm &= 0x8000;
+      dm &= 0x8000;
+      if (rm) sr_ |= F_N;
+      break;
+   case LONG:
+      rm &= 0x80000000;
+      sm &= 0x80000000;
+      dm &= 0x80000000;
+      if (rm) sr_ |= F_N;
+      break;
+   }
+   if ((sm & dm & (~rm)) | ((~sm) & (~dm) & (rm)))
+   {
+      sr_ |= F_V;
+   }
+   if (sm & dm | (~rm) & dm | sm & (~rm))
+   {
+      sr_ |= F_C | F_X;
+   }
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
    Fetch();
    return true;
 }

@@ -41,6 +41,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xF1C0, 0x0100, &Disassembler68k::BtstDnOpcode_);
    AddCommand(0xFFC0, 0x0840, &Disassembler68k::BchgOpcode_);
    AddCommand(0xFFC0, 0x0140, &Disassembler68k::BchgDnOpcode_);
+   AddCommand(0xF138, 0x0108, &Disassembler68k::MovepOpcode);
    AddCommand(0xF100, 0x5100, &Disassembler68k::SubQOpcode_);// .L=>Ad, Dn   
    AddCommand(0xF000, 0x9000, &Disassembler68k::SubOpcode_);
    AddCommand(0xFF00, 0x0400, &Disassembler68k::SubIOpcode_);
@@ -67,13 +68,17 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFEC0, 0xE6C0, &Disassembler68k::RodOpcode);
    AddCommand(0xF1C0, 0xC0C0, &Disassembler68k::MuluOpcode_);
    AddCommand(0xF1C0, 0xC1C0, &Disassembler68k::MulsOpcode_);
+   AddCommand(0xF1F0, 0xC100, &Disassembler68k::AbcdOpcode);
    AddCommand(0xF1C0, 0x80C0, &Disassembler68k::DivuOpcode_);
    AddCommand(0xF1C0, 0x81C0, &Disassembler68k::DivsOpcode_);
+   AddCommand(0xF1F0, 0x8100, &Disassembler68k::SbcdOpcode);
+   AddCommand(0xFFC0, 0x4AC0, &Disassembler68k::TasOpcode);
    AddCommand(0xFFC0, 0x4EC0, &Disassembler68k::JmpOpcode);
    AddCommand(0xFFC0, 0x4E80, &Disassembler68k::JsrOpcode);
    AddCommand(0xFFC0, 0x4840, &Disassembler68k::PeaOpcode);
    AddCommand(0xFFC0, 0x40C0, &Disassembler68k::MoveFromSrOpcode);
    AddCommand(0xFFC0, 0x46C0, &Disassembler68k::MoveToSrOpcode);
+   AddCommand(0xFFC0, 0x4800, &Disassembler68k::NbcdOpcode);
    AddCommand(0xFFF8, 0x4840, &Disassembler68k::SwapOpcode);
    AddCommand(0xFB80, 0x4880, &Disassembler68k::MovemOpcode);
    AddCommand(0xFFB8, 0x4880, &Disassembler68k::ExtOpcode);
@@ -84,6 +89,7 @@ Disassembler68k::Disassembler68k()
    AddCommand(0xFFFF, 0x4E76, &Disassembler68k::TrapvOpcode);
    AddCommand(0xFFFF, 0x4E73, &Disassembler68k::RteOpcode);
    AddCommand(0xFFFF, 0x4E75, &Disassembler68k::RtsOpcode);
+   AddCommand(0xFFFF, 0x4E77, &Disassembler68k::RtrOpcode);
    AddCommand(0xFFFF, 0x007C, &Disassembler68k::OriSrOpcode);
    AddCommand(0xFFFF, 0x003C, &Disassembler68k::OriToCcrOpcode);
    AddCommand(0xFFFF, 0x0A3C, &Disassembler68k::EoriToCcrOpcode);
@@ -302,6 +308,25 @@ unsigned int Disassembler68k::DisassembleAddressingMode (Motherboard* motherboar
       break;
    }
    return offset;
+}
+
+unsigned int Disassembler68k::AbcdOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+   sstream << "abcd ";
+
+   if (opcode & 0x8)
+   {
+      sstream << "-(" << std::hex << std::uppercase << address_[opcode & 0x7] << "), -(" << address_[(opcode >> 9) & 0x7] << ")";
+   }
+   else
+   {
+      sstream << std::hex << std::uppercase << data_[opcode & 0x7]  << ", " << data_[(opcode >> 9) & 0x7];
+   }
+
+   str_asm = sstream.str();
+
+   return pc;
 }
 
 unsigned int Disassembler68k::AddOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
@@ -548,11 +573,40 @@ unsigned int Disassembler68k::LsdOpcode2(Motherboard* motherboard, unsigned shor
    if (immediate)
       sstream << "#" << rotat;
    else
-      sstream << data_[rotat];
+      sstream << (data_[rotat]);
 
    sstream << ", " << data_[opcode & 0x7];
 
    str_asm = sstream.str();
+   return pc;
+}
+
+unsigned int Disassembler68k::MovepOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+   sstream << "movep.";
+   std::string displacement;
+
+   opcode += GetDisplacement(motherboard, pc, displacement);
+
+   switch ((opcode >> 6) & 0x3)
+   {
+   case 0:
+      sstream << "w (" << displacement << ", " << address_[opcode & 0x7] <<  "), " <<  data_[(opcode>>8)&0x7];
+      break;
+   case 1:
+      sstream << "l (" << displacement << ", " << address_[opcode & 0x7] << "), " << data_[(opcode >> 8) & 0x7];
+      break;
+   case 2:
+      sstream << "w " << data_[(opcode >> 8) & 0x7] << ",(" + displacement + ", " << address_[opcode & 0x7] << ")";
+      break;
+   case 3:
+      sstream << "l " << data_[(opcode >> 8) & 0x7] << ",(" + displacement + ", " << address_[opcode & 0x7] << ")";
+      break;
+   }
+
+   str_asm = sstream.str();
+
    return pc;
 }
 
@@ -681,6 +735,17 @@ unsigned int Disassembler68k::MovemOpcode(Motherboard* motherboard, unsigned sho
       
    }
    
+
+   return pc;
+}
+
+unsigned int Disassembler68k::NbcdOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+
+   str_asm = "nbcd ";
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 3, str_opcode);
+   str_asm += str_opcode;
 
    return pc;
 }
@@ -921,6 +986,25 @@ unsigned int Disassembler68k::SubXOpcode_(Motherboard* motherboard, unsigned sho
    return pc;
 }
 
+unsigned int Disassembler68k::SbcdOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::stringstream sstream;
+   sstream << "sbcd ";
+
+   if (opcode & 0x8)
+   {
+      sstream << "-(" << std::hex << std::uppercase << address_[opcode & 0x7] << "), -(" << address_[(opcode >> 9) & 0x7] << ")";
+   }
+   else
+   {
+      sstream << std::hex << std::uppercase << data_[opcode & 0x7] << ", " << data_[(opcode >> 9) & 0x7];
+   }
+
+   str_asm = sstream.str();
+
+   return pc;
+}
+
 unsigned int Disassembler68k::SccOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    std::stringstream sstream;
@@ -1101,6 +1185,7 @@ unsigned int Disassembler68k::BtstDnOpcode_(Motherboard* motherboard, unsigned s
 
    return pc;
 }
+
 
 unsigned int Disassembler68k::MulsOpcode_(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
@@ -1364,6 +1449,18 @@ unsigned int Disassembler68k::CmpIOpcode_(Motherboard* motherboard, unsigned sho
    return pc;
 }
 
+unsigned int Disassembler68k::TasOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   str_asm = "tas";
+
+   pc += DisassembleAddressingMode(motherboard, pc, (opcode >> 3) & 0x7, (opcode) & 0x7, 0, str_opcode);
+   str_asm += " " + str_opcode;
+
+   return pc;
+
+}
+
 unsigned int Disassembler68k::TrapOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
 {
    std::stringstream sstream;
@@ -1428,7 +1525,7 @@ unsigned int Disassembler68k::RodOpcode2(Motherboard* motherboard, unsigned shor
    if (immediate)
       sstream << "#" << rotat;
    else
-      sstream << data_[rotat];
+      sstream << (data_[rotat]);
 
    sstream << ", " << data_[opcode & 0x7];
 
@@ -1463,7 +1560,7 @@ unsigned int Disassembler68k::AsdOpcode2(Motherboard* motherboard, unsigned shor
    if (immediate)
       sstream << "#" << rotat;
    else
-      sstream << data_[rotat];
+      sstream << (data_[rotat]);
 
    sstream << ", " << data_[opcode & 0x7];
 
@@ -1484,7 +1581,7 @@ unsigned int Disassembler68k::RoxdOpcode2(Motherboard* motherboard, unsigned sho
    if (immediate)
       sstream << "#" << rotat;
    else
-      sstream << data_[rotat];
+      sstream << (data_[rotat]);
 
    sstream << ", " << data_[opcode & 0x7];
 
@@ -1496,6 +1593,14 @@ unsigned int Disassembler68k::RteOpcode(Motherboard* motherboard, unsigned short
 {
    std::string str_opcode;
    str_asm = "rte";
+
+   return pc;
+}
+
+unsigned int Disassembler68k::RtrOpcode(Motherboard* motherboard, unsigned short opcode, unsigned int pc, std::string& str_asm)
+{
+   std::string str_opcode;
+   str_asm = "rtr";
 
    return pc;
 }
