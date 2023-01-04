@@ -2555,96 +2555,50 @@ unsigned int M68k::DecodeTrapV()
 unsigned int M68k::DecodeAbcd()
 {
    // Depending of sense :
-   size_ = 0;
    if (ird_ & 0x8)   // R/M
    {
       // Address register
-      //destination_alu_ = destination_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
-      //source_alu_ = source_factory_.InitAlu(0, (ird_ >> 9) & 0x7, size_);
+      destination_alu_ = destination_factory_.InitAlu(4, (ird_ >> 9) & 0x7, 0);
+      source_alu_ = source_factory_.InitAlu(4, ird_ & 0x7, 0); // -(Ay)
    }
    else
    {
       // Data register
-      //source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
-      //destination_alu_ = destination_factory_.InitAlu(0, (ird_ >> 9) & 0x7, size_);
+      destination_alu_ = destination_factory_.InitAlu(0, (ird_ >> 9) & 0x7, 0);
+      source_alu_ = source_factory_.InitAlu(0, ird_ & 0x7, 0); // Dx
    }
    return true;
 }
 
 unsigned int M68k::OpcodeAbcd()
 {
-   // TODO ALL
    unsigned int sm, dm, rm = 0;
-   switch (destination_alu_->GetSize())
-   {
-   case 0:
-      dm = destination_alu_->GetU8();
-      break;
-   case 1:
-      dm = destination_alu_->GetU16();
-      break;
-   case 2:
-      dm = destination_alu_->GetU32();
-      break;
-   }
+   dm = destination_alu_->GetU8();
+   sm = source_alu_->GetU8();
+   sr_ &= 0xFFE4;
 
-   switch (source_alu_->GetSize())
+   // Add low nibble
+   unsigned char low_nibble = (sm & 0xF) + (dm & 0xF) + ((sr_ >> 4) & 0x1);
+   unsigned char high_nibble = 0;
+   if (low_nibble > 9)
    {
-   case 0:
-      sm = source_alu_->GetU8();
-      break;
-   case 1:
-      sm = source_alu_->GetU16();
-      break;
-   case 2:
-      sm = source_alu_->GetU32();
-      break;
+      low_nibble += 6;
+      low_nibble &= 0xF;
+      high_nibble = 0x10;
    }
-   rm = sm + dm;
-   switch (size_)
+   high_nibble += (sm & 0xF0) + (dm & 0xF0);
+   if (high_nibble > 0x90)
    {
-   case 0:
-      rm &= 0xFF;
-      break;
-   case 1:
-
-
-      rm &= 0xFFFF;
-      break;
-   }
-   destination_alu_->WriteInput(rm);
-
-   sr_ &= 0xFFE0;
-   if (rm == 0) sr_ |= F_Z;
-   switch (size_)
-   {
-   case BYTE:
-      rm &= 0x80;
-      sm &= 0x80;
-      dm &= 0x80;
-      if (rm) sr_ |= F_N;
-      break;
-   case WORD:
-      rm &= 0x8000;
-      sm &= 0x8000;
-      dm &= 0x8000;
-      if (rm) sr_ |= F_N;
-      break;
-   case LONG:
-      rm &= 0x80000000;
-      sm &= 0x80000000;
-      dm &= 0x80000000;
-      if (rm) sr_ |= F_N;
-      break;
-   }
-   if ((sm & dm & (~rm)) | ((~sm) & (~dm) & (rm)))
-   {
-      sr_ |= F_V;
-   }
-   if (sm & dm | (~rm) & dm | sm & (~rm))
-   {
+      high_nibble += 0x60;
+      high_nibble &= 0xF0;
       sr_ |= F_C | F_X;
    }
+
+   // Add high nibble
+   rm = (low_nibble | high_nibble) & 0xFF;
+   destination_alu_->WriteInput(rm);
+
+   if (rm != 0) sr_ &= ~F_Z;
 
    if (!destination_alu_->WriteComplete())
    {

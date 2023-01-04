@@ -15,9 +15,35 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 // ABCD
-TEST(DISABLED_Cpu68k, CPU_ABCD)
+TEST(Cpu68k, CPU_ABCD_A)
 {
-   // TODO
+   TestEngineCpu test_engine;
+   unsigned char opcode[] = { 0xC7, 0x0A }; // ABCD -(A2),-(A3)
+   test_engine.Get68k()->SetDataSr(0x202000);
+   test_engine.Get68k()->SetAddressRegister(2, 0x2001);
+   test_engine.Get68k()->SetAddressRegister(3, 0x3001);
+   unsigned char* ram = test_engine.GetRam();
+   ram[0x2000] = 0x66;
+   ram[0x3000] = 0x77;
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);  // Prefetch
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(2) , 0x2000);
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(3), 0x3000);
+   ASSERT_EQ(ram[0x3000], 0x43);
+   ASSERT_EQ(ram[0x2000], 0x66);
+   ASSERT_EQ(test_engine.Get68k()->GetDataSr() & 0x1F, 0x11);
+}
+
+TEST(Cpu68k, CPU_ABCD_D)
+{
+   TestEngineCpu test_engine;
+   unsigned char opcode[] = { 0xC7, 0x02 }; // ABCD D2,D3 
+   test_engine.Get68k()->SetDataSr(0x2000);
+   test_engine.Get68k()->SetDataRegister(2, 0x66);
+   test_engine.Get68k()->SetDataRegister(3, 0x77);
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);  // Prefetch
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(2), 0x66);
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(3), 0x43);
+   ASSERT_EQ(test_engine.Get68k()->GetDataSr() & 0x1F, 0x11);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
