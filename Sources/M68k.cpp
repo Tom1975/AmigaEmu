@@ -16,6 +16,7 @@ static unsigned int op_index = 0;
 
 M68k::Func M68k::ResetList_[] = { &M68k::CpuFetchInit, &M68k::CpuFetch, nullptr };
 
+M68k::Func M68k::Abcd_[] = { &M68k::DecodeAbcd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAbcd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Add_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAdd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::And_[] = { &M68k::DecodeAdd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAnd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::AddA_[] = { &M68k::DecodeAddA, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAddA, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -102,15 +103,13 @@ M68k::Func M68k::Unlk_[] = { &M68k::DecodeUnlk, &M68k::SourceRead, &M68k::Opcode
 M68k::Func M68k::IllegalInstruction_[] = { &M68k::DecodeNotSupported, &M68k::NotSupported, &M68k::NotSupported2, &M68k::NotSupported3, &M68k::SourceRead, &M68k::NotSupported4, &M68k::CpuFetch, nullptr, };
 
 // WIP
-M68k::Func M68k::Abcd_[] = { &M68k::DecodeAbcd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeAbcd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
+M68k::Func M68k::Sbcd_[] = { &M68k::DecodeAbcd, &M68k::SourceFetch, &M68k::SourceRead, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeSbcd, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 
 // TO IMPLEMENT & DISASSEMBLE
 M68k::Func M68k::Movep_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Nbcd_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Tas_[] = { &M68k::NotImplemented, nullptr };
 M68k::Func M68k::Rtr_[] = { &M68k::NotImplemented, nullptr };
-M68k::Func M68k::Sbcd_[] = { &M68k::NotImplemented, nullptr };
-//M68k::Func M68k::Abcd_[] = { &M68k::NotImplemented, nullptr };
 
 
 M68k::M68k() : pc_(0), sr_(0), current_state_(0),
@@ -2592,6 +2591,56 @@ unsigned int M68k::OpcodeAbcd()
    if (high_nibble > 0x90)
    {
       high_nibble += 0x60;
+      high_nibble &= 0xF0;
+      sr_ |= F_C | F_X;
+   }
+
+   // Add high nibble
+   rm = (low_nibble | high_nibble) & 0xFF;
+   destination_alu_->WriteInput(rm);
+
+   if (rm != 0) sr_ &= ~F_Z;
+
+   if (!destination_alu_->WriteComplete())
+   {
+      next_size_ = destination_alu_->GetSize();
+      write_end_ = false;
+      next_bus_operation_ = &M68k::WriteCycle;
+      next_waiting_instruction_ = &M68k::WriteEnd;
+      next_data_ = destination_alu_->WriteNextWord(next_address_);
+      current_function_ = &M68k::WaitForWriteSourceToDestination;
+      return false;
+   }
+
+   Fetch();
+   return true;
+}
+
+unsigned int M68k::OpcodeSbcd()
+{
+   unsigned int sm, dm, rm = 0;
+   dm = destination_alu_->GetU8();
+   sm = source_alu_->GetU8();
+   sr_ &= 0xFFE4;
+
+   // Add low nibble
+   unsigned char x = ((sr_ >> 4) & 0x1);
+   unsigned char low_nibble = (dm & 0xF) - (sm & 0xF) - x;
+   unsigned char high_nibble = 0;
+   if (low_nibble > 9 ) // Negative !
+   {
+      low_nibble -= 6;
+      low_nibble &= 0xF;
+      x = 0x10;
+   }
+   else
+   {
+      x = 0;
+   }
+   high_nibble = (dm & 0xF0) - (sm & 0xF0) - x;
+   if (high_nibble > 0x90) // Negative !
+   {
+      high_nibble -= 0x60;
       high_nibble &= 0xF0;
       sr_ |= F_C | F_X;
    }
