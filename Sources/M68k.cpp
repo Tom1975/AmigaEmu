@@ -1664,6 +1664,12 @@ unsigned int M68k::DecodeRts()
 
 unsigned int M68k::OpcodeRts()
 {
+   // breakpoint
+   if (d_[0] == 0x19978)
+   {
+      int dbg = 1;
+   }
+   // 
    // Read something
    pc_ = source_alu_->GetU32();
    if (sr_ & 0x2000)
@@ -3529,7 +3535,7 @@ unsigned int M68k::DecodeCmpAL()
 unsigned int M68k::OpcodeCmpAL()
 {
    // Do it and adjust the flags
-   source_alu_->Cmp(a_[an_], sr_, false);
+   source_alu_->Cmp((an_==7)?((sr_ & 0x2000)?usp_:ssp_):a_[an_], sr_, false);
    // Fetch 
    Fetch();
    return true;
@@ -3603,8 +3609,39 @@ unsigned int M68k::OpcodeCmpm()
    // Do it and adjust the flags
    data_l_ = source_alu_->GetU32();
    destination_alu_->Cmp(data_l_, sr_, true);
-   a_[ird_&0x7]++;
-   a_[(ird_>>9)&0x7]++;
+
+   if ((ird_ & 0x7) == 7)
+   {
+      if (sr_ & 0x2000)
+      {
+         ssp_++;
+      }
+      else
+      {
+         usp_++;
+      }
+   }
+   else
+   {
+      a_[ird_ & 0x7]++;
+   }
+
+   if (((ird_ >> 9) & 0x7) == 7)
+   {
+      if (sr_ & 0x2000)
+      {
+         ssp_++;
+      }
+      else
+      {
+         usp_++;
+      }
+   }
+   else
+   {
+      a_[(ird_ >> 9) & 0x7]++;
+   }
+   
    // Fetch x1
    Fetch();
    return true;
@@ -3902,28 +3939,65 @@ unsigned int M68k::DecodeEoriToCcr()
 unsigned int M68k::DecodeExg()
 {
    unsigned int opmode = (ird_ >> 3) & 0x1F;
-   unsigned int tmp;
+
+   unsigned int* reg2 = 0;
+   unsigned int* reg1 = 0;
+
+   // exchange
    switch (opmode)
    {
    case 0x8: // data register
-      tmp = d_[(ird_ >> 9) & 0x7];
-      d_[(ird_ >> 9) & 0x7] = d_[ird_ & 0x7];
-      d_[ird_ & 0x7] = tmp;
+      reg1 = &d_[(ird_ >> 9) & 0x7];
+      reg2 = &d_[ird_ & 0x7];
       break;
    case 0x9: // address
-      tmp = a_[(ird_ >> 9) & 0x7];
-      a_[(ird_ >> 9) & 0x7] = a_[ird_ & 0x7];
-      a_[ird_ & 0x7] = tmp;
+   {
+      if ((ird_ & 0x7) == 7)
+      {
+         reg2 = (sr_ & 0x2000) ? &ssp_ : &usp_;
+      }
+      else
+      {
+         reg2 = &a_[ird_ & 0x7];
+      }
+
+      if (((ird_ >> 9) & 0x7) == 7)
+      {
+         if (sr_ & 0x2000)
+         {
+            reg1 = &ssp_;
+         }
+         else
+         {
+            reg1 = &usp_;
+         }
+      }
+      else
+      {
+         reg1 = &a_[(ird_ >> 9) & 0x7];
+      }
       break;
+   }
    case 0x11: // data / address
-      tmp = d_[(ird_ >> 9) & 0x7];
-      d_[(ird_ >> 9) & 0x7] = a_[ird_ & 0x7];
-      a_[ird_ & 0x7] = tmp;
+      reg1 = &d_[(ird_ >> 9) & 0x7];
+      if ((ird_ & 0x7) == 7)
+      {
+         reg2 = (sr_ & 0x2000) ? &ssp_ : &usp_;
+      }
+      else
+      {
+         reg2 = &a_[ird_ & 0x7];
+      }
       break;
    default:
       // todo : ERROR !
       break;
    }
+
+   unsigned int tmp = *reg1;
+   *reg1 = *reg2;
+   *reg2 = tmp;
+
    Fetch();
    return true;
 }
