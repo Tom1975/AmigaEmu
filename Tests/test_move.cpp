@@ -160,6 +160,33 @@ TEST(Cpu68k_MOVEM, CPU_MOVEM_W_D16AN_D)
 //    D -> (d8.An.Xn)
 //    D -> (xxx).W
 //    D -> (xxx).L
+
+TEST(Cpu68k_MOVEM, CPU_MOVEM_L_D_IMMEDIATE)
+{
+   TestEngineCpu test_engine;
+   test_engine.Get68k()->SetDataRegister(0, 0x0);
+   test_engine.Get68k()->SetDataRegister(1, 0x0);
+   unsigned char opcode[] = { 0x48, 0xF9, 0x00, 0x03, 0x00, 0x06, 0x07, 0x84, 0x46, 0xFC, 0x20, 0x00 }; // movem.l D0 / D1, 60784
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x5A, 512 * 1024);
+   memset(&ram[0x60784], 0xCC, 8);
+
+   test_engine.RunOpcode(opcode, sizeof(opcode), 1);
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(1), 0); // Check D2
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(0), 0); // Check D3
+   unsigned char result[8];
+   memset(result, 0, 8);
+   unsigned char default_ram[8];
+   memset(default_ram, 0x5A, 8);
+   ASSERT_EQ(memcmp(&ram[0x60784], result, 8), 0);
+   ASSERT_EQ(memcmp(&ram[0x60006], default_ram, 8), 0);
+   ASSERT_EQ(ram[0xDA], 0x46);
+   ASSERT_EQ(ram[0xDB], 0xFC);
+   ASSERT_EQ(ram[0xDC], 0x20);
+   ASSERT_EQ(ram[0xDD], 0x00);
+}
+
+// 
 // A -> EA
 //    A -> (An)
 //    A -> -(An)
