@@ -840,6 +840,9 @@ unsigned int M68k::SourceFetch()
    {
       source_alu_->AddWord(irc_);
 
+   // HERE : this is logical to be done, but it breaks things..
+//      irc_ready_ = false;
+
       Fetch();
       current_function_ = &M68k::FetchSource;
       return false;
@@ -1209,14 +1212,18 @@ unsigned int M68k::DecodeMovem ()
    }*/
    // No ? go to end of sequence 
    // todo
-   // Fetch
+   // Fetch 
    Fetch();
    return true;
 }
 unsigned int M68k::DecodeMovembis()
 {
+   // Strange : should we call this ? or not ?
+   // We have to rethink a lot this movem....
+   // 
    if (irc_ready_)
    {
+      // 
       Fetch();
       return true;
    }
