@@ -63,8 +63,30 @@ M68k::Func M68k::MoveFromSr_[] = { &M68k::DecodeMoveFromSr, &M68k::DestinationFe
 M68k::Func M68k::MoveToSr_[] = { &M68k::DecodeMoveToSr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeMoveToSr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveFromCcr_[] = { &M68k::DecodeMoveCcr, &M68k::DestinationFetch, &M68k::OpcodeMoveFromCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveToCcr_[] = { &M68k::DecodeMoveToCcr, &M68k::SourceFetch, &M68k::SourceRead, &M68k::OpcodeMoveToCcr, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
-M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,
+
+// Movem : 
+// 1/ np (fetch register list) - 
+// 2/ [np (fetch operands)*] - 
+// 3/ Read/write* nr/nw *
+// 4/ np (fetch next ir)
+
+M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, // register list from cache
+                              &M68k::SourceFetch, // 1/ np - fetch operand (if any and source)
+                              &M68k::OperandFetch, 
+                              &M68k::DecodeMovem2, // Init transfert
+                              &M68k::OpcodeMovem, 
+                              &M68k::SourceRead,
+                              &M68k::OpcodeMovemWrite,   // Check if we need a bus transfert (skip next if not necessary)
+                              &M68k::WriteSourceToDestinationSimple, 
+                              &M68k::OpcodeMovem2, 
+                              &M68k::CpuFetch, 
+                              nullptr };//
+
+//  Old one
+/*M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, &M68k::DecodeMovembis, &M68k::SourceFetch, &M68k::OperandFetch, &M68k::DecodeMovem2, &M68k::OpcodeMovem, &M68k::SourceRead,
                               &M68k::OpcodeMovemWrite, &M68k::WriteSourceToDestinationSimple, &M68k::OpcodeMovem2, &M68k::CpuFetch, nullptr }; // loop
+                              */
+
 M68k::Func M68k::Moveq_[] = { &M68k::DecodeMoveq, &M68k::SimpleFetch, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::MoveUsp_[] = { &M68k::OpcodeMoveUsp, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
 M68k::Func M68k::Muls_[] = { &M68k::DecodeMulu, &M68k::DestinationFetch, &M68k::DestinationRead, &M68k::OpcodeMuls, &M68k::CpuFetch, &M68k::OperandFinished, nullptr };
@@ -1201,17 +1223,8 @@ unsigned int M68k::DecodeMovem ()
    // ea
    source_alu_ = source_factory_.InitAlu((ird_ >> 3) & 0x7, (ird_) & 0x7, size_);
 
-   //if (((ird_ >> 10) & 0x1)==1 || source_alu_->FetchComplete())
-   {
-      mask_ = irc_;
-   }
-   /*else
-   {
-      mask_ = 0;
-      index_list_ += 1;
-   }*/
-   // No ? go to end of sequence 
-   // todo
+   mask_ = irc_;
+
    // Fetch 
    Fetch();
    return true;
@@ -1255,6 +1268,7 @@ unsigned int M68k::OpcodeMovem()
    {
       return true;
    }
+
    // Go to end
    register_list_.Clear();
    destination_alu_ = source_alu_ = nullptr;
@@ -1269,7 +1283,8 @@ unsigned int M68k::OpcodeMovemWrite()
    if (!destination_alu_->WriteInput(source_alu_))
    {
       // already written : step next state
-      index_list_++;
+      //index_list_++;
+      index_list_ = 3;
       return true;
    }
    return true;
@@ -1283,7 +1298,7 @@ unsigned int M68k::OpcodeMovem2()
    {
       // Pre-decrement ?
       // do it : Source read, then Destination write 
-      index_list_ = 4;
+      index_list_ = 3;
       return true;
    }
    /*
