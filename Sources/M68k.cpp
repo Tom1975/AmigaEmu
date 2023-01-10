@@ -71,8 +71,8 @@ M68k::Func M68k::MoveToCcr_[] = { &M68k::DecodeMoveToCcr, &M68k::SourceFetch, &M
 // 4/ np (fetch next ir)
 
 M68k::Func M68k::Movem_[] = { &M68k::DecodeMovem, // register list from cache
-                              &M68k::SourceFetch, // 1/ np - fetch operand (if any and source)
                               &M68k::OperandFetch, 
+                              &M68k::SourceFetch, // 1/ np - fetch operand (if any and source)
                               &M68k::DecodeMovem2, // Init transfert
                               &M68k::OpcodeMovem, 
                               &M68k::SourceRead,
@@ -3513,7 +3513,7 @@ unsigned int M68k::OpcodeChk()
       {
          sr_ &= ~F_N;
       }
-      TRAP(6);
+      return TRAP(6);
    }
    else
    {
