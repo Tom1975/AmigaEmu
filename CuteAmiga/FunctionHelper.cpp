@@ -445,6 +445,7 @@ std::map<std::string, std::map<short, std::string>> FunctionHelper::library_help
       { -192, "LoadRGB4"},
       { -222, "LoadView"},
       { -216, "MakeVPort"},
+      { -240, "Move"},
       { -426, "MoveSprite"},
       { -210, "MrgCop"},
       { -516, "NewRegion"},
