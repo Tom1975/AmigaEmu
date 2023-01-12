@@ -234,9 +234,37 @@ TEST(Cpu68k_MOVEM, CPU_MOVEM_L_AN_POST_D) //
    ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(2), 0xC0); 
    ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(3), 0xFC0818); 
    ASSERT_EQ(test_engine.Get68k()->GetDataRegister(2), 0xFFFFFFF6); 
-   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(3), 0x0); 
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(3), 0x0);
+
 }
+
 //    (d16.An)
+TEST(Cpu68k_MOVEM, CPU_MOVEM_L_D16_AN_D) // 
+{
+   TestEngineCpu test_engine;
+   unsigned char* ram = test_engine.GetRam();
+   memset(ram, 0x0F, 512 * 1024);
+   // Simulate a stack
+   test_engine.Get68k()->SetDataRegister(0, 0xFF885566);
+   test_engine.Get68k()->SetDataRegister(2, 0x55555555);
+   test_engine.Get68k()->SetDataRegister(3, 0x55555555);
+   test_engine.Get68k()->SetDataRegister(4, 0x55555555);
+   test_engine.Get68k()->SetAddressRegister(6, 0x676);
+
+   unsigned char opcode[] = { 0x4C, 0xEE, 0x00, 0x1C, 0x02, 0x22, 0x70, 0x00 }; // movem.l($222, A6), D2 / D3 / D4  - moveq 0, d0
+   unsigned char memory_to_use[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c};
+   memcpy(&ram[0x898], memory_to_use, sizeof(memory_to_use));
+
+   test_engine.RunOpcode(opcode, sizeof(opcode), 2);
+
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(2), 0x01020304);
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(3), 0x05060708);
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(4), 0x090a0b0c);
+   ASSERT_EQ(test_engine.Get68k()->GetAddressRegister(6), 0x676);
+   ASSERT_EQ(test_engine.Get68k()->GetDataRegister(0), 0);
+   ASSERT_EQ(test_engine.Get68k()->GetPc(), 0xDE);
+}
+
 //    (d8.An.Xn)
 //    (xxx).W
 //    (xxx).L
